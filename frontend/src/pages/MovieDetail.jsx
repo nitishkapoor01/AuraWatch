@@ -206,52 +206,83 @@ const MovieDetail = () => {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/downloads/movie`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: movie.title, year: movie.year })
-      });
+      if (isTV) {
+        setDownloadErrorMsg('Direct downloads are currently only available for Movies. Please use the "Play Now" button to watch online instead.');
+        setDownloadStep('error');
+        if (timerInterval) clearInterval(timerInterval);
+        return;
+      }
+
+      // Pure Frontend API Call to YTS (Fast, No Backend Needed)
+      const query = encodeURIComponent(`${movie.title}`);
+      const res = await fetch(`https://yts.mx/api/v2/list_movies.json?query_term=${query}`);
       const data = await res.json();
       
-      if (data.status === 'success' && data.qualities && data.qualities.length > 0) {
-        // Parse and Group Links
-        const grouped = {};
-        for (const q of data.qualities) {
-          const directLinks = q.links.filter(l => l.type === 'direct');
-          if (directLinks.length === 0) continue;
-          
-          grouped[q.quality] = {};
-          for (const link of directLinks) {
-            const lang = extractLanguage(link.name);
-            if (!grouped[q.quality][lang]) grouped[q.quality][lang] = [];
-            grouped[q.quality][lang].push(link);
-          }
-        }
+      if (data.status === 'ok' && data.data && data.data.movie_count > 0) {
+        // Find best match by year if possible, otherwise take the first result
+        const bestMatch = data.data.movies.find(m => String(m.year) === String(movie.year)) || data.data.movies[0];
         
-        const availableQualities = Object.keys(grouped);
-        if (availableQualities.length > 0) {
-          setParsedDownloads(grouped);
-          setSelectedQuality(availableQualities[0]);
-          setSelectedLanguage(Object.keys(grouped[availableQualities[0]])[0]);
+        if (bestMatch && bestMatch.torrents && bestMatch.torrents.length > 0) {
+          const grouped = {};
           
-          if (shouldSkipTimer) {
-            if (timerInterval) clearInterval(timerInterval);
-            setDownloadStep('options');
+          for (const t of bestMatch.torrents) {
+            // Normalize quality strings (YTS uses 2160p instead of 4K)
+            const quality = t.quality === '2160p' ? '4K' : t.quality;
+            const lang = 'Original / English';
+            
+            if (!grouped[quality]) grouped[quality] = {};
+            if (!grouped[quality][lang]) grouped[quality][lang] = [];
+            
+            // Construct direct Magnet link
+            const magnetUrl = `magnet:?xt=urn:btih:${t.hash}&dn=${encodeURIComponent(bestMatch.title)}&tr=udp://open.demonii.com:1337/announce&tr=udp://tracker.openbittorrent.com:80`;
+            
+            grouped[quality][lang].push({
+              name: `Magnet Link (${t.type.toUpperCase()})`,
+              url: magnetUrl,
+              size: t.size
+            });
+            
+            // Provide Torrent File link as fallback
+            grouped[quality][lang].push({
+              name: `Torrent File (${t.type.toUpperCase()})`,
+              url: t.url,
+              size: t.size
+            });
+          }
+          
+          const availableQualities = Object.keys(grouped);
+          if (availableQualities.length > 0) {
+            // Sort qualities (4K > 1080p > 720p)
+            const sortedQualities = availableQualities.sort((a, b) => {
+              const weight = { '4K': 3, '1080p': 2, '720p': 1 };
+              return (weight[b] || 0) - (weight[a] || 0);
+            });
+
+            setParsedDownloads(grouped);
+            setSelectedQuality(sortedQualities[0]);
+            setSelectedLanguage(Object.keys(grouped[sortedQualities[0]])[0]);
+            
+            if (shouldSkipTimer) {
+              if (timerInterval) clearInterval(timerInterval);
+              setDownloadStep('options');
+            } else {
+              const checkTimer = setInterval(() => {
+                setAdTimer((currentTimer) => {
+                  if (currentTimer <= 0) {
+                    clearInterval(checkTimer);
+                    setDownloadStep('options');
+                  }
+                  return currentTimer;
+                });
+              }, 500);
+            }
           } else {
-            // Wait for timer if still running
-            const checkTimer = setInterval(() => {
-              setAdTimer((currentTimer) => {
-                if (currentTimer <= 0) {
-                  clearInterval(checkTimer);
-                  setDownloadStep('options');
-                }
-                return currentTimer;
-              });
-            }, 500);
+            setDownloadErrorMsg('No reliable links found for this title.');
+            setDownloadStep('error');
+            if (timerInterval) clearInterval(timerInterval);
           }
         } else {
-          setDownloadErrorMsg('No direct download links found. (Only torrents/magnets available)');
-          setDownloadStep('error');
+          setDownloadStep('not_found');
           if (timerInterval) clearInterval(timerInterval);
         }
       } else {
@@ -259,8 +290,8 @@ const MovieDetail = () => {
         if (timerInterval) clearInterval(timerInterval);
       }
     } catch (err) {
-      console.error(err);
-      setDownloadErrorMsg('Failed to search for download links. Please ensure Scrapper is running.');
+      console.error('YTS API Error:', err);
+      setDownloadErrorMsg('Failed to fetch download links. The API might be temporarily unavailable.');
       setDownloadStep('error');
       if (timerInterval) clearInterval(timerInterval);
     } finally {
