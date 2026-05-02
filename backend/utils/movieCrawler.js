@@ -4,10 +4,10 @@ chromium.use(stealth);
 
 // Prevent Playwright stealth plugin from crashing the process on timeouts
 process.on('uncaughtException', (err) => {
-    // Ignore cdpSession errors from stealth plugin
+    console.error('UNCAUGHT EXCEPTION:', err);
 });
 process.on('unhandledRejection', (reason, promise) => {
-    // Ignore cdpSession errors from stealth plugin
+    console.error('UNHANDLED REJECTION:', reason);
 });
 
 const cheerio = require('cheerio');

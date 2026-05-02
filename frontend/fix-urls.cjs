@@ -20,28 +20,18 @@ const walk = (dir) => {
 
 const files = walk(path.join(__dirname, 'src'));
 
+const LIVE_URL = "https://aurawatch-1.onrender.com/api";
+
 files.forEach(file => {
   let content = fs.readFileSync(file, 'utf8');
   let changed = false;
 
-  // Replace occurrences in backticks: `http://localhost:5000/api/...` -> `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/...`
-  if (content.includes('`http://localhost:5000/api')) {
-    content = content.replace(/`http:\/\/localhost:5000\/api/g, '`${import.meta.env.VITE_API_BASE_URL || \'http://localhost:5000/api\'}');
-    changed = true;
-  }
-
-  // Replace occurrences in single quotes: 'http://localhost:5000/api/...' -> `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/...`
-  // We need to convert them to backticks for easier interpolation if they aren't already variables.
-  // Example: 'http://localhost:5000/api/tracking/heartbeat' -> `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/tracking/heartbeat`
-  if (content.includes('\'http://localhost:5000/api')) {
-    // Regex matches 'http://localhost:5000/api/something'
-    content = content.replace(/'http:\/\/localhost:5000\/api([^']*)'/g, '`${import.meta.env.VITE_API_BASE_URL || \'http://localhost:5000/api\'}$1`');
-    changed = true;
-  }
-
-  // Handle double quotes just in case: "http://localhost:5000/api/..." -> `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/...`
-  if (content.includes('"http://localhost:5000/api')) {
-    content = content.replace(/"http:\/\/localhost:5000\/api([^"]*)"/g, '`${import.meta.env.VITE_API_BASE_URL || \'http://localhost:5000/api\'}$1`');
+  // Replace `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`
+  // with `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api')}`
+  const regex = /\$\{import\.meta\.env\.VITE_API_BASE_URL \|\| (['"`])http:\/\/localhost:5000\/api\1\}/g;
+  
+  if (regex.test(content)) {
+    content = content.replace(regex, `\${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '${LIVE_URL}')}`);
     changed = true;
   }
 
@@ -51,4 +41,4 @@ files.forEach(file => {
   }
 });
 
-console.log('Done replacing hardcoded URLs.');
+console.log('Done fixing URLs for production fallback.');

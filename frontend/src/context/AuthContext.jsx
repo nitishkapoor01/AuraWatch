@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-const API_BASE = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`;
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api')}`;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

@@ -21,7 +21,7 @@ const Home = () => {
             setTrending(freshData.slice(0, 10));
           }
         };
-        const data = await fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/trending`, onRevalidate);
+        const data = await fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api')}`}/movies/trending`, onRevalidate);
         if (Array.isArray(data) && data.length > 0) {
           setTrending(data.slice(0, 10));
         } else {
