@@ -879,7 +879,7 @@
     width: 140px;
     min-width: 140px;
     align-self: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 30px rgba(229, 9, 20, 0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
   }
 
   .info {

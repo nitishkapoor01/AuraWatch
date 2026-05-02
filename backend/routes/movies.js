@@ -70,7 +70,7 @@ const formatMovie = (m, forceType = null) => {
 const cache = new Map();
 const pendingRequests = new Map();
 
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes fresh
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes fresh (TMDB data doesn't change often)
 const CACHE_HARD_TTL = 24 * 60 * 60 * 1000; // 24 hours fallback
 
 const getCacheKey = (url) => {
