@@ -20,50 +20,6 @@ class MovieCrawler {
      * Search for an EXACT movie and return only its download links.
      * Uses lightweight axios/cheerio approach for HDHub4u and YTS API.
      */
-    async searchExactMovie(title, year = null) {
-        this.logger.banner();
-        this.logger.info(`🎯 LIGHTWEIGHT SEARCH: "${title}" ${year ? `(${year})` : ''}`);
-        
-        const results = {
-            movie: null,
-            meta: {
-                searchTitle: title,
-                searchYear: year,
-                exactMatchFound: false,
-                sourcesTried: []
-            }
-        };
-
-        try {
-            // Source 1: YTS API (Global Movies)
-            const ytsResult = await this._searchYTS(title, year);
-            results.meta.sourcesTried.push('YTS');
-            
-            // Source 2: HDHub4u API + Scraper (Indian/Hindi Movies)
-            const hdhubResult = await this._searchHDHub4u(title, year);
-            results.meta.sourcesTried.push('HDHub4u');
-
-            // Merge results
-            const mergedMovie = this._mergeResults(ytsResult, hdhubResult, title);
-            
-            if (mergedMovie) {
-                results.movie = mergedMovie;
-                results.meta.exactMatchFound = true;
-                this.stats.moviesFound = 1;
-            }
-
-        } catch (err) {
-            this.logger.error(`Search error: ${err.message}`);
-            this.stats.errors++;
-        }
-
-        const elapsed = ((Date.now() - this.stats.startTime) / 1000).toFixed(1);
-        this.stats.timeTaken = `${elapsed}s`;
-        this.logger.info(`🏁 Search completed in ${elapsed}s`);
-        
-        return results;
-    }
-
     async _searchYTS(title, year) {
         try {
             this.logger.info(`🔍 Searching YTS...`);
@@ -72,7 +28,6 @@ class MovieCrawler {
             const response = await axios.get(url, { timeout: 10000 });
             
             if (response.data.status === 'ok' && response.data.data.movie_count > 0) {
-                // Find best match by year
                 const movies = response.data.data.movies;
                 const match = year ? movies.find(m => String(m.year) === String(year)) || movies[0] : movies[0];
                 
@@ -98,11 +53,7 @@ class MovieCrawler {
                         this.stats.torrentLinks++;
                     });
                     
-                    return {
-                        title: match.title,
-                        qualities,
-                        links
-                    };
+                    return { title: match.title, qualities, links };
                 }
             }
         } catch (e) {
@@ -112,8 +63,12 @@ class MovieCrawler {
     }
 
     async _searchHDHub4u(title, year) {
+        return this._searchGenericTypesense(title, year, "HDHub4u", "https://new7.hdhub4u.fo/");
+    }
+
+    async _searchGenericTypesense(title, year, name, baseUrl) {
         try {
-            this.logger.info(`🔍 Searching HDHub4u...`);
+            this.logger.info(`🔍 Searching ${name}...`);
             const today = new Date().toISOString().split('T')[0];
             const query = year ? `${title} ${year}` : title;
             const apiUrl = "https://search.pingora.fyi/collections/post/documents/search";
@@ -124,7 +79,7 @@ class MovieCrawler {
                     query_by: 'post_title,category,stars,director,imdb_id',
                     query_by_weights: '4,2,2,2,4',
                     sort_by: 'sort_by_date:desc',
-                    limit: 5,
+                    limit: 3,
                     highlight_fields: 'none',
                     use_cache: 'true',
                     page: 1,
@@ -132,41 +87,40 @@ class MovieCrawler {
                 },
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': 'https://new7.hdhub4u.fo/',
-                    'Origin': 'https://new7.hdhub4u.fo'
+                    'Referer': baseUrl,
+                    'Origin': baseUrl.slice(0, -1)
                 },
                 timeout: 10000
             });
 
             if (response.data.hits && response.data.hits.length > 0) {
-                // Find best match (simple title check)
                 const hit = response.data.hits[0].document;
-                const movieUrl = hit.permalink.startsWith('http') ? hit.permalink : `https://new7.hdhub4u.fo${hit.permalink}`;
+                const movieUrl = hit.permalink.startsWith('http') ? hit.permalink : `${baseUrl}${hit.permalink.startsWith('/') ? hit.permalink.slice(1) : hit.permalink}`;
                 
-                this.logger.info(`📄 Found movie page: ${hit.post_title}`);
+                this.logger.info(`📄 [${name}] Found: ${hit.post_title}`);
                 const pageRes = await axios.get(movieUrl, {
                     headers: { 'User-Agent': 'Mozilla/5.0' },
-                    timeout: 10000
+                    timeout: 8000
                 });
                 
                 const $ = cheerio.load(pageRes.data);
                 const qualities = {};
                 const links = { direct: [], magnet: [], torrent: [] };
                 
-                // Specific HDHub4u pattern for download links
-                $('a[href*="hblinks"], a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"]').each((i, el) => {
+                // Broad patterns for movie sites
+                $('a[href*="hblinks"], a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="v-cloud"], a[href*="fastdl"]').each((i, el) => {
                     const href = $(el).attr('href');
-                    const text = $(el).text().trim();
-                    if (!href) return;
+                    const text = $(el).text().trim() || $(el).attr('title') || 'Download';
+                    if (!href || href.includes('wp-content')) return;
                     
                     const q = this._detectQuality(text + ' ' + hit.post_title) || 'other';
                     if (!qualities[q]) qualities[q] = [];
                     
                     const linkObj = {
                         url: href,
-                        name: text || hit.post_title,
+                        name: `${name}: ${text}`,
                         type: 'direct',
-                        size: this._detectSize(text)
+                        size: this._detectSize(text + ' ' + $(el).parent().text())
                     };
                     
                     qualities[q].push(linkObj);
@@ -175,17 +129,121 @@ class MovieCrawler {
                 });
 
                 if (links.direct.length > 0) {
-                    return {
-                        title: hit.post_title,
-                        qualities,
-                        links
-                    };
+                    return { title: hit.post_title, qualities, links };
                 }
             }
         } catch (e) {
-            this.logger.warn(`HDHub4u search failed: ${e.message}`);
+            this.logger.warn(`${name} search failed: ${e.message}`);
         }
         return null;
+    }
+
+    async _searchWordpressSite(title, year, name, baseUrl) {
+        try {
+            this.logger.info(`🔍 Searching ${name}...`);
+            const query = year ? `${title} ${year}` : title;
+            const searchUrl = `${baseUrl}?s=${encodeURIComponent(query)}`;
+            
+            const response = await axios.get(searchUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0' },
+                timeout: 10000
+            });
+
+            const $ = cheerio.load(response.data);
+            const firstResult = $('article h2 a, .post-title a, .result-item a').first();
+            const movieUrl = firstResult.attr('href');
+            const movieTitle = firstResult.text().trim();
+
+            if (movieUrl) {
+                this.logger.info(`📄 [${name}] Found: ${movieTitle}`);
+                const pageRes = await axios.get(movieUrl, {
+                    headers: { 'User-Agent': 'Mozilla/5.0' },
+                    timeout: 8000
+                });
+                
+                const $$ = cheerio.load(pageRes.data);
+                const qualities = {};
+                const links = { direct: [], magnet: [], torrent: [] };
+                
+                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"]').each((i, el) => {
+                    const href = $$(el).attr('href');
+                    const text = $$(el).text().trim() || $$(el).attr('title') || 'Download';
+                    if (!href || href.includes('google.com/search') || href.includes('wp-content')) return;
+                    
+                    const q = this._detectQuality(text + ' ' + movieTitle) || 'other';
+                    if (!qualities[q]) qualities[q] = [];
+                    
+                    const linkObj = {
+                        url: href,
+                        name: `${name}: ${text}`,
+                        type: 'direct',
+                        size: this._detectSize(text + ' ' + $$(el).parent().text())
+                    };
+                    
+                    qualities[q].push(linkObj);
+                    links.direct.push(linkObj);
+                    this.stats.directLinks++;
+                });
+
+                if (links.direct.length > 0) {
+                    return { title: movieTitle, qualities, links };
+                }
+            }
+        } catch (e) {
+            this.logger.warn(`${name} search failed: ${e.message}`);
+        }
+        return null;
+    }
+
+    async searchExactMovie(title, year = null) {
+        this.logger.banner();
+        this.logger.info(`🎯 MULTI-SOURCE SEARCH: "${title}" ${year ? `(${year})` : ''}`);
+        
+        const results = {
+            movie: null,
+            meta: {
+                searchTitle: title,
+                searchYear: year,
+                exactMatchFound: false,
+                sourcesTried: []
+            }
+        };
+
+        try {
+            const sources = [
+                () => this._searchYTS(title, year),
+                () => this._searchHDHub4u(title, year),
+                () => this._searchWordpressSite(title, year, "OlaMovies", "https://olamovies.homes/"),
+                () => this._searchWordpressSite(title, year, "VegaMovies", "https://vegamovies.nf/"),
+                () => this._searchWordpressSite(title, year, "KatMovieHD", "https://katmoviehd.cymru/")
+            ];
+
+            const sourceResults = await Promise.allSettled(sources.map(s => s()));
+            
+            let mergedMovie = null;
+            sourceResults.forEach((res, index) => {
+                const sourceNames = ['YTS', 'HDHub4u', 'OlaMovies', 'VegaMovies', 'KatMovieHD'];
+                results.meta.sourcesTried.push(sourceNames[index]);
+                
+                if (res.status === 'fulfilled' && res.value) {
+                    mergedMovie = this._mergeResults(mergedMovie, res.value, title);
+                }
+            });
+
+            if (mergedMovie) {
+                results.movie = mergedMovie;
+                results.meta.exactMatchFound = true;
+                this.stats.moviesFound = 1;
+            }
+
+        } catch (err) {
+            this.logger.error(`Search error: ${err.message}`);
+            this.stats.errors++;
+        }
+
+        const elapsed = ((Date.now() - this.stats.startTime) / 1000).toFixed(1);
+        this.stats.timeTaken = `${elapsed}s`;
+        return results;
     }
 
     _mergeResults(yts, hdhub, originalTitle) {
