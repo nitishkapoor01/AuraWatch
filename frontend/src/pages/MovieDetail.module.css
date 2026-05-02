@@ -40,7 +40,7 @@
   z-index: 10;
   display: flex;
   gap: 40px;
-  padding: 0 40px 0 100px; /* 100px left to clear sidebar (80px) + 20px gap */
+  padding: 0 40px 0 85px; /* 85px left to clear sidebar (80px) + 5px gap */
   margin-top: -20vh;
   align-items: flex-start;
 }
@@ -73,7 +73,7 @@
   justify-content: flex-end;
   color: white;
   padding-bottom: 20px;
-  max-width: 800px;
+  max-width: 1000px;
   opacity: 0;
   animation: contentSlideIn 0.8s cubic-bezier(0.2, 1, 0.3, 1) 0.2s forwards;
 }

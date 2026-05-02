@@ -1,5 +1,5 @@
 .searchPage {
-  padding: 100px 40px 40px 100px; /* Space for TopNav and Sidebar */
+  padding: 100px 40px 40px 85px; /* Space for TopNav and Sidebar */
   min-height: 100vh;
   background-color: var(--bg-main);
 }

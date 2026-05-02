@@ -16,7 +16,8 @@
   display: flex;
   align-items: flex-end;
   padding-bottom: 15vh; /* Space for the overlapping row */
-  padding-left: 100px; /* Space for sidebar */
+  padding-left: 85px; /* Space for sidebar */
+  padding-right: 40px;
   overflow: hidden;
 }
 
@@ -64,7 +65,7 @@
 .heroContent {
   position: relative;
   z-index: 3;
-  max-width: 40%;
+  max-width: 60%;
   color: #fff;
   animation: heroContentSlideIn 1s cubic-bezier(0.2, 1, 0.3, 1) forwards;
 }
@@ -188,7 +189,7 @@
 
 /* Sections overlap hero */
 .sectionContainer {
-  padding: 0 40px 0 100px;
+  padding: 0 40px 0 85px;
   margin-top: -13vh; /* Balance: overlap slightly but not block content */
   position: relative;
   z-index: 10;
@@ -409,7 +410,7 @@
 /* 🖥️ TABLET RESPONSIVENESS (769px–1024px) */
 @media (max-width: 1024px) {
   .hero {
-    padding-left: 100px; /* keep sidebar offset */
+    padding-left: 85px; /* keep sidebar offset */
     padding-right: 24px;
   }
 
@@ -422,7 +423,7 @@
   }
 
   .sectionContainer {
-    padding: 0 24px 0 100px;
+    padding: 0 24px 0 85px;
   }
 
   .cardContainer {
