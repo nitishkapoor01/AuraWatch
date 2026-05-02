@@ -201,14 +201,36 @@ class MovieCrawler {
         return null;
     }
 
-    async searchExactMovie(title, year = null) {
+    async searchExactMovie(title, year = null, tvInfo = {}) {
+        const { type, season, episode } = tvInfo;
+        
+        let displayTitle = title;
+        let searchQuery = title;
+
+        if (type === 'tv' && season) {
+            // For TV shows, we usually want "Season X" or "S01E01"
+            const sNum = String(season).padStart(2, '0');
+            const eNum = episode ? String(episode).padStart(2, '0') : null;
+            
+            if (episode) {
+                searchQuery = `${title} S${sNum}E${eNum}`;
+                displayTitle = `${title} - Season ${season} Episode ${episode}`;
+            } else {
+                searchQuery = `${title} Season ${season}`;
+                displayTitle = `${title} - Season ${season}`;
+            }
+        } else if (year) {
+            searchQuery = `${title} ${year}`;
+            displayTitle = `${title} (${year})`;
+        }
+
         this.logger.banner();
-        this.logger.info(`🎯 MULTI-SOURCE SEARCH: "${title}" ${year ? `(${year})` : ''}`);
+        this.logger.info(`🎯 MULTI-SOURCE SEARCH: "${displayTitle}"`);
         
         const results = {
             movie: null,
             meta: {
-                searchTitle: title,
+                searchTitle: displayTitle,
                 searchYear: year,
                 exactMatchFound: false,
                 sourcesTried: []
@@ -217,14 +239,14 @@ class MovieCrawler {
 
         try {
             const sources = [
-                () => this._searchYTS(title, year),
-                () => this._searchGenericTypesense(title, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
-                () => this._searchWordpressSite(title, year, "OlaMovies", "https://olamovies.app/"),
-                () => this._searchWordpressSite(title, year, "Movies4u", "https://movies4u.ba/"),
-                () => this._searchWordpressSite(title, year, "Movie4in", "https://movie4in.com/"),
-                () => this._searchWordpressSite(title, year, "VegaMovies", "https://vegamovies.nf/"),
-                () => this._searchWordpressSite(title, year, "KatMovieHD", "https://new1.katmoviehd.cymru/"),
-                () => this._searchWordpressSite(title, year, "WatchAnimeWorld", "https://watchanimeworld.net/")
+                () => type !== 'tv' ? this._searchYTS(title, year) : Promise.resolve(null),
+                () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
+                () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app/"),
+                () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba/"),
+                () => this._searchWordpressSite(searchQuery, year, "Movie4in", "https://movie4in.com/"),
+                () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.nf/"),
+                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://new1.katmoviehd.cymru/"),
+                () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net/")
             ];
 
             const sourceResults = await Promise.allSettled(sources.map(s => s()));

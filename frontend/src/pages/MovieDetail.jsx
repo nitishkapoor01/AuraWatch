@@ -209,7 +209,13 @@ const MovieDetail = () => {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/downloads/movie`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: movie.title, year: movie.year })
+        body: JSON.stringify({ 
+          title: movie.title, 
+          year: movie.year,
+          type: movie.type,
+          season: isTV ? selectedSeason : null,
+          episode: isTV ? selectedEpisode : null
+        })
       });
       const data = await res.json();
       

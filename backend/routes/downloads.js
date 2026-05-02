@@ -64,17 +64,17 @@ async function saveToCacheDB(title, year, cacheKey, responseData) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.post('/movie', async (req, res) => {
-    const { title, year } = req.body;
+    const { title, year, season, episode, type } = req.body;
 
     if (!title) {
         return res.status(400).json({
-            error: 'Movie title is required',
-            example: { title: 'The Batman', year: 2022 }
+            error: 'Title is required'
         });
     }
 
     // ── STEP 1: Check Cache ──────────────────────────────────────────────
-    const cacheKey = buildCacheKey(title, year);
+    // For TV shows, cache specifically for the season/episode
+    const cacheKey = type === 'tv' ? `tv:${title}:${season}:${episode}` : buildCacheKey(title, year);
     const cached = await getCachedResult(cacheKey);
 
     if (cached) {
@@ -94,7 +94,11 @@ router.post('/movie', async (req, res) => {
     const crawler = new MovieCrawler({ bypassShorteners: true });
 
     try {
-        const results = await crawler.searchExactMovie(title, year || null);
+        const results = await crawler.searchExactMovie(title, year || null, { 
+            type, 
+            season, 
+            episode 
+        });
 
         if (!results.movie) {
             return res.json({
