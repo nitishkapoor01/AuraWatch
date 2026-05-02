@@ -516,7 +516,9 @@
 /* 📱 MOBILE (≤768px) */
 @media (max-width: 768px) {
   .historyPage {
-    padding: 40px 16px 90px 16px;
+    padding: 80px 16px 100px 16px;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .pageTitle {
@@ -595,7 +597,7 @@
 /* 📱 SMALL PHONE (≤480px) */
 @media (max-width: 480px) {
   .historyPage {
-    padding: 32px 12px 90px 12px;
+    padding: 70px 12px 100px 12px;
   }
 
   .pageTitle {
