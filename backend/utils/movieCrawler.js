@@ -62,9 +62,7 @@ class MovieCrawler {
         return null;
     }
 
-    async _searchHDHub4u(title, year) {
-        return this._searchGenericTypesense(title, year, "HDHub4u", "https://new7.hdhub4u.fo/");
-    }
+
 
     async _searchGenericTypesense(title, year, name, baseUrl) {
         try {
@@ -165,7 +163,7 @@ class MovieCrawler {
                 const qualities = {};
                 const links = { direct: [], magnet: [], torrent: [] };
                 
-                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"]').each((i, el) => {
+                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"]').each((i, el) => {
                     const href = $$(el).attr('href');
                     const text = $$(el).text().trim() || $$(el).attr('title') || 'Download';
                     if (!href || href.includes('google.com/search') || href.includes('wp-content')) return;
@@ -212,17 +210,21 @@ class MovieCrawler {
         try {
             const sources = [
                 () => this._searchYTS(title, year),
-                () => this._searchHDHub4u(title, year),
-                () => this._searchWordpressSite(title, year, "OlaMovies", "https://olamovies.homes/"),
+                () => this._searchGenericTypesense(title, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
+                () => this._searchWordpressSite(title, year, "OlaMovies", "https://olamovies.app/"),
+                () => this._searchWordpressSite(title, year, "Movies4u", "https://movies4u.ba/"),
+                () => this._searchWordpressSite(title, year, "Movie4in", "https://movie4in.com/"),
                 () => this._searchWordpressSite(title, year, "VegaMovies", "https://vegamovies.nf/"),
-                () => this._searchWordpressSite(title, year, "KatMovieHD", "https://katmoviehd.cymru/")
+                () => this._searchWordpressSite(title, year, "KatMovieHD", "https://new1.katmoviehd.cymru/"),
+                () => this._searchWordpressSite(title, year, "WatchAnimeWorld", "https://watchanimeworld.net/")
             ];
 
             const sourceResults = await Promise.allSettled(sources.map(s => s()));
             
             let mergedMovie = null;
+            const sourceNames = ['YTS', 'HDHub4u', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
+            
             sourceResults.forEach((res, index) => {
-                const sourceNames = ['YTS', 'HDHub4u', 'OlaMovies', 'VegaMovies', 'KatMovieHD'];
                 results.meta.sourcesTried.push(sourceNames[index]);
                 
                 if (res.status === 'fulfilled' && res.value) {
