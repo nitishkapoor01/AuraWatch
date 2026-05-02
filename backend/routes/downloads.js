@@ -3,28 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const MovieCrawler = require('../utils/movieCrawler');
 
-// Dynamic import for p-limit to support ESM or CommonJS
-let downloadQueue;
-
-(async () => {
-    try {
-        const pLimitModule = await import('p-limit');
-        const pLimit = pLimitModule.default || pLimitModule;
-        // Optimization: Use concurrency 1 to prevent OOM on free tier
-        downloadQueue = pLimit(1);
-    } catch (err) {
-        console.error('Failed to load p-limit:', err);
-        downloadQueue = async (fn) => fn();
-    }
-})();
-
-// Prevent Playwright stealth plugin from crashing the whole server on timeouts
-process.on('uncaughtException', (err) => {
-    console.error('Caught exception:', err.message);
-});
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
+// Lightweight scraper - no p-limit or Playwright needed
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  CACHE SETTINGS
@@ -112,11 +91,10 @@ router.post('/movie', async (req, res) => {
     // ── STEP 2: Run Scraper ──────────────────────────────────────────────
     // Give 55s total for the HTTP request (crawler's own 18s hard stop + depth-1 crawl time)
     res.setTimeout(55000);
-    const crawler = new MovieCrawler({ maxDepth: 2, concurrency: 2, bypassShorteners: true });
+    const crawler = new MovieCrawler({ bypassShorteners: true });
 
     try {
-        const runner = downloadQueue || (async (fn) => fn());
-        const results = await runner(() => crawler.searchExactMovie(title, year || null));
+        const results = await crawler.searchExactMovie(title, year || null);
 
         if (!results.movie) {
             return res.json({
