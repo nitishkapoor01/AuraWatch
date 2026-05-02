@@ -368,7 +368,8 @@ router.post('/avatar-upload', authMiddleware, upload.single('avatarFile'), async
   console.log('[Auth] File received:', req.file.filename);
 
   try {
-    const avatarUrl = `http://localhost:5000/uploads/avatars/${req.file.filename}`;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const avatarUrl = `${baseUrl}/uploads/avatars/${req.file.filename}`;
     await db.query('UPDATE users SET avatar = $1 WHERE id = $2', [avatarUrl, req.user.id]);
     console.log('[Auth] Avatar updated in DB:', avatarUrl);
     res.json({ message: 'Avatar uploaded successfully', avatar: avatarUrl });

@@ -39,8 +39,5 @@ RUN npx playwright install-deps chromium
 # Copy the rest of the application
 COPY . .
 
-# Expose the port
-EXPOSE 5000
-
 # Start the server
 CMD ["node", "server.js"]

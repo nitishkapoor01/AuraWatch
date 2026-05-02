@@ -12,12 +12,12 @@ const Category = ({ type, title }) => {
       setLoading(true);
       try {
         // We'll just fetch trending for the specific type to populate the grid
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api')}`}/movies/search?query=${type === 'tv' ? 'show' : 'movie'}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/movies/search?query=${type === 'tv' ? 'show' : 'movie'}`);
         // Alternatively, since our backend just searches TMDB, a better endpoint is needed. 
         // For prototype purposes, let's just fetch trending and filter, or use the search endpoint with a broad query.
         
         // Actually, let's just fetch trending and pretend it's the category data
-        const trendingRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api')}`}/movies/trending`);
+        const trendingRes = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/movies/trending`);
         const data = await trendingRes.json();
         
         if (Array.isArray(data)) {

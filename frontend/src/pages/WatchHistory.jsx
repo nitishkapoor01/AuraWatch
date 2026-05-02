@@ -30,7 +30,7 @@ const WatchHistory = () => {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api')}/watch-history`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/watch-history`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -45,7 +45,7 @@ const WatchHistory = () => {
 
   const handleRemove = async (movieId, movieType) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api')}`}/watch-history/${movieId}?type=${movieType}`, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/watch-history/${movieId}?type=${movieType}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
