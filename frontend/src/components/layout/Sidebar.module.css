@@ -1,0 +1,236 @@
+.sidebar {
+  width: 80px;
+  height: 100vh;
+  background-color: transparent;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 0 20px 0;
+  z-index: 2000;
+}
+
+.logo {
+  display: none;
+}
+
+.navSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1; 
+  gap: 32px;
+  width: 100%;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 28px;
+  color: #808080;
+  transition: color 0.15s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Animate the icon */
+.navItem:hover {
+  color: #fff;
+  transform: scale(1.35); /* Aggressive pop */
+}
+
+.navItem.active {
+  color: #fff;
+}
+
+.navItem.active::after {
+  content: none;
+}
+
+.navItem.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
+  width: 3px;
+  background-color: #e50914;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Floating text next to the icon */
+.navItem span {
+  font-size: 15px;
+  font-weight: 700;
+  position: absolute;
+  left: 60px;
+  opacity: 0;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translateX(-15px);
+  pointer-events: none;
+  
+  /* Tooltip background */
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  color: #fff;
+  z-index: 100;
+}
+
+/* Reveal text when hovering this specific button */
+.navItem:hover span {
+  opacity: 1;
+  transform: translateX(8px); /* Aggressive slide past the starting point */
+}
+
+/* Bottom Profile / Utilities */
+.userProfile {
+  margin-top: auto;
+  margin-bottom: 0px;
+  width: 100%;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.1);
+  border: 2px solid white;
+}
+
+.userInfo, .premiumCard {
+  display: none;
+}
+
+/* 📱 MOBILE RESPONSIVENESS (Bottom Navigation) */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100vw;
+    height: calc(70px + env(safe-area-inset-bottom, 0px));
+    bottom: 0;
+    top: auto;
+    flex-direction: row;
+    padding: 0 0 env(safe-area-inset-bottom, 0px) 0;
+    background-color: rgba(0, 0, 0, 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+  }
+
+  .navSection {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .navItem {
+    width: auto;
+    padding: 10px;
+    flex: 1;
+    height: 100%;
+    justify-content: center;
+    color: #fff;
+    opacity: 0.5;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Active bottom tab */
+  .navItem.active {
+    color: #fff;
+    opacity: 1;
+  }
+
+  /* Disable hover pop & text tooltip on mobile */
+  .navItem:hover {
+    transform: scale(1.08);
+    color: #fff;
+    opacity: 1;
+  }
+
+  /* Hide tooltip labels on mobile */
+  .navItem span {
+    display: none;
+  }
+
+  /* Active indicator becomes a top line */
+  .navItem.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 3px;
+    background-color: #e50914;
+    border-radius: 0 0 4px 4px;
+  }
+
+  .userProfile {
+    display: none;
+  }
+}
+
+/* 📱 SMALL PHONE (≤480px) */
+@media (max-width: 480px) {
+  .sidebar {
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .navItem {
+    padding: 8px 4px;
+  }
+}
+
+/* 📺 TV / LARGE SCREENS (≥1440px) — expand sidebar wider with labels visible */
+@media (min-width: 1440px) {
+  .sidebar {
+    width: 120px;
+  }
+
+  .navItem {
+    padding-left: 36px;
+  }
+
+  .navItem span {
+    font-size: 17px;
+  }
+}
+
+/* 🖥️ EXTRA LARGE TV (≥1920px) — fully expanded sidebar */
+@media (min-width: 1920px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .navItem:hover span,
+  .navItem.active span {
+    opacity: 1;
+    transform: translateX(8px);
+  }
+}
+

@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    {"id": "readme_frontend", "label": "Frontend README", "file_type": "document", "source_file": "frontend/README.md"},
+    {"id": "movie_links_txt", "label": "Extracted Movie Links", "file_type": "document", "source_file": "Scrapper/movie_links.txt"},
+    {"id": "scrapper_ui_html", "label": "Scrapper UI", "file_type": "document", "source_file": "Scrapper/public/index.html"},
+    {"id": "hero_png", "label": "Hero Banner Image", "file_type": "image", "source_file": "frontend/src/assets/hero.png"},
+    {"id": "logo_png", "label": "AuraMovie Logo", "file_type": "image", "source_file": "frontend/public/AuraWatch Logo.png"}
+  ],
+  "edges": [
+    {"source": "scrapper_ui_html", "target": "moviecrawler_scrapper", "relation": "calls", "confidence": "INFERRED", "confidence_score": 0.9},
+    {"source": "readme_frontend", "target": "app_jsx", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "home_page", "target": "hero_png", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.95},
+    {"source": "topnav_jsx", "target": "logo_png", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.95}
+  ],
+  "hyperedges": [],
+  "input_tokens": 1000,
+  "output_tokens": 300
+}

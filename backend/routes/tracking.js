@@ -1,0 +1,79 @@
+const express = require('express');
+const router = express.Router();
+const { authMiddleware, isAdmin } = require('../middleware/auth');
+const db = require('../db');
+
+// In-memory store for active sessions
+// Map<sessionId, { lastSeen: number, isGuest: boolean, userId: number|null }>
+const activeSessions = new Map();
+
+// Ping endpoint - called by all clients every ~30s
+router.post('/heartbeat', (req, res) => {
+  const { sessionId, isGuest, userId } = req.body;
+  if (!sessionId) {
+    return res.status(400).json({ error: 'sessionId required' });
+  }
+
+  activeSessions.set(sessionId, {
+    lastSeen: Date.now(),
+    isGuest: !!isGuest,
+    userId: userId || null
+  });
+
+  if (userId) {
+    try {
+      db.prepare("INSERT OR IGNORE INTO user_activity (user_id, date) VALUES (?, date('now'))").run(userId);
+    } catch (e) {
+      console.error('Failed to log user activity', e);
+    }
+  }
+
+  try {
+    db.prepare("INSERT OR IGNORE INTO platform_visits (session_id, date) VALUES (?, date('now'))").run(sessionId);
+  } catch (e) {
+    console.error('Failed to log platform visit', e);
+  }
+
+  let announcement = null;
+  try {
+    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get('announcement');
+    if (row && row.value) {
+      announcement = JSON.parse(row.value);
+    }
+  } catch (e) {
+    console.error('Failed to get announcement for heartbeat', e);
+  }
+
+  res.json({ success: true, announcement });
+});
+
+// Cleanup stale sessions (older than 60 seconds)
+setInterval(() => {
+  const now = Date.now();
+  for (const [sessionId, data] of activeSessions.entries()) {
+    if (now - data.lastSeen > 60000) {
+      activeSessions.delete(sessionId);
+    }
+  }
+}, 30000); // Check every 30s
+
+// Admin endpoint to get live stats
+// Protected route
+router.get('/live-stats', authMiddleware, isAdmin, (req, res) => {
+  let total = 0;
+  let guests = 0;
+  let loggedIn = 0;
+
+  for (const data of activeSessions.values()) {
+    total++;
+    if (data.isGuest) {
+      guests++;
+    } else {
+      loggedIn++;
+    }
+  }
+
+  res.json({ total, guests, loggedIn });
+});
+
+module.exports = router;

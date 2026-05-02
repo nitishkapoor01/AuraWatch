@@ -1,0 +1,488 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.2s ease;
+  pointer-events: auto; /* Enable clicks */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background-color: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #808080;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 8px;
+}
+
+.closeBtn:hover {
+  color: white;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.currentAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.userInfo h3 {
+  font-size: 20px;
+  color: white;
+  margin: 0 0 4px 0;
+}
+
+.userInfo p {
+  color: #999;
+  font-size: 14px;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  color: #ccc;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.avatarOption {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  opacity: 0.8;
+}
+
+.avatarOption:hover {
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+.avatarOption.selected {
+  border-color: white;
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+.uploadOption {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.3) !important;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.uploadOption:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: #fff !important;
+  color: #fff;
+}
+
+.currentAvatarImage {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.avatarOption:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Edit Name Section */
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editNameBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.editNameBtn:hover {
+  color: #e50914;
+  background: rgba(229, 9, 20, 0.1);
+}
+
+.nameEditForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.nameInput {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.nameInput:focus {
+  border-color: #e50914;
+}
+
+.passwordRow {
+  display: flex;
+  gap: 8px;
+}
+
+.passwordInputWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.passwordInput {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 36px 8px 12px;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.passwordInput:focus {
+  border-color: #e50914;
+}
+
+.passwordInput::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.togglePasswordBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+}
+
+.togglePasswordBtn:hover {
+  color: #fff;
+}
+
+.nameActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.saveNameBtn {
+  background: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.saveNameBtn:hover:not(:disabled) {
+  background: #c40812;
+}
+
+.saveNameBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelNameBtn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancelNameBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.nameError {
+  color: #e50914;
+  font-size: 12px;
+  margin: 0;
+}
+
+.nameSuccess {
+  color: #2ecc71;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Change Password Section */
+.passwordSection {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.changePasswordToggle {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.changePasswordToggle:hover {
+  border-color: #e50914;
+  color: #e50914;
+  background: rgba(229, 9, 20, 0.08);
+}
+
+.passwordForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Security Question Elements */
+.useSecurityBtn {
+  background: none;
+  border: none;
+  color: #0071eb;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  margin-bottom: 4px;
+  transition: color 0.2s;
+}
+
+.useSecurityBtn:hover {
+  color: #3395ff;
+  text-decoration: underline;
+}
+
+.securityQuestionBox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.securityQuestionLabel {
+  font-size: 11px;
+  color: #999;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.securityQuestionText {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+}
+
+/* 📱 MOBILE (≤768px) */
+@media (max-width: 768px) {
+  .modal {
+    padding: 24px;
+    max-width: calc(100% - 32px);
+    margin: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .passwordRow {
+    flex-direction: column;
+  }
+}
+
+/* 📱 SMALL PHONE (≤480px) */
+@media (max-width: 480px) {
+  .modal {
+    padding: 20px 16px;
+    max-width: calc(100% - 20px);
+    margin: 10px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .nameRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* 📺 TV (≥1440px) */
+@media (min-width: 1440px) {
+  .modal {
+    max-width: 600px;
+    padding: 40px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+  }
+
+  .currentAvatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .currentAvatarImage {
+    width: 100px;
+    height: 100px;
+  }
+
+  .userInfo h3 {
+    font-size: 24px;
+  }
+
+  .userInfo p {
+    font-size: 16px;
+  }
+}
+

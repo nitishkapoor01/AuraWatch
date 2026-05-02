@@ -1,0 +1,1409 @@
+{
+  "meta": {
+    "crawledAt": "2026-05-02T03:18:14.603Z",
+    "totalLinks": 77,
+    "pagesCrawled": 1,
+    "errors": 0,
+    "resolved": 0
+  },
+  "links": {
+    "all": [
+      {
+        "url": "https://www7.yts-official.to/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "internal",
+        "text": "",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/browse-movies?keyword=&quality=2160p&genre=all&rating=0&year=0&order_by=latest",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4K",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/browse-movies",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "Browse Movies",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://www.yts-official.to/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "YIFY",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/browse-movies?keyword=&quality=all&genre=all&rating=0&year=0&order_by=featured",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "Popular Movies",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/jean-valjean-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.3 / 10\n                            DramaHistory                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/hard-matter-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.7 / 10\n                            ActionDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/fury-of-the-dragon-1976/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.2 / 10\n                            ActionAdventure                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-green-hornet-1974/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.1 / 10\n                            ActionCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/biker-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.1 / 10\n                            DramaFamily                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/night-games-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.6 / 10\n                            HorrorThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/coutures-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.0 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/indomptables-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/nie-xiaoqian-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.5 / 10\n                            AnimationFantasy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-hero-of-heroic-bloodshed-a-john-woo-documentary-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Documentary                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/junai-monogatari-1957/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.3 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/kraken-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.3 / 10\n                            ActionDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/brave-warrior-1952/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.0 / 10\n                            DramaWestern                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/concussed-the-american-dream-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.4 / 10\n                            DocumentarySport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/no-ordinary-heist-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.9 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/du-cheng-feng-yun-ii-2015/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.6 / 10\n                            ActionAdventure                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/pretty-obsession-2012/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.1 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/ice-pocalypse-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Action                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/stolen-assignment-1955/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.8 / 10\n                            ComedyCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/treagens-black-shadows-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-professionals-1960/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.3 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/what-happened-to-dorothy-bell-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.0 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-genesis-project-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.3 / 10\n                            HorrorThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/crack-up-1946/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.5 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-goetia-diaries-2022/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.2 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-space-rodent-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.8 / 10\n                            ComedyHorror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/niko-ja-myrskyporojen-arvoitus-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.1 / 10\n                            AdventureAnimation                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/fei-chi-ren-sheng-3-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.8 / 10\n                            ComedySport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/arrowsmith-1931/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.2 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/escape-to-hell-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/betray-2023/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.8 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/whores-on-fire-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/janur-ireng-sewu-dino-the-prequel-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.1 / 10\n                            HorrorThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/akta-skrack-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.6 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/buen-camino-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            Comedy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/superjuffie-in-de-jungle-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.9 / 10\n                            AdventureFamily                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/mavka-the-true-myth-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.6 / 10\n                            FantasyRomance                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/etiologia-unei-crime-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.7 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/a-big-hand-for-the-little-lady-1966/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.3 / 10\n                            ComedyWestern                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/hoodlum-and-son-2003/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.7 / 10\n                            ComedyCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/alpine-trilogy-doggystyle-2021/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Sport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-substance-of-fire-1996/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.0 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-princess-killers-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Action                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/mob-boss-1990/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.9 / 10\n                            Comedy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/no-code-of-conduct-1998/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.8 / 10\n                            ActionCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/je-mappelle-agneta-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.5 / 10\n                            Comedy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-good-the-bad-the-hungry-2019/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.7 / 10\n                            DocumentaryGame-Show                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-shape-of-something-squashed-2014/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.9 / 10\n                            ComedyDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/7-nights-of-darkness-2011/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.0 / 10\n                            HorrorMystery                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/essex-boys-retribution-2013/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.3 / 10\n                            Crime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/valley-of-the-shadow-of-death-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/woman-2023/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.4 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/one-2-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Crime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/hoppers-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.4 / 10\n                            AdventureAnimation                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/les-fantomes-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.6 / 10\n                            DramaThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/bai-lu-yuan-2011/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            DramaHistory                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/my-name-is-modesty-a-modesty-blaise-adventure-2004/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.6 / 10\n                            ActionCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/sonhar-com-leoes-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.6 / 10\n                            ComedyDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/dirty-hands-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.4 / 10\n                            CrimeThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/jik-zyun-soeng-bun-coeng-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.7 / 10\n                            ActionSport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "http://www.histats.com/viewstats/?sid=4846111&ccid=511",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://t.sharethis.com/a/t_.htm?ver=1.2051.23421&cid=c010&cls=B",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "embed",
+        "text": "[iframe]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://platform-api.sharethis.com/panorama.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://count-server.sharethis.com/v2.0/get_counts?cb=window.__sharethis__.cb&url=https%3A%2F%2Fwww7.yts-official.to%2F",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://buttons-config.sharethis.com/js/65af1f192bb34700194aa378.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://s10.histats.com/js15_as.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://www7.yts-official.to/static/yts/style/modded1.js?yify=2",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://platform-api.sharethis.com/js/sharethis.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://s4.histats.com/stats/0.php?4846111&@f16&@g1&@h1&@i1&@j1777691860950&@k0&@l1&@mYTS%3A%20The%20Official%20Home%20of%20YIFY%20Movies%20Download%20-%20YTS&@n0&@o1000&@q0&@r0&@s511&@ten-GB&@u1920&@b1:-95489919&@b3:1777691861&@b4:js15_as.js&@b5:330&@a-_0.2.1&@vhttps%3A%2F%2Fwww7.yts-official.to%2F&@w",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://s10.histats.com/counters/cc_511.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://schema.org/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "js-embedded",
+        "text": "[js-embedded]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://www.yts-official.to/#content",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "js-embedded",
+        "text": "[js-embedded]",
+        "resolved": null,
+        "status": "found"
+      }
+    ],
+    "internal": [
+      {
+        "url": "https://www7.yts-official.to/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "internal",
+        "text": "",
+        "resolved": null,
+        "status": "found"
+      }
+    ],
+    "external": [
+      {
+        "url": "https://en.yts-official.top/browse-movies?keyword=&quality=2160p&genre=all&rating=0&year=0&order_by=latest",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4K",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/browse-movies",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "Browse Movies",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://www.yts-official.to/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "YIFY",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/browse-movies?keyword=&quality=all&genre=all&rating=0&year=0&order_by=featured",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "Popular Movies",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/jean-valjean-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.3 / 10\n                            DramaHistory                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/hard-matter-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.7 / 10\n                            ActionDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/fury-of-the-dragon-1976/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.2 / 10\n                            ActionAdventure                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-green-hornet-1974/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.1 / 10\n                            ActionCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/biker-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.1 / 10\n                            DramaFamily                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/night-games-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.6 / 10\n                            HorrorThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/coutures-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.0 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/indomptables-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/nie-xiaoqian-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.5 / 10\n                            AnimationFantasy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-hero-of-heroic-bloodshed-a-john-woo-documentary-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Documentary                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/junai-monogatari-1957/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.3 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/kraken-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.3 / 10\n                            ActionDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/brave-warrior-1952/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.0 / 10\n                            DramaWestern                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/concussed-the-american-dream-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.4 / 10\n                            DocumentarySport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/no-ordinary-heist-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.9 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/du-cheng-feng-yun-ii-2015/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.6 / 10\n                            ActionAdventure                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/pretty-obsession-2012/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.1 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/ice-pocalypse-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Action                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/stolen-assignment-1955/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.8 / 10\n                            ComedyCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/treagens-black-shadows-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-professionals-1960/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.3 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/what-happened-to-dorothy-bell-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.0 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-genesis-project-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.3 / 10\n                            HorrorThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/crack-up-1946/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.5 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-goetia-diaries-2022/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.2 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-space-rodent-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.8 / 10\n                            ComedyHorror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/niko-ja-myrskyporojen-arvoitus-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.1 / 10\n                            AdventureAnimation                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/fei-chi-ren-sheng-3-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.8 / 10\n                            ComedySport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/arrowsmith-1931/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.2 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/escape-to-hell-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/betray-2023/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.8 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/whores-on-fire-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/janur-ireng-sewu-dino-the-prequel-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.1 / 10\n                            HorrorThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/akta-skrack-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.6 / 10\n                            Horror                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/buen-camino-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            Comedy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/superjuffie-in-de-jungle-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.9 / 10\n                            AdventureFamily                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/mavka-the-true-myth-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.6 / 10\n                            FantasyRomance                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/etiologia-unei-crime-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.7 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/a-big-hand-for-the-little-lady-1966/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.3 / 10\n                            ComedyWestern                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/hoodlum-and-son-2003/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.7 / 10\n                            ComedyCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/alpine-trilogy-doggystyle-2021/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Sport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-substance-of-fire-1996/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.0 / 10\n                            Drama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-princess-killers-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Action                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/mob-boss-1990/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.9 / 10\n                            Comedy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/no-code-of-conduct-1998/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.8 / 10\n                            ActionCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/je-mappelle-agneta-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.5 / 10\n                            Comedy                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-good-the-bad-the-hungry-2019/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.7 / 10\n                            DocumentaryGame-Show                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/the-shape-of-something-squashed-2014/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.9 / 10\n                            ComedyDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/7-nights-of-darkness-2011/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.0 / 10\n                            HorrorMystery                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/essex-boys-retribution-2013/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.3 / 10\n                            Crime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/valley-of-the-shadow-of-death-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            CrimeDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/woman-2023/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.4 / 10\n                            Thriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/one-2-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "0.0 / 10\n                            Crime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/hoppers-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "7.4 / 10\n                            AdventureAnimation                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/les-fantomes-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.6 / 10\n                            DramaThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/bai-lu-yuan-2011/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.4 / 10\n                            DramaHistory                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/my-name-is-modesty-a-modesty-blaise-adventure-2004/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "4.6 / 10\n                            ActionCrime                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/sonhar-com-leoes-2024/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "6.6 / 10\n                            ComedyDrama                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/dirty-hands-2026/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.4 / 10\n                            CrimeThriller                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://en.yts-official.top/movies/jik-zyun-soeng-bun-coeng-2025/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "5.7 / 10\n                            ActionSport                            View Details",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "http://www.histats.com/viewstats/?sid=4846111&ccid=511",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "external",
+        "text": "",
+        "resolved": null,
+        "status": "found"
+      }
+    ],
+    "media": [],
+    "embedded": [
+      {
+        "url": "https://t.sharethis.com/a/t_.htm?ver=1.2051.23421&cid=c010&cls=B",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "embed",
+        "text": "[iframe]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://schema.org/",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "js-embedded",
+        "text": "[js-embedded]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://www.yts-official.to/#content",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "js-embedded",
+        "text": "[js-embedded]",
+        "resolved": null,
+        "status": "found"
+      }
+    ],
+    "resources": [
+      {
+        "url": "https://platform-api.sharethis.com/panorama.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://count-server.sharethis.com/v2.0/get_counts?cb=window.__sharethis__.cb&url=https%3A%2F%2Fwww7.yts-official.to%2F",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://buttons-config.sharethis.com/js/65af1f192bb34700194aa378.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://s10.histats.com/js15_as.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://www7.yts-official.to/static/yts/style/modded1.js?yify=2",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://platform-api.sharethis.com/js/sharethis.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://s4.histats.com/stats/0.php?4846111&@f16&@g1&@h1&@i1&@j1777691860950&@k0&@l1&@mYTS%3A%20The%20Official%20Home%20of%20YIFY%20Movies%20Download%20-%20YTS&@n0&@o1000&@q0&@r0&@s511&@ten-GB&@u1920&@b1:-95489919&@b3:1777691861&@b4:js15_as.js&@b5:330&@a-_0.2.1&@vhttps%3A%2F%2Fwww7.yts-official.to%2F&@w",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      },
+      {
+        "url": "https://s10.histats.com/counters/cc_511.js",
+        "source": "https://www7.yts-official.to/",
+        "depth": 0,
+        "type": "resource",
+        "text": "[script]",
+        "resolved": null,
+        "status": "found"
+      }
+    ],
+    "shortLinksResolved": []
+  }
+}

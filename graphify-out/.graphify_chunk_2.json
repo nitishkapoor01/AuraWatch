@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {"id": "auth_context", "label": "Authentication Context", "file_type": "code", "source_file": "frontend/src/context/AuthContext.jsx"},
+    {"id": "theme_context", "label": "Theme Context", "file_type": "code", "source_file": "frontend/src/context/ThemeContext.jsx"},
+    {"id": "admindashboard_page", "label": "Admin Dashboard", "file_type": "code", "source_file": "frontend/src/pages/AdminDashboard.jsx"},
+    {"id": "home_page", "label": "Home Page", "file_type": "code", "source_file": "frontend/src/pages/Home.jsx"},
+    {"id": "moviedetail_page", "label": "Movie Detail Page", "file_type": "code", "source_file": "frontend/src/pages/MovieDetail.jsx"},
+    {"id": "api_utils_frontend", "label": "Frontend API Utils", "file_type": "code", "source_file": "frontend/src/utils/api.js"},
+    {"id": "moviecrawler_scrapper", "label": "Movie Crawler Scrapper", "file_type": "code", "source_file": "Scrapper/movieCrawler.js"},
+    {"id": "resolver_utils", "label": "Link Resolver Utilities", "file_type": "code", "source_file": "Scrapper/utils/resolver.js"},
+    {"id": "logger_utils", "label": "Scrapper Logger", "file_type": "code", "source_file": "Scrapper/utils/logger.js"},
+    {"id": "index_html", "label": "Index HTML", "file_type": "document", "source_file": "frontend/index.html"}
+  ],
+  "edges": [
+    {"source": "home_page", "target": "auth_context", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "moviedetail_page", "target": "api_utils_frontend", "relation": "calls", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "moviecrawler_scrapper", "target": "resolver_utils", "relation": "calls", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "moviecrawler_scrapper", "target": "logger_utils", "relation": "calls", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "admindashboard_page", "target": "auth_context", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "api_utils_frontend", "target": "auth_context", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.7}
+  ],
+  "hyperedges": [
+    {
+      "id": "frontend_state_management",
+      "label": "Frontend State Management",
+      "nodes": ["auth_context", "theme_context"],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.95
+    },
+    {
+      "id": "scrapper_system",
+      "label": "Scrapper Subsystem",
+      "nodes": ["moviecrawler_scrapper", "resolver_utils", "logger_utils"],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9
+    }
+  ],
+  "input_tokens": 2000,
+  "output_tokens": 600
+}

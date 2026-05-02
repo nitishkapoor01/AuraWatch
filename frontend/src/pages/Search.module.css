@@ -1,0 +1,45 @@
+.searchPage {
+  padding: 100px 40px 40px 100px; /* Space for TopNav and Sidebar */
+  min-height: 100vh;
+  background-color: var(--bg-main);
+}
+
+.searchHeader {
+  margin-bottom: 32px;
+}
+
+.searchTitle {
+  font-size: 24px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.query {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.noResults {
+  text-align: center;
+  padding: 100px 0;
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+/* 📱 MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .searchPage {
+    padding: 100px 20px 80px 20px;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Scrapper — Movie Link Hunter</title>
+    <meta name="description" content="Powerful movie torrent crawler and link scraper">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="particles" id="particles"></div>
+
+    <!-- ─── Header ─── -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="logo-icon">🕷️</div>
+            <div>
+                <h1 class="logo-text">MEGA SCRAPPER</h1>
+                <p class="logo-sub">Movie Link Hunter & Torrent Crawler</p>
+            </div>
+        </div>
+        <div class="header-stats" id="headerStats">
+            <div class="stat-pill">
+                <span class="stat-dot stat-dot--green"></span>
+                <span id="statPages">0</span> Pages
+            </div>
+            <div class="stat-pill stat-pill--magnet">
+                <span class="stat-dot stat-dot--magenta"></span>
+                <span id="statMagnets">0</span> Magnets
+            </div>
+            <div class="stat-pill">
+                <span class="stat-dot stat-dot--blue"></span>
+                <span id="statTorrents">0</span> Torrents
+            </div>
+            <div class="stat-pill">
+                <span class="stat-dot stat-dot--purple"></span>
+                <span id="statDirect">0</span> Direct
+            </div>
+        </div>
+    </header>
+
+    <!-- ─── Main ─── -->
+    <main class="main">
+
+        <!-- ─── Mode Switcher ─── -->
+        <div class="mode-switcher">
+            <button class="mode-btn active" data-mode="movie-crawl" onclick="switchMode('movie-crawl')">
+                🎬 Crawl Site
+            </button>
+            <button class="mode-btn" data-mode="movie-search" onclick="switchMode('movie-search')">
+                🔍 Search Movie
+            </button>
+            <button class="mode-btn" data-mode="generic" onclick="switchMode('generic')">
+                🕷️ Generic Crawler
+            </button>
+        </div>
+
+        <!-- ─── Input Section ─── -->
+        <section class="input-section">
+            <div class="input-card glass">
+                <div class="input-glow"></div>
+
+                <!-- Movie Crawl Mode -->
+                <div id="movieCrawlMode">
+                    <h2 class="input-title">
+                        <span class="input-icon">🎬</span>
+                        Crawl Movie/Torrent Site
+                    </h2>
+                    <p class="input-desc">Enter any torrent or movie download site URL. The crawler will extract all magnet links, torrent files, and download links.</p>
+                    <div class="input-row">
+                        <div class="url-input-wrap">
+                            <span class="url-prefix">🌐</span>
+                            <input type="text" id="urlInput" class="url-input" placeholder="Paste torrent/movie site URL here..." autocomplete="off">
+                        </div>
+                        <button class="btn btn-primary" id="crawlBtn" onclick="startMovieCrawl()">
+                            <span class="btn-icon">🚀</span>
+                            <span class="btn-text">Crawl Links</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Movie Search Mode -->
+                <div id="movieSearchMode" style="display:none;">
+                    <h2 class="input-title">
+                        <span class="input-icon">🔍</span>
+                        Search Movie Across Torrents
+                    </h2>
+                    <p class="input-desc">Enter a movie name and we'll search across 1337x, YTS, TorrentGalaxy, Piratebay, EZTV, LimeTorrents, and more.</p>
+                    <div class="input-row">
+                        <div class="url-input-wrap">
+                            <span class="url-prefix">🎥</span>
+                            <input type="text" id="searchInput" class="url-input" placeholder="Enter movie name... e.g. Inception 2010" autocomplete="off">
+                        </div>
+                        <button class="btn btn-primary" id="searchBtn" onclick="startMovieSearch()">
+                            <span class="btn-icon">🔍</span>
+                            <span class="btn-text">Search All</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generic Mode -->
+                <div id="genericMode" style="display:none;">
+                    <h2 class="input-title">
+                        <span class="input-icon">🕷️</span>
+                        Generic Link Crawler
+                    </h2>
+                    <p class="input-desc">Extract all links from any website — internal, external, JS-embedded, media, and more.</p>
+                    <div class="input-row">
+                        <div class="url-input-wrap">
+                            <span class="url-prefix">https://</span>
+                            <input type="text" id="genericUrlInput" class="url-input" placeholder="Enter any website URL..." autocomplete="off">
+                        </div>
+                        <button class="btn btn-primary" id="genericBtn" onclick="startGenericCrawl()">
+                            <span class="btn-icon">🚀</span>
+                            <span class="btn-text">Launch Crawl</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advanced Options (shared) -->
+                <div class="options-toggle" onclick="toggleOptions()">
+                    <span>⚙️ Advanced Options</span>
+                    <span class="chevron" id="chevron">▼</span>
+                </div>
+                <div class="options-panel" id="optionsPanel">
+                    <div class="option-grid">
+                        <div class="option-item">
+                            <label>Max Depth</label>
+                            <input type="number" id="optDepth" value="2" min="0" max="10" class="opt-input">
+                        </div>
+                        <div class="option-item">
+                            <label>Concurrency</label>
+                            <input type="number" id="optConcurrency" value="3" min="1" max="10" class="opt-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Results ─── -->
+        <section class="results-section" id="resultsSection" style="display:none;">
+
+            <div class="status-bar glass" id="statusBar">
+                <div class="status-info">
+                    <div class="status-indicator" id="statusIndicator">
+                        <div class="pulse"></div>
+                    </div>
+                    <span class="status-text" id="statusText">Crawling...</span>
+                </div>
+                <div class="status-timer" id="statusTimer">00:00</div>
+            </div>
+
+            <!-- Tab Bar -->
+            <div class="tab-bar">
+                <button class="tab active" data-tab="movies" onclick="switchTab('movies')">🎬 Movies</button>
+                <button class="tab" data-tab="feed" onclick="switchTab('feed')">📡 Live Feed</button>
+                <button class="tab" data-tab="magnets" onclick="switchTab('magnets')">🧲 Magnets</button>
+                <button class="tab" data-tab="torrents" onclick="switchTab('torrents')">📦 Torrents</button>
+                <button class="tab" data-tab="direct" onclick="switchTab('direct')">⬇️ Direct</button>
+                <button class="tab" data-tab="all" onclick="switchTab('all')">🔗 All Links</button>
+            </div>
+
+            <!-- Links Container -->
+            <div class="links-container glass" id="linksContainer">
+                <div class="links-list" id="linksList">
+                    <div class="empty-state">
+                        <div class="empty-icon">🎬</div>
+                        <p>Download links will appear here as they are discovered...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export -->
+            <div class="export-bar" id="exportBar" style="display:none;">
+                <button class="btn btn-secondary" onclick="exportJSON()">📄 Export JSON</button>
+                <button class="btn btn-secondary" onclick="exportCSV()">📊 Export CSV</button>
+                <button class="btn btn-secondary" onclick="copyMagnets()">🧲 Copy Magnets</button>
+                <button class="btn btn-secondary" onclick="copyAll()">📋 Copy All Links</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

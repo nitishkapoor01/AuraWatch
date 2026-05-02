@@ -1,0 +1,31 @@
+{
+  "name": "mega-scrapper",
+  "version": "1.0.0",
+  "description": "Powerful web crawler & link scraper with short-link resolution",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js",
+    "crawl": "node scraper.js",
+    "server": "node server.js"
+  },
+  "keywords": [
+    "scraper",
+    "crawler",
+    "links",
+    "shortlinks"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.15.2",
+    "chalk": "^4.1.2",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "express": "^4.22.1",
+    "p-limit": "^3.1.0",
+    "playwright": "^1.59.1",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}

@@ -1,0 +1,386 @@
+.topNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  background-color: transparent;
+  gap: 24px;
+  
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0; 
+  z-index: 1000;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+  pointer-events: none; /* Let clicks pass through where there is no content */
+}
+
+/* Make sure elements inside capture clicks */
+.branding, .navActions, .searchContainer, .iconButton, .userProfile {
+  pointer-events: auto;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto; /* Always push to the right */
+  padding-right: 20px;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+}
+
+.profileSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid transparent;
+}
+
+.avatarCircle:hover {
+  transform: scale(1.1);
+  border-color: white;
+}
+
+.logoutBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.logoutBtn[data-title]::after {
+  content: attr(data-title);
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
+  z-index: 100;
+}
+
+.logoutBtn[data-title]:hover::after {
+  opacity: 1;
+  bottom: -45px;
+}
+
+.logoutBtn:hover {
+  background: #e50914;
+  transform: scale(1.05);
+}
+
+.loginBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #e50914;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.loginBtn:hover {
+  background: #b20710;
+}
+
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Even smaller gap */
+  cursor: pointer;
+  padding-left: 0;
+  margin-left: -5px;
+}
+
+.brandLogo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.3));
+}
+
+.brandName {
+  color: #e50914;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  margin-left: -5px; /* Pull text closer to logo */
+  margin-top: -10px; 
+}
+
+.watchText {
+  color: #fff;
+}
+
+.searchContainer {
+  position: relative;
+  width: 300px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 16px 10px 40px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.searchInput:focus {
+  border-color: var(--accent-primary);
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  transition: background-color 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.iconButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Search Suggestions Dropdown */
+.suggestionsContainer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin-top: 8px;
+  background-color: #141414;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+.suggestionItem:last-child {
+  border-bottom: none;
+}
+
+.suggestionItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.suggestionImage {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.suggestionInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestionTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.suggestionMeta {
+  font-size: 12px;
+  color: #a0a0a0;
+  margin-top: 4px;
+}
+
+/* 📱 MOBILE (≤768px) */
+@media (max-width: 768px) {
+  .topNav {
+    left: 0;
+    padding: 8px 12px;
+    gap: 8px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
+  }
+
+  .brandLogo {
+    height: 30px;
+  }
+
+  .brandName {
+    display: block;
+    font-size: 16px;
+    letter-spacing: 1px;
+    margin-left: -2px;
+    margin-top: -2px;
+  }
+
+  .searchContainer {
+    width: 140px;
+  }
+
+  .searchInput {
+    padding: 8px 10px 8px 30px;
+    font-size: 13px;
+  }
+
+  .navActions {
+    gap: 8px;
+    padding-right: 0;
+  }
+
+  .loginBtn {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+}
+
+/* 📱 SMALL PHONE (≤480px) */
+@media (max-width: 480px) {
+  .topNav {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .brandName {
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .brandLogo {
+    height: 26px;
+  }
+
+  .searchContainer {
+    width: 110px;
+  }
+
+  .searchInput {
+    padding: 7px 8px 7px 28px;
+    font-size: 12px;
+  }
+
+  .loginBtn span {
+    display: none; /* Show only icon on very small phones */
+  }
+
+  .loginBtn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* 📺 TV / LARGE SCREENS (≥1440px) */
+@media (min-width: 1440px) {
+  .topNav {
+    padding: 10px 20px;
+  }
+
+  .brandLogo {
+    height: 72px;
+  }
+
+  .brandName {
+    font-size: 28px;
+    letter-spacing: 4px;
+  }
+
+  .searchContainer {
+    width: 420px;
+  }
+
+  .searchInput {
+    padding: 14px 20px 14px 48px;
+    font-size: 16px;
+    border-radius: 28px;
+  }
+
+  .loginBtn {
+    padding: 10px 22px;
+    font-size: 16px;
+  }
+
+  .logoutBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .avatarCircle {
+    width: 40px;
+    height: 40px;
+    font-size: 17px;
+  }
+}
+

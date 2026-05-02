@@ -1,0 +1,4571 @@
+{
+  "nodes": [
+    {
+      "id": "backend_db_js",
+      "label": "db.js",
+      "file_type": "code",
+      "source_file": "backend\\db.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_server_js",
+      "label": "server.js",
+      "file_type": "code",
+      "source_file": "backend\\server.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_data_mockmovies_js",
+      "label": "mockMovies.js",
+      "file_type": "code",
+      "source_file": "backend\\data\\mockMovies.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_middleware_auth_js",
+      "label": "auth.js",
+      "file_type": "code",
+      "source_file": "backend\\middleware\\auth.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "auth_authmiddleware",
+      "label": "authMiddleware()",
+      "file_type": "code",
+      "source_file": "backend\\middleware\\auth.js",
+      "source_location": "L5"
+    },
+    {
+      "id": "auth_isadmin",
+      "label": "isAdmin()",
+      "file_type": "code",
+      "source_file": "backend\\middleware\\auth.js",
+      "source_location": "L23"
+    },
+    {
+      "id": "backend_routes_admin_js",
+      "label": "admin.js",
+      "file_type": "code",
+      "source_file": "backend\\routes\\admin.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_routes_auth_js",
+      "label": "auth.js",
+      "file_type": "code",
+      "source_file": "backend\\routes\\auth.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "auth_normalizeanswer",
+      "label": "normalizeAnswer()",
+      "file_type": "code",
+      "source_file": "backend\\routes\\auth.js",
+      "source_location": "L14"
+    },
+    {
+      "id": "backend_routes_favorites_js",
+      "label": "favorites.js",
+      "file_type": "code",
+      "source_file": "backend\\routes\\favorites.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_routes_movies_js",
+      "label": "movies.js",
+      "file_type": "code",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "movies_getapikey",
+      "label": "getApiKey()",
+      "file_type": "code",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L16"
+    },
+    {
+      "id": "movies_fetchwithretry",
+      "label": "fetchWithRetry()",
+      "file_type": "code",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L26"
+    },
+    {
+      "id": "movies_formatmovie",
+      "label": "formatMovie()",
+      "file_type": "code",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L44"
+    },
+    {
+      "id": "movies_getcachekey",
+      "label": "getCacheKey()",
+      "file_type": "code",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L76"
+    },
+    {
+      "id": "movies_fetchandformat",
+      "label": "fetchAndFormat()",
+      "file_type": "code",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L86"
+    },
+    {
+      "id": "movies_revalidate",
+      "label": "revalidate()",
+      "file_type": "code",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L107"
+    },
+    {
+      "id": "backend_routes_tracking_js",
+      "label": "tracking.js",
+      "file_type": "code",
+      "source_file": "backend\\routes\\tracking.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_routes_watchhistory_js",
+      "label": "watchHistory.js",
+      "file_type": "code",
+      "source_file": "backend\\routes\\watchHistory.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_utils_email_js",
+      "label": "email.js",
+      "file_type": "code",
+      "source_file": "backend\\utils\\email.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "email_sendotp",
+      "label": "sendOTP()",
+      "file_type": "code",
+      "source_file": "backend\\utils\\email.js",
+      "source_location": "L12"
+    },
+    {
+      "id": "frontend_eslint_config_js",
+      "label": "eslint.config.js",
+      "file_type": "code",
+      "source_file": "frontend\\eslint.config.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_vite_config_js",
+      "label": "vite.config.js",
+      "file_type": "code",
+      "source_file": "frontend\\vite.config.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_app_jsx",
+      "label": "App.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_app",
+      "label": "App()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "frontend_src_main_jsx",
+      "label": "main.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_row_jsx",
+      "label": "Row.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "row_row",
+      "label": "Row()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "frontend_src_components_layout_announcementbanner_jsx",
+      "label": "AnnouncementBanner.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\layout\\AnnouncementBanner.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "announcementbanner_announcementbanner",
+      "label": "AnnouncementBanner()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\layout\\AnnouncementBanner.jsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "frontend_src_components_layout_sidebar_jsx",
+      "label": "Sidebar.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "sidebar_sidebar",
+      "label": "Sidebar()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "frontend_src_components_layout_topnav_jsx",
+      "label": "TopNav.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "topnav_topnav",
+      "label": "TopNav()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "frontend_src_components_profile_profilemodal_jsx",
+      "label": "ProfileModal.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "profilemodal_profilemodal",
+      "label": "ProfileModal()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "frontend_src_context_authcontext_jsx",
+      "label": "AuthContext.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\context\\AuthContext.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "authcontext_authprovider",
+      "label": "AuthProvider()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\context\\AuthContext.jsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "authcontext_useauth",
+      "label": "useAuth()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\context\\AuthContext.jsx",
+      "source_location": "L181"
+    },
+    {
+      "id": "frontend_src_context_themecontext_jsx",
+      "label": "ThemeContext.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\context\\ThemeContext.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "themecontext_themeprovider",
+      "label": "ThemeProvider()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\context\\ThemeContext.jsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "frontend_src_pages_admindashboard_jsx",
+      "label": "AdminDashboard.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "admindashboard_admindashboard",
+      "label": "AdminDashboard()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "frontend_src_pages_category_jsx",
+      "label": "Category.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Category.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "category_category",
+      "label": "Category()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Category.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "frontend_src_pages_home_jsx",
+      "label": "Home.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "home_home",
+      "label": "Home()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "frontend_src_pages_login_jsx",
+      "label": "Login.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "login_login",
+      "label": "Login()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "frontend_src_pages_moviedetail_jsx",
+      "label": "MovieDetail.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "moviedetail_istvtype",
+      "label": "isTVType()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "moviedetail_extractlanguage",
+      "label": "extractLanguage()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "moviedetail_moviedetail",
+      "label": "MovieDetail()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "frontend_src_pages_mylist_jsx",
+      "label": "MyList.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "mylist_mylist",
+      "label": "MyList()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "frontend_src_pages_player_jsx",
+      "label": "Player.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Player.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "player_player",
+      "label": "Player()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Player.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "frontend_src_pages_search_jsx",
+      "label": "Search.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Search.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "search_search",
+      "label": "Search()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\Search.jsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "frontend_src_pages_watchhistory_jsx",
+      "label": "WatchHistory.jsx",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "watchhistory_watchhistory",
+      "label": "WatchHistory()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "frontend_src_utils_api_js",
+      "label": "api.js",
+      "file_type": "code",
+      "source_file": "frontend\\src\\utils\\api.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "api_fetchwithcache",
+      "label": "fetchWithCache()",
+      "file_type": "code",
+      "source_file": "frontend\\src\\utils\\api.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "scrapper_crawler_js",
+      "label": "crawler.js",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "crawler_megacrawler",
+      "label": "MegaCrawler",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L8"
+    },
+    {
+      "id": "crawler_megacrawler_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L9"
+    },
+    {
+      "id": "crawler_megacrawler_findsystemchrome",
+      "label": "._findSystemChrome()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L29"
+    },
+    {
+      "id": "crawler_megacrawler_crawl",
+      "label": ".crawl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L52"
+    },
+    {
+      "id": "crawler_megacrawler_processurl",
+      "label": "._processUrl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L130"
+    },
+    {
+      "id": "crawler_megacrawler_drainqueue",
+      "label": "._drainQueue()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L208"
+    },
+    {
+      "id": "crawler_megacrawler_autoscroll",
+      "label": "._autoScroll()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L219"
+    },
+    {
+      "id": "crawler_megacrawler_extractlinks",
+      "label": "._extractLinks()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L243"
+    },
+    {
+      "id": "crawler_megacrawler_resolveurl",
+      "label": "._resolveUrl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L347"
+    },
+    {
+      "id": "crawler_megacrawler_getlinktype",
+      "label": "._getLinkType()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L367"
+    },
+    {
+      "id": "crawler_megacrawler_isvalidurl",
+      "label": "._isValidUrl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L380"
+    },
+    {
+      "id": "crawler_megacrawler_isblockeddomain",
+      "label": "._isBlockedDomain()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L392"
+    },
+    {
+      "id": "crawler_megacrawler_resolveallshortlinks",
+      "label": "._resolveAllShortLinks()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L404"
+    },
+    {
+      "id": "crawler_megacrawler_buildresults",
+      "label": "._buildResults()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L428"
+    },
+    {
+      "id": "crawler_megacrawler_saveresults",
+      "label": "._saveResults()",
+      "file_type": "code",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L454"
+    },
+    {
+      "id": "scrapper_moviecrawler_js",
+      "label": "movieCrawler.js",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "moviecrawler_moviecrawler",
+      "label": "MovieCrawler",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L19"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L20"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_findsystemchrome",
+      "label": "._findSystemChrome()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L43"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_launchbrowser",
+      "label": "._launchBrowser()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L63"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_crawl",
+      "label": ".crawl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L101"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_searchmovie",
+      "label": ".searchMovie()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L139"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_searchexactmovie",
+      "label": ".searchExactMovie()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L195"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_findexactmatch",
+      "label": "._findExactMatch()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L264"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_buildsearchurls",
+      "label": "._buildSearchUrls()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L343"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_processpage",
+      "label": "._processPage()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L370"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_extractmoviedata",
+      "label": "._extractMovieData()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L492"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_extractnamefrommagnet",
+      "label": "._extractNameFromMagnet()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L656"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_detectquality",
+      "label": "._detectQuality()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L667"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_findnearbytext",
+      "label": "._findNearbyText()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L690"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_resolveurl",
+      "label": "._resolveUrl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L714"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_resolveshortlinkwithbrowser",
+      "label": "._resolveShortlinkWithBrowser()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L729"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_autoscroll",
+      "label": "._autoScroll()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L821"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_drainqueue",
+      "label": "._drainQueue()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L843"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_printstats",
+      "label": "._printStats()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L853"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_extractmovietitle",
+      "label": "._extractMovieTitle()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L876"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_buildresults",
+      "label": "._buildResults()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L897"
+    },
+    {
+      "id": "moviecrawler_moviecrawler_saveresults",
+      "label": "._saveResults()",
+      "file_type": "code",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L957"
+    },
+    {
+      "id": "scrapper_scraper_js",
+      "label": "scraper.js",
+      "file_type": "code",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "scraper_parseargs",
+      "label": "parseArgs()",
+      "file_type": "code",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L10"
+    },
+    {
+      "id": "scraper_showhelp",
+      "label": "showHelp()",
+      "file_type": "code",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L35"
+    },
+    {
+      "id": "scraper_interactivemode",
+      "label": "interactiveMode()",
+      "file_type": "code",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L58"
+    },
+    {
+      "id": "scraper_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L97"
+    },
+    {
+      "id": "scrapper_server_js",
+      "label": "server.js",
+      "file_type": "code",
+      "source_file": "Scrapper\\server.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_matchquality",
+      "label": "matchQuality()",
+      "file_type": "code",
+      "source_file": "Scrapper\\server.js",
+      "source_location": "L188"
+    },
+    {
+      "id": "scrapper_public_app_js",
+      "label": "app.js",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_switchmode",
+      "label": "switchMode()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L34"
+    },
+    {
+      "id": "app_toggleoptions",
+      "label": "toggleOptions()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L44"
+    },
+    {
+      "id": "app_startmoviecrawl",
+      "label": "startMovieCrawl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L52"
+    },
+    {
+      "id": "app_startmoviesearch",
+      "label": "startMovieSearch()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L89"
+    },
+    {
+      "id": "app_startgenericcrawl",
+      "label": "startGenericCrawl()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L125"
+    },
+    {
+      "id": "app_showresults",
+      "label": "showResults()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L164"
+    },
+    {
+      "id": "app_startpolling",
+      "label": "startPolling()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L172"
+    },
+    {
+      "id": "app_starttimer",
+      "label": "startTimer()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L225"
+    },
+    {
+      "id": "app_stoptimer",
+      "label": "stopTimer()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L236"
+    },
+    {
+      "id": "app_switchtab",
+      "label": "switchTab()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L239"
+    },
+    {
+      "id": "app_renderlinks",
+      "label": "renderLinks()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L247"
+    },
+    {
+      "id": "app_rendermoviesgrouped",
+      "label": "renderMoviesGrouped()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L283"
+    },
+    {
+      "id": "app_rendermovielink",
+      "label": "renderMovieLink()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L358"
+    },
+    {
+      "id": "app_rendergenericlink",
+      "label": "renderGenericLink()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L374"
+    },
+    {
+      "id": "app_getqualityclass",
+      "label": "getQualityClass()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L387"
+    },
+    {
+      "id": "app_escapehtml",
+      "label": "escapeHtml()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L397"
+    },
+    {
+      "id": "app_escapejs",
+      "label": "escapeJs()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L402"
+    },
+    {
+      "id": "app_copylink",
+      "label": "copyLink()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L407"
+    },
+    {
+      "id": "app_copymagnets",
+      "label": "copyMagnets()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L411"
+    },
+    {
+      "id": "app_copyall",
+      "label": "copyAll()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L417"
+    },
+    {
+      "id": "app_exportjson",
+      "label": "exportJSON()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L422"
+    },
+    {
+      "id": "app_exportcsv",
+      "label": "exportCSV()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L428"
+    },
+    {
+      "id": "app_downloadblob",
+      "label": "downloadBlob()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L438"
+    },
+    {
+      "id": "app_showtoast",
+      "label": "showToast()",
+      "file_type": "code",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L446"
+    },
+    {
+      "id": "scrapper_utils_logger_js",
+      "label": "logger.js",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "logger_logger",
+      "label": "Logger",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L26"
+    },
+    {
+      "id": "logger_logger_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L27"
+    },
+    {
+      "id": "logger_logger_timestamp",
+      "label": "._timestamp()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L31"
+    },
+    {
+      "id": "logger_logger_banner",
+      "label": ".banner()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L36"
+    },
+    {
+      "id": "logger_logger_info",
+      "label": ".info()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L45"
+    },
+    {
+      "id": "logger_logger_success",
+      "label": ".success()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L49"
+    },
+    {
+      "id": "logger_logger_warn",
+      "label": ".warn()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L53"
+    },
+    {
+      "id": "logger_logger_error",
+      "label": ".error()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L57"
+    },
+    {
+      "id": "logger_logger_link",
+      "label": ".link()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L61"
+    },
+    {
+      "id": "logger_logger_crawling",
+      "label": ".crawling()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L75"
+    },
+    {
+      "id": "logger_logger_stats",
+      "label": ".stats()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L80"
+    },
+    {
+      "id": "logger_logger_saved",
+      "label": ".saved()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L94"
+    },
+    {
+      "id": "logger_logger_done",
+      "label": ".done()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L99"
+    },
+    {
+      "id": "scrapper_utils_resolver_js",
+      "label": "resolver.js",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "resolver_linkresolver",
+      "label": "LinkResolver",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "resolver_linkresolver_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L4"
+    },
+    {
+      "id": "resolver_linkresolver_resolve",
+      "label": ".resolve()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L13"
+    },
+    {
+      "id": "resolver_linkresolver_isshortlink",
+      "label": ".isShortLink()",
+      "file_type": "code",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L55"
+    },
+    {
+      "id": "db_db",
+      "label": "Database Connection",
+      "file_type": "code",
+      "source_file": "backend/db.js"
+    },
+    {
+      "id": "server_express",
+      "label": "Express Server",
+      "file_type": "code",
+      "source_file": "backend/server.js"
+    },
+    {
+      "id": "mockmovies_movies",
+      "label": "Mock Movie Data",
+      "file_type": "code",
+      "source_file": "backend/data/mockMovies.js"
+    },
+    {
+      "id": "auth_middleware",
+      "label": "Auth Middleware",
+      "file_type": "code",
+      "source_file": "backend/middleware/auth.js"
+    },
+    {
+      "id": "admin_routes",
+      "label": "Admin Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/admin.js"
+    },
+    {
+      "id": "auth_routes",
+      "label": "Auth Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/auth.js"
+    },
+    {
+      "id": "favorites_routes",
+      "label": "Favorites Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/favorites.js"
+    },
+    {
+      "id": "movies_routes",
+      "label": "Movies Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/movies.js"
+    },
+    {
+      "id": "tracking_routes",
+      "label": "Tracking Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/tracking.js"
+    },
+    {
+      "id": "watchhistory_routes",
+      "label": "Watch History Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/watchHistory.js"
+    },
+    {
+      "id": "email_utils",
+      "label": "Email Utilities",
+      "file_type": "code",
+      "source_file": "backend/utils/email.js"
+    },
+    {
+      "id": "app_jsx",
+      "label": "App Component",
+      "file_type": "code",
+      "source_file": "frontend/src/App.jsx"
+    },
+    {
+      "id": "main_jsx",
+      "label": "Main Entry Point",
+      "file_type": "code",
+      "source_file": "frontend/src/main.jsx"
+    },
+    {
+      "id": "row_jsx",
+      "label": "Movie Row Component",
+      "file_type": "code",
+      "source_file": "frontend/src/components/Row.jsx"
+    },
+    {
+      "id": "announcementbanner_jsx",
+      "label": "Announcement Banner",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/AnnouncementBanner.jsx"
+    },
+    {
+      "id": "sidebar_jsx",
+      "label": "Sidebar Component",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/Sidebar.jsx"
+    },
+    {
+      "id": "topnav_jsx",
+      "label": "Top Navigation",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/TopNav.jsx"
+    },
+    {
+      "id": "profilemodal_jsx",
+      "label": "Profile Modal",
+      "file_type": "code",
+      "source_file": "frontend/src/components/profile/ProfileModal.jsx"
+    },
+    {
+      "id": "auth_context",
+      "label": "Authentication Context",
+      "file_type": "code",
+      "source_file": "frontend/src/context/AuthContext.jsx"
+    },
+    {
+      "id": "theme_context",
+      "label": "Theme Context",
+      "file_type": "code",
+      "source_file": "frontend/src/context/ThemeContext.jsx"
+    },
+    {
+      "id": "admindashboard_page",
+      "label": "Admin Dashboard",
+      "file_type": "code",
+      "source_file": "frontend/src/pages/AdminDashboard.jsx"
+    },
+    {
+      "id": "home_page",
+      "label": "Home Page",
+      "file_type": "code",
+      "source_file": "frontend/src/pages/Home.jsx"
+    },
+    {
+      "id": "moviedetail_page",
+      "label": "Movie Detail Page",
+      "file_type": "code",
+      "source_file": "frontend/src/pages/MovieDetail.jsx"
+    },
+    {
+      "id": "api_utils_frontend",
+      "label": "Frontend API Utils",
+      "file_type": "code",
+      "source_file": "frontend/src/utils/api.js"
+    },
+    {
+      "id": "moviecrawler_scrapper",
+      "label": "Movie Crawler Scrapper",
+      "file_type": "code",
+      "source_file": "Scrapper/movieCrawler.js"
+    },
+    {
+      "id": "resolver_utils",
+      "label": "Link Resolver Utilities",
+      "file_type": "code",
+      "source_file": "Scrapper/utils/resolver.js"
+    },
+    {
+      "id": "logger_utils",
+      "label": "Scrapper Logger",
+      "file_type": "code",
+      "source_file": "Scrapper/utils/logger.js"
+    },
+    {
+      "id": "index_html",
+      "label": "Index HTML",
+      "file_type": "document",
+      "source_file": "frontend/index.html"
+    },
+    {
+      "id": "readme_frontend",
+      "label": "Frontend README",
+      "file_type": "document",
+      "source_file": "frontend/README.md"
+    },
+    {
+      "id": "movie_links_txt",
+      "label": "Extracted Movie Links",
+      "file_type": "document",
+      "source_file": "Scrapper/movie_links.txt"
+    },
+    {
+      "id": "scrapper_ui_html",
+      "label": "Scrapper UI",
+      "file_type": "document",
+      "source_file": "Scrapper/public/index.html"
+    },
+    {
+      "id": "hero_png",
+      "label": "Hero Banner Image",
+      "file_type": "image",
+      "source_file": "frontend/src/assets/hero.png"
+    },
+    {
+      "id": "logo_png",
+      "label": "AuraMovie Logo",
+      "file_type": "image",
+      "source_file": "frontend/public/AuraWatch Logo.png"
+    }
+  ],
+  "edges": [
+    {
+      "source": "backend_middleware_auth_js",
+      "target": "auth_authmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\middleware\\auth.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_middleware_auth_js",
+      "target": "auth_isadmin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\middleware\\auth.js",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_routes_auth_js",
+      "target": "auth_normalizeanswer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\auth.js",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_routes_movies_js",
+      "target": "movies_getapikey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_routes_movies_js",
+      "target": "movies_fetchwithretry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_routes_movies_js",
+      "target": "movies_formatmovie",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_routes_movies_js",
+      "target": "movies_getcachekey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_routes_movies_js",
+      "target": "movies_fetchandformat",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_routes_movies_js",
+      "target": "movies_revalidate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "movies_fetchandformat",
+      "target": "movies_getcachekey",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "movies_fetchandformat",
+      "target": "movies_revalidate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L99",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_utils_email_js",
+      "target": "email_sendotp",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend\\utils\\email.js",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_eslint_config_js",
+      "target": "js",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\eslint.config.js",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_eslint_config_js",
+      "target": "globals",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\eslint.config.js",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_eslint_config_js",
+      "target": "eslint_plugin_react_hooks",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\eslint.config.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_eslint_config_js",
+      "target": "eslint_plugin_react_refresh",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\eslint.config.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_eslint_config_js",
+      "target": "config",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\eslint.config.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_vite_config_js",
+      "target": "vite",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\vite.config.js",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_vite_config_js",
+      "target": "plugin_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\vite.config.js",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_components_layout_sidebar",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_components_layout_topnav",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_components_layout_announcementbanner",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_home",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_search",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_moviedetail",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_player",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_category",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_login",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_mylist",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_watchhistory",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_pages_admindashboard",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "frontend_src_app_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_app_jsx",
+      "target": "app_app",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_main_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_main_jsx",
+      "target": "client",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_main_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_main_jsx",
+      "target": "frontend_src_app_tsx",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_main_jsx",
+      "target": "frontend_src_index_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_main_jsx",
+      "target": "frontend_src_context_themecontext_tsx",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_main_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\main.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_row_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_row_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_row_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_row_jsx",
+      "target": "frontend_src_utils_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_row_jsx",
+      "target": "frontend_src_pages_home_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_row_jsx",
+      "target": "row_row",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\Row.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_announcementbanner_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\AnnouncementBanner.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_announcementbanner_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\AnnouncementBanner.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_announcementbanner_jsx",
+      "target": "frontend_src_components_layout_announcementbanner_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\AnnouncementBanner.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_announcementbanner_jsx",
+      "target": "announcementbanner_announcementbanner",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\AnnouncementBanner.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_sidebar_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_sidebar_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_sidebar_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_sidebar_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_sidebar_jsx",
+      "target": "frontend_src_components_layout_sidebar_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_sidebar_jsx",
+      "target": "sidebar_sidebar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_topnav_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_topnav_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_topnav_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_topnav_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_topnav_jsx",
+      "target": "frontend_src_components_profile_profilemodal",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_topnav_jsx",
+      "target": "frontend_src_components_layout_topnav_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_layout_topnav_jsx",
+      "target": "topnav_topnav",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_profile_profilemodal_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_profile_profilemodal_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_profile_profilemodal_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_profile_profilemodal_jsx",
+      "target": "frontend_src_components_profile_profilemodal_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_profile_profilemodal_jsx",
+      "target": "profilemodal_profilemodal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_context_authcontext_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\context\\AuthContext.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_context_authcontext_jsx",
+      "target": "authcontext_authprovider",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\context\\AuthContext.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_context_authcontext_jsx",
+      "target": "authcontext_useauth",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\context\\AuthContext.jsx",
+      "source_location": "L181",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_context_themecontext_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\context\\ThemeContext.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_context_themecontext_jsx",
+      "target": "themecontext_themeprovider",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\context\\ThemeContext.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_admindashboard_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_admindashboard_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_admindashboard_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_admindashboard_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_admindashboard_jsx",
+      "target": "frontend_src_pages_admindashboard_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_admindashboard_jsx",
+      "target": "admindashboard_admindashboard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_category_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Category.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_category_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Category.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_category_jsx",
+      "target": "frontend_src_pages_search_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Category.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_category_jsx",
+      "target": "frontend_src_pages_home_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Category.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_category_jsx",
+      "target": "category_category",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Category.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_home_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_home_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_home_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_home_jsx",
+      "target": "frontend_src_utils_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_home_jsx",
+      "target": "frontend_src_pages_home_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_home_jsx",
+      "target": "frontend_src_components_row",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_home_jsx",
+      "target": "home_home",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Home.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_login_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_login_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_login_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_login_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_login_jsx",
+      "target": "frontend_src_pages_login_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_login_jsx",
+      "target": "login_login",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "frontend_src_pages_moviedetail_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "frontend_src_components_row",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "frontend_src_utils_api",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "moviedetail_istvtype",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "moviedetail_extractlanguage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_moviedetail_jsx",
+      "target": "moviedetail_moviedetail",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "moviedetail_moviedetail",
+      "target": "moviedetail_istvtype",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_mylist_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_mylist_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_mylist_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_mylist_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_mylist_jsx",
+      "target": "frontend_src_pages_mylist_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_mylist_jsx",
+      "target": "mylist_mylist",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_player_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Player.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_player_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Player.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_player_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Player.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_player_jsx",
+      "target": "frontend_src_pages_player_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Player.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_player_jsx",
+      "target": "player_player",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Player.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_search_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Search.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_search_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Search.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_search_jsx",
+      "target": "frontend_src_pages_search_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Search.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_search_jsx",
+      "target": "frontend_src_pages_home_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Search.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_search_jsx",
+      "target": "search_search",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\Search.jsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_watchhistory_jsx",
+      "target": "react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_watchhistory_jsx",
+      "target": "react_router_dom",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_watchhistory_jsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_watchhistory_jsx",
+      "target": "frontend_src_context_authcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_watchhistory_jsx",
+      "target": "frontend_src_pages_watchhistory_module_css",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_pages_watchhistory_jsx",
+      "target": "watchhistory_watchhistory",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_utils_api_js",
+      "target": "api_fetchwithcache",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend\\src\\utils\\api.js",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_crawler_js",
+      "target": "crawler_megacrawler",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_findsystemchrome",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_crawl",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_processurl",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_drainqueue",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L208",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_autoscroll",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L219",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_extractlinks",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L243",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_resolveurl",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L347",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_getlinktype",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L367",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_isvalidurl",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L380",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_isblockeddomain",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L392",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_resolveallshortlinks",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L404",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_buildresults",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L428",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler",
+      "target": "crawler_megacrawler_saveresults",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L454",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "crawler_megacrawler_findsystemchrome",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "crawler_megacrawler_processurl",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "crawler_megacrawler_drainqueue",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "crawler_megacrawler_resolveallshortlinks",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "crawler_megacrawler_buildresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L120",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "crawler_megacrawler_saveresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_processurl",
+      "target": "crawler_megacrawler_isblockeddomain",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L133",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_processurl",
+      "target": "crawler_megacrawler_autoscroll",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_processurl",
+      "target": "crawler_megacrawler_extractlinks",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L170",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_extractlinks",
+      "target": "crawler_megacrawler_isvalidurl",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L309",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_moviecrawler_js",
+      "target": "moviecrawler_moviecrawler",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_findsystemchrome",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_launchbrowser",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_crawl",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_searchmovie",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_searchexactmovie",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L195",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_findexactmatch",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L264",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_buildsearchurls",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L343",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_processpage",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L370",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_extractmoviedata",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L492",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_extractnamefrommagnet",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L656",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_detectquality",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L667",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_findnearbytext",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L690",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_resolveurl",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L714",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_resolveshortlinkwithbrowser",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L729",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_autoscroll",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L821",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_drainqueue",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L843",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_printstats",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L853",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_extractmovietitle",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L876",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_buildresults",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L897",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler",
+      "target": "moviecrawler_moviecrawler_saveresults",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L957",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_launchbrowser",
+      "target": "moviecrawler_moviecrawler_findsystemchrome",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "moviecrawler_moviecrawler_launchbrowser",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "moviecrawler_moviecrawler_processpage",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "moviecrawler_moviecrawler_drainqueue",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "moviecrawler_moviecrawler_printstats",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L127",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "moviecrawler_moviecrawler_buildresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "moviecrawler_moviecrawler_saveresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "moviecrawler_moviecrawler_buildsearchurls",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L144",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "moviecrawler_moviecrawler_launchbrowser",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "moviecrawler_moviecrawler_drainqueue",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "moviecrawler_moviecrawler_printstats",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L177",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "moviecrawler_moviecrawler_buildresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "moviecrawler_moviecrawler_saveresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L180",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "moviecrawler_moviecrawler_buildsearchurls",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "moviecrawler_moviecrawler_launchbrowser",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L213",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "moviecrawler_moviecrawler_drainqueue",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L229",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "moviecrawler_moviecrawler_printstats",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L241",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "moviecrawler_moviecrawler_buildresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L243",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "moviecrawler_moviecrawler_findexactmatch",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L244",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "moviecrawler_moviecrawler_autoscroll",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L412",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "moviecrawler_moviecrawler_extractmoviedata",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L419",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "moviecrawler_moviecrawler_extractnamefrommagnet",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L428",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "moviecrawler_moviecrawler_detectquality",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L430",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "moviecrawler_moviecrawler_resolveshortlinkwithbrowser",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L457",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_extractmoviedata",
+      "target": "moviecrawler_moviecrawler_extractnamefrommagnet",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L530",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_extractmoviedata",
+      "target": "moviecrawler_moviecrawler_detectquality",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L531",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_resolveshortlinkwithbrowser",
+      "target": "moviecrawler_moviecrawler_autoscroll",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L764",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_buildresults",
+      "target": "moviecrawler_moviecrawler_extractmovietitle",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L901",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_scraper_js",
+      "target": "scraper_parseargs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_scraper_js",
+      "target": "scraper_showhelp",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_scraper_js",
+      "target": "scraper_interactivemode",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_scraper_js",
+      "target": "scraper_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L97",
+      "weight": 1.0
+    },
+    {
+      "source": "scraper_parseargs",
+      "target": "scraper_showhelp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "scraper_main",
+      "target": "scraper_parseargs",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "scraper_main",
+      "target": "scraper_interactivemode",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L106",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_server_js",
+      "target": "server_matchquality",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\server.js",
+      "source_location": "L188",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_switchmode",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_toggleoptions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_startmoviecrawl",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_startmoviesearch",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_startgenericcrawl",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L125",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_showresults",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_startpolling",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L172",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_starttimer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L225",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_stoptimer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L236",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_switchtab",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L239",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_renderlinks",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L247",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_rendermoviesgrouped",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L283",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_rendermovielink",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L358",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_rendergenericlink",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L374",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_getqualityclass",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L387",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_escapehtml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L397",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_escapejs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L402",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_copylink",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L407",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_copymagnets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L411",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_copyall",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L417",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_exportjson",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L422",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_exportcsv",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L428",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_downloadblob",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L438",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_public_app_js",
+      "target": "app_showtoast",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L446",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviecrawl",
+      "target": "app_showtoast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviecrawl",
+      "target": "app_showresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviecrawl",
+      "target": "app_startpolling",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviecrawl",
+      "target": "app_starttimer",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviesearch",
+      "target": "app_showtoast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L91",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviesearch",
+      "target": "app_showresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L110",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviesearch",
+      "target": "app_startpolling",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviesearch",
+      "target": "app_starttimer",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startgenericcrawl",
+      "target": "app_showtoast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L127",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startgenericcrawl",
+      "target": "app_showresults",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L149",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startgenericcrawl",
+      "target": "app_startpolling",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startgenericcrawl",
+      "target": "app_starttimer",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "app_showresults",
+      "target": "app_renderlinks",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L169",
+      "weight": 1.0
+    },
+    {
+      "source": "app_switchtab",
+      "target": "app_renderlinks",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L243",
+      "weight": 1.0
+    },
+    {
+      "source": "app_renderlinks",
+      "target": "app_rendermoviesgrouped",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L252",
+      "weight": 1.0
+    },
+    {
+      "source": "app_rendermovielink",
+      "target": "app_getqualityclass",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L361",
+      "weight": 1.0
+    },
+    {
+      "source": "app_rendermovielink",
+      "target": "app_escapehtml",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L362",
+      "weight": 1.0
+    },
+    {
+      "source": "app_rendermovielink",
+      "target": "app_escapejs",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L370",
+      "weight": 1.0
+    },
+    {
+      "source": "app_rendergenericlink",
+      "target": "app_escapehtml",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L379",
+      "weight": 1.0
+    },
+    {
+      "source": "app_copymagnets",
+      "target": "app_showtoast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L413",
+      "weight": 1.0
+    },
+    {
+      "source": "app_exportjson",
+      "target": "app_downloadblob",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L424",
+      "weight": 1.0
+    },
+    {
+      "source": "app_exportjson",
+      "target": "app_showtoast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L425",
+      "weight": 1.0
+    },
+    {
+      "source": "app_exportcsv",
+      "target": "app_downloadblob",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L434",
+      "weight": 1.0
+    },
+    {
+      "source": "app_exportcsv",
+      "target": "app_showtoast",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L435",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_utils_logger_js",
+      "target": "logger_logger",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_timestamp",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_banner",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_info",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_success",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_warn",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_error",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_link",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_crawling",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_stats",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_saved",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger",
+      "target": "logger_logger_done",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L99",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger_info",
+      "target": "logger_logger_timestamp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger_success",
+      "target": "logger_logger_timestamp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger_warn",
+      "target": "logger_logger_timestamp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger_error",
+      "target": "logger_logger_timestamp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger_link",
+      "target": "logger_logger_timestamp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "logger_logger_crawling",
+      "target": "logger_logger_timestamp",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\logger.js",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "scrapper_utils_resolver_js",
+      "target": "resolver_linkresolver",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "resolver_linkresolver",
+      "target": "resolver_linkresolver_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "resolver_linkresolver",
+      "target": "resolver_linkresolver_resolve",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "resolver_linkresolver",
+      "target": "resolver_linkresolver_isshortlink",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Scrapper\\utils\\resolver.js",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "movies_fetchwithretry",
+      "target": "logger_logger_warn",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\routes\\movies.js",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "email_sendotp",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "backend\\utils\\email.js",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "app_app",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\App.jsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "sidebar_sidebar",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\components\\layout\\Sidebar.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "topnav_topnav",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\components\\layout\\TopNav.jsx",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "profilemodal_profilemodal",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\components\\profile\\ProfileModal.jsx",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "admindashboard_admindashboard",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\pages\\AdminDashboard.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "login_login",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\pages\\Login.jsx",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "moviedetail_moviedetail",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\pages\\MovieDetail.jsx",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "mylist_mylist",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\pages\\MyList.jsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "watchhistory_watchhistory",
+      "target": "authcontext_useauth",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\pages\\WatchHistory.jsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "api_fetchwithcache",
+      "target": "logger_logger_warn",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\utils\\api.js",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "api_fetchwithcache",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend\\src\\utils\\api.js",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "logger_logger_banner",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "logger_logger_success",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "logger_logger_warn",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "logger_logger_stats",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_crawl",
+      "target": "logger_logger_done",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L123",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_processurl",
+      "target": "logger_logger_crawling",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L136",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_processurl",
+      "target": "logger_logger_link",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L186",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_processurl",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L196",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_resolveallshortlinks",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L405",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_resolveallshortlinks",
+      "target": "resolver_linkresolver_isshortlink",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L409",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_resolveallshortlinks",
+      "target": "resolver_linkresolver_resolve",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L411",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_resolveallshortlinks",
+      "target": "logger_logger_link",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L416",
+      "weight": 1.0
+    },
+    {
+      "source": "crawler_megacrawler_saveresults",
+      "target": "logger_logger_saved",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\crawler.js",
+      "source_location": "L459",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_launchbrowser",
+      "target": "logger_logger_success",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_launchbrowser",
+      "target": "logger_logger_warn",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "logger_logger_banner",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L104",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_crawl",
+      "target": "logger_logger_done",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L132",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "logger_logger_banner",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L141",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L142",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L169",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchmovie",
+      "target": "logger_logger_done",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L182",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "logger_logger_banner",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L198",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L199",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L232",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_searchexactmovie",
+      "target": "logger_logger_done",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L247",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "logger_logger_crawling",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L375",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L436",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_processpage",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L482",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_resolveshortlinkwithbrowser",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L735",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_resolveshortlinkwithbrowser",
+      "target": "logger_logger_success",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L759",
+      "weight": 1.0
+    },
+    {
+      "source": "moviecrawler_moviecrawler_saveresults",
+      "target": "logger_logger_info",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\movieCrawler.js",
+      "source_location": "L960",
+      "weight": 1.0
+    },
+    {
+      "source": "scraper_interactivemode",
+      "target": "moviecrawler_moviecrawler_crawl",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "scraper_main",
+      "target": "moviecrawler_moviecrawler_crawl",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\scraper.js",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviecrawl",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L81",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startmoviesearch",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "app_startgenericcrawl",
+      "target": "logger_logger_error",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "Scrapper\\public\\app.js",
+      "source_location": "L156",
+      "weight": 1.0
+    },
+    {
+      "source": "server_express",
+      "target": "db_db",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "server_express",
+      "target": "auth_routes",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "server_express",
+      "target": "movies_routes",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "movies_routes",
+      "target": "mockmovies_movies",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "admin_routes",
+      "target": "auth_middleware",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "app_jsx",
+      "target": "sidebar_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "app_jsx",
+      "target": "topnav_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "main_jsx",
+      "target": "app_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "profilemodal_jsx",
+      "target": "email_utils",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8
+    },
+    {
+      "source": "home_page",
+      "target": "auth_context",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "moviedetail_page",
+      "target": "api_utils_frontend",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "moviecrawler_scrapper",
+      "target": "resolver_utils",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "moviecrawler_scrapper",
+      "target": "logger_utils",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "admindashboard_page",
+      "target": "auth_context",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "api_utils_frontend",
+      "target": "auth_context",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7
+    },
+    {
+      "source": "scrapper_ui_html",
+      "target": "moviecrawler_scrapper",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9
+    },
+    {
+      "source": "readme_frontend",
+      "target": "app_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "home_page",
+      "target": "hero_png",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95
+    },
+    {
+      "source": "topnav_jsx",
+      "target": "logo_png",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "backend_api",
+      "label": "Backend API Structure",
+      "nodes": [
+        "auth_routes",
+        "movies_routes",
+        "admin_routes",
+        "favorites_routes",
+        "tracking_routes"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9
+    },
+    {
+      "id": "frontend_state_management",
+      "label": "Frontend State Management",
+      "nodes": [
+        "auth_context",
+        "theme_context"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.95
+    },
+    {
+      "id": "scrapper_system",
+      "label": "Scrapper Subsystem",
+      "nodes": [
+        "moviecrawler_scrapper",
+        "resolver_utils",
+        "logger_utils"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9
+    }
+  ],
+  "input_tokens": 4500,
+  "output_tokens": 1400
+}

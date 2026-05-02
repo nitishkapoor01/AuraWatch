@@ -1,0 +1,45 @@
+{
+  "nodes": [
+    {"id": "db_db", "label": "Database Connection", "file_type": "code", "source_file": "backend/db.js"},
+    {"id": "server_express", "label": "Express Server", "file_type": "code", "source_file": "backend/server.js"},
+    {"id": "mockmovies_movies", "label": "Mock Movie Data", "file_type": "code", "source_file": "backend/data/mockMovies.js"},
+    {"id": "auth_middleware", "label": "Auth Middleware", "file_type": "code", "source_file": "backend/middleware/auth.js"},
+    {"id": "admin_routes", "label": "Admin Routes", "file_type": "code", "source_file": "backend/routes/admin.js"},
+    {"id": "auth_routes", "label": "Auth Routes", "file_type": "code", "source_file": "backend/routes/auth.js"},
+    {"id": "favorites_routes", "label": "Favorites Routes", "file_type": "code", "source_file": "backend/routes/favorites.js"},
+    {"id": "movies_routes", "label": "Movies Routes", "file_type": "code", "source_file": "backend/routes/movies.js"},
+    {"id": "tracking_routes", "label": "Tracking Routes", "file_type": "code", "source_file": "backend/routes/tracking.js"},
+    {"id": "watchhistory_routes", "label": "Watch History Routes", "file_type": "code", "source_file": "backend/routes/watchHistory.js"},
+    {"id": "email_utils", "label": "Email Utilities", "file_type": "code", "source_file": "backend/utils/email.js"},
+    {"id": "app_jsx", "label": "App Component", "file_type": "code", "source_file": "frontend/src/App.jsx"},
+    {"id": "main_jsx", "label": "Main Entry Point", "file_type": "code", "source_file": "frontend/src/main.jsx"},
+    {"id": "row_jsx", "label": "Movie Row Component", "file_type": "code", "source_file": "frontend/src/components/Row.jsx"},
+    {"id": "announcementbanner_jsx", "label": "Announcement Banner", "file_type": "code", "source_file": "frontend/src/components/layout/AnnouncementBanner.jsx"},
+    {"id": "sidebar_jsx", "label": "Sidebar Component", "file_type": "code", "source_file": "frontend/src/components/layout/Sidebar.jsx"},
+    {"id": "topnav_jsx", "label": "Top Navigation", "file_type": "code", "source_file": "frontend/src/components/layout/TopNav.jsx"},
+    {"id": "profilemodal_jsx", "label": "Profile Modal", "file_type": "code", "source_file": "frontend/src/components/profile/ProfileModal.jsx"}
+  ],
+  "edges": [
+    {"source": "server_express", "target": "db_db", "relation": "calls", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "server_express", "target": "auth_routes", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "server_express", "target": "movies_routes", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "movies_routes", "target": "mockmovies_movies", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "admin_routes", "target": "auth_middleware", "relation": "calls", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "app_jsx", "target": "sidebar_jsx", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "app_jsx", "target": "topnav_jsx", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "main_jsx", "target": "app_jsx", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0},
+    {"source": "profilemodal_jsx", "target": "email_utils", "relation": "calls", "confidence": "INFERRED", "confidence_score": 0.8}
+  ],
+  "hyperedges": [
+    {
+      "id": "backend_api",
+      "label": "Backend API Structure",
+      "nodes": ["auth_routes", "movies_routes", "admin_routes", "favorites_routes", "tracking_routes"],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9
+    }
+  ],
+  "input_tokens": 1500,
+  "output_tokens": 500
+}

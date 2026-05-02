@@ -1,0 +1,1071 @@
+.detailPage {
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  position: relative;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.backdropContainer {
+  position: relative;
+  width: 100vw;
+  height: 60vh;
+  overflow: hidden;
+}
+
+.backdrop {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  animation: backdropZoom 10s ease-out forwards;
+}
+
+@keyframes backdropZoom {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(0deg, var(--bg-main) 5%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.5) 100%);
+}
+
+.content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  gap: 40px;
+  padding: 0 40px 0 100px; /* 100px left to clear sidebar (80px) + 20px gap */
+  margin-top: -20vh;
+  align-items: flex-start;
+}
+
+.poster {
+  width: 280px;
+  min-width: 280px;
+  height: auto;
+  align-self: flex-start; /* Prevent stretching to match info column height */
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: center center;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  animation: posterPopIn 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+  transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.4s ease;
+  transform-origin: center bottom;
+}
+
+.poster:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 40px rgba(229, 9, 20, 0.2);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: white;
+  padding-bottom: 20px;
+  max-width: 800px;
+  opacity: 0;
+  animation: contentSlideIn 0.8s cubic-bezier(0.2, 1, 0.3, 1) 0.2s forwards;
+}
+
+@keyframes posterPopIn {
+  0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes contentSlideIn {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.title {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+
+.meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 16px;
+  color: #a0a0a0;
+  margin-bottom: 24px;
+}
+
+/* Rating Badge (IMDB Style) */
+.ratingBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.ratingScore {
+  font-weight: 800;
+  color: #fff;
+  font-size: 15px;
+  margin-left: 2px;
+}
+
+.ratingMax {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.overview {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  color: #ddd;
+}
+
+.playBtn {
+  background-color: #fff;
+  color: #000;
+  padding: 16px 40px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s, background-color 0.2s;
+  cursor: pointer;
+  border: none;
+  width: fit-content;
+}
+
+.playBtn:hover {
+  transform: scale(1.05);
+  background-color: rgba(255,255,255,0.8);
+}
+
+.actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* TV Season + Episode Selectors */
+.tvSelectors {
+  display: flex;
+  gap: 20px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.selectorWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selectorLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+
+.trailerBtnDetail {
+  background-color: rgba(109, 109, 110, 0.7);
+  color: white;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 4px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trailerBtnDetail:hover {
+  background-color: rgba(109, 109, 110, 0.4);
+  transform: scale(1.05);
+}
+
+.listBtn {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.listBtn[data-title]::after {
+  content: attr(data-title);
+  position: absolute;
+  bottom: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.95);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
+  z-index: 100;
+  backdrop-filter: blur(5px);
+}
+
+.listBtn[data-title]:hover::after {
+  opacity: 1;
+  bottom: -50px;
+}
+
+.listBtn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: white;
+  transform: scale(1.05);
+}
+
+.listBtnActive {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #000;
+  border-color: transparent;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.trailerPlayer {
+  width: 100%;
+  height: 100%;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fullscreen Trailer Modal */
+.trailerModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trailerIframe {
+  width: 85vw;
+  height: 85vh;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0 60px rgba(0,0,0,0.9);
+}
+
+.closeTrailerBtn {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.4);
+  color: #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background 0.2s, transform 0.2s;
+  z-index: 10000;
+}
+
+.closeTrailerBtn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  transform: scale(1.1);
+}
+
+.recommendations {
+  padding: 40px 40px 80px 100px;
+  background-color: var(--bg-main);
+}
+
+/* ─── Seasons & Episodes ──────────────────────── */
+.seasonsSection {
+  padding: 40px 40px 20px 100px;
+  background-color: var(--bg-main);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.seasonHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.episodesTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.seasonDropdownWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.seasonDropdown {
+  appearance: none;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 8px 36px 8px 16px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.seasonDropdown:hover {
+  border-color: rgba(255,255,255,0.7);
+}
+
+.seasonDropdown option {
+  background: #141414;
+  color: #fff;
+}
+
+.dropdownIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #fff;
+}
+
+/* Cast Section */
+.castSection {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.castTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #999;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.castList {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+.castList::-webkit-scrollbar {
+  height: 6px;
+}
+
+.castList::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+
+.castMember {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 90px;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.castImage, .castImagePlaceholder {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  border: 2px solid rgba(255,255,255,0.1);
+}
+
+.castImagePlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.castName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.castCharacter {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Episode List */
+.episodeList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.episodeCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.episodeCard:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.episodeThumb {
+  position: relative;
+  flex: 0 0 160px;
+  height: 90px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #1e1e1e;
+}
+
+.episodeImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.episodeNoThumb {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+}
+
+.episodePlayOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.episodeCard:hover .episodePlayOverlay {
+  opacity: 1;
+}
+
+.episodeInfo {
+  flex: 1;
+}
+
+.episodeMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.episodeNum {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.episodeDuration {
+  font-size: 13px;
+  color: #999;
+  white-space: nowrap;
+}
+
+.episodeOverview {
+  font-size: 13px;
+  color: #aaa;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.playerEpLabel {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  z-index: 10000;
+}
+
+/* Download Modal UI */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.downloadModal {
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  min-height: 400px;
+  padding: 40px;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+}
+
+.closeModalBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.closeModalBtn:hover {
+  color: #fff;
+}
+
+/* Ad Phase */
+.adPhase, .errorPhase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+}
+
+.adPhase h2, .errorPhase h2, .optionsPhase h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.adPhase p, .errorPhase p {
+  color: #aaa;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+.adPlaceholder {
+  width: 100%;
+  height: 250px;
+  background: #222;
+  border: 2px dashed #444;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.adPlaceholder span {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.timerBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e50914;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.primaryBtn {
+  background: #e50914;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.primaryBtn:hover {
+  background: #b20710;
+}
+
+/* Options Phase */
+.optionsPhase {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.optionsSubtitle {
+  color: #999;
+  margin-bottom: 24px;
+}
+
+.qualityTabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 12px;
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.tabBtn:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+
+.activeTab {
+  color: #fff;
+  background: rgba(229, 9, 20, 0.2);
+  border: 1px solid rgba(229, 9, 20, 0.5);
+}
+
+.languageTabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.langTabBtn {
+  background: #222;
+  border: 1px solid #333;
+  color: #aaa;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.langTabBtn:hover {
+  background: #333;
+  color: #fff;
+}
+
+.activeLangTab {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+  font-weight: 600;
+}
+
+.linksList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.linksList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.linksList::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+
+.linkCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.2s;
+}
+
+.linkCard:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.linkInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linkQuality {
+  font-weight: 700;
+  color: #fff;
+  font-size: 16px;
+}
+
+.linkSize {
+  color: #e50914;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.linkName {
+  color: #888;
+  font-size: 12px;
+}
+
+/* 🖥️ TABLET RESPONSIVENESS (769px–1024px) */
+@media (max-width: 1024px) {
+  .content {
+    padding: 0 24px 0 100px;
+    gap: 24px;
+  }
+
+  .poster {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .overview {
+    font-size: 16px;
+  }
+
+  .recommendations,
+  .seasonsSection {
+    padding: 32px 24px 60px 100px;
+  }
+
+  .episodeThumb {
+    flex: 0 0 130px;
+    height: 74px;
+  }
+}
+
+/* 📱 MOBILE RESPONSIVENESS (≤768px) */
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+    padding: 0 16px 90px 16px;
+    align-items: center;
+    margin-top: -12vh;
+    gap: 16px;
+  }
+
+  .poster {
+    width: 140px;
+    min-width: 140px;
+    align-self: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 30px rgba(229, 9, 20, 0.3);
+  }
+
+  .info {
+    max-width: 100%;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title {
+    font-size: 28px;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .meta {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+
+  .overview {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .playBtn, .trailerBtnDetail {
+    width: 100%;
+    justify-content: center;
+    font-size: 16px;
+    padding: 14px 20px;
+  }
+
+  .listBtn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .tvSelectors {
+    justify-content: center;
+  }
+
+  .recommendations,
+  .seasonsSection {
+    padding: 20px 16px 90px 16px;
+  }
+
+  .episodeCard {
+    gap: 12px;
+    padding: 12px 8px;
+  }
+
+  .episodeThumb {
+    flex: 0 0 110px;
+    height: 62px;
+  }
+
+  .episodeNum {
+    font-size: 14px;
+  }
+
+  .episodeOverview {
+    font-size: 12px;
+    -webkit-line-clamp: 1;
+  }
+
+  .downloadModal {
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .qualityTabs, .languageTabs {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .trailerIframe {
+    width: 100vw;
+    height: 56vw;
+    border-radius: 0;
+  }
+
+  .closeTrailerBtn {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* 📱 SMALL PHONE (≤480px) */
+@media (max-width: 480px) {
+  .content {
+    padding: 0 12px 90px 12px;
+    margin-top: -10vh;
+  }
+
+  .poster {
+    width: 120px;
+    min-width: 120px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .playBtn, .trailerBtnDetail {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+
+  .episodeThumb {
+    flex: 0 0 90px;
+    height: 52px;
+  }
+
+  .episodeMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* 📺 TV / LARGE SCREENS (≥1440px) */
+@media (min-width: 1440px) {
+  .content {
+    padding: 0 80px 0 140px;
+    gap: 60px;
+    margin-top: -22vh;
+  }
+
+  .poster {
+    width: 340px;
+    min-width: 340px;
+  }
+
+  .title {
+    font-size: 64px;
+  }
+
+  .overview {
+    font-size: 20px;
+    line-height: 1.7;
+  }
+
+  .playBtn {
+    font-size: 24px;
+    padding: 20px 52px;
+  }
+
+  .trailerBtnDetail {
+    font-size: 22px;
+    padding: 20px 40px;
+  }
+
+  .listBtn {
+    width: 68px;
+    height: 68px;
+  }
+
+  .recommendations,
+  .seasonsSection {
+    padding: 60px 80px 80px 140px;
+  }
+
+  .episodesTitle {
+    font-size: 32px;
+  }
+
+  .episodeThumb {
+    flex: 0 0 220px;
+    height: 124px;
+  }
+
+  .episodeNum {
+    font-size: 20px;
+  }
+}
+
+

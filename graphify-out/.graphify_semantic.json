@@ -1,0 +1,378 @@
+{
+  "nodes": [
+    {
+      "id": "db_db",
+      "label": "Database Connection",
+      "file_type": "code",
+      "source_file": "backend/db.js"
+    },
+    {
+      "id": "server_express",
+      "label": "Express Server",
+      "file_type": "code",
+      "source_file": "backend/server.js"
+    },
+    {
+      "id": "mockmovies_movies",
+      "label": "Mock Movie Data",
+      "file_type": "code",
+      "source_file": "backend/data/mockMovies.js"
+    },
+    {
+      "id": "auth_middleware",
+      "label": "Auth Middleware",
+      "file_type": "code",
+      "source_file": "backend/middleware/auth.js"
+    },
+    {
+      "id": "admin_routes",
+      "label": "Admin Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/admin.js"
+    },
+    {
+      "id": "auth_routes",
+      "label": "Auth Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/auth.js"
+    },
+    {
+      "id": "favorites_routes",
+      "label": "Favorites Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/favorites.js"
+    },
+    {
+      "id": "movies_routes",
+      "label": "Movies Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/movies.js"
+    },
+    {
+      "id": "tracking_routes",
+      "label": "Tracking Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/tracking.js"
+    },
+    {
+      "id": "watchhistory_routes",
+      "label": "Watch History Routes",
+      "file_type": "code",
+      "source_file": "backend/routes/watchHistory.js"
+    },
+    {
+      "id": "email_utils",
+      "label": "Email Utilities",
+      "file_type": "code",
+      "source_file": "backend/utils/email.js"
+    },
+    {
+      "id": "app_jsx",
+      "label": "App Component",
+      "file_type": "code",
+      "source_file": "frontend/src/App.jsx"
+    },
+    {
+      "id": "main_jsx",
+      "label": "Main Entry Point",
+      "file_type": "code",
+      "source_file": "frontend/src/main.jsx"
+    },
+    {
+      "id": "row_jsx",
+      "label": "Movie Row Component",
+      "file_type": "code",
+      "source_file": "frontend/src/components/Row.jsx"
+    },
+    {
+      "id": "announcementbanner_jsx",
+      "label": "Announcement Banner",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/AnnouncementBanner.jsx"
+    },
+    {
+      "id": "sidebar_jsx",
+      "label": "Sidebar Component",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/Sidebar.jsx"
+    },
+    {
+      "id": "topnav_jsx",
+      "label": "Top Navigation",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/TopNav.jsx"
+    },
+    {
+      "id": "profilemodal_jsx",
+      "label": "Profile Modal",
+      "file_type": "code",
+      "source_file": "frontend/src/components/profile/ProfileModal.jsx"
+    },
+    {
+      "id": "auth_context",
+      "label": "Authentication Context",
+      "file_type": "code",
+      "source_file": "frontend/src/context/AuthContext.jsx"
+    },
+    {
+      "id": "theme_context",
+      "label": "Theme Context",
+      "file_type": "code",
+      "source_file": "frontend/src/context/ThemeContext.jsx"
+    },
+    {
+      "id": "admindashboard_page",
+      "label": "Admin Dashboard",
+      "file_type": "code",
+      "source_file": "frontend/src/pages/AdminDashboard.jsx"
+    },
+    {
+      "id": "home_page",
+      "label": "Home Page",
+      "file_type": "code",
+      "source_file": "frontend/src/pages/Home.jsx"
+    },
+    {
+      "id": "moviedetail_page",
+      "label": "Movie Detail Page",
+      "file_type": "code",
+      "source_file": "frontend/src/pages/MovieDetail.jsx"
+    },
+    {
+      "id": "api_utils_frontend",
+      "label": "Frontend API Utils",
+      "file_type": "code",
+      "source_file": "frontend/src/utils/api.js"
+    },
+    {
+      "id": "moviecrawler_scrapper",
+      "label": "Movie Crawler Scrapper",
+      "file_type": "code",
+      "source_file": "Scrapper/movieCrawler.js"
+    },
+    {
+      "id": "resolver_utils",
+      "label": "Link Resolver Utilities",
+      "file_type": "code",
+      "source_file": "Scrapper/utils/resolver.js"
+    },
+    {
+      "id": "logger_utils",
+      "label": "Scrapper Logger",
+      "file_type": "code",
+      "source_file": "Scrapper/utils/logger.js"
+    },
+    {
+      "id": "index_html",
+      "label": "Index HTML",
+      "file_type": "document",
+      "source_file": "frontend/index.html"
+    },
+    {
+      "id": "readme_frontend",
+      "label": "Frontend README",
+      "file_type": "document",
+      "source_file": "frontend/README.md"
+    },
+    {
+      "id": "movie_links_txt",
+      "label": "Extracted Movie Links",
+      "file_type": "document",
+      "source_file": "Scrapper/movie_links.txt"
+    },
+    {
+      "id": "scrapper_ui_html",
+      "label": "Scrapper UI",
+      "file_type": "document",
+      "source_file": "Scrapper/public/index.html"
+    },
+    {
+      "id": "hero_png",
+      "label": "Hero Banner Image",
+      "file_type": "image",
+      "source_file": "frontend/src/assets/hero.png"
+    },
+    {
+      "id": "logo_png",
+      "label": "AuraMovie Logo",
+      "file_type": "image",
+      "source_file": "frontend/public/AuraWatch Logo.png"
+    }
+  ],
+  "edges": [
+    {
+      "source": "server_express",
+      "target": "db_db",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "server_express",
+      "target": "auth_routes",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "server_express",
+      "target": "movies_routes",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "movies_routes",
+      "target": "mockmovies_movies",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "admin_routes",
+      "target": "auth_middleware",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "app_jsx",
+      "target": "sidebar_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "app_jsx",
+      "target": "topnav_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "main_jsx",
+      "target": "app_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "profilemodal_jsx",
+      "target": "email_utils",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8
+    },
+    {
+      "source": "home_page",
+      "target": "auth_context",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "moviedetail_page",
+      "target": "api_utils_frontend",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "moviecrawler_scrapper",
+      "target": "resolver_utils",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "moviecrawler_scrapper",
+      "target": "logger_utils",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "admindashboard_page",
+      "target": "auth_context",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "api_utils_frontend",
+      "target": "auth_context",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7
+    },
+    {
+      "source": "scrapper_ui_html",
+      "target": "moviecrawler_scrapper",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9
+    },
+    {
+      "source": "readme_frontend",
+      "target": "app_jsx",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "home_page",
+      "target": "hero_png",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95
+    },
+    {
+      "source": "topnav_jsx",
+      "target": "logo_png",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "backend_api",
+      "label": "Backend API Structure",
+      "nodes": [
+        "auth_routes",
+        "movies_routes",
+        "admin_routes",
+        "favorites_routes",
+        "tracking_routes"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9
+    },
+    {
+      "id": "frontend_state_management",
+      "label": "Frontend State Management",
+      "nodes": [
+        "auth_context",
+        "theme_context"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.95
+    },
+    {
+      "id": "scrapper_system",
+      "label": "Scrapper Subsystem",
+      "nodes": [
+        "moviecrawler_scrapper",
+        "resolver_utils",
+        "logger_utils"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9
+    }
+  ],
+  "input_tokens": 4500,
+  "output_tokens": 1400
+}
