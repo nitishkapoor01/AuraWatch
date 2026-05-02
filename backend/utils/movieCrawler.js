@@ -84,11 +84,12 @@ class MovieCrawler {
                     analytics_tag: today
                 },
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'Accept': 'application/json, text/plain, */*',
                     'Referer': baseUrl,
                     'Origin': baseUrl.slice(0, -1)
                 },
-                timeout: 10000
+                timeout: 12000
             });
 
             if (response.data.hits && response.data.hits.length > 0) {
@@ -147,34 +148,58 @@ class MovieCrawler {
             const searchUrl = `${baseUrl}?s=${encodeURIComponent(query)}`;
             
             const response = await axios.get(searchUrl, {
-                headers: { 'User-Agent': 'Mozilla/5.0' },
-                timeout: 10000
+                headers: { 
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': baseUrl,
+                    'DNT': '1'
+                },
+                timeout: 15000
             });
 
             const $ = cheerio.load(response.data);
-            const firstResult = $('article h2 a, .post-title a, .result-item a').first();
-            const movieUrl = firstResult.attr('href');
-            const movieTitle = firstResult.text().trim();
+            // Try different selectors for different WP themes
+            const results = $('article h2 a, .post-title a, .result-item a, .entry-title a, .entry-header h2 a');
+            
+            let bestResult = null;
+            if (results.length > 0) {
+                // Find the best title match
+                results.each((i, el) => {
+                    const t = $(el).text().trim().toLowerCase();
+                    if (t.includes(title.toLowerCase())) {
+                        bestResult = { url: $(el).attr('href'), title: $(el).text().trim() };
+                        return false; // Break loop
+                    }
+                });
+                
+                // Fallback to first result if no "best" match found but we have results
+                if (!bestResult) bestResult = { url: results.first().attr('href'), title: results.first().text().trim() };
+            }
 
-            if (movieUrl) {
-                this.logger.info(`📄 [${name}] Found: ${movieTitle}`);
-                const pageRes = await axios.get(movieUrl, {
-                    headers: { 'User-Agent': 'Mozilla/5.0' },
-                    timeout: 8000
+            if (bestResult && bestResult.url) {
+                this.logger.info(`📄 [${name}] Found: ${bestResult.title}`);
+                const pageRes = await axios.get(bestResult.url, {
+                    headers: { 
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                        'Referer': searchUrl
+                    },
+                    timeout: 12000
                 });
                 
                 const $$ = cheerio.load(pageRes.data);
                 const qualities = {};
                 const links = { direct: [], magnet: [], torrent: [] };
                 
-                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"]').each((i, el) => {
+                // Broad patterns for download buttons and links
+                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"]').each((i, el) => {
                     const href = $$(el).attr('href');
                     const text = $$(el).text().trim() || $$(el).attr('title') || 'Download';
-                    if (!href || href.includes('google.com/search') || href.includes('wp-content')) return;
                     
-                    // Prioritize detecting quality from the button text first
+                    if (!href || href.includes('google.com/search') || href.includes('wp-content') || href.includes('facebook.com')) return;
+                    
                     let q = this._detectQuality(text);
-                    if (!q) q = this._detectQuality(movieTitle);
+                    if (!q) q = this._detectQuality(bestResult.title);
                     if (!q) q = 'other';
                     
                     if (!qualities[q]) qualities[q] = [];
@@ -183,16 +208,19 @@ class MovieCrawler {
                         url: href,
                         name: `${name}: ${text}`,
                         type: 'direct',
-                        size: this._detectSize(text + ' ' + $$(el).parent().text())
+                        size: this._detectSize(text + ' ' + $$(el).parent().text() + ' ' + $$(el).closest('div').text())
                     };
                     
-                    qualities[q].push(linkObj);
-                    links.direct.push(linkObj);
-                    this.stats.directLinks++;
+                    // Avoid duplicates from the same source link
+                    if (!qualities[q].some(l => l.url === href)) {
+                        qualities[q].push(linkObj);
+                        links.direct.push(linkObj);
+                        this.stats.directLinks++;
+                    }
                 });
 
                 if (links.direct.length > 0) {
-                    return { title: movieTitle, qualities, links };
+                    return { title: bestResult.title, qualities, links };
                 }
             }
         } catch (e) {
