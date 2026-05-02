@@ -74,7 +74,15 @@ class MovieCrawler {
                 '--disable-extensions',
                 '--disable-background-networking',
                 '--disable-default-apps',
-                '--mute-audio'
+                '--mute-audio',
+                // Memory optimizations for Render/Docker (512MB)
+                '--disable-software-rasterizer',
+                '--disable-features=TranslateUI',
+                '--disable-ipc-flooding-protection',
+                '--disable-renderer-backgrounding',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-component-update',
+                '--js-flags=--max-old-space-size=256'
             ]
         };
 
@@ -95,7 +103,7 @@ class MovieCrawler {
 
         this.context = await this.browser.newContext({
             userAgent: this.config.userAgent,
-            viewport: { width: 1920, height: 1080 },
+            viewport: { width: 1280, height: 720 },
             extraHTTPHeaders: this.config.headers,
             ignoreHTTPSErrors: true
         });
@@ -143,7 +151,7 @@ class MovieCrawler {
      * Search for a movie across known torrent sites.
      */
     async searchMovie(query, opts = {}) {
-        const mergedConfig = { ...this.config, ...opts, maxDepth: 2, query: query.toLowerCase(), timeout: 15000 };
+        const mergedConfig = { ...this.config, ...opts, maxDepth: 2, query: query.toLowerCase(), timeout: 20000 };
         this.logger.banner();
         this.logger.info(`🔍 Searching: "${query}"`);
 
@@ -154,7 +162,7 @@ class MovieCrawler {
             await this._launchBrowser();
 
             const { default: pLimit } = await import('p-limit');
-            const limit = pLimit(20); // High concurrency for fast initial sweep
+            const limit = pLimit(2); // Reduced concurrency to prevent OOM on Render (512MB limit)
 
             const searchPromises = searchUrls.map(searchUrl => limit(async () => {
                 this.logger.info(`Trying: ${searchUrl.name}`);
@@ -168,8 +176,8 @@ class MovieCrawler {
             // Run all initial search pages with concurrency limit
             await Promise.allSettled(searchPromises);
 
-            // Process found movie pages from the queue with high concurrency
-            await this._drainQueue({ ...mergedConfig, concurrency: 8 });
+            // Process found movie pages from the queue with low concurrency to save memory
+            await this._drainQueue({ ...mergedConfig, concurrency: 2 });
 
         } catch (err) {
             this.logger.error(`Fatal: ${err.message}`);
@@ -200,7 +208,7 @@ class MovieCrawler {
      */
     async searchExactMovie(title, year = null, opts = {}) {
         const searchQuery = year ? `${title} ${year}` : title;
-        const mergedConfig = { ...this.config, ...opts, maxDepth: 2, query: searchQuery.toLowerCase(), timeout: 15000 };
+        const mergedConfig = { ...this.config, ...opts, maxDepth: 2, query: searchQuery.toLowerCase(), timeout: 12000 };
         this.logger.banner();
         this.logger.info(`🎯 EXACT SEARCH: "${title}" ${year ? `(${year})` : ''}`);
 
@@ -208,18 +216,20 @@ class MovieCrawler {
         this.logger.info(`Searching across ${searchUrls.length} sources...`);
         this.isStopped = false;
 
-        // Force stop after 28 seconds to ensure frontend 30s timer is respected
+        // Force stop after 15 seconds — source search pages have 12s to respond.
+        // After 15s, the queue is cleared. In-flight depth-1 pages get 20-30s to
+        // finish crawling and resolve links before the 55s HTTP timeout.
         const hardTimeout = setTimeout(() => {
-            this.logger.warn(`⏳ Hard 28s timeout reached! Forcing early stop to return partial results...`);
+            this.logger.warn(`⏳ Hard 15s timeout reached! Clearing queue to let in-flight pages finish...`);
             this.isStopped = true;
-            this.queue = []; // Clear queue to stop drainQueue
-        }, 28000);
+            this.queue = []; // Stop drainQueue from starting new pages
+        }, 15000);
 
         try {
             await this._launchBrowser();
 
             const { default: pLimit } = await import('p-limit');
-            const limit = pLimit(20);
+            const limit = pLimit(2);
 
             const searchPromises = searchUrls.map(searchUrl => limit(async () => {
                 if (this.isStopped) return;
@@ -232,7 +242,7 @@ class MovieCrawler {
             }));
 
             await Promise.allSettled(searchPromises);
-            await this._drainQueue({ ...mergedConfig, concurrency: 8 });
+            await this._drainQueue({ ...mergedConfig, concurrency: 2 });
 
         } catch (err) {
             this.logger.error(`Fatal: ${err.message}`);
@@ -378,13 +388,8 @@ class MovieCrawler {
             
             // ── INDIAN / HINDI SITES ─────────────────────────
             { name: 'HDHub4u', url: `https://new7.hdhub4u.fo/?s=${plused}` },
-            { name: 'HDHub4u.tv', url: `https://hdhub4u.tv/?s=${plused}` },
             { name: 'VegaMovies', url: `https://vegamovies.nf/?s=${plused}` },
-            { name: 'OlaMovies', url: `https://olamovies.app/?s=${plused}` },
-            { name: 'Movies4u', url: `https://movies4u.ba/?s=${plused}` },
-            { name: 'Movie4in', url: `https://movie4in.com/?s=${plused}` },
-            { name: 'KatMovieHD', url: `https://new1.katmoviehd.cymru/?s=${plused}` },
-            { name: 'WatchAnimeWorld', url: `https://watchanimeworld.net/?s=${plused}` }
+            { name: 'KatMovieHD', url: `https://new1.katmoviehd.cymru/?s=${plused}` }
         ];
     }
 
@@ -474,23 +479,25 @@ class MovieCrawler {
                 this.logger.info(`📦 TORRENT: ${(torrent.name || torrent.url).substring(0, 70)}`);
             }
 
-            // Process direct download links
-            for (const direct of extracted.directLinks) {
-                let finalUrl = direct.url;
-                if (config.bypassShorteners !== false) {
-                    finalUrl = await this._resolveShortlinkWithBrowser(direct.url);
-                }
-
-                this.allDownloadLinks.push({
-                    type: 'direct',
-                    url: finalUrl,
-                    name: direct.name || '',
-                    source: pageUrl,
-                    quality: direct.quality || this._detectQuality(direct.name) || this._detectQuality(direct.url),
-                    size: direct.size || '',
+            // Process direct download links — resolve shorteners IN PARALLEL
+            if (extracted.directLinks.length > 0) {
+                const resolveAll = extracted.directLinks.map(async (direct) => {
+                    let finalUrl = direct.url;
+                    if (config.bypassShorteners !== false) {
+                        finalUrl = await this._resolveShortlinkWithBrowser(direct.url);
+                    }
+                    this.allDownloadLinks.push({
+                        type: 'direct',
+                        url: finalUrl,
+                        name: direct.name || '',
+                        source: pageUrl,
+                        quality: direct.quality || this._detectQuality(direct.name) || this._detectQuality(direct.url),
+                        size: direct.size || '',
+                    });
+                    this.stats.directLinks++;
+                    this.logger.info(`⬇️  DIRECT: ${(direct.name || direct.url).substring(0, 70)}`);
                 });
-                this.stats.directLinks++;
-                this.logger.info(`⬇️  DIRECT: ${(direct.name || direct.url).substring(0, 70)}`);
+                await Promise.allSettled(resolveAll);
             }
 
             // Queue internal movie/detail pages for deeper crawl
@@ -771,7 +778,9 @@ class MovieCrawler {
      */
     async _resolveShortlinkWithBrowser(url) {
         if (!this.context) return url;
-        const shorteners = ['shrink', 'gplink', 'droplink', 'ouo.io', 'adf.ly', 'bit.ly', 'tinyurl', 'urlshortx', 'vcloud', 'fastdl', 'spix', 'adangle', 'linkstaker', 'tnshort', 'mdisk', 'hblinks'];
+        // NOTE: hblinks.dad is NOT in this list — those URLs are valid clickable redirects
+        // (they go directly to GDrive/HubDrive). Bypassing them serially was the main bottleneck.
+        const shorteners = ['shrink', 'gplink', 'droplink', 'ouo.io', 'adf.ly', 'bit.ly', 'tinyurl', 'urlshortx', 'vcloud', 'fastdl', 'spix', 'adangle', 'linkstaker', 'tnshort', 'mdisk'];
         const isShort = shorteners.some(s => url.toLowerCase().includes(s));
         if (!isShort) return url;
 

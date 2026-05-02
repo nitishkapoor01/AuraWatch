@@ -110,36 +110,13 @@ router.post('/movie', async (req, res) => {
     console.log(`[CACHE] MISS for "${title}" — starting scraper...`);
 
     // ── STEP 2: Run Scraper ──────────────────────────────────────────────
+    // Give 55s total for the HTTP request (crawler's own 18s hard stop + depth-1 crawl time)
+    res.setTimeout(55000);
     const crawler = new MovieCrawler({ maxDepth: 2, concurrency: 2, bypassShorteners: true });
 
     try {
-        const timeoutPromise = new Promise((resolve) => {
-            setTimeout(() => {
-                try {
-                    const fullResults = crawler._buildResults();
-                    const exactMovie = crawler._findExactMatch(fullResults.movies, title, year || null);
-                    resolve({
-                        meta: {
-                            ...fullResults.meta,
-                            searchTitle: title,
-                            searchYear: year || null,
-                            exactMatchFound: !!exactMovie,
-                            timedOut: true
-                        },
-                        movie: exactMovie
-                    });
-                } catch (e) {
-                    resolve({ meta: {}, movie: null });
-                }
-            }, 28500);
-        });
-
         const runner = downloadQueue || (async (fn) => fn());
-
-        const results = await runner(() => Promise.race([
-            crawler.searchExactMovie(title, year || null),
-            timeoutPromise
-        ]));
+        const results = await runner(() => crawler.searchExactMovie(title, year || null));
 
         if (!results.movie) {
             return res.json({

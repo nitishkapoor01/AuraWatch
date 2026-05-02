@@ -187,7 +187,7 @@ const MovieDetail = () => {
     const isAdmin = user?.role === 'admin';
     const shouldSkipTimer = isAdmin || globalSkipAds;
     setDownloadStep('ad');
-    setAdTimer(shouldSkipTimer ? 0 : 30);
+    setAdTimer(shouldSkipTimer ? 0 : 50);
     setParsedDownloads({});
     setDownloadErrorMsg('');
     
