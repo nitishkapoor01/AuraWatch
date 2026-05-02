@@ -278,32 +278,45 @@ class MovieCrawler {
         return results;
     }
 
-    _mergeResults(yts, hdhub, originalTitle) {
-        if (!yts && !hdhub) return null;
+    _mergeResults(existing, incoming, originalTitle) {
+        if (!existing && !incoming) return null;
         
-        const merged = {
-            title: yts?.title || hdhub?.title || originalTitle,
+        // Use existing or create new base
+        const merged = existing || {
+            title: incoming?.title || originalTitle,
             qualities: {},
-            links: { direct: [], magnet: [], torrent: [] }
+            links: { direct: [], magnet: [], torrent: [] },
+            totalLinks: 0
         };
+        
+        if (!incoming) return merged;
 
-        const addResults = (res) => {
-            if (!res) return;
-            // Merge qualities
-            for (const q in res.qualities) {
-                if (!merged.qualities[q]) merged.qualities[q] = [];
-                merged.qualities[q].push(...res.qualities[q]);
-            }
-            // Merge links
-            merged.links.direct.push(...(res.links.direct || []));
-            merged.links.magnet.push(...(res.links.magnet || []));
-            merged.links.torrent.push(...(res.links.torrent || []));
-        };
+        // Merge qualities
+        for (const q in incoming.qualities) {
+            if (!merged.qualities[q]) merged.qualities[q] = [];
+            
+            // Add unique links only (check by URL)
+            const seenUrls = new Set(merged.qualities[q].map(l => l.url));
+            incoming.qualities[q].forEach(link => {
+                if (!seenUrls.has(link.url)) {
+                    merged.qualities[q].push(link);
+                }
+            });
+        }
 
-        addResults(yts);
-        addResults(hdhub);
+        // Merge raw links list
+        if (incoming.links) {
+            const seenDirect = new Set(merged.links.direct.map(l => l.url));
+            (incoming.links.direct || []).forEach(l => { if (!seenDirect.has(l.url)) merged.links.direct.push(l); });
+            
+            const seenMagnet = new Set(merged.links.magnet.map(l => l.url));
+            (incoming.links.magnet || []).forEach(l => { if (!seenMagnet.has(l.url)) merged.links.magnet.push(l); });
+            
+            const seenTorrent = new Set(merged.links.torrent.map(l => l.url));
+            (incoming.links.torrent || []).forEach(l => { if (!seenTorrent.has(l.url)) merged.links.torrent.push(l); });
+        }
 
-        // Calculate total links
+        // Update total count
         merged.totalLinks = merged.links.direct.length + merged.links.magnet.length + merged.links.torrent.length;
         
         return merged;
