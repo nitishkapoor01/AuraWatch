@@ -106,12 +106,16 @@ class MovieCrawler {
                 const links = { direct: [], magnet: [], torrent: [] };
                 
                 // Broad patterns for movie sites
-                $('a[href*="hblinks"], a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="v-cloud"], a[href*="fastdl"]').each((i, el) => {
+                $('a[href*="hblinks"], a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="v-cloud"], a[href*="fastdl"], a[href*="mediafire"]').each((i, el) => {
                     const href = $(el).attr('href');
                     const text = $(el).text().trim() || $(el).attr('title') || 'Download';
                     if (!href || href.includes('wp-content')) return;
                     
-                    const q = this._detectQuality(text + ' ' + hit.post_title) || 'other';
+                    // Prioritize detecting quality from the button text first
+                    let q = this._detectQuality(text);
+                    if (!q) q = this._detectQuality(hit.post_title);
+                    if (!q) q = 'other';
+                    
                     if (!qualities[q]) qualities[q] = [];
                     
                     const linkObj = {
@@ -163,12 +167,16 @@ class MovieCrawler {
                 const qualities = {};
                 const links = { direct: [], magnet: [], torrent: [] };
                 
-                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"]').each((i, el) => {
+                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"]').each((i, el) => {
                     const href = $$(el).attr('href');
                     const text = $$(el).text().trim() || $$(el).attr('title') || 'Download';
                     if (!href || href.includes('google.com/search') || href.includes('wp-content')) return;
                     
-                    const q = this._detectQuality(text + ' ' + movieTitle) || 'other';
+                    // Prioritize detecting quality from the button text first
+                    let q = this._detectQuality(text);
+                    if (!q) q = this._detectQuality(movieTitle);
+                    if (!q) q = 'other';
+                    
                     if (!qualities[q]) qualities[q] = [];
                     
                     const linkObj = {
@@ -280,11 +288,13 @@ class MovieCrawler {
     }
 
     _detectQuality(str) {
+        if (!str) return null;
         const s = str.toLowerCase();
-        if (/2160p|4k/i.test(s)) return '4K';
-        if (/1080p/i.test(s)) return '1080p';
-        if (/720p/i.test(s)) return '720p';
-        if (/480p/i.test(s)) return '480p';
+        if (/2160p|4k|uhd/i.test(s)) return '4K';
+        if (/1080p|fhd/i.test(s)) return '1080p';
+        if (/720p|hd/i.test(s) && !/hdhub|katmoviehd/i.test(s)) return '720p';
+        if (/480p|sd/i.test(s)) return '480p';
+        if (/360p/i.test(s)) return '360p';
         return null;
     }
 
