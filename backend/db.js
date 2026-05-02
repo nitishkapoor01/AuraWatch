@@ -76,6 +76,18 @@ const initDB = async () => {
         key TEXT PRIMARY KEY,
         value TEXT
       );
+
+      CREATE TABLE IF NOT EXISTS download_cache (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        year TEXT,
+        cache_key TEXT UNIQUE NOT NULL,
+        result JSONB NOT NULL,
+        total_links INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_download_cache_key ON download_cache(cache_key);
     `);
     console.log('[DB] PostgreSQL database initialized');
   } catch (err) {
