@@ -36,8 +36,9 @@ router.post('/register', async (req, res) => {
   const cleanEmail = email.toLowerCase().trim();
 
   // Check if email already exists
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(cleanEmail);
-  if (existing) {
+  const existingResult = await db.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
+  console.log('[DEBUG] Existing check for', cleanEmail, 'Result rows:', existingResult.rows.length);
+  if (existingResult.rows.length > 0) {
     return res.status(409).json({ message: 'An account with this email already exists.' });
   }
 
@@ -45,12 +46,14 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const answerHash = await bcrypt.hash(normalizeAnswer(securityAnswer), SALT_ROUNDS);
 
-    const result = db.prepare(
-      'INSERT INTO users (name, email, password_hash, security_question, security_answer_hash) VALUES (?, ?, ?, ?, ?)'
-    ).run(name.trim(), cleanEmail, passwordHash, securityQuestion.trim(), answerHash);
+    const result = await db.query(
+      'INSERT INTO users (name, email, password_hash, security_question, security_answer_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [name.trim(), cleanEmail, passwordHash, securityQuestion.trim(), answerHash]
+    );
+    const newUserId = result.rows[0].id;
 
     const token = jwt.sign(
-      { id: result.lastInsertRowid, email: cleanEmail, name: name.trim() },
+      { id: newUserId, email: cleanEmail, name: name.trim() },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -58,11 +61,11 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'Account created successfully!',
       token,
-      user: { id: result.lastInsertRowid, email: cleanEmail, name: name.trim(), role: 'user', avatar: 'red' }
+      user: { id: newUserId, email: cleanEmail, name: name.trim(), role: 'user', avatar: 'red' }
     });
   } catch (error) {
     console.error('[Auth] Register error:', error);
-    if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+    if (error.code === '23505') { // PostgreSQL unique constraint violation
        return res.status(409).json({ message: 'An account with this email already exists.' });
     }
     res.status(500).json({ message: 'Failed to create account. Please try again.' });
@@ -78,7 +81,8 @@ router.post('/login', async (req, res) => {
   }
 
   const cleanEmail = email.toLowerCase().trim();
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(cleanEmail);
+  const userResult = await db.query('SELECT * FROM users WHERE email = $1', [cleanEmail]);
+  const user = userResult.rows[0];
   
   if (!user) {
     return res.status(401).json({ message: 'Invalid email or password.' });
@@ -97,18 +101,17 @@ router.post('/login', async (req, res) => {
       const newAttempts = user.failed_login_attempts + 1;
       if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
         const lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MINUTES * 60000).toISOString();
-        db.prepare('UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?')
-          .run(newAttempts, lockedUntil, user.id);
+        await db.query('UPDATE users SET failed_login_attempts = $1, locked_until = $2 WHERE id = $3', [newAttempts, lockedUntil, user.id]);
         return res.status(403).json({ message: `Account locked due to too many failed attempts. Try again in ${LOCKOUT_DURATION_MINUTES} minutes.` });
       } else {
-        db.prepare('UPDATE users SET failed_login_attempts = ? WHERE id = ?').run(newAttempts, user.id);
+        await db.query('UPDATE users SET failed_login_attempts = $1 WHERE id = $2', [newAttempts, user.id]);
         return res.status(401).json({ message: `Invalid email or password. ${MAX_LOGIN_ATTEMPTS - newAttempts} attempts remaining.` });
       }
     }
 
     // Reset failed attempts on success
     if (user.failed_login_attempts > 0 || user.locked_until !== null) {
-      db.prepare('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?').run(user.id);
+      await db.query('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = $1', [user.id]);
     }
 
     const token = jwt.sign(
@@ -129,12 +132,13 @@ router.post('/login', async (req, res) => {
 });
 
 // Forgot Password - Step 1: Get Question
-router.post('/forgot-password/question', (req, res) => {
+router.post('/forgot-password/question', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: 'Email is required.' });
 
   const cleanEmail = email.toLowerCase().trim();
-  const user = db.prepare('SELECT security_question FROM users WHERE email = ?').get(cleanEmail);
+  const userResult = await db.query('SELECT security_question FROM users WHERE email = $1', [cleanEmail]);
+  const user = userResult.rows[0];
 
   if (!user) {
     // Return a generic success-looking response to prevent email enumeration attacks,
@@ -152,7 +156,8 @@ router.post('/forgot-password/verify', async (req, res) => {
   if (!email || !answer) return res.status(400).json({ message: 'Email and answer are required.' });
 
   const cleanEmail = email.toLowerCase().trim();
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(cleanEmail);
+  const userResult = await db.query('SELECT * FROM users WHERE email = $1', [cleanEmail]);
+  const user = userResult.rows[0];
 
   if (!user) return res.status(404).json({ message: 'User not found.' });
 
@@ -167,17 +172,16 @@ router.post('/forgot-password/verify', async (req, res) => {
       const newAttempts = user.failed_login_attempts + 1;
       if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
         const lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MINUTES * 60000).toISOString();
-        db.prepare('UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?')
-          .run(newAttempts, lockedUntil, user.id);
+        await db.query('UPDATE users SET failed_login_attempts = $1, locked_until = $2 WHERE id = $3', [newAttempts, lockedUntil, user.id]);
         return res.status(403).json({ message: 'Account locked due to too many failed attempts.' });
       } else {
-        db.prepare('UPDATE users SET failed_login_attempts = ? WHERE id = ?').run(newAttempts, user.id);
+        await db.query('UPDATE users SET failed_login_attempts = $1 WHERE id = $2', [newAttempts, user.id]);
         return res.status(401).json({ message: `Incorrect answer. ${MAX_LOGIN_ATTEMPTS - newAttempts} attempts remaining.` });
       }
     }
 
     // Reset attempts on success
-    db.prepare('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?').run(user.id);
+    await db.query('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = $1', [user.id]);
 
     // Issue a temporary 15-minute token for password reset
     const resetToken = jwt.sign(
@@ -216,7 +220,7 @@ router.post('/forgot-password/reset', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, decoded.id);
+    await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, decoded.id]);
 
     res.json({ message: 'Password has been successfully reset. You can now login.' });
   } catch (error) {
@@ -227,8 +231,9 @@ router.post('/forgot-password/reset', async (req, res) => {
 
 
 // Get current user
-router.get('/me', authMiddleware, (req, res) => {
-  const user = db.prepare('SELECT id, name, email, avatar, role, created_at FROM users WHERE id = ?').get(req.user.id);
+router.get('/me', authMiddleware, async (req, res) => {
+  const result = await db.query('SELECT id, name, email, avatar, role, created_at FROM users WHERE id = $1', [req.user.id]);
+  const user = result.rows[0];
   if (!user) {
     return res.status(404).json({ message: 'User not found.' });
   }
@@ -236,11 +241,11 @@ router.get('/me', authMiddleware, (req, res) => {
 });
 
 // Update Avatar
-router.put('/avatar', authMiddleware, (req, res) => {
+router.put('/avatar', authMiddleware, async (req, res) => {
   const { avatar } = req.body;
   if (!avatar) return res.status(400).json({ message: 'Avatar string is required.' });
   try {
-    db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatar, req.user.id);
+    await db.query('UPDATE users SET avatar = $1 WHERE id = $2', [avatar, req.user.id]);
     res.json({ message: 'Avatar updated successfully', avatar });
   } catch (error) {
     res.status(500).json({ message: 'Failed to update avatar.' });
@@ -248,8 +253,9 @@ router.put('/avatar', authMiddleware, (req, res) => {
 });
 
 // Get Logged-in User's Security Question
-router.get('/my-security-question', authMiddleware, (req, res) => {
-  const user = db.prepare('SELECT security_question FROM users WHERE id = ?').get(req.user.id);
+router.get('/my-security-question', authMiddleware, async (req, res) => {
+  const result = await db.query('SELECT security_question FROM users WHERE id = $1', [req.user.id]);
+  const user = result.rows[0];
   if (!user) return res.status(404).json({ message: 'User not found.' });
   res.json({ question: user.security_question });
 });
@@ -271,7 +277,8 @@ router.put('/update-name', authMiddleware, async (req, res) => {
   }
 
   try {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    const userResult = await db.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    const user = userResult.rows[0];
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     let match = false;
@@ -285,7 +292,7 @@ router.put('/update-name', authMiddleware, async (req, res) => {
     }
 
     const trimmedName = newName.trim();
-    db.prepare('UPDATE users SET name = ? WHERE id = ?').run(trimmedName, req.user.id);
+    await db.query('UPDATE users SET name = $1 WHERE id = $2', [trimmedName, req.user.id]);
     res.json({ message: 'Name updated successfully', name: trimmedName });
   } catch (error) {
     console.error('[Auth] Update name error:', error);
@@ -310,7 +317,8 @@ router.put('/change-password', authMiddleware, async (req, res) => {
   }
 
   try {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    const userResult = await db.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    const user = userResult.rows[0];
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     let match = false;
@@ -324,7 +332,7 @@ router.put('/change-password', authMiddleware, async (req, res) => {
     }
 
     const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(newHash, req.user.id);
+    await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newHash, req.user.id]);
     res.json({ message: 'Password changed successfully!' });
   } catch (error) {
     console.error('[Auth] Change password error:', error);
@@ -350,7 +358,7 @@ const upload = multer({
 });
 
 // Upload Custom Avatar
-router.post('/avatar-upload', authMiddleware, upload.single('avatarFile'), (req, res) => {
+router.post('/avatar-upload', authMiddleware, upload.single('avatarFile'), async (req, res) => {
   console.log('[Auth] Avatar upload request received');
   if (!req.file) {
     console.log('[Auth] No file provided in upload request');
@@ -361,7 +369,7 @@ router.post('/avatar-upload', authMiddleware, upload.single('avatarFile'), (req,
 
   try {
     const avatarUrl = `http://localhost:5000/uploads/avatars/${req.file.filename}`;
-    db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(avatarUrl, req.user.id);
+    await db.query('UPDATE users SET avatar = $1 WHERE id = $2', [avatarUrl, req.user.id]);
     console.log('[Auth] Avatar updated in DB:', avatarUrl);
     res.json({ message: 'Avatar uploaded successfully', avatar: avatarUrl });
   } catch (error) {

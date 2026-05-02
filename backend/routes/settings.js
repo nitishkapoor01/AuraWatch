@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 
 // Get a public setting by key
-router.get('/:key', (req, res) => {
+router.get('/:key', async (req, res) => {
   const { key } = req.params;
   
   // Only allow certain keys to be read publicly
@@ -13,7 +13,8 @@ router.get('/:key', (req, res) => {
   }
 
   try {
-    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+    const result = await db.query('SELECT value FROM settings WHERE key = $1', [key]);
+    const row = result.rows[0];
     if (!row) return res.json({ value: null });
     
     try {

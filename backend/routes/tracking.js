@@ -8,7 +8,7 @@ const db = require('../db');
 const activeSessions = new Map();
 
 // Ping endpoint - called by all clients every ~30s
-router.post('/heartbeat', (req, res) => {
+router.post('/heartbeat', async (req, res) => {
   const { sessionId, isGuest, userId } = req.body;
   if (!sessionId) {
     return res.status(400).json({ error: 'sessionId required' });
@@ -22,21 +22,22 @@ router.post('/heartbeat', (req, res) => {
 
   if (userId) {
     try {
-      db.prepare("INSERT OR IGNORE INTO user_activity (user_id, date) VALUES (?, date('now'))").run(userId);
+      await db.query("INSERT INTO user_activity (user_id, date) VALUES ($1, CURRENT_DATE) ON CONFLICT DO NOTHING", [userId]);
     } catch (e) {
       console.error('Failed to log user activity', e);
     }
   }
 
   try {
-    db.prepare("INSERT OR IGNORE INTO platform_visits (session_id, date) VALUES (?, date('now'))").run(sessionId);
+    await db.query("INSERT INTO platform_visits (session_id, date) VALUES ($1, CURRENT_DATE) ON CONFLICT DO NOTHING", [sessionId]);
   } catch (e) {
     console.error('Failed to log platform visit', e);
   }
 
   let announcement = null;
   try {
-    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get('announcement');
+    const result = await db.query('SELECT value FROM settings WHERE key = $1', ['announcement']);
+    const row = result.rows[0];
     if (row && row.value) {
       announcement = JSON.parse(row.value);
     }

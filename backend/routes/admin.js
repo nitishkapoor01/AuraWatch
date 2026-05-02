@@ -8,44 +8,44 @@ router.use(authMiddleware);
 router.use(isAdmin);
 
 // Fetch Platform Stats
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
-    const totalUsers = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
-    const totalFavorites = db.prepare('SELECT COUNT(*) as count FROM favorites').get().count;
-    const totalWatches = db.prepare('SELECT COUNT(*) as count FROM watch_history').get().count;
+    const totalUsers = (await db.query('SELECT COUNT(*) as count FROM users')).rows[0].count;
+    const totalFavorites = (await db.query('SELECT COUNT(*) as count FROM favorites')).rows[0].count;
+    const totalWatches = (await db.query('SELECT COUNT(*) as count FROM watch_history')).rows[0].count;
     
     // Get actual watch time from progress (stored in minutes)
-    const totalProgressResult = db.prepare('SELECT SUM(progress) as totalProgress FROM watch_history').get();
-    const totalProgressMinutes = totalProgressResult.totalProgress || 0;
+    const totalProgressResult = await db.query('SELECT SUM(progress) as "totalProgress" FROM watch_history');
+    const totalProgressMinutes = totalProgressResult.rows[0].totalProgress || 0;
     const totalWatchTimeHours = totalProgressMinutes / 60;
 
     // Analytics
-    const dailyActive = db.prepare("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date = date('now')").get().count;
-    const weeklyActive = db.prepare("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= date('now', '-7 days')").get().count;
-    const monthlyActive = db.prepare("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= date('now', '-30 days')").get().count;
-    const yearlyActive = db.prepare("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= date('now', '-365 days')").get().count;
+    const dailyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date = CURRENT_DATE")).rows[0].count;
+    const weeklyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= CURRENT_DATE - INTERVAL '7 days'")).rows[0].count;
+    const monthlyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= CURRENT_DATE - INTERVAL '30 days'")).rows[0].count;
+    const yearlyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= CURRENT_DATE - INTERVAL '365 days'")).rows[0].count;
     
     // Total Unique Visits (Guests + Logged In)
-    const totalVisitsToday = db.prepare("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date = date('now')").get().count;
-    const totalVisitsWeekly = db.prepare("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= date('now', '-7 days')").get().count;
-    const totalVisitsMonthly = db.prepare("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= date('now', '-30 days')").get().count;
-    const totalVisitsYearly = db.prepare("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= date('now', '-365 days')").get().count;
-    const totalVisitsAllTime = db.prepare("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits").get().count;
+    const totalVisitsToday = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date = CURRENT_DATE")).rows[0].count;
+    const totalVisitsWeekly = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '7 days'")).rows[0].count;
+    const totalVisitsMonthly = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '30 days'")).rows[0].count;
+    const totalVisitsYearly = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '365 days'")).rows[0].count;
+    const totalVisitsAllTime = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits")).rows[0].count;
 
     res.json({
-      totalUsers,
-      totalFavorites,
-      totalWatches,
+      totalUsers: parseInt(totalUsers),
+      totalFavorites: parseInt(totalFavorites),
+      totalWatches: parseInt(totalWatches),
       totalWatchTimeHours: parseFloat(totalWatchTimeHours.toFixed(1)),
-      dailyActive,
-      weeklyActive,
-      monthlyActive,
-      yearlyActive,
-      totalVisitsToday,
-      totalVisitsWeekly,
-      totalVisitsMonthly,
-      totalVisitsYearly,
-      totalVisitsAllTime
+      dailyActive: parseInt(dailyActive),
+      weeklyActive: parseInt(weeklyActive),
+      monthlyActive: parseInt(monthlyActive),
+      yearlyActive: parseInt(yearlyActive),
+      totalVisitsToday: parseInt(totalVisitsToday),
+      totalVisitsWeekly: parseInt(totalVisitsWeekly),
+      totalVisitsMonthly: parseInt(totalVisitsMonthly),
+      totalVisitsYearly: parseInt(totalVisitsYearly),
+      totalVisitsAllTime: parseInt(totalVisitsAllTime)
     });
   } catch (error) {
     console.error('Stats error:', error);
@@ -54,14 +54,14 @@ router.get('/stats', (req, res) => {
 });
 
 // Fetch all users
-router.get('/users', (req, res) => {
+router.get('/users', async (req, res) => {
   try {
-    const users = db.prepare(`
+    const result = await db.query(`
       SELECT id, name, email, role, avatar, created_at, failed_login_attempts
       FROM users
       ORDER BY created_at DESC
-    `).all();
-    res.json(users);
+    `);
+    res.json(result.rows);
   } catch (error) {
     console.error('Users fetch error:', error);
     res.status(500).json({ message: 'Failed to fetch users.' });
@@ -69,7 +69,7 @@ router.get('/users', (req, res) => {
 });
 
 // Delete a user
-router.delete('/users/:id', (req, res) => {
+router.delete('/users/:id', async (req, res) => {
   const userId = req.params.id;
   
   if (parseInt(userId) === req.user.id) {
@@ -77,15 +77,13 @@ router.delete('/users/:id', (req, res) => {
   }
 
   try {
-    const info = db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    const result = await db.query('DELETE FROM users WHERE id = $1', [userId]);
     
-    if (info.changes === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Clean up related data
-    db.prepare('DELETE FROM favorites WHERE user_id = ?').run(userId);
-    db.prepare('DELETE FROM watch_history WHERE user_id = ?').run(userId);
+    // Clean up related data (handled by ON DELETE CASCADE if setup, but good to be explicit or let DB handle it. We already set it up in schema)
 
     res.json({ message: 'User deleted successfully.' });
   } catch (error) {
@@ -95,9 +93,10 @@ router.delete('/users/:id', (req, res) => {
 });
 
 // Get Current Announcement
-router.get('/announcement', (req, res) => {
+router.get('/announcement', async (req, res) => {
   try {
-    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get('announcement');
+    const result = await db.query('SELECT value FROM settings WHERE key = $1', ['announcement']);
+    const row = result.rows[0];
     if (row && row.value) {
       res.json(JSON.parse(row.value));
     } else {
@@ -110,11 +109,11 @@ router.get('/announcement', (req, res) => {
 });
 
 // Update Announcement
-router.post('/announcement', (req, res) => {
+router.post('/announcement', async (req, res) => {
   try {
     const announcement = req.body; // { active: boolean, message: string, type: string }
     const valueStr = JSON.stringify(announcement);
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run('announcement', valueStr);
+    await db.query('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value', ['announcement', valueStr]);
     res.json({ message: 'Announcement updated successfully.', announcement });
   } catch (error) {
     console.error('Update announcement error:', error);
@@ -123,11 +122,11 @@ router.post('/announcement', (req, res) => {
 });
 
 // Fetch All Settings
-router.get('/settings', (req, res) => {
+router.get('/settings', async (req, res) => {
   try {
-    const settings = db.prepare('SELECT * FROM settings').all();
+    const result = await db.query('SELECT * FROM settings');
     const settingsMap = {};
-    settings.forEach(s => {
+    result.rows.forEach(s => {
       try {
         settingsMap[s.key] = JSON.parse(s.value);
       } catch {
@@ -143,14 +142,14 @@ router.get('/settings', (req, res) => {
 });
 
 // Update Setting
-router.post('/settings', (req, res) => {
+router.post('/settings', async (req, res) => {
   const { key, value } = req.body;
   if (!key) return res.status(400).json({ message: 'Key is required.' });
 
   try {
     console.log(`[ADMIN] Updating setting: ${key} = ${value}`);
     const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
-    db.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(key, valueStr);
+    await db.query('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value', [key, valueStr]);
     res.json({ message: `Setting ${key} updated successfully.`, key, value });
   } catch (error) {
     console.error('Update setting error:', error);

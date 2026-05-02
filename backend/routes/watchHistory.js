@@ -8,12 +8,13 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // Get user's watch history
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const history = db.prepare(
-      'SELECT * FROM watch_history WHERE user_id = ? ORDER BY last_watched DESC'
-    ).all(req.user.id);
-    res.json(history);
+    const history = await db.query(
+      'SELECT * FROM watch_history WHERE user_id = $1 ORDER BY last_watched DESC',
+      [req.user.id]
+    );
+    res.json(history.rows);
   } catch (error) {
     console.error('[WatchHistory] Get error:', error);
     res.status(500).json({ message: 'Failed to fetch watch history.' });
@@ -21,7 +22,7 @@ router.get('/', (req, res) => {
 });
 
 // Add or update watch history (upsert)
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { movieId, movieType, title, poster, backdrop, rating, year, progress, duration, season, episode } = req.body;
 
   if (!movieId || !title) {
@@ -29,18 +30,18 @@ router.post('/', (req, res) => {
   }
 
   try {
-    db.prepare(`
+    await db.query(`
       INSERT INTO watch_history (user_id, movie_id, movie_type, title, poster, backdrop, rating, year, progress, duration, season, episode, last_watched)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
       ON CONFLICT(user_id, movie_id, movie_type, season, episode) 
       DO UPDATE SET 
-        progress = excluded.progress,
-        duration = excluded.duration,
-        last_watched = datetime('now'),
-        title = excluded.title,
-        poster = excluded.poster,
-        backdrop = excluded.backdrop
-    `).run(
+        progress = EXCLUDED.progress,
+        duration = EXCLUDED.duration,
+        last_watched = NOW(),
+        title = EXCLUDED.title,
+        poster = EXCLUDED.poster,
+        backdrop = EXCLUDED.backdrop
+    `, [
       req.user.id,
       movieId,
       movieType || 'movie',
@@ -53,7 +54,7 @@ router.post('/', (req, res) => {
       duration || 0,
       season || null,
       episode || null
-    );
+    ]);
 
     res.status(201).json({ message: 'Watch history updated!' });
   } catch (error) {
@@ -63,14 +64,15 @@ router.post('/', (req, res) => {
 });
 
 // Delete from watch history
-router.delete('/:movieId', (req, res) => {
+router.delete('/:movieId', async (req, res) => {
   const { movieId } = req.params;
   const { type = 'movie' } = req.query;
 
   try {
-    db.prepare(
-      'DELETE FROM watch_history WHERE user_id = ? AND movie_id = ? AND movie_type = ?'
-    ).run(req.user.id, parseInt(movieId), type);
+    await db.query(
+      'DELETE FROM watch_history WHERE user_id = $1 AND movie_id = $2 AND movie_type = $3',
+      [req.user.id, parseInt(movieId), type]
+    );
 
     res.json({ message: 'Removed from watch history.' });
   } catch (error) {
