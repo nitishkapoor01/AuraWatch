@@ -14,7 +14,7 @@ const downloadsRoutes = require('./routes/downloads');
 require('./db');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
 const path = require('path');
 
@@ -40,6 +40,6 @@ app.get('/', (req, res) => {
   res.send('AuraWatch API is running');
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

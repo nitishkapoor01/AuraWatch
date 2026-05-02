@@ -19,5 +19,9 @@ RUN npx playwright install chromium --with-deps
 # Copy the rest of the application
 COPY . .
 
+# Expose the port strictly to help Render's port scanner
+ENV PORT=10000
+EXPOSE 10000
+
 # Start the server
 CMD ["node", "server.js"]
