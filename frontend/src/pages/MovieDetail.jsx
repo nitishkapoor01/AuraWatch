@@ -206,7 +206,7 @@ const MovieDetail = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:3000/api/movie/download', {
+      const res = await fetch(`${import.meta.env.VITE_API_DOWNLOAD_URL || 'http://localhost:3000'}/api/movie/download`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: movie.title, year: movie.year })

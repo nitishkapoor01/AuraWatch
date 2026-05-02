@@ -867,10 +867,12 @@
 @media (max-width: 768px) {
   .content {
     flex-direction: column;
-    padding: 0 16px 90px 16px;
+    padding: 80px 16px 120px 16px;
     align-items: center;
-    margin-top: -12vh;
-    gap: 16px;
+    margin-top: -15vh;
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .poster {
@@ -905,6 +907,8 @@
   .overview {
     font-size: 14px;
     margin-bottom: 20px;
+    text-align: left;
+    width: 100%;
   }
 
   .actions {
