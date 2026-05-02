@@ -21,7 +21,7 @@ const AdminDashboard = () => {
 
   const fetchLiveStats = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/tracking/live-stats', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/tracking/live-stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
 
   const fetchAnnouncement = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/announcement', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/admin/announcement`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -49,7 +49,7 @@ const AdminDashboard = () => {
 
   const fetchGlobalSettings = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/admin/settings', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/admin/settings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -89,8 +89,8 @@ const AdminDashboard = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [statsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:5000/api/admin/stats', { headers }),
-        fetch('http://localhost:5000/api/admin/users', { headers })
+        fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/admin/stats`, { headers }),
+        fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/admin/users`, { headers })
       ]);
 
       if (!statsRes.ok || !usersRes.ok) {
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
   const handleSaveAnnouncement = async () => {
     try {
       setSavingAnnouncement(true);
-      const res = await fetch('http://localhost:5000/api/admin/announcement', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/admin/announcement`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ const AdminDashboard = () => {
   const handleUpdateSetting = async (key, value) => {
     try {
       setSavingSettings(true);
-      const res = await fetch('http://localhost:5000/api/admin/settings', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/admin/settings`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -62,8 +62,8 @@ const Row = ({ title, endpoint }) => {
         };
 
         const sep = endpoint.includes('?') ? '&' : '?';
-        const p1Promise = fetchWithCache(`http://localhost:5000/api/movies/${endpoint}`, onRevalidatePage1);
-        const p2Promise = fetchWithCache(`http://localhost:5000/api/movies/${endpoint}${sep}page=2`, onRevalidatePage2);
+        const p1Promise = fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/${endpoint}`, onRevalidatePage1);
+        const p2Promise = fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/${endpoint}${sep}page=2`, onRevalidatePage2);
         
         const [page1, page2] = await Promise.all([p1Promise, p2Promise]);
         

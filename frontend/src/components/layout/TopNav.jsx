@@ -36,7 +36,7 @@ const TopNav = () => {
     if (query.trim().length > 1) {
       const fetchSearch = async () => {
         try {
-          const res = await fetch(`http://localhost:5000/api/movies/search?query=${query}`);
+          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/search?query=${query}`);
           const data = await res.json();
           if (Array.isArray(data)) {
             setSuggestions(data.slice(0, 5));

@@ -68,7 +68,7 @@ const MyList = () => {
 
   const fetchFavorites = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/favorites', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/favorites`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -83,7 +83,7 @@ const MyList = () => {
 
   const handleRemove = async (movieId, movieType) => {
     try {
-      await fetch(`http://localhost:5000/api/favorites/${movieId}?type=${movieType}`, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/favorites/${movieId}?type=${movieType}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

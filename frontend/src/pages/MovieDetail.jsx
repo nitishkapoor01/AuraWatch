@@ -66,7 +66,7 @@ const MovieDetail = () => {
           else setMovie(null);
           setLoading(false);
         };
-        const data = await fetchWithCache(`http://localhost:5000/api/movies/${id}?type=${type}`, onRevalidate);
+        const data = await fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/${id}?type=${type}`, onRevalidate);
         if (data && data.id) setMovie(data);
         else setMovie(null);
       } catch (error) {
@@ -78,7 +78,7 @@ const MovieDetail = () => {
 
     const fetchGlobalSettings = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/settings/skip_ads_timer');
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/settings/skip_ads_timer`);
         if (res.ok) {
           const data = await res.json();
           setGlobalSkipAds(data.value === 'true' || data.value === true);
@@ -105,7 +105,7 @@ const MovieDetail = () => {
     if (!isLoggedIn || !id) return;
     const checkFavorite = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/favorites/check/${id}?type=${type}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/favorites/check/${id}?type=${type}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
@@ -130,7 +130,7 @@ const MovieDetail = () => {
             setSelectedSeason(prev => prev || data[0]?.number || 1);
           }
         };
-        const data = await fetchWithCache(`http://localhost:5000/api/movies/${id}/seasons`, onRevalidate);
+        const data = await fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/${id}/seasons`, onRevalidate);
         if (Array.isArray(data)) {
           setSeasons(data);
           setSelectedSeason(data[0]?.number || 1);
@@ -151,7 +151,7 @@ const MovieDetail = () => {
             // Don't reset selectedEpisode on revalidate if it's already set
           }
         };
-        const data = await fetchWithCache(`http://localhost:5000/api/movies/${id}/season/${selectedSeason}`, onRevalidate);
+        const data = await fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/${id}/season/${selectedSeason}`, onRevalidate);
         if (Array.isArray(data)) {
           setEpisodes(data);
           setSelectedEpisode(1);
@@ -164,7 +164,7 @@ const MovieDetail = () => {
   const handleWatchTrailer = async () => {
     if (trailerKey) { setShowTrailer(true); return; }
     try {
-      const res = await fetch(`http://localhost:5000/api/movies/${id}/videos?type=${type}`);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/movies/${id}/videos?type=${type}`);
       const data = await res.json();
       if (data.key) { setTrailerKey(data.key); setShowTrailer(true); }
       else alert('Trailer not available');
@@ -272,7 +272,7 @@ const MovieDetail = () => {
   const trackWatch = async (season = null, episode = null) => {
     if (!isLoggedIn || !movie) return;
     try {
-      await fetch('http://localhost:5000/api/watch-history', {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/watch-history`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -312,13 +312,13 @@ const MovieDetail = () => {
 
     try {
       if (isFavorite) {
-        await fetch(`http://localhost:5000/api/favorites/${id}?type=${type}`, {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}`}/favorites/${id}?type=${type}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` }
         });
         setIsFavorite(false);
       } else {
-        await fetch('http://localhost:5000/api/favorites', {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/favorites`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
