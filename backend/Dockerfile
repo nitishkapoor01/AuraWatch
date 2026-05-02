@@ -1,27 +1,8 @@
 FROM node:18-slim
 
-# Install Playwright's OS-level dependencies (slim variant needs these)
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
-    fonts-liberation \
-    libnss3 \
-    libxss1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libgtk-3-0 \
-    libgbm-dev \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxrandr2 \
-    libxdamage1 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libcups2 \
-    libdrm2 \
-    libxshmfence1 \
-    && rm -rf /var/lib/apt/lists/*
+# Prevent apt-get from prompting for user input during installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 
 WORKDIR /app
 
@@ -31,10 +12,9 @@ COPY package*.json ./
 # Install npm dependencies
 RUN npm ci --production
 
-# Install ONLY Chromium (not Firefox/WebKit — saves ~400MB)
+# Install Playwright and its dependencies
 ENV PLAYWRIGHT_BROWSERS_PATH=/app/.playwright-browsers
-RUN npx playwright install chromium
-RUN npx playwright install-deps chromium
+RUN npx playwright install chromium --with-deps
 
 # Copy the rest of the application
 COPY . .
