@@ -14,7 +14,7 @@ const downloadsRoutes = require('./routes/downloads');
 require('./db');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = 10000;
 
 const path = require('path');
 
