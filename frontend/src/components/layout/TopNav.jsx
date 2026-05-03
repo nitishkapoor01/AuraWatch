@@ -3,6 +3,7 @@ import { Search, LogOut, User } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProfileModal from '../profile/ProfileModal';
+import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 
 const AVATARS = [
@@ -65,6 +66,16 @@ const TopNav = () => {
     }
   };
 
+  const handleFilterChange = (filters) => {
+    // If we change filters, go to search page with those filters
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+    params.append('type', filters.type);
+    params.append('genre', filters.genre);
+    params.append('lang', filters.lang);
+    navigate(`/search?${params.toString()}`);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login', { state: { message: 'Logged out successfully!' } });
@@ -96,6 +107,10 @@ const TopNav = () => {
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             onKeyDown={handleKeyDown}
           />
+
+          <div className={styles.filterInline}>
+            <FilterBar onFilterChange={handleFilterChange} />
+          </div>
           
           {isFocused && suggestions.length > 0 && (
             <div className={styles.suggestionsContainer}>

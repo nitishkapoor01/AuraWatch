@@ -157,8 +157,15 @@
 
 .searchContainer {
   position: relative;
-  width: 300px;
+  width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), flex-grow 0.3s;
+}
+
+.filterInline {
+  flex-shrink: 0;
 }
 
 .searchInput {
