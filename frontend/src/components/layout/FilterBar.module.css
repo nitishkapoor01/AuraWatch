@@ -7,29 +7,26 @@
 }
 
 .filterToggle {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 40px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.3s;
-  font-weight: 600;
-  font-size: 14px;
+  transition: all 0.2s;
 }
 
 .filterToggle:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 .filterToggle.active {
-  background: #e50914;
-  border-color: #e50914;
-  box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
+  color: #e50914;
+  background: rgba(229, 9, 20, 0.1);
 }
 
 .rotate {

@@ -96,6 +96,10 @@ const TopNav = () => {
 
       <div className={styles.navActions}>
         <div className={styles.searchContainer}>
+          <div className={styles.filterInline}>
+            <FilterBar onFilterChange={handleFilterChange} />
+          </div>
+
           <Search size={18} className={styles.searchIcon} />
           <input 
             type="text" 
@@ -107,10 +111,6 @@ const TopNav = () => {
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             onKeyDown={handleKeyDown}
           />
-
-          <div className={styles.filterInline}>
-            <FilterBar onFilterChange={handleFilterChange} />
-          </div>
           
           {isFocused && suggestions.length > 0 && (
             <div className={styles.suggestionsContainer}>

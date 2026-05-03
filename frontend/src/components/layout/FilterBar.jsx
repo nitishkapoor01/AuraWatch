@@ -45,10 +45,9 @@ const FilterBar = ({ onFilterChange }) => {
       <button 
         className={`${styles.filterToggle} ${isOpen ? styles.active : ''}`}
         onClick={() => setIsOpen(!isOpen)}
+        title="Filter Movies & Series"
       >
         <Filter size={18} />
-        <span>Filters</span>
-        <ChevronDown size={14} className={isOpen ? styles.rotate : ''} />
       </button>
 
       {isOpen && (
