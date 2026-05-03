@@ -822,39 +822,23 @@ class MovieCrawler {
 
     _isTitleMatch(targetTitle, searchTitle, searchYear) {
         if (!targetTitle || !searchTitle) return false;
-        
         const clean = (s) => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
         const t = clean(targetTitle);
         const s = clean(searchTitle);
-        
-        // Exact match or starts with + word boundary
+        // Exact match
         if (t === s) return true;
-        
-        // Ensure the search title is a standalone part of the target title
-        // This prevents "The Boys" from matching "The Boys I Love"
         const wordsS = s.split(' ');
         const wordsT = t.split(' ');
-        
-        // Check if all words of search title appear in sequence at the start of target
-        let match = true;
+        // All search title words must appear in sequence at the start of target
         for (let i = 0; i < wordsS.length; i++) {
-            if (wordsT[i] !== wordsS[i]) {
-                match = false;
-                break;
-            }
+            if (wordsT[i] !== wordsS[i]) return false;
         }
-
-        if (match) {
-            // Check year if provided
-            if (searchYear) {
-                if (targetTitle.includes(searchYear)) return true;
-                // If year not in title, we still allow it but it's less certain
-                // For now, if title matches exactly at start, we accept it
-            }
-            return true;
-        }
-
-        return false;
+        // Reject if extra words are real content words
+        // e.g. prevents "The Boys" matching "The Boys I've Loved Before"
+        const extraWords = wordsT.slice(wordsS.length);
+        const allowedExtra = /^(\d{3,4}p?|4k|uhd|hd|sd|s\d+|e\d+|season|episode|\d{4}|complete|batch|dual|hindi|english|tamil|telugu|bluray|webrip|web|dl|x264|x265|hevc|mkv|mp4|rip|part)$/i;
+        if (extraWords.some(w => !allowedExtra.test(w))) return false;
+        return true;
     }
 }
 
