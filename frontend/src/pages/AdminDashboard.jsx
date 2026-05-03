@@ -299,7 +299,7 @@ const AdminDashboard = () => {
       {activeTab === 'users' && (
         <div className={styles.tabContent}>
           <div className={styles.usersSection}>
-            <div className={styles.sectionHeader}><h2>User Management</h2><span className={styles.userCount}>{users.length} Users</span></div>
+            <div className={styles.sectionHeader}><h2>Registered Users</h2><span className={styles.userCount}>{users.length} Users</span></div>
             <div className={styles.tableContainer}>
               <table className={styles.usersTable}>
                 <thead>
@@ -333,6 +333,47 @@ const AdminDashboard = () => {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className={styles.usersSection} style={{ marginTop: '40px' }}>
+            <div className={styles.sectionHeader}>
+              <h2>Active Guest Sessions</h2>
+              <span className={styles.userCount} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}>
+                {liveStats?.sessions.filter(s => s.isGuest).length || 0} Guests
+              </span>
+            </div>
+            <div className={styles.tableContainer}>
+              <table className={styles.usersTable}>
+                <thead>
+                  <tr><th>Guest ID</th><th>Last Action</th><th>Current Path</th><th>Last Seen</th></tr>
+                </thead>
+                <tbody>
+                  {(liveStats?.sessions.filter(s => s.isGuest) || []).map(guest => (
+                    <tr key={guest.id}>
+                      <td>
+                        <div className={styles.userInfo}>
+                          <div className={styles.userAvatar} style={{ background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Users size={16} color="#666" />
+                          </div>
+                          <div>
+                            <div className={styles.userName}>Guest #{guest.id.substring(0, 8)}</div>
+                            <div className={styles.userEmail}>Visitor ID: {guest.visitorId?.substring(0, 12) || 'Anonymous'}...</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={styles.actionBadge} style={{ fontSize: '10px' }}>{guest.action || 'Browsing'}</span>
+                      </td>
+                      <td style={{ fontSize: '11px', color: '#888' }}>{guest.path}</td>
+                      <td>{Math.round((Date.now() - guest.lastSeen) / 1000)}s ago</td>
+                    </tr>
+                  ))}
+                  {(!liveStats || liveStats.sessions.filter(s => s.isGuest).length === 0) && (
+                    <tr><td colSpan="4" className={styles.emptyTable}>No guests active right now.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
