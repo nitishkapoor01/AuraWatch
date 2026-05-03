@@ -61,7 +61,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'Account created successfully!',
       token,
-      user: { id: newUserId, email: cleanEmail, name: name.trim(), role: 'user', avatar: 'red' }
+      user: { id: newUserId, email: cleanEmail, name: name.trim(), role: 'user', avatar: 'red', is_super_admin: false, admin_permissions: { all: false } }
     });
   } catch (error) {
     console.error('[Auth] Register error:', error);
@@ -134,7 +134,7 @@ router.post('/login', async (req, res) => {
     res.json({
       message: 'Login successful!',
       token,
-      user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role }
+      user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role, is_super_admin: user.is_super_admin, admin_permissions: user.admin_permissions }
     });
   } catch (error) {
     console.error('[Auth] Login error:', error);
@@ -243,7 +243,7 @@ router.post('/forgot-password/reset', async (req, res) => {
 
 // Get current user
 router.get('/me', authMiddleware, async (req, res) => {
-  const result = await db.query('SELECT id, name, email, avatar, role, created_at FROM users WHERE id = $1', [req.user.id]);
+  const result = await db.query('SELECT id, name, email, avatar, role, is_super_admin, admin_permissions, created_at FROM users WHERE id = $1', [req.user.id]);
   const user = result.rows[0];
   if (!user) {
     return res.status(404).json({ message: 'User not found.' });

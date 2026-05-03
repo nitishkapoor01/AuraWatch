@@ -18,6 +18,8 @@ const initDB = async () => {
         security_answer_hash TEXT NOT NULL,
         avatar TEXT DEFAULT 'red',
         role TEXT DEFAULT 'user',
+        is_super_admin BOOLEAN DEFAULT FALSE,
+        admin_permissions JSONB DEFAULT '{"all": true}',
         failed_login_attempts INTEGER DEFAULT 0,
         locked_until TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -132,6 +134,12 @@ const initDB = async () => {
       BEGIN 
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='is_banned') THEN
           ALTER TABLE users ADD COLUMN is_banned BOOLEAN DEFAULT FALSE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='is_super_admin') THEN
+          ALTER TABLE users ADD COLUMN is_super_admin BOOLEAN DEFAULT FALSE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='admin_permissions') THEN
+          ALTER TABLE users ADD COLUMN admin_permissions JSONB DEFAULT '{"all": false}';
         END IF;
       END $$;
 

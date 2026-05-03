@@ -81,7 +81,7 @@ router.get('/stats', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT u.id, u.name, u.email, u.role, u.avatar, u.created_at, u.failed_login_attempts, u.is_banned,
+      SELECT u.id, u.name, u.email, u.role, u.is_super_admin, u.admin_permissions, u.avatar, u.created_at, u.failed_login_attempts, u.is_banned,
              (SELECT last_seen FROM unique_visitors v WHERE v.user_id = u.id ORDER BY last_seen DESC LIMIT 1) as last_seen
       FROM users u
       ORDER BY u.created_at DESC
@@ -231,10 +231,35 @@ router.put('/users/:id/role', async (req, res) => {
   }
 
   try {
+    // Check if target user is super admin
+    const target = await db.query('SELECT is_super_admin FROM users WHERE id = $1', [id]);
+    if (target.rows[0]?.is_super_admin) {
+      return res.status(403).json({ message: 'Super Admins cannot be demoted.' });
+    }
+
     await db.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
     res.json({ message: `User role updated to ${role}` });
   } catch (e) {
     res.status(500).json({ message: 'Failed to update user role' });
+  }
+});
+
+// Update Admin Permissions
+router.put('/users/:id/permissions', async (req, res) => {
+  const { id } = req.params;
+  const { permissions } = req.body; // { read: boolean, write: boolean }
+
+  try {
+    // Only super admin can change permissions
+    const currentUser = await db.query('SELECT is_super_admin FROM users WHERE id = $1', [req.user.id]);
+    if (!currentUser.rows[0]?.is_super_admin) {
+      return res.status(403).json({ message: 'Only Super Admins can manage permissions.' });
+    }
+
+    await db.query('UPDATE users SET admin_permissions = $1 WHERE id = $2', [JSON.stringify(permissions), id]);
+    res.json({ message: 'Permissions updated successfully.' });
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to update permissions' });
   }
 });
 
@@ -248,6 +273,12 @@ router.put('/users/:id/ban', async (req, res) => {
   }
 
   try {
+    // Check if target user is super admin
+    const target = await db.query('SELECT is_super_admin FROM users WHERE id = $1', [id]);
+    if (target.rows[0]?.is_super_admin) {
+      return res.status(403).json({ message: 'Super Admins cannot be banned.' });
+    }
+
     await db.query('UPDATE users SET is_banned = $1 WHERE id = $2', [is_banned, id]);
     res.json({ message: `User ${is_banned ? 'banned' : 'unbanned'} successfully` });
   } catch (e) {

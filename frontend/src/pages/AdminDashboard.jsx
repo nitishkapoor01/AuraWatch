@@ -25,6 +25,9 @@ const AdminDashboard = () => {
   const [searchLogs, setSearchLogs] = useState({ recent: [], topKeywords: [], noResults: [] });
   const [loginLogs, setLoginLogs] = useState([]);
   const [blockedIps, setBlockedIps] = useState([]);
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
+  const [selectedUserForPerms, setSelectedUserForPerms] = useState(null);
+  const [tempPerms, setTempPerms] = useState({ read: true, write: false });
   const [mostWatched, setMostWatched] = useState([]);
   const [visitors, setVisitors] = useState([]);
   
@@ -126,17 +129,44 @@ const AdminDashboard = () => {
     } catch (e) { alert('Error updating role'); }
   };
 
-  const handleToggleBan = async (userId, isBanned) => {
+  const handleToggleBan = async (id, currentStatus) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/users/${userId}/ban`, {
+      const res = await fetch(`${API_BASE}/admin/users/${id}/ban`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ is_banned: !isBanned })
+        body: JSON.stringify({ is_banned: !currentStatus })
       });
       if (res.ok) {
-        setUsers(users.map(u => u.id === userId ? { ...u, is_banned: !isBanned } : u));
+        setUsers(users.map(u => u.id === id ? { ...u, is_banned: !currentStatus } : u));
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Action failed');
       }
-    } catch (e) { alert('Error toggling ban'); }
+    } catch (e) { alert('Error updating ban status'); }
+  };
+
+  const handleUpdatePermissions = async () => {
+    if (!selectedUserForPerms) return;
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${selectedUserForPerms.id}/permissions`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ permissions: tempPerms })
+      });
+      if (res.ok) {
+        setUsers(users.map(u => u.id === selectedUserForPerms.id ? { ...u, admin_permissions: tempPerms } : u));
+        setIsPermissionModalOpen(false);
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Update failed');
+      }
+    } catch (e) { alert('Error updating permissions'); }
+  };
+
+  const openPermissionModal = (user) => {
+    setSelectedUserForPerms(user);
+    setTempPerms(user.admin_permissions || { read: true, write: false });
+    setIsPermissionModalOpen(true);
   };
 
   const handleBlockIp = async (e) => {
@@ -315,11 +345,17 @@ const AdminDashboard = () => {
                       <td>
                         <div className={styles.userInfo}>
                           <img src={u.avatar?.startsWith('http') ? u.avatar : `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.avatar || 'red'}`} className={styles.userAvatar} />
-                          <div><div className={styles.userName}>{u.name}</div><div className={styles.userEmail}>{u.email}</div></div>
+                          <div>
+                            <div className={styles.userName}>
+                              {u.name}
+                              {u.is_super_admin && <span className={styles.superAdminBadge}>SUPER ADMIN</span>}
+                            </div>
+                            <div className={styles.userEmail}>{u.email}</div>
+                          </div>
                         </div>
                       </td>
                       <td>
-                        <select className={styles.roleSelect} value={u.role} onChange={(e) => handleUpdateRole(u.id, e.target.value)} disabled={u.id === currentUser.id}>
+                        <select className={styles.roleSelect} value={u.role} onChange={(e) => handleUpdateRole(u.id, e.target.value)} disabled={u.id === currentUser.id || u.is_super_admin}>
                           <option value="user">User</option>
                           <option value="admin">Admin</option>
                         </select>
@@ -333,7 +369,12 @@ const AdminDashboard = () => {
                       </td>
                       <td>
                         <div className={styles.userActionBtns}>
-                          <button className={u.is_banned ? styles.unbanBtn : styles.banBtn} onClick={() => handleToggleBan(u.id, u.is_banned)} disabled={u.id === currentUser.id}>
+                          {currentUser.is_super_admin && u.role === 'admin' && !u.is_super_admin && (
+                            <button className={styles.permBtn} onClick={() => openPermissionModal(u)} title="Admin Permissions">
+                              <Shield size={18} />
+                            </button>
+                          )}
+                          <button className={u.is_banned ? styles.unbanBtn : styles.banBtn} onClick={() => handleToggleBan(u.id, u.is_banned)} disabled={u.id === currentUser.id || u.is_super_admin}>
                             {u.is_banned ? <ShieldCheck size={18} /> : <Ban size={18} />}
                           </button>
                         </div>
@@ -545,6 +586,47 @@ const AdminDashboard = () => {
               </div>
             ))}
             {liveStats.sessions.length === 0 && <div className={styles.emptyTable}>No active users in the last 5 minutes.</div>}
+          </div>
+        </div>
+      )}
+      {/* PERMISSION MODAL */}
+      {isPermissionModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.permModal}>
+            <div className={styles.modalHeader}>
+              <h3>Manage Admin Permissions</h3>
+              <button className={styles.closeBtn} onClick={() => setIsPermissionModalOpen(false)}><X size={20} /></button>
+            </div>
+            <p className={styles.modalSubtitle}>Setting access for: {selectedUserForPerms?.name}</p>
+            
+            <div className={styles.permGrid}>
+              <div className={styles.permItem}>
+                <div className={styles.permInfo}>
+                  <strong>Read Access</strong>
+                  <span>Can view stats, users, and logs.</span>
+                </div>
+                <label className={styles.switch}>
+                  <input type="checkbox" checked={tempPerms.read} onChange={e => setTempPerms({...tempPerms, read: e.target.checked})} />
+                  <span className={styles.slider}></span>
+                </label>
+              </div>
+              
+              <div className={styles.permItem}>
+                <div className={styles.permInfo}>
+                  <strong>Write Access</strong>
+                  <span>Can ban users, change announcements, and block IPs.</span>
+                </div>
+                <label className={styles.switch}>
+                  <input type="checkbox" checked={tempPerms.write} onChange={e => setTempPerms({...tempPerms, write: e.target.checked})} />
+                  <span className={styles.slider}></span>
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button className={styles.cancelBtn} onClick={() => setIsPermissionModalOpen(false)}>Cancel</button>
+              <button className={styles.saveBtn} onClick={handleUpdatePermissions}>Save Permissions</button>
+            </div>
           </div>
         </div>
       )}
