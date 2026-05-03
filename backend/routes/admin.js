@@ -163,6 +163,22 @@ router.put('/users/:id/role', isAdmin, async (req, res) => {
   res.json({ message: `User role updated to ${role}` });
 });
 
+// Delete User Permanently
+router.delete('/users/:id', isAdmin, async (req, res) => {
+  const { id } = req.params;
+  if (parseInt(id) === req.user.id) return res.status(400).json({ message: 'You cannot delete yourself.' });
+  
+  try {
+    const target = await db.query('SELECT is_super_admin FROM users WHERE id = $1', [id]);
+    if (target.rows[0]?.is_super_admin) return res.status(403).json({ message: 'Super Admins cannot be deleted.' });
+
+    await db.query('DELETE FROM users WHERE id = $1', [id]);
+    res.json({ message: 'User deleted permanently.' });
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to delete user.' });
+  }
+});
+
 // Update Admin Permissions
 router.put('/users/:id/permissions', isAdmin, async (req, res) => {
   const { id } = req.params;

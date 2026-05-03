@@ -145,6 +145,22 @@ const AdminDashboard = () => {
     } catch (e) { alert('Error updating ban status'); }
   };
 
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm('ARE YOU SURE? This will permanently delete this user and all their data from the database. This cannot be undone.')) return;
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setUsers(users.filter(u => u.id !== id));
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Failed to delete user');
+      }
+    } catch (e) { alert('Error deleting user'); }
+  };
+
   const handleUpdatePermissions = async () => {
     if (!selectedUserForPerms) return;
     try {
@@ -389,6 +405,15 @@ const AdminDashboard = () => {
                             disabled={u.id === currentUser.id || u.is_super_admin || currentUser.role !== 'admin'}
                           >
                             {u.is_banned ? <ShieldCheck size={18} /> : <Ban size={18} />}
+                          </button>
+                          <button 
+                            className={styles.banBtn} 
+                            style={{ background: 'rgba(229, 9, 20, 0.05)', borderColor: 'rgba(229, 9, 20, 0.1)' }}
+                            onClick={() => handleDeleteUser(u.id)} 
+                            disabled={u.id === currentUser.id || u.is_super_admin || currentUser.role !== 'admin'}
+                            title="Delete User Permanently"
+                          >
+                            <Trash2 size={18} />
                           </button>
                         </div>
                       </td>
