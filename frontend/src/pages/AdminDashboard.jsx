@@ -493,7 +493,7 @@ const AdminDashboard = () => {
               <form onSubmit={handleBlockIp} className={styles.blockIpForm}>
                 <input type="text" placeholder="IP Address (e.g. 1.2.3.4)" className={styles.inputField} value={newBlockIp.ip} onChange={e => setNewBlockIp({...newBlockIp, ip: e.target.value})} required />
                 <input type="text" placeholder="Reason for blocking" className={styles.inputField} value={newBlockIp.reason} onChange={e => setNewBlockIp({...newBlockIp, reason: e.target.value})} />
-                <button type="submit" className={styles.primaryBtn}>Block IP</button>
+                <button type="submit" className={styles.primaryBtn} disabled={currentUser.role !== 'admin'}>Block IP</button>
               </form>
               
               <h3 style={{ marginTop: '30px' }}>Blocked IPs</h3>
@@ -505,7 +505,7 @@ const AdminDashboard = () => {
                       <tr key={item.ip_address}>
                         <td>{item.ip_address}</td>
                         <td>{item.reason}</td>
-                        <td><button className={styles.unblockBtn} onClick={() => handleUnblockIp(item.ip_address)}>Unblock</button></td>
+                        <td><button className={styles.unblockBtn} onClick={() => handleUnblockIp(item.ip_address)} disabled={currentUser.role !== 'admin'}>Unblock</button></td>
                       </tr>
                     ))}
                     {blockedIps.length === 0 && <tr><td colSpan="3">No blocked IPs</td></tr>}
