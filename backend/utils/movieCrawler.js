@@ -686,6 +686,9 @@ class MovieCrawler {
                 () => this._search1337x(title, year, tvInfo),
                 () => type === 'tv' ? this._searchEZTV(title, year, tvInfo) : Promise.resolve(null),
                 () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
+                () => this._searchWordpressSite(searchQuery, year, "MoviesVerse", "https://moviesmod.day/"),
+                () => this._searchWordpressSite(searchQuery, year, "UHDMovies", "https://uhdmovies.wiki/"),
+                () => this._searchWordpressSite(searchQuery, year, "BollyFlix", "https://bollyflix.icu/"),
                 () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movie4in", "https://movie4in.com/"),
@@ -697,7 +700,7 @@ class MovieCrawler {
             const sourceResults = await Promise.allSettled(sources.map(s => s()));
             
             let mergedMovie = null;
-            const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
+            const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'MoviesVerse', 'UHDMovies', 'BollyFlix', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
             
             sourceResults.forEach((res, index) => {
                 results.meta.sourcesTried.push(sourceNames[index]);
