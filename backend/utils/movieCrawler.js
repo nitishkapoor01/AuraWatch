@@ -845,23 +845,35 @@ class MovieCrawler {
 
     _isTitleMatch(targetTitle, searchTitle, searchYear) {
         if (!targetTitle || !searchTitle) return false;
-        const clean = (s) => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
-        const t = clean(targetTitle);
-        const s = clean(searchTitle);
-        // Exact match
-        if (t === s) return true;
-        const wordsS = s.split(' ');
-        const wordsT = t.split(' ');
-        // All search title words must appear in sequence at the start of target
-        for (let i = 0; i < wordsS.length; i++) {
-            if (wordsT[i] !== wordsS[i]) return false;
+        
+        const getPureTitle = (str) => {
+            let clean = str.toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+            const words = clean.split(' ');
+            const metadataRegex = /^(19\d{2}|20\d{2}|\d{3,4}p|4k|uhd|hd|sd|s\d+|e\d+|season|episode|complete|batch|pack|dual|audio|hindi|english|tamil|telugu|bluray|webrip|web|dl|x264|x265|hevc|aac|mkv|mp4|avi|rip|dvdrip|hdrip|extended|unrated|directors|cut|remastered|part|hdhub4u|vegamovies|katmoviehd|moviesverse)$/i;
+            
+            let pureWords = [];
+            for (let i = 0; i < words.length; i++) {
+                const w = words[i];
+                if (i === 0 || !metadataRegex.test(w)) {
+                    pureWords.push(w);
+                } else {
+                    break;
+                }
+            }
+            return pureWords.join(' ');
+        };
+
+        const pureTarget = getPureTitle(targetTitle);
+        const pureSearch = getPureTitle(searchTitle);
+
+        if (pureTarget === pureSearch) return true;
+        
+        if (pureTarget.includes(pureSearch) || pureSearch.includes(pureTarget)) {
+            if (Math.abs(pureTarget.length - pureSearch.length) < 15) {
+                return true;
+            }
         }
-        // Reject if extra words are real content words
-        // e.g. prevents "The Boys" matching "The Boys I've Loved Before"
-        const extraWords = wordsT.slice(wordsS.length);
-        const allowedExtra = /^(\d{3,4}p?|4k|uhd|hd|sd|s\d+|e\d+|season|episode|\d{4}|complete|batch|dual|hindi|english|tamil|telugu|bluray|webrip|web|dl|x264|x265|hevc|mkv|mp4|rip|part)$/i;
-        if (extraWords.some(w => !allowedExtra.test(w))) return false;
-        return true;
+        return false;
     }
 }
 
