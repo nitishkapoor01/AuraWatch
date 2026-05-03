@@ -180,6 +180,9 @@ const MovieDetail = () => {
   };
 
   const handleDownload = async (forceRefresh = false) => {
+    // Prevent React synthetic event objects from being treated as true
+    const isForceRefresh = typeof forceRefresh === 'boolean' ? forceRefresh : false;
+    
     if (!movie || isDownloading) return;
     setIsDownloading(true);
     setShowDownloadModal(true);
@@ -215,7 +218,7 @@ const MovieDetail = () => {
           type: movie.type,
           season: isTV ? selectedSeason : null,
           episode: isTV ? selectedEpisode : null,
-          forceRefresh
+          forceRefresh: isForceRefresh
         })
       });
       const data = await res.json();
