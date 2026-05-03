@@ -404,27 +404,33 @@
 /* 📱 MOBILE (≤768px) */
 @media (max-width: 768px) {
   .modal {
-    padding: 24px;
+    padding: 20px;
     max-width: calc(100% - 32px);
     margin: 16px;
   }
 
   .title {
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 20px;
+    margin-bottom: 16px;
   }
 
   .profileHeader {
     flex-direction: column;
     text-align: center;
-    gap: 16px;
-    padding-bottom: 24px;
-    margin-bottom: 24px;
+    gap: 12px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+
+  .currentAvatar, .currentAvatarImage {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
   }
 
   .grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
   }
 
   .passwordRow {
@@ -435,14 +441,19 @@
 /* 📱 SMALL PHONE (≤480px) */
 @media (max-width: 480px) {
   .modal {
-    padding: 20px 16px;
-    max-width: calc(100% - 20px);
-    margin: 10px;
+    padding: 16px 12px;
+    max-width: calc(100% - 16px);
+    margin: 8px;
+    max-height: 85vh;
   }
 
   .grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .avatarOption {
+    font-size: 18px;
   }
 
   .nameRow {
