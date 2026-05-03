@@ -21,8 +21,7 @@ const authMiddleware = (req, res, next) => {
 };
 
 const isAdmin = async (req, res, next) => {
-  // We need to fetch the fresh role from the database to ensure immediate revocation if needed
-  const db = require('../db'); // Require lazily to avoid circular deps if any
+  const db = require('../db');
   try {
     const result = await db.query('SELECT role FROM users WHERE id = $1', [req.user.id]);
     const user = result.rows[0];
@@ -36,4 +35,19 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, isAdmin };
+const isModerator = async (req, res, next) => {
+  const db = require('../db');
+  try {
+    const result = await db.query('SELECT role FROM users WHERE id = $1', [req.user.id]);
+    const user = result.rows[0];
+    if (!user || (user.role !== 'admin' && user.role !== 'moderator')) {
+      return res.status(403).json({ message: 'Access denied. Moderator privileges required.' });
+    }
+    next();
+  } catch (error) {
+    console.error('[Auth Middleware] Moderator verify error:', error);
+    return res.status(500).json({ message: 'Error verifying moderator status.' });
+  }
+};
+
+module.exports = { authMiddleware, isAdmin, isModerator };

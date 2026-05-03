@@ -308,7 +308,11 @@ const AdminDashboard = () => {
                     </button>
                   </div>
                 </div>
-                <button className={styles.saveAnnouncementBtn} onClick={handleSaveAnnouncement} disabled={savingAnnouncement}>
+                <button 
+                  className={styles.saveAnnouncementBtn} 
+                  onClick={handleSaveAnnouncement} 
+                  disabled={savingAnnouncement || currentUser.role !== 'admin'}
+                >
                   {savingAnnouncement ? 'UPDATING...' : 'PUSH TO ALL DEVICES'}
                 </button>
               </div>
@@ -320,7 +324,11 @@ const AdminDashboard = () => {
             <div className={styles.settingsGrid}>
               <div className={styles.settingCard}>
                 <div className={styles.settingInfo}><h3>Skip Download Timer</h3><p>Users bypass the 30s wait when enabled.</p></div>
-                <button className={`${styles.toggleBtn} ${globalSettings.skip_ads_timer ? styles.active : ''}`} onClick={() => handleUpdateSetting('skip_ads_timer', !globalSettings.skip_ads_timer)} disabled={savingSettings}>
+                <button 
+                  className={`${styles.toggleBtn} ${globalSettings.skip_ads_timer ? styles.active : ''}`} 
+                  onClick={() => handleUpdateSetting('skip_ads_timer', !globalSettings.skip_ads_timer)} 
+                  disabled={savingSettings || currentUser.role !== 'admin'}
+                >
                   <div className={styles.toggleThumb}></div>
                 </button>
               </div>
@@ -355,8 +363,9 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td>
-                        <select className={styles.roleSelect} value={u.role} onChange={(e) => handleUpdateRole(u.id, e.target.value)} disabled={u.id === currentUser.id || u.is_super_admin}>
+                        <select className={styles.roleSelect} value={u.role} onChange={(e) => handleUpdateRole(u.id, e.target.value)} disabled={u.id === currentUser.id || u.is_super_admin || currentUser.role !== 'admin'}>
                           <option value="user">User</option>
+                          <option value="moderator">Moderator</option>
                           <option value="admin">Admin</option>
                         </select>
                       </td>
@@ -374,7 +383,11 @@ const AdminDashboard = () => {
                               <Shield size={18} />
                             </button>
                           )}
-                          <button className={u.is_banned ? styles.unbanBtn : styles.banBtn} onClick={() => handleToggleBan(u.id, u.is_banned)} disabled={u.id === currentUser.id || u.is_super_admin}>
+                          <button 
+                            className={u.is_banned ? styles.unbanBtn : styles.banBtn} 
+                            onClick={() => handleToggleBan(u.id, u.is_banned)} 
+                            disabled={u.id === currentUser.id || u.is_super_admin || currentUser.role !== 'admin'}
+                          >
                             {u.is_banned ? <ShieldCheck size={18} /> : <Ban size={18} />}
                           </button>
                         </div>

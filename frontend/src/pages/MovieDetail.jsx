@@ -602,7 +602,7 @@ const MovieDetail = () => {
                 <h2>Generating Premium Links</h2>
                 <p>Please wait while we securely fetch the best available download links for you.</p>
                 
-                {(!user || user.role !== 'admin') && !globalSkipAds ? (
+                {(!user || (user.role !== 'admin' && !user.is_super_admin)) && !globalSkipAds ? (
                   <>
                     {/* AD PLACEHOLDER */}
                     <div className={styles.adPlaceholder}>
