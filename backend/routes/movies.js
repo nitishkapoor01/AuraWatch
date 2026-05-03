@@ -142,7 +142,7 @@ router.get('/discover', async (req, res) => {
   try { res.json(await fetchAndFormat(url, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
-// --- HOME PAGE ENDPOINTS (RESTORED) ---
+// --- HOME PAGE ENDPOINTS ---
 router.get('/originals', async (req, res) => {
   try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/tv?api_key=${getApiKey()}&with_networks=213&page=${req.query.page || 1}`, 'tv')); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
@@ -167,9 +167,11 @@ router.get('/genre/:id', async (req, res) => {
 
 // --- DETAILS & TV ENDPOINTS ---
 router.get('/:id/videos', async (req, res) => {
-  const mediaType = req.query.type === 'Series' ? 'tv' : 'movie';
+  const { id } = req.params;
+  const type = (req.query.type || '').toLowerCase();
+  const mediaType = (type === 'series' || type === 'tv') ? 'tv' : 'movie';
   try {
-    const r = await fetchWithRetry(`${TMDB_BASE_URL}/${mediaType}/${req.params.id}/videos?api_key=${getApiKey()}`);
+    const r = await fetchWithRetry(`${TMDB_BASE_URL}/${mediaType}/${id}/videos?api_key=${getApiKey()}`);
     const d = await r.json();
     const trailer = (d.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube') || (d.results || [])[0];
     res.json(trailer || { key: null });
@@ -193,12 +195,14 @@ router.get('/:id/season/:num', async (req, res) => {
 });
 
 router.get('/:id/similar', async (req, res) => {
-  const mediaType = req.query.type === 'Series' ? 'tv' : 'movie';
+  const type = (req.query.type || '').toLowerCase();
+  const mediaType = (type === 'series' || type === 'tv') ? 'tv' : 'movie';
   try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/${mediaType}/${req.params.id}/recommendations?api_key=${getApiKey()}`, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
 router.get('/:id', async (req, res) => {
-  const mediaType = req.query.type === 'Series' ? 'tv' : 'movie';
+  const type = (req.query.type || '').toLowerCase();
+  const mediaType = (type === 'series' || type === 'tv') ? 'tv' : 'movie';
   try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/${mediaType}/${req.params.id}?api_key=${getApiKey()}&append_to_response=credits`, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
