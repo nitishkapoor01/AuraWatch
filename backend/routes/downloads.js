@@ -94,8 +94,6 @@ router.post('/movie', async (req, res) => {
     console.log(`[CACHE] MISS for "${title}" — starting scraper...`);
 
     // ── STEP 2: Run Scraper ──────────────────────────────────────────────
-    // Give 55s total for the HTTP request (crawler's own 18s hard stop + depth-1 crawl time)
-    res.setTimeout(55000);
     const crawler = new MovieCrawler({ bypassShorteners: true });
 
     try {

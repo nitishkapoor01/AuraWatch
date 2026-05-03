@@ -697,15 +697,30 @@ class MovieCrawler {
                 () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net/")
             ];
 
-            const sourceResults = await Promise.allSettled(sources.map(s => s()));
+            const sourceResults = [];
+            const wrappedPromises = sources.map(async (s, index) => {
+                try {
+                    const value = await s();
+                    sourceResults[index] = { status: 'fulfilled', value };
+                } catch (reason) {
+                    sourceResults[index] = { status: 'rejected', reason };
+                }
+            });
+
+            // Strict 25s limit to guarantee we respond before frontend/Render times out
+            await Promise.race([
+                Promise.all(wrappedPromises),
+                new Promise(resolve => setTimeout(resolve, 25000))
+            ]);
             
             let mergedMovie = null;
             const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'MoviesVerse', 'UHDMovies', 'BollyFlix', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
             
-            sourceResults.forEach((res, index) => {
-                results.meta.sourcesTried.push(sourceNames[index]);
+            sourceNames.forEach((name, index) => {
+                results.meta.sourcesTried.push(name);
+                const res = sourceResults[index];
                 
-                if (res.status === 'fulfilled' && res.value) {
+                if (res && res.status === 'fulfilled' && res.value) {
                     mergedMovie = this._mergeResults(mergedMovie, res.value, title);
                 }
             });
