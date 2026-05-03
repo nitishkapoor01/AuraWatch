@@ -397,7 +397,7 @@
   }
 
   .controlGrid, .securityControls {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 16px;
   }
 }
@@ -484,7 +484,7 @@
   }
 
   .controlGrid, .securityControls {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 16px;
   }
 

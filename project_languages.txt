@@ -1,0 +1,24 @@
+AuraWatch Project - Technologies & Languages Used
+==================================================
+
+1. Programming Languages
+------------------------
+- JavaScript (JS / JSX) : The core programming language used for both the Frontend, Backend, and Scrapper.
+- CSS : Used for styling the application (Vanilla CSS and CSS Modules).
+- HTML : Used for the structure of the web pages.
+- SQL : Used for interacting with the PostgreSQL database.
+
+2. Frameworks & Libraries
+-------------------------
+- React.js : Frontend UI library.
+- Node.js & Express.js : Backend server framework.
+- Playwright / Puppeteer : Browser automation tools used in the backend scraper for fetching download links.
+- pg (node-postgres) : PostgreSQL client for Node.js.
+- jsonwebtoken (JWT) : Used for authentication.
+
+3. Tools & Configurations
+-------------------------
+- JSON : Used for configuration files (package.json, etc.).
+- Dockerfile : Used for containerizing the backend for deployment.
+- Git : Version control.
+- Vite : Build tool for the React frontend.
