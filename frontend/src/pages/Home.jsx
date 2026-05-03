@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchWithCache } from '../utils/api';
 import styles from './Home.module.css';
 import Row from '../components/Row';
+import SEO from '../components/SEO';
 
 const Home = () => {
   const [trending, setTrending] = useState([]);
@@ -60,8 +61,9 @@ const Home = () => {
 
   return (
     <div className={styles.home}>
-      {/* Hero Section */}
-      <section className={styles.hero}>
+      <SEO />
+      {/* Dynamic Hero Section */}
+      <div className={styles.heroSection}>
         {loading ? (
           <div className="skeleton" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></div>
         ) : (

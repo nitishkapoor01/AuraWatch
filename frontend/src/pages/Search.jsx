@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import styles from './Search.module.css';
 import homeStyles from './Home.module.css';
+import SEO from '../components/SEO';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -45,6 +46,10 @@ const Search = () => {
 
   return (
     <div className={styles.searchPage}>
+      <SEO 
+        title={query ? `Search results for "${query}"` : `Explore ${filterType === 'Movie' ? 'Movies' : 'TV Series'}`}
+        description={`Find and download the best ${filterType === 'Movie' ? 'movies' : 'TV shows'} matching your search on AuraWatch.`}
+      />
       <div className={styles.searchHeader}>
         {query ? (
           <h1 className={styles.searchTitle}>

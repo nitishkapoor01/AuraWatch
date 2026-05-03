@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2 } from 'lucide-react';
 import styles from './MovieDetail.module.css';
 import Row from '../components/Row';
+import SEO from '../components/SEO';
 import { fetchWithCache } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -181,6 +182,13 @@ const MovieDetail = () => {
     fetchSeasons();
   }, [id, isTV]);
 
+  // Ensure user waits 30s even if links are fetched earlier
+  useEffect(() => {
+    if (downloadStep === 'ad' && adTimer <= 0 && Object.keys(parsedDownloads).length > 0) {
+      setDownloadStep('options');
+    }
+  }, [adTimer, downloadStep, parsedDownloads]);
+
   // Fetch episodes when season changes
   useEffect(() => {
     if (!isTV) return;
@@ -300,18 +308,9 @@ const MovieDetail = () => {
           if (shouldSkipTimer) {
             if (timerInterval) clearInterval(timerInterval);
             setDownloadStep('options');
-          } else {
-            // Wait for timer if still running
-            const checkTimer = setInterval(() => {
-              setAdTimer((currentTimer) => {
-                if (currentTimer <= 0) {
-                  clearInterval(checkTimer);
-                  setDownloadStep('options');
-                }
-                return currentTimer;
-              });
-            }, 500);
           }
+          // If not skipping, the useEffect above will trigger setDownloadStep('options')
+          // when adTimer reaches 0 and parsedDownloads is populated.
         } else {
           setDownloadErrorMsg('No direct download links found. (Only torrents/magnets available)');
           setDownloadStep('error');
@@ -410,6 +409,12 @@ const MovieDetail = () => {
 
   return (
     <div className={styles.detailPage}>
+      <SEO 
+        title={`Download ${movie?.title} (${movie?.year || ''}) Dual Audio HD`}
+        description={movie?.overview || `Watch and download ${movie?.title} in 1080p high quality on AuraWatch.`}
+        image={movie?.poster || movie?.backdrop}
+        type={isTV ? "video.tv_show" : "video.movie"}
+      />
 
       {/* Embed Player Modal */}
       {showPlayer && (
