@@ -22,6 +22,21 @@ const extractLanguage = (name) => {
   return 'Original / English';
 };
 
+const AdScript = () => {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://heavenlysuspicious.com/0f/1d/e9/0f1de92e83b8f920f72e427960fb1049.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+  return null;
+};
+
 const MovieDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -604,10 +619,11 @@ const MovieDetail = () => {
                 
                 {(!user || (user.role !== 'admin' && !user.is_super_admin)) && !globalSkipAds ? (
                   <>
-                    {/* AD PLACEHOLDER */}
+                    {/* ADVERTISEMENT SCRIPT */}
                     <div className={styles.adPlaceholder}>
+                      <AdScript />
                       <span>ADVERTISEMENT</span>
-                      <p>Insert Google AdSense or Custom Script Here</p>
+                      <p>Support us by viewing this ad.</p>
                     </div>
                     
                     <div className={styles.timerBox}>
