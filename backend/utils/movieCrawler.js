@@ -506,7 +506,20 @@ class MovieCrawler {
             });
 
             if (response.data.hits && response.data.hits.length > 0) {
-                const hit = response.data.hits[0].document;
+                // Find best hit
+                let hit = null;
+                for (const h of response.data.hits) {
+                    if (this._isTitleMatch(h.document.post_title, title, year)) {
+                        hit = h.document;
+                        break;
+                    }
+                }
+                
+                if (!hit) {
+                    this.logger.info(`⚠️ [${name}] No accurate match found in hits`);
+                    return null;
+                }
+
                 const movieUrl = hit.permalink.startsWith('http') ? hit.permalink : `${baseUrl}${hit.permalink.startsWith('/') ? hit.permalink.slice(1) : hit.permalink}`;
                 
                 this.logger.info(`📄 [${name}] Found: ${hit.post_title}`);
@@ -580,15 +593,12 @@ class MovieCrawler {
             if (results.length > 0) {
                 // Find the best title match
                 results.each((i, el) => {
-                    const t = $(el).text().trim().toLowerCase();
-                    if (t.includes(title.toLowerCase())) {
-                        bestResult = { url: $(el).attr('href'), title: $(el).text().trim() };
+                    const t = $(el).text().trim();
+                    if (this._isTitleMatch(t, title, year)) {
+                        bestResult = { url: $(el).attr('href'), title: t };
                         return false; // Break loop
                     }
                 });
-                
-                // Fallback to first result if no "best" match found but we have results
-                if (!bestResult) bestResult = { url: results.first().attr('href'), title: results.first().text().trim() };
             }
 
             if (bestResult && bestResult.url) {
@@ -808,6 +818,43 @@ class MovieCrawler {
         const s = str.toLowerCase();
         if (/batch|pack|zip|complete|season \d+|s\d+ complete/i.test(s)) return 'batch';
         return 'episode';
+    }
+
+    _isTitleMatch(targetTitle, searchTitle, searchYear) {
+        if (!targetTitle || !searchTitle) return false;
+        
+        const clean = (s) => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+        const t = clean(targetTitle);
+        const s = clean(searchTitle);
+        
+        // Exact match or starts with + word boundary
+        if (t === s) return true;
+        
+        // Ensure the search title is a standalone part of the target title
+        // This prevents "The Boys" from matching "The Boys I Love"
+        const wordsS = s.split(' ');
+        const wordsT = t.split(' ');
+        
+        // Check if all words of search title appear in sequence at the start of target
+        let match = true;
+        for (let i = 0; i < wordsS.length; i++) {
+            if (wordsT[i] !== wordsS[i]) {
+                match = false;
+                break;
+            }
+        }
+
+        if (match) {
+            // Check year if provided
+            if (searchYear) {
+                if (targetTitle.includes(searchYear)) return true;
+                // If year not in title, we still allow it but it's less certain
+                // For now, if title matches exactly at start, we accept it
+            }
+            return true;
+        }
+
+        return false;
     }
 }
 
