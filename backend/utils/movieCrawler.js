@@ -239,6 +239,244 @@ class MovieCrawler {
         return null;
     }
 
+    /**
+     * PirateBay — JSON API at apibay.org, returns info_hash for magnet links.
+     * No shorteners, direct magnet links. Covers movies (cat=207) and TV (cat=205).
+     */
+    async _searchPirateBay(title, year, tvInfo = {}) {
+        try {
+            this.logger.info(`🔍 Searching PirateBay...`);
+            const { type, season, episode } = tvInfo;
+            let query, cat;
+            
+            if (type === 'tv' && season) {
+                const sNum = String(season).padStart(2, '0');
+                const eNum = episode ? String(episode).padStart(2, '0') : null;
+                query = episode ? `${title} S${sNum}E${eNum}` : `${title} Season ${season}`;
+                cat = 205; // TV shows
+            } else {
+                query = year ? `${title} ${year}` : title;
+                cat = 207; // HD Movies
+            }
+            
+            const url = `https://apibay.org/q.php?q=${encodeURIComponent(query)}&cat=${cat}`;
+            const response = await axios.get(url, { timeout: 10000 });
+            
+            if (!Array.isArray(response.data) || response.data.length === 0) return null;
+            // apibay returns [{id:"0",name:"No results"}] when nothing found
+            if (response.data[0].id === '0') return null;
+            
+            const qualities = {};
+            const links = { direct: [], magnet: [], torrent: [] };
+            const trackers = 'tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://open.demonii.com:1337/announce&tr=udp://tracker.openbittorrent.com:80';
+            
+            // Take top 8 results with seeders > 0
+            const topResults = response.data
+                .filter(t => parseInt(t.seeders) > 0)
+                .slice(0, 8);
+            
+            for (const torrent of topResults) {
+                const magnet = `magnet:?xt=urn:btih:${torrent.info_hash}&dn=${encodeURIComponent(torrent.name)}&${trackers}`;
+                const size = this._formatBytes(parseInt(torrent.size));
+                const q = this._detectQuality(torrent.name) || 'other';
+                
+                if (!qualities[q]) qualities[q] = [];
+                const linkObj = {
+                    url: magnet,
+                    name: `PirateBay: ${torrent.name} [${size}] [${torrent.seeders} seeds]`,
+                    type: 'magnet',
+                    size: size
+                };
+                qualities[q].push(linkObj);
+                links.magnet.push(linkObj);
+                this.stats.torrentLinks++;
+            }
+            
+            if (links.magnet.length > 0) {
+                this.logger.info(`✅ [PirateBay] Found ${links.magnet.length} magnet links`);
+                return { title: topResults[0].name, qualities, links };
+            }
+        } catch (e) {
+            this.logger.warn(`PirateBay search failed: ${e.message}`);
+        }
+        return null;
+    }
+
+    /**
+     * 1337x — Scrapes search results and individual torrent pages for magnet links.
+     * Two-step: search page → torrent page → extract magnet link.
+     */
+    async _search1337x(title, year, tvInfo = {}) {
+        try {
+            this.logger.info(`🔍 Searching 1337x...`);
+            const { type, season, episode } = tvInfo;
+            let query;
+            
+            if (type === 'tv' && season) {
+                const sNum = String(season).padStart(2, '0');
+                const eNum = episode ? String(episode).padStart(2, '0') : null;
+                query = episode ? `${title} S${sNum}E${eNum}` : `${title} Season ${season}`;
+            } else {
+                query = year ? `${title} ${year}` : title;
+            }
+            
+            const searchUrl = `https://1337x.to/search/${encodeURIComponent(query)}/1/`;
+            const response = await axios.get(searchUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+                timeout: 12000
+            });
+            
+            const $ = cheerio.load(response.data);
+            const resultRows = $('tbody tr').slice(0, 5); // Top 5 results
+            
+            if (resultRows.length === 0) return null;
+            
+            const qualities = {};
+            const links = { direct: [], magnet: [], torrent: [] };
+            
+            // Fetch magnet links from individual torrent pages (limit to 3 for speed)
+            const torrentLinks = [];
+            resultRows.each((i, el) => {
+                if (i >= 3) return; // Max 3 pages to keep it fast
+                const nameEl = $(el).find('td.name a').eq(1);
+                const href = nameEl.attr('href');
+                const name = nameEl.text().trim();
+                const seeders = $(el).find('td.seeds').text().trim();
+                const size = $(el).find('td.size').text().replace(/[\n\r]/g, '').trim();
+                if (href && parseInt(seeders) > 0) {
+                    torrentLinks.push({ href: `https://1337x.to${href}`, name, seeders, size });
+                }
+            });
+            
+            // Fetch magnet from each torrent page in parallel
+            const magnetPromises = torrentLinks.map(async (t) => {
+                try {
+                    const pageRes = await axios.get(t.href, {
+                        headers: { 'User-Agent': 'Mozilla/5.0' },
+                        timeout: 8000
+                    });
+                    const $$ = cheerio.load(pageRes.data);
+                    const magnet = $$('a[href^="magnet:"]').first().attr('href');
+                    if (magnet) {
+                        return { ...t, magnet };
+                    }
+                } catch { /* skip this torrent */ }
+                return null;
+            });
+            
+            const magnetResults = (await Promise.allSettled(magnetPromises))
+                .filter(r => r.status === 'fulfilled' && r.value)
+                .map(r => r.value);
+            
+            for (const torrent of magnetResults) {
+                const q = this._detectQuality(torrent.name) || 'other';
+                if (!qualities[q]) qualities[q] = [];
+                const linkObj = {
+                    url: torrent.magnet,
+                    name: `1337x: ${torrent.name} [${torrent.size}] [${torrent.seeders} seeds]`,
+                    type: 'magnet',
+                    size: torrent.size
+                };
+                qualities[q].push(linkObj);
+                links.magnet.push(linkObj);
+                this.stats.torrentLinks++;
+            }
+            
+            if (links.magnet.length > 0) {
+                this.logger.info(`✅ [1337x] Found ${links.magnet.length} magnet links`);
+                return { title: magnetResults[0].name, qualities, links };
+            }
+        } catch (e) {
+            this.logger.warn(`1337x search failed: ${e.message}`);
+        }
+        return null;
+    }
+
+    /**
+     * EZTV — JSON API for TV show torrents. Great for episode-specific results.
+     * API: https://eztv.re/api/get-torrents?imdb_id=XXXXX
+     */
+    async _searchEZTV(title, year, tvInfo = {}) {
+        try {
+            const { type, season, episode } = tvInfo;
+            if (type !== 'tv') return null; // EZTV is TV-only
+            
+            this.logger.info(`🔍 Searching EZTV...`);
+            
+            // First get IMDb ID from TMDb
+            const tmdbResult = await this._getTmdbId(title, year, 'tv');
+            if (!tmdbResult) return null;
+            
+            // Get IMDb ID from TMDb
+            let imdbId = null;
+            try {
+                const tmdbRes = await axios.get(
+                    `https://api.themoviedb.org/3/tv/${tmdbResult.tmdbId}/external_ids?api_key=${TMDB_API_KEY}`,
+                    { timeout: 8000 }
+                );
+                imdbId = tmdbRes.data?.imdb_id;
+            } catch { /* skip */ }
+            
+            if (!imdbId) return null;
+            
+            // Strip 'tt' prefix for EZTV API
+            const imdbNum = imdbId.replace('tt', '');
+            const eztvUrl = `https://eztv.re/api/get-torrents?imdb_id=${imdbNum}&limit=30`;
+            
+            const response = await axios.get(eztvUrl, { timeout: 12000 });
+            
+            if (!response.data?.torrents || response.data.torrents.length === 0) return null;
+            
+            const qualities = {};
+            const links = { direct: [], magnet: [], torrent: [] };
+            
+            // Filter for the requested season/episode
+            let filteredTorrents = response.data.torrents;
+            if (season) {
+                filteredTorrents = filteredTorrents.filter(t => {
+                    return t.season === String(season) || t.season === season;
+                });
+                if (episode) {
+                    filteredTorrents = filteredTorrents.filter(t => {
+                        return t.episode === String(episode) || t.episode === episode;
+                    });
+                }
+            }
+            
+            // Take top 6 results
+            const topResults = filteredTorrents
+                .filter(t => parseInt(t.seeds) > 0)
+                .slice(0, 6);
+            
+            for (const torrent of topResults) {
+                const magnet = torrent.magnet_url;
+                if (!magnet) continue;
+                
+                const size = this._formatBytes(parseInt(torrent.size_bytes || 0));
+                const q = this._detectQuality(torrent.title) || 'other';
+                
+                if (!qualities[q]) qualities[q] = [];
+                const linkObj = {
+                    url: magnet,
+                    name: `EZTV: ${torrent.title} [${size}] [${torrent.seeds} seeds]`,
+                    type: 'magnet',
+                    size: size
+                };
+                qualities[q].push(linkObj);
+                links.magnet.push(linkObj);
+                this.stats.torrentLinks++;
+            }
+            
+            if (links.magnet.length > 0) {
+                this.logger.info(`✅ [EZTV] Found ${links.magnet.length} TV magnet links`);
+                return { title: topResults[0].title, qualities, links };
+            }
+        } catch (e) {
+            this.logger.warn(`EZTV search failed: ${e.message}`);
+        }
+        return null;
+    }
+
     async _searchGenericTypesense(title, year, name, baseUrl) {
         try {
             this.logger.info(`🔍 Searching ${name}...`);
@@ -444,6 +682,9 @@ class MovieCrawler {
             const sources = [
                 () => type !== 'tv' ? this._searchYTS(title, year) : Promise.resolve(null),
                 () => this._searchVidVault(title, year, tvInfo),
+                () => this._searchPirateBay(title, year, tvInfo),
+                () => this._search1337x(title, year, tvInfo),
+                () => type === 'tv' ? this._searchEZTV(title, year, tvInfo) : Promise.resolve(null),
                 () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
                 () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba/"),
@@ -456,7 +697,7 @@ class MovieCrawler {
             const sourceResults = await Promise.allSettled(sources.map(s => s()));
             
             let mergedMovie = null;
-            const sourceNames = ['YTS', 'VidVault', 'HDHub4u', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
+            const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
             
             sourceResults.forEach((res, index) => {
                 results.meta.sourcesTried.push(sourceNames[index]);
