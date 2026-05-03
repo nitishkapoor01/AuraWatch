@@ -64,7 +64,7 @@ async function saveToCacheDB(title, year, cacheKey, responseData) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.post('/movie', async (req, res) => {
-    const { title, year, season, episode, type } = req.body;
+    const { title, year, season, episode, type, forceRefresh } = req.body;
 
     if (!title) {
         return res.status(400).json({
@@ -75,15 +75,20 @@ router.post('/movie', async (req, res) => {
     // ── STEP 1: Check Cache ──────────────────────────────────────────────
     // For TV shows, cache specifically for the season/episode
     const cacheKey = type === 'tv' ? `tv:${title}:${season}:${episode}` : buildCacheKey(title, year);
-    const cached = await getCachedResult(cacheKey);
+    
+    if (!forceRefresh) {
+        const cached = await getCachedResult(cacheKey);
 
-    if (cached) {
-        console.log(`[CACHE] HIT for "${title}" — returning instantly!`);
-        return res.json({
-            ...cached,
-            cached: true,
-            cacheMessage: 'Served from cache (instant). Links refresh every 24h.'
-        });
+        if (cached) {
+            console.log(`[CACHE] HIT for "${title}" — returning instantly!`);
+            return res.json({
+                ...cached,
+                cached: true,
+                cacheMessage: 'Served from cache (instant). Links refresh every 24h.'
+            });
+        }
+    } else {
+        console.log(`[CACHE] FORCE REFRESH requested for "${title}" — bypassing cache.`);
     }
 
     console.log(`[CACHE] MISS for "${title}" — starting scraper...`);

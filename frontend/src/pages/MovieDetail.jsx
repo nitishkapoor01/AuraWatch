@@ -179,7 +179,7 @@ const MovieDetail = () => {
     trackWatch(season, episode);
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (forceRefresh = false) => {
     if (!movie || isDownloading) return;
     setIsDownloading(true);
     setShowDownloadModal(true);
@@ -214,7 +214,8 @@ const MovieDetail = () => {
           year: movie.year,
           type: movie.type,
           season: isTV ? selectedSeason : null,
-          episode: isTV ? selectedEpisode : null
+          episode: isTV ? selectedEpisode : null,
+          forceRefresh
         })
       });
       const data = await res.json();
@@ -611,7 +612,10 @@ const MovieDetail = () => {
               <div className={styles.errorPhase}>
                 <h2 style={{color: '#e50914'}}>Oops!</h2>
                 <p>{downloadErrorMsg}</p>
-                <button className={styles.primaryBtn} onClick={() => setShowDownloadModal(false)}>Close</button>
+                <div style={{display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px'}}>
+                  <button className={styles.primaryBtn} onClick={() => setShowDownloadModal(false)}>Close</button>
+                  <button className={styles.primaryBtn} style={{background: '#333'}} onClick={() => handleDownload(true)}>Try Again</button>
+                </div>
               </div>
             )}
 
@@ -619,13 +623,25 @@ const MovieDetail = () => {
               <div className={styles.errorPhase}>
                 <h2>No Links Found</h2>
                 <p>We couldn't find any direct download links for this title right now. Please check back later.</p>
-                <button className={styles.primaryBtn} onClick={() => setShowDownloadModal(false)}>Close</button>
+                <div style={{display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px'}}>
+                  <button className={styles.primaryBtn} onClick={() => setShowDownloadModal(false)}>Close</button>
+                  <button className={styles.primaryBtn} style={{background: '#333'}} onClick={() => handleDownload(true)}>Search Again</button>
+                </div>
               </div>
             )}
 
             {downloadStep === 'options' && (
               <div className={styles.optionsPhase}>
-                <h2>Download Options</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <h2>Download Options</h2>
+                  <button 
+                    className={styles.refreshBtn} 
+                    onClick={() => handleDownload(true)}
+                    title="Clear cache and fetch fresh links"
+                  >
+                    Fetch Fresh Links
+                  </button>
+                </div>
                 <p className={styles.optionsSubtitle}>{movie.title}</p>
                 
                 <div className={styles.qualityTabs}>

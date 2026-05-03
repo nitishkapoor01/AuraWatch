@@ -715,6 +715,26 @@
   margin-bottom: 24px;
 }
 
+.refreshBtn {
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.refreshBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: #666;
+}
+
 .qualityTabs {
   display: flex;
   gap: 12px;
