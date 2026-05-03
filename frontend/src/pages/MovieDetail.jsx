@@ -48,6 +48,7 @@ const MovieDetail = () => {
   const [parsedDownloads, setParsedDownloads] = useState({});
   const [selectedQuality, setSelectedQuality] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('episode'); // 'episode' or 'batch'
   const [downloadErrorMsg, setDownloadErrorMsg] = useState('');
   const [globalSkipAds, setGlobalSkipAds] = useState(false);
 
@@ -234,17 +235,27 @@ const MovieDetail = () => {
           
           grouped[q.quality] = {};
           for (const link of directLinks) {
+            const cat = link.category || 'episode';
             const lang = extractLanguage(link.name);
-            if (!grouped[q.quality][lang]) grouped[q.quality][lang] = [];
-            grouped[q.quality][lang].push(link);
+            
+            if (!grouped[q.quality][cat]) grouped[q.quality][cat] = {};
+            if (!grouped[q.quality][cat][lang]) grouped[q.quality][cat][lang] = [];
+            grouped[q.quality][cat][lang].push(link);
           }
         }
         
         const availableQualities = Object.keys(grouped);
         if (availableQualities.length > 0) {
           setParsedDownloads(grouped);
-          setSelectedQuality(availableQualities[0]);
-          setSelectedLanguage(Object.keys(grouped[availableQualities[0]])[0]);
+          const firstQ = availableQualities[0];
+          setSelectedQuality(firstQ);
+          
+          // Find first available category in this quality
+          const firstCat = grouped[firstQ]['batch'] ? 'batch' : 'episode';
+          setSelectedCategory(firstCat);
+          
+          const firstLang = Object.keys(grouped[firstQ][firstCat] || {})[0];
+          setSelectedLanguage(firstLang);
           
           if (shouldSkipTimer) {
             if (timerInterval) clearInterval(timerInterval);
@@ -656,7 +667,10 @@ const MovieDetail = () => {
                       className={`${styles.tabBtn} ${selectedQuality === q ? styles.activeTab : ''}`}
                       onClick={() => {
                         setSelectedQuality(q);
-                        setSelectedLanguage(Object.keys(parsedDownloads[q])[0]); // Reset language
+                        const availableCats = Object.keys(parsedDownloads[q]);
+                        const newCat = availableCats.includes(selectedCategory) ? selectedCategory : availableCats[0];
+                        setSelectedCategory(newCat);
+                        setSelectedLanguage(Object.keys(parsedDownloads[q][newCat])[0]);
                       }}
                     >
                       {q}
@@ -664,9 +678,26 @@ const MovieDetail = () => {
                   ))}
                 </div>
 
-                {selectedQuality && parsedDownloads[selectedQuality] && (
+                {isTV && selectedQuality && parsedDownloads[selectedQuality] && (
+                  <div className={styles.categoryTabs}>
+                    {Object.keys(parsedDownloads[selectedQuality]).map((cat) => (
+                      <button
+                        key={cat}
+                        className={`${styles.catTabBtn} ${selectedCategory === cat ? styles.activeCatTab : ''}`}
+                        onClick={() => {
+                          setSelectedCategory(cat);
+                          setSelectedLanguage(Object.keys(parsedDownloads[selectedQuality][cat])[0]);
+                        }}
+                      >
+                        {cat === 'batch' ? 'Season Batch / Packs' : 'Episode Wise'}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {selectedQuality && selectedCategory && parsedDownloads[selectedQuality]?.[selectedCategory] && (
                   <div className={styles.languageTabs}>
-                    {Object.keys(parsedDownloads[selectedQuality]).map((lang) => (
+                    {Object.keys(parsedDownloads[selectedQuality][selectedCategory]).map((lang) => (
                       <button
                         key={lang}
                         className={`${styles.langTabBtn} ${selectedLanguage === lang ? styles.activeLangTab : ''}`}
@@ -679,7 +710,7 @@ const MovieDetail = () => {
                 )}
 
                 <div className={styles.linksList}>
-                  {selectedQuality && selectedLanguage && parsedDownloads[selectedQuality]?.[selectedLanguage]?.map((link, idx) => (
+                  {selectedQuality && selectedCategory && selectedLanguage && parsedDownloads[selectedQuality]?.[selectedCategory]?.[selectedLanguage]?.map((link, idx) => (
                     <div key={idx} className={styles.linkCard}>
                       <div className={styles.linkInfo}>
                         <span className={styles.linkQuality}>{selectedQuality}</span>

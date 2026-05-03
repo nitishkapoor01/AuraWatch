@@ -128,7 +128,8 @@ router.post('/movie', async (req, res) => {
                         url: l.url,
                         name: l.name,
                         type: l.type,
-                        size: l.size || null
+                        size: l.size || null,
+                        category: l.category || 'episode'
                     }))
                 });
             }

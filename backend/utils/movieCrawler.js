@@ -536,7 +536,8 @@ class MovieCrawler {
                         url: href,
                         name: `${name}: ${text}`,
                         type: 'direct',
-                        size: this._detectSize(text + ' ' + $(el).parent().text())
+                        size: this._detectSize(text + ' ' + $(el).parent().text()),
+                        category: this._detectCategory(text + ' ' + hit.post_title + ' ' + href)
                     };
                     
                     qualities[q].push(linkObj);
@@ -621,7 +622,8 @@ class MovieCrawler {
                         url: href,
                         name: `${name}: ${text}`,
                         type: 'direct',
-                        size: this._detectSize(text + ' ' + $$(el).parent().text() + ' ' + $$(el).closest('div').text())
+                        size: this._detectSize(text + ' ' + $$(el).parent().text() + ' ' + $$(el).closest('div').text()),
+                        category: this._detectCategory(text + ' ' + bestResult.title + ' ' + href)
                     };
                     
                     // Avoid duplicates from the same source link
@@ -799,6 +801,13 @@ class MovieCrawler {
     _detectSize(str) {
         const match = str.match(/\[(\d+\.?\d*\s*(GB|MB))\]/i);
         return match ? match[1] : null;
+    }
+
+    _detectCategory(str) {
+        if (!str) return 'episode';
+        const s = str.toLowerCase();
+        if (/batch|pack|zip|complete|season \d+|s\d+ complete/i.test(s)) return 'batch';
+        return 'episode';
     }
 }
 
