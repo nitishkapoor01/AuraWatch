@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, LogOut, User } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -22,6 +22,18 @@ const TopNav = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -137,18 +149,19 @@ const TopNav = () => {
           {!loading && (
             isLoggedIn ? (
               <div className={styles.profileSection}>
+              <div className={styles.profileDropdownContainer} ref={dropdownRef}>
                 {user?.avatar?.startsWith('http') ? (
                   <img 
                     src={user.avatar} 
                     alt="Profile" 
                     className={styles.avatarCircle} 
-                    onClick={() => setIsProfileModalOpen(true)}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     style={{ objectFit: 'cover' }}
                   />
                 ) : (
                   <div 
                     className={styles.avatarCircle} 
-                    onClick={() => setIsProfileModalOpen(true)}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     style={{
                       backgroundColor: AVATARS.find(a => a.id === user?.avatar)?.color || '#e50914'
                     }}
@@ -156,9 +169,18 @@ const TopNav = () => {
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 )}
-                <button className={styles.logoutBtn} onClick={handleLogout} data-title="Logout">
-                  <LogOut size={20} />
-                </button>
+                
+                {isDropdownOpen && (
+                  <div className={styles.dropdownMenu}>
+                    <button className={styles.dropdownItem} onClick={() => { setIsProfileModalOpen(true); setIsDropdownOpen(false); }}>
+                      <User size={16} /> Edit Profile
+                    </button>
+                    <button className={styles.dropdownItem} onClick={() => { handleLogout(); setIsDropdownOpen(false); }}>
+                      <LogOut size={16} /> Log Out
+                    </button>
+                  </div>
+                )}
+              </div>
               </div>
             ) : (
               <Link to="/login" className={styles.loginBtn}>

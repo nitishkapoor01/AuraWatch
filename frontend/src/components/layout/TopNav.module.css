@@ -59,53 +59,56 @@
   border-color: white;
 }
 
-
-
-.logoutBtn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: #fff;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
+.profileDropdownContainer {
   position: relative;
 }
 
-.logoutBtn[data-title]::after {
-  content: attr(data-title);
+.dropdownMenu {
   position: absolute;
-  bottom: -40px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: calc(100% + 15px);
+  right: 0;
   background: rgba(20, 20, 20, 0.95);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 180px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  animation: fadeInDown 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.15);
-  z-index: 100;
 }
 
-.logoutBtn[data-title]:hover::after {
-  opacity: 1;
-  bottom: -45px;
-}
-
-.logoutBtn:hover {
-  background: #e50914;
-  transform: scale(1.05);
+.dropdownItem:last-child:hover {
+  background: rgba(229, 9, 20, 0.1);
+  color: #e50914;
 }
 
 .loginBtn {
