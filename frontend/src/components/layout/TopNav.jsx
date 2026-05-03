@@ -75,12 +75,12 @@ const TopNav = () => {
   return (
     <header className={styles.topNav}>
       {!isLoginPage && (
-        <div className={styles.branding}>
+        <Link to="/" className={styles.branding} style={{ textDecoration: 'none' }}>
           <img src="/AuraMovie_logo.png.png" alt="Logo" className={styles.brandLogo} />
           <span className={styles.brandName}>
             Aura<span className={styles.watchText}>Watch</span>
           </span>
-        </div>
+        </Link>
       )}
 
       <div className={styles.navActions}>
