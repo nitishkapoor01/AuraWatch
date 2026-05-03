@@ -24,6 +24,20 @@ router.post('/heartbeat', async (req, res) => {
     action: action || null
   });
 
+  // Log to unique_visitors table (background-ish)
+  if (visitorId) {
+    const ip = req.ip || req.headers['x-forwarded-for'] || '0.0.0.0';
+    db.query(`
+      INSERT INTO unique_visitors (visitor_id, last_ip, is_registered, user_id, last_seen)
+      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+      ON CONFLICT (visitor_id) DO UPDATE SET
+        last_ip = EXCLUDED.last_ip,
+        is_registered = EXCLUDED.is_registered,
+        user_id = EXCLUDED.user_id,
+        last_seen = CURRENT_TIMESTAMP
+    `, [visitorId, ip, !isGuest, userId || null]).catch(e => console.error('[TRACKING] Failed to upsert visitor', e));
+  }
+
   if (userId) {
     try {
       await db.query("INSERT INTO user_activity (user_id, date) VALUES ($1, CURRENT_DATE) ON CONFLICT DO NOTHING", [userId]);

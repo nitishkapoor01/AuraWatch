@@ -26,6 +26,7 @@ const AdminDashboard = () => {
   const [loginLogs, setLoginLogs] = useState([]);
   const [blockedIps, setBlockedIps] = useState([]);
   const [mostWatched, setMostWatched] = useState([]);
+  const [visitors, setVisitors] = useState([]);
   
   // Control States
   const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' });
@@ -86,6 +87,9 @@ const AdminDashboard = () => {
       ]);
       if (searchRes.ok) setSearchLogs(await searchRes.json());
       if (watchedRes.ok) setMostWatched(await watchedRes.json());
+    } else if (tab === 'users') {
+      const visitorsRes = await fetch(`${baseUrl}/admin/visitors`, { headers });
+      if (visitorsRes.ok) setVisitors(await visitorsRes.json());
     }
   };
 
@@ -374,6 +378,48 @@ const AdminDashboard = () => {
                   {(!liveStats || liveStats.sessions.filter(s => s.isGuest).length === 0) && (
                     <tr><td colSpan="4" className={styles.emptyTable}>No guests active right now.</td></tr>
                   )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className={styles.usersSection} style={{ marginTop: '40px' }}>
+            <div className={styles.sectionHeader}>
+              <h2>Historical Unique Visitors</h2>
+              <span className={styles.userCount} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
+                {visitors.length} Unique People
+              </span>
+            </div>
+            <div className={styles.tableContainer}>
+              <table className={styles.usersTable}>
+                <thead>
+                  <tr><th>Visitor</th><th>Status</th><th>Last IP</th><th>First Seen</th><th>Last Active</th></tr>
+                </thead>
+                <tbody>
+                  {visitors.map(v => (
+                    <tr key={v.visitor_id}>
+                      <td>
+                        <div className={styles.userInfo}>
+                          <div className={styles.userAvatar} style={{ background: v.is_registered ? '#e50914' : '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {v.is_registered ? <ShieldCheck size={16} /> : <Users size={16} />}
+                          </div>
+                          <div>
+                            <div className={styles.userName}>{v.user_name || `Visitor #${v.visitor_id.substring(0, 6)}`}</div>
+                            <div className={styles.userEmail}>{v.visitor_id.substring(0, 20)}...</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`${styles.roleBadge} ${v.is_registered ? styles.roleAdmin : styles.roleUser}`} style={{ background: v.is_registered ? 'rgba(46, 204, 113, 0.1)' : 'rgba(255,255,255,0.05)', color: v.is_registered ? '#2ecc71' : '#777', borderColor: 'transparent' }}>
+                          {v.is_registered ? 'REGISTERED' : 'GUEST'}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '11px', opacity: 0.7 }}>{v.last_ip}</td>
+                      <td style={{ fontSize: '12px' }}>{new Date(v.first_seen).toLocaleDateString()}</td>
+                      <td style={{ fontSize: '12px' }}>{new Date(v.last_seen).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {visitors.length === 0 && <tr><td colSpan="5" className={styles.emptyTable}>No historical records found.</td></tr>}
                 </tbody>
               </table>
             </div>

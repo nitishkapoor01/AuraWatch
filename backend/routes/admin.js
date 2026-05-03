@@ -7,6 +7,22 @@ const { authMiddleware, isAdmin } = require('../middleware/auth');
 router.use(authMiddleware);
 router.use(isAdmin);
 
+// GET all unique visitors
+router.get('/visitors', async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT v.*, u.name as user_name 
+      FROM unique_visitors v
+      LEFT JOIN users u ON v.user_id = u.id
+      ORDER BY v.last_seen DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error fetching visitors' });
+  }
+});
+
 // Fetch Platform Stats
 router.get('/stats', async (req, res) => {
   try {

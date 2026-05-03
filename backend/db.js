@@ -88,6 +88,53 @@ const initDB = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS search_logs (
+        id SERIAL PRIMARY KEY,
+        query TEXT NOT NULL,
+        success BOOLEAN DEFAULT TRUE,
+        visitor_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS login_logs (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        email TEXT,
+        ip_address TEXT,
+        success BOOLEAN NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS blocked_ips (
+        ip_address TEXT PRIMARY KEY,
+        reason TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS activity_logs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        action TEXT,
+        details JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS unique_visitors (
+        visitor_id TEXT PRIMARY KEY,
+        first_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        last_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        last_ip TEXT,
+        is_registered BOOLEAN DEFAULT FALSE,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
+      );
+
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='is_banned') THEN
+          ALTER TABLE users ADD COLUMN is_banned BOOLEAN DEFAULT FALSE;
+        END IF;
+      END $$;
+
       CREATE INDEX IF NOT EXISTS idx_download_cache_key ON download_cache(cache_key);
     `);
     console.log('[DB] PostgreSQL database initialized');
