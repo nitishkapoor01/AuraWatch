@@ -267,7 +267,7 @@ const MovieDetail = () => {
       }
     } catch (err) {
       console.error(err);
-      setDownloadErrorMsg('Failed to search for download links. Please ensure Scrapper is running.');
+      setDownloadErrorMsg(`Failed to search for download links. Error: ${err.message || 'Network Error'}`);
       setDownloadStep('error');
       if (timerInterval) clearInterval(timerInterval);
     } finally {
