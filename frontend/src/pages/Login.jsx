@@ -37,7 +37,13 @@ const Login = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, register } = useAuth();
+  const { login, register, isLoggedIn, loading: authLoading } = useAuth();
+
+  React.useEffect(() => {
+    if (!authLoading && isLoggedIn) {
+      navigate('/');
+    }
+  }, [isLoggedIn, authLoading, navigate]);
 
   React.useEffect(() => {
     if (location.state?.message) {
@@ -301,6 +307,10 @@ const Login = () => {
     if (mode === 'forgot_reset') return 'New Password';
     return 'Sign In';
   };
+
+  if (authLoading) {
+    return <div className={styles.loginPage}><div className={styles.spinner}></div></div>;
+  }
 
   return (
     <div className={styles.loginPage}>

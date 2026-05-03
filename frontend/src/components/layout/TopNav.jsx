@@ -24,7 +24,7 @@ const TopNav = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, user, logout, loading } = useAuth();
 
   useEffect(() => {
     if (location.pathname === '/') {
@@ -119,36 +119,38 @@ const TopNav = () => {
         </div>
 
         <div className={styles.userProfile}>
-          {isLoggedIn ? (
-            <div className={styles.profileSection}>
-              {user?.avatar?.startsWith('http') ? (
-                <img 
-                  src={user.avatar} 
-                  alt="Profile" 
-                  className={styles.avatarCircle} 
-                  onClick={() => setIsProfileModalOpen(true)}
-                  style={{ objectFit: 'cover' }}
-                />
-              ) : (
-                <div 
-                  className={styles.avatarCircle} 
-                  onClick={() => setIsProfileModalOpen(true)}
-                  style={{
-                    backgroundColor: AVATARS.find(a => a.id === user?.avatar)?.color || '#e50914'
-                  }}
-                >
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
-                </div>
-              )}
-              <button className={styles.logoutBtn} onClick={handleLogout} data-title="Logout">
-                <LogOut size={20} />
-              </button>
-            </div>
-          ) : (
-            <Link to="/login" className={styles.loginBtn}>
-              <User size={20} />
-              <span>Login</span>
-            </Link>
+          {!loading && (
+            isLoggedIn ? (
+              <div className={styles.profileSection}>
+                {user?.avatar?.startsWith('http') ? (
+                  <img 
+                    src={user.avatar} 
+                    alt="Profile" 
+                    className={styles.avatarCircle} 
+                    onClick={() => setIsProfileModalOpen(true)}
+                    style={{ objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div 
+                    className={styles.avatarCircle} 
+                    onClick={() => setIsProfileModalOpen(true)}
+                    style={{
+                      backgroundColor: AVATARS.find(a => a.id === user?.avatar)?.color || '#e50914'
+                    }}
+                  >
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                <button className={styles.logoutBtn} onClick={handleLogout} data-title="Logout">
+                  <LogOut size={20} />
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" className={styles.loginBtn}>
+                <User size={20} />
+                <span>Login</span>
+              </Link>
+            )
           )}
         </div>
       </div>
