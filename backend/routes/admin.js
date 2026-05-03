@@ -81,9 +81,10 @@ router.get('/stats', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT id, name, email, role, avatar, created_at, failed_login_attempts
-      FROM users
-      ORDER BY created_at DESC
+      SELECT u.id, u.name, u.email, u.role, u.avatar, u.created_at, u.failed_login_attempts, u.is_banned,
+             (SELECT last_seen FROM unique_visitors v WHERE v.user_id = u.id ORDER BY last_seen DESC LIMIT 1) as last_seen
+      FROM users u
+      ORDER BY u.created_at DESC
     `);
     res.json(result.rows);
   } catch (error) {

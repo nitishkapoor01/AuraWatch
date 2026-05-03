@@ -307,7 +307,7 @@ const AdminDashboard = () => {
             <div className={styles.tableContainer}>
               <table className={styles.usersTable}>
                 <thead>
-                  <tr><th>User</th><th>Role</th><th>Joined</th><th>Security</th><th>Actions</th></tr>
+                  <tr><th>User</th><th>Role</th><th>Joined</th><th>Last Active</th><th>Security</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   {users.map(u => (
@@ -325,6 +325,9 @@ const AdminDashboard = () => {
                         </select>
                       </td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                      <td style={{ fontSize: '12px' }}>
+                        {u.last_seen ? new Date(u.last_seen).toLocaleString() : 'Never'}
+                      </td>
                       <td>
                         {u.failed_login_attempts > 0 && <span className={styles.logFailure}><AlertTriangle size={14} /> {u.failed_login_attempts}</span>}
                       </td>
