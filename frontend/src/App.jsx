@@ -27,6 +27,12 @@ function App() {
       sessionStorage.setItem('trackingSessionId', sessionId);
     }
 
+    let visitorId = localStorage.getItem('trackingVisitorId');
+    if (!visitorId) {
+      visitorId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('trackingVisitorId', visitorId);
+    }
+
     const sendHeartbeat = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/tracking/heartbeat`, {
@@ -34,6 +40,7 @@ function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sessionId,
+            visitorId,
             isGuest: !isLoggedIn,
             userId: user ? user.id : null
           })

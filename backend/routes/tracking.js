@@ -9,7 +9,7 @@ const activeSessions = new Map();
 
 // Ping endpoint - called by all clients every ~30s
 router.post('/heartbeat', async (req, res) => {
-  const { sessionId, isGuest, userId } = req.body;
+  const { sessionId, isGuest, userId, visitorId } = req.body;
   if (!sessionId) {
     return res.status(400).json({ error: 'sessionId required' });
   }
@@ -29,7 +29,7 @@ router.post('/heartbeat', async (req, res) => {
   }
 
   try {
-    await db.query("INSERT INTO platform_visits (session_id, date) VALUES ($1, CURRENT_DATE) ON CONFLICT DO NOTHING", [sessionId]);
+    await db.query("INSERT INTO platform_visits (session_id, date, visitor_id) VALUES ($1, CURRENT_DATE, $2) ON CONFLICT (session_id, date) DO UPDATE SET visitor_id = EXCLUDED.visitor_id", [sessionId, visitorId || null]);
   } catch (e) {
     console.error('Failed to log platform visit', e);
   }

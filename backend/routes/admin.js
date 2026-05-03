@@ -32,6 +32,11 @@ router.get('/stats', async (req, res) => {
     const totalVisitsYearly = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '365 days'")).rows[0].count;
     const totalVisitsAllTime = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits")).rows[0].count;
 
+    // Unique Visitors (by localStorage tracking)
+    const uniqueVisitorsToday = (await db.query("SELECT COUNT(DISTINCT visitor_id) as count FROM platform_visits WHERE date = CURRENT_DATE AND visitor_id IS NOT NULL")).rows[0].count;
+    const uniqueVisitorsWeekly = (await db.query("SELECT COUNT(DISTINCT visitor_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '7 days' AND visitor_id IS NOT NULL")).rows[0].count;
+    const uniqueVisitorsMonthly = (await db.query("SELECT COUNT(DISTINCT visitor_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '30 days' AND visitor_id IS NOT NULL")).rows[0].count;
+
     res.json({
       totalUsers: parseInt(totalUsers),
       totalFavorites: parseInt(totalFavorites),
@@ -45,7 +50,10 @@ router.get('/stats', async (req, res) => {
       totalVisitsWeekly: parseInt(totalVisitsWeekly),
       totalVisitsMonthly: parseInt(totalVisitsMonthly),
       totalVisitsYearly: parseInt(totalVisitsYearly),
-      totalVisitsAllTime: parseInt(totalVisitsAllTime)
+      totalVisitsAllTime: parseInt(totalVisitsAllTime),
+      uniqueVisitorsToday: parseInt(uniqueVisitorsToday),
+      uniqueVisitorsWeekly: parseInt(uniqueVisitorsWeekly),
+      uniqueVisitorsMonthly: parseInt(uniqueVisitorsMonthly)
     });
   } catch (error) {
     console.error('Stats error:', error);

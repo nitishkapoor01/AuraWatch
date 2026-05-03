@@ -69,6 +69,7 @@ const initDB = async () => {
       CREATE TABLE IF NOT EXISTS platform_visits (
         session_id TEXT NOT NULL,
         date DATE NOT NULL,
+        visitor_id TEXT,
         PRIMARY KEY (session_id, date)
       );
 

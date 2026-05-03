@@ -248,9 +248,18 @@ const AdminDashboard = () => {
           <div className={styles.analyticsSection}>
             <div className={styles.sectionHeader}>
               <h2>Site Traffic</h2>
-              <p className={styles.sectionSub}>Total unique visitors (Guests + Logged In)</p>
+              <p className={styles.sectionSub}>Session visits vs Unique browser visitors</p>
             </div>
             <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
+                  <Users size={28} />
+                </div>
+                <div className={styles.statInfo}>
+                  <h3>{stats.uniqueVisitorsToday}</h3>
+                  <p>Unique Visitors Today</p>
+                </div>
+              </div>
               <div className={styles.statCard}>
                 <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
                   <Activity size={28} />
