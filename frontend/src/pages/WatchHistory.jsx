@@ -55,11 +55,13 @@ const WatchHistory = () => {
     }
   };
 
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+
   const handleGetLink = async (item) => {
     try {
-      const res = await fetch('http://localhost:3000/api/movie/download', {
+      const res = await fetch(`${API_BASE}/downloads/movie`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ title: item.title, year: item.year })
       });
       const data = await res.json();

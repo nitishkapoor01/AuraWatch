@@ -2,8 +2,8 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const { Logger } = require('./logger');
 
-// VidVault uses TMDb IDs — we use their own public key (embedded in their frontend)
-const TMDB_API_KEY = '54e00466a09676df57ba51c4ca30b1a6';
+// VidVault uses TMDb IDs — use env variable, fallback to their public embedded key
+const TMDB_API_KEY = process.env.TMDB_API_KEY_1 || process.env.TMDB_API_KEY || '54e00466a09676df57ba51c4ca30b1a6';
 const VIDVAULT_API = 'https://vidvault.ru/api';
 const VIDVAULT_CDN = 'https://dl.gemlelispe.workers.dev';
 
