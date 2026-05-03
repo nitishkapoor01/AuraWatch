@@ -396,7 +396,7 @@
     gap: 16px;
   }
 
-  .controlGrid {
+  .controlGrid, .securityControls {
     grid-template-columns: 1fr;
     gap: 16px;
   }
@@ -483,7 +483,7 @@
     padding: 16px;
   }
 
-  .controlGrid {
+  .controlGrid, .securityControls {
     grid-template-columns: 1fr;
     gap: 16px;
   }
