@@ -20,8 +20,17 @@ router.get('/stats', isModerator, async (req, res) => {
 
     const dailyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date = CURRENT_DATE")).rows[0].count;
     const weeklyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= CURRENT_DATE - INTERVAL '7 days'")).rows[0].count;
+    const monthlyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= CURRENT_DATE - INTERVAL '30 days'")).rows[0].count;
+    const yearlyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= CURRENT_DATE - INTERVAL '365 days'")).rows[0].count;
     
+    const totalVisitsToday = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date = CURRENT_DATE")).rows[0].count;
+    const totalVisitsWeekly = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '7 days'")).rows[0].count;
+    const totalVisitsMonthly = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '30 days'")).rows[0].count;
     const totalVisitsAllTime = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits")).rows[0].count;
+
+    const uniqueVisitorsToday = (await db.query("SELECT COUNT(DISTINCT visitor_id) as count FROM platform_visits WHERE date = CURRENT_DATE AND visitor_id IS NOT NULL")).rows[0].count;
+    const uniqueVisitorsWeekly = (await db.query("SELECT COUNT(DISTINCT visitor_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '7 days' AND visitor_id IS NOT NULL")).rows[0].count;
+    const uniqueVisitorsMonthly = (await db.query("SELECT COUNT(DISTINCT visitor_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '30 days' AND visitor_id IS NOT NULL")).rows[0].count;
 
     res.json({
       totalUsers: parseInt(totalUsers),
@@ -30,7 +39,15 @@ router.get('/stats', isModerator, async (req, res) => {
       totalWatchTimeHours: parseFloat(totalWatchTimeHours.toFixed(1)),
       dailyActive: parseInt(dailyActive),
       weeklyActive: parseInt(weeklyActive),
-      totalVisitsAllTime: parseInt(totalVisitsAllTime)
+      monthlyActive: parseInt(monthlyActive),
+      yearlyActive: parseInt(yearlyActive),
+      totalVisitsToday: parseInt(totalVisitsToday),
+      totalVisitsWeekly: parseInt(totalVisitsWeekly),
+      totalVisitsMonthly: parseInt(totalVisitsMonthly),
+      totalVisitsAllTime: parseInt(totalVisitsAllTime),
+      uniqueVisitorsToday: parseInt(uniqueVisitorsToday),
+      uniqueVisitorsWeekly: parseInt(uniqueVisitorsWeekly),
+      uniqueVisitorsMonthly: parseInt(uniqueVisitorsMonthly)
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch platform statistics.' });
