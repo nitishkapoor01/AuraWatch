@@ -444,7 +444,7 @@ const AdminDashboard = () => {
                 <div className={styles.feedUser}>
                   <div className={styles.feedAvatar} style={{background: session.isGuest ? '#333' : '#e50914'}}></div>
                   <div className={styles.feedInfo}>
-                    <h4>{session.isGuest ? `Guest (${session.id.substring(0, 6)})` : `User ID: ${session.userId}`}</h4>
+                    <h4>{session.isGuest ? `Guest #${session.id.substring(0, 4)}` : (session.name || `User #${session.userId}`)}</h4>
                     <p>{session.path}</p>
                   </div>
                 </div>

@@ -44,6 +44,7 @@ function App() {
             visitorId,
             isGuest: !isLoggedIn,
             userId: user ? user.id : null,
+            name: user ? user.name : null,
             path: location.pathname + location.search,
             action: getActionFromPath(location.pathname)
           })

@@ -9,7 +9,7 @@ const activeSessions = new Map();
 
 // Ping endpoint - called by all clients every ~30s
 router.post('/heartbeat', async (req, res) => {
-  const { sessionId, isGuest, userId, visitorId, path, action } = req.body;
+  const { sessionId, isGuest, userId, visitorId, path, action, name } = req.body;
   if (!sessionId) {
     return res.status(400).json({ error: 'sessionId required' });
   }
@@ -18,6 +18,7 @@ router.post('/heartbeat', async (req, res) => {
     lastSeen: Date.now(),
     isGuest: !!isGuest,
     userId: userId || null,
+    name: name || null,
     visitorId: visitorId || null,
     path: path || '/',
     action: action || null
@@ -83,6 +84,7 @@ router.get('/live-stats', authMiddleware, isAdmin, (req, res) => {
         id: sessionId,
         isGuest: data.isGuest,
         userId: data.userId,
+        name: data.name,
         visitorId: data.visitorId,
         path: data.path,
         action: data.action,
