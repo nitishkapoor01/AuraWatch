@@ -11,7 +11,13 @@ router.use(authMiddleware);
 router.get('/', async (req, res) => {
   try {
     const history = await db.query(
-      'SELECT * FROM watch_history WHERE user_id = $1 ORDER BY last_watched DESC',
+      `SELECT * FROM (
+        SELECT DISTINCT ON (movie_id, movie_type) * 
+        FROM watch_history 
+        WHERE user_id = $1 
+        ORDER BY movie_id, movie_type, last_watched DESC
+      ) sub
+      ORDER BY last_watched DESC`,
       [req.user.id]
     );
     res.json(history.rows);

@@ -125,7 +125,16 @@ const WatchHistory = () => {
       ? items 
       : items.filter(item => item.category === activeFilter);
 
-    return { counts, filteredList: filtered };
+    // Final deduplication for safety
+    const seen = new Set();
+    const deduped = filtered.filter(item => {
+      const key = `${item.movie_id}-${item.movie_type}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return { counts, filteredList: deduped };
   }, [history, activeFilter]);
 
   if (loading) {

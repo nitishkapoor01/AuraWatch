@@ -6,13 +6,12 @@ import homeStyles from './Home.module.css';
 const Search = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
+  const filterType = searchParams.get('type') || 'Movie';
+  const filterGenre = searchParams.get('genre') || 'all';
+  const filterLang = searchParams.get('lang') || 'all';
+  
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    type: 'Movie',
-    genre: 'all',
-    lang: 'all'
-  });
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
@@ -28,7 +27,7 @@ const Search = () => {
           endpoint = `${API_BASE}/movies/search?query=${query}&visitorId=${visitorId}`;
         } else {
           // If no keyword, use discover with filters
-          endpoint = `${API_BASE}/movies/discover?type=${filters.type}&genre=${filters.genre}&lang=${filters.lang}`;
+          endpoint = `${API_BASE}/movies/discover?type=${filterType}&genre=${filterGenre}&lang=${filterLang}`;
         }
 
         const res = await fetch(endpoint);
@@ -42,7 +41,7 @@ const Search = () => {
     };
 
     fetchResults();
-  }, [query, filters]);
+  }, [query, filterType, filterGenre, filterLang]);
 
   return (
     <div className={styles.searchPage}>
@@ -53,7 +52,7 @@ const Search = () => {
           </h1>
         ) : (
           <h1 className={styles.searchTitle}>
-            Exploring <span className={styles.query}>{filters.type === 'Movie' ? 'Movies' : 'TV Series'}</span>
+            Exploring <span className={styles.query}>{filterType === 'Movie' ? 'Movies' : 'TV Series'}</span>
           </h1>
         )}
       </div>

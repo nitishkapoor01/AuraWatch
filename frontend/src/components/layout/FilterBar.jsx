@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Filter, ChevronDown, Check } from 'lucide-react';
 import styles from './FilterBar.module.css';
 
@@ -27,12 +28,22 @@ const TYPES = [
 ];
 
 const FilterBar = ({ onFilterChange }) => {
+  const [searchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
-    type: 'Movie',
-    genre: 'all',
-    lang: 'all'
+    type: searchParams.get('type') || 'Movie',
+    genre: searchParams.get('genre') || 'all',
+    lang: searchParams.get('lang') || 'all'
   });
+
+  // Keep filters in sync if URL changes externally
+  useEffect(() => {
+    setActiveFilters({
+      type: searchParams.get('type') || 'Movie',
+      genre: searchParams.get('genre') || 'all',
+      lang: searchParams.get('lang') || 'all'
+    });
+  }, [searchParams]);
 
   const handleSelect = (key, val) => {
     const newFilters = { ...activeFilters, [key]: val };
