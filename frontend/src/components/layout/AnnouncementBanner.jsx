@@ -4,25 +4,23 @@ import styles from './AnnouncementBanner.module.css';
 
 const AnnouncementBanner = ({ announcement }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [lastMessage, setLastMessage] = useState('');
 
   useEffect(() => {
     if (announcement && announcement.active) {
-      const dismissedMessage = sessionStorage.getItem('dismissedAnnouncement');
-      if (dismissedMessage !== announcement.message) {
+      // If it's a completely new message, show it even if we dismissed the old one
+      if (announcement.message !== lastMessage) {
         setIsVisible(true);
-      } else {
-        setIsVisible(false);
+        setLastMessage(announcement.message);
       }
     } else {
       setIsVisible(false);
+      setLastMessage('');
     }
   }, [announcement]);
 
   const handleDismiss = () => {
     setIsVisible(false);
-    if (announcement) {
-      sessionStorage.setItem('dismissedAnnouncement', announcement.message);
-    }
   };
 
   if (!isVisible || !announcement) return null;
