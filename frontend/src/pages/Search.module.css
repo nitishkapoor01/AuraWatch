@@ -5,13 +5,18 @@
 }
 
 .searchHeader {
-  margin-bottom: 32px;
+  margin-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .searchTitle {
-  font-size: 24px;
+  font-size: 28px;
   color: var(--text-secondary);
-  font-weight: 400;
+  font-weight: 300;
+  margin-top: 10px;
 }
 
 .query {

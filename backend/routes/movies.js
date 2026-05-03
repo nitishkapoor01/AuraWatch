@@ -71,7 +71,7 @@ const formatMovie = (m, forceType = null) => {
 const cache = new Map();
 const pendingRequests = new Map();
 
-const CACHE_TTL = 30 * 60 * 1000; // 30 minutes fresh (TMDB data doesn't change often)
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes fresh
 const CACHE_HARD_TTL = 24 * 60 * 60 * 1000; // 24 hours fallback
 
 const getCacheKey = (url) => {
@@ -89,57 +89,29 @@ const fetchAndFormat = async (url, forceType = null) => {
   const cacheKey = getCacheKey(url);
   const cached = cache.get(cacheKey);
 
-  // 1. FRESH HIT: Return immediately
-  if (cached && now < cached.expiresAt) {
-    return cached.data;
-  }
-
-  // 2. STALE HIT (SWR): Return stale data immediately, but fetch in background
+  if (cached && now < cached.expiresAt) return cached.data;
   if (cached && now < cached.hardExpiresAt) {
-    // Trigger background fetch (don't await)
-    revalidate(url, forceType, cacheKey).catch(err => console.error(`[SWR] Background refresh failed:`, err.message));
+    revalidate(url, forceType, cacheKey).catch(err => console.error(`[SWR] Error:`, err.message));
     return cached.data;
   }
-
-  // 3. MISS or HARD EXPIRED: Must fetch now
   return await revalidate(url, forceType, cacheKey);
 };
 
 const revalidate = async (url, forceType, cacheKey) => {
-  // REQUEST COALESCING: Check if someone is already fetching this exact URL
   let promise = pendingRequests.get(cacheKey);
-  if (promise) {
-    return await promise;
-  }
+  if (promise) return await promise;
 
   const fetchPromise = (async () => {
     try {
-      console.log(`[Backend] Fetching from TMDB: ${url}`);
       const response = await fetchWithRetry(url);
       const data = await response.json();
-      
       if (!response.ok) throw new Error(data.status_message || 'TMDB API Error');
-      
-      let results;
-      if (Array.isArray(data.results)) {
-        results = data.results.map(m => formatMovie(m, forceType));
-      } else {
-        results = formatMovie(data, forceType);
-      }
-      
-      cache.set(cacheKey, {
-        data: results,
-        expiresAt: Date.now() + CACHE_TTL,
-        hardExpiresAt: Date.now() + CACHE_HARD_TTL
-      });
-      
+      let results = Array.isArray(data.results) ? data.results.map(m => formatMovie(m, forceType)) : formatMovie(data, forceType);
+      cache.set(cacheKey, { data: results, expiresAt: Date.now() + CACHE_TTL, hardExpiresAt: Date.now() + CACHE_HARD_TTL });
       return results;
     } catch (error) {
       const expired = cache.get(cacheKey);
-      if (expired) {
-        console.warn(`[Fallback] Network error, serving expired cache for ${cacheKey}`);
-        return expired.data;
-      }
+      if (expired) return expired.data;
       throw error;
     } finally {
       pendingRequests.delete(cacheKey);
@@ -150,97 +122,12 @@ const revalidate = async (url, forceType, cacheKey) => {
   return await fetchPromise;
 };
 
-// Trending
+// --- ROUTES ---
+
 router.get('/trending', async (req, res) => {
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}&page=${page}`);
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}&page=${req.query.page || 1}`)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
-// Continue Watching (Using Popular)
-router.get('/continue-watching', async (req, res) => {
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/movie/popular?api_key=${getApiKey()}&page=${page}`, 'movie');
-    const formatted = data.map(m => ({ ...m, timeLeft: Math.floor(Math.random() * 2) + 1 + 'h ' + Math.floor(Math.random() * 60) + 'm left' }));
-    res.json(formatted);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
-});
-
-// Top Rated
-router.get('/top-rated', async (req, res) => {
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/movie/top_rated?api_key=${getApiKey()}&page=${page}`, 'movie');
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
-});
-
-// Action Movies
-router.get('/action', async (req, res) => {
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=28&page=${page}`, 'movie');
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
-});
-
-// Comedy Movies
-router.get('/comedy', async (req, res) => {
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=35&page=${page}`, 'movie');
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
-});
-
-// Horror Movies
-router.get('/horror', async (req, res) => {
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=27&page=${page}`, 'movie');
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
-});
-
-// Netflix Originals
-router.get('/originals', async (req, res) => {
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/discover/tv?api_key=${getApiKey()}&with_networks=213&page=${page}`, 'tv');
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
-});
-
-// Dynamic Genre
-router.get('/genre/:id', async (req, res) => {
-  const { id } = req.params;
-  const page = req.query.page || 1;
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=${id}&page=${page}`, 'movie');
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch' });
-  }
-});
-
-// Search movies
 router.get('/search', async (req, res) => {
   const { query, visitorId } = req.query;
   try {
@@ -248,114 +135,63 @@ router.get('/search', async (req, res) => {
       ? `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}`
       : `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}`;
     const data = await fetchAndFormat(url);
-    
-    // Log the search if it's a real query
-    if (query && query.trim() !== '') {
-      try {
-        const hasResults = data && data.length > 0;
-        await db.query(
-          "INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)",
-          [query.trim().toLowerCase(), hasResults, visitorId || null]
-        );
-      } catch (logError) {
-        console.error('Failed to log search query:', logError);
-      }
+    if (query && query.trim()) {
+      try { await db.query("INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)", [query.trim().toLowerCase(), data && data.length > 0, visitorId || null]); } catch (l) {}
     }
-
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to search' });
-  }
+  } catch (error) { res.status(500).json({ message: 'Error' }); }
+});
+
+router.get('/discover', async (req, res) => {
+  const { type, genre, lang, page = 1 } = req.query;
+  const langMap = { 'hollywood': 'en', 'bollywood': 'hi', 'south': 'te|ta|kn|ml', 'anime': 'ja' };
+  const mediaType = (type === 'Series' || type === 'tv') ? 'tv' : 'movie';
+  const tmdbLang = langMap[lang] || '';
+  let url = `${TMDB_BASE_URL}/discover/${mediaType}?api_key=${getApiKey()}&page=${page}&sort_by=popularity.desc`;
+  if (genre && genre !== 'all') url += `&with_genres=${genre}`;
+  if (tmdbLang) url += `&with_original_language=${tmdbLang}`;
+  try { res.json(await fetchAndFormat(url, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+
+router.get('/genre/:id', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=${req.params.id}&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
 router.get('/:id/videos', async (req, res) => {
   const { id } = req.params;
-  const { type = 'movie' } = req.query;
-  const mediaType = type.toLowerCase() === 'series' || type.toLowerCase() === 'tv' ? 'tv' : 'movie';
+  const mediaType = req.query.type === 'Series' ? 'tv' : 'movie';
   try {
-    const response = await fetchWithRetry(`${TMDB_BASE_URL}/${mediaType}/${id}/videos?api_key=${getApiKey()}`);
-    const data = await response.json();
-    const trailer = (data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube') || (data.results || [])[0];
+    const r = await fetchWithRetry(`${TMDB_BASE_URL}/${mediaType}/${id}/videos?api_key=${getApiKey()}`);
+    const d = await r.json();
+    const trailer = (d.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube') || (d.results || [])[0];
     res.json(trailer || { key: null });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch videos' });
-  }
+  } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
-// TV Seasons list
 router.get('/:id/seasons', async (req, res) => {
-  const { id } = req.params;
   try {
-    const response = await fetchWithRetry(`${TMDB_BASE_URL}/tv/${id}?api_key=${getApiKey()}`);
-    const data = await response.json();
-    const seasons = (data.seasons || [])
-      .filter(s => s.season_number > 0)
-      .map(s => ({
-        id: s.id,
-        number: s.season_number,
-        name: s.name,
-        episodeCount: s.episode_count,
-        poster: s.poster_path ? `https://image.tmdb.org/t/p/w300${s.poster_path}` : null,
-        airDate: s.air_date,
-      }));
-    res.json(seasons);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch seasons' });
-  }
+    const r = await fetchWithRetry(`${TMDB_BASE_URL}/tv/${req.params.id}?api_key=${getApiKey()}`);
+    const d = await r.json();
+    res.json((d.seasons || []).filter(s => s.season_number > 0).map(s => ({ id: s.id, number: s.season_number, name: s.name, episodeCount: s.episode_count, poster: s.poster_path ? `https://image.tmdb.org/t/p/w300${s.poster_path}` : null })));
+  } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
-// TV Season episodes
 router.get('/:id/season/:num', async (req, res) => {
-  const { id, num } = req.params;
   try {
-    const response = await fetchWithRetry(`${TMDB_BASE_URL}/tv/${id}/season/${num}?api_key=${getApiKey()}`);
-    const data = await response.json();
-    const episodes = (data.episodes || []).map(e => ({
-      id: e.id,
-      number: e.episode_number,
-      name: e.name,
-      overview: e.overview,
-      runtime: e.runtime,
-      airDate: e.air_date,
-      still: e.still_path ? `https://image.tmdb.org/t/p/w300${e.still_path}` : null,
-      rating: e.vote_average ? Math.round(e.vote_average * 10) : null,
-    }));
-    res.json(episodes);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch episodes' });
-  }
+    const r = await fetchWithRetry(`${TMDB_BASE_URL}/tv/${req.params.id}/season/${req.params.num}?api_key=${getApiKey()}`);
+    const d = await r.json();
+    res.json((d.episodes || []).map(e => ({ id: e.id, number: e.episode_number, name: e.name, overview: e.overview, runtime: e.runtime, still: e.still_path ? `https://image.tmdb.org/t/p/w300${e.still_path}` : null, rating: e.vote_average ? Math.round(e.vote_average * 10) : null })));
+  } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
 router.get('/:id/similar', async (req, res) => {
-  const { id } = req.params;
-  const { type = 'movie' } = req.query;
-  const mediaType = type.toLowerCase() === 'series' || type.toLowerCase() === 'tv' ? 'tv' : 'movie';
-  try {
-    const data = await fetchAndFormat(`${TMDB_BASE_URL}/${mediaType}/${id}/recommendations?api_key=${getApiKey()}`, mediaType);
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch recommendations' });
-  }
+  const mediaType = req.query.type === 'Series' ? 'tv' : 'movie';
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/${mediaType}/${req.params.id}/recommendations?api_key=${getApiKey()}`, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
 router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  let { type = 'movie' } = req.query;
-  
-  const mediaType = type.toLowerCase() === 'series' || type.toLowerCase() === 'tv' ? 'tv' : 'movie';
-  const url = `${TMDB_BASE_URL}/${mediaType}/${id}?api_key=${getApiKey()}&append_to_response=credits`;
-  
-  try {
-    const data = await fetchAndFormat(url, mediaType);
-    if (data && data.id) {
-      res.json(data);
-    } else {
-      res.status(404).json({ message: 'Movie not found' });
-    }
-  } catch (error) {
-    console.error(`[Backend] Error: ${error.message}`);
-    res.status(500).json({ message: 'Failed to fetch details' });
-  }
+  const mediaType = req.query.type === 'Series' ? 'tv' : 'movie';
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/${mediaType}/${req.params.id}?api_key=${getApiKey()}&append_to_response=credits`, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
 module.exports = router;
