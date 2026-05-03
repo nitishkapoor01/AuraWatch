@@ -30,6 +30,7 @@ const TYPES = [
 const FilterBar = ({ onFilterChange }) => {
   const [searchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  const filterRef = React.useRef(null);
   const [activeFilters, setActiveFilters] = useState({
     type: searchParams.get('type') || 'Movie',
     genre: searchParams.get('genre') || 'all',
@@ -45,6 +46,20 @@ const FilterBar = ({ onFilterChange }) => {
     });
   }, [searchParams]);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
   const handleSelect = (key, val) => {
     const newFilters = { ...activeFilters, [key]: val };
     setActiveFilters(newFilters);
@@ -52,7 +67,7 @@ const FilterBar = ({ onFilterChange }) => {
   };
 
   return (
-    <div className={styles.filterWrapper}>
+    <div className={styles.filterWrapper} ref={filterRef}>
       <button 
         className={`${styles.filterToggle} ${isOpen ? styles.active : ''}`}
         onClick={() => setIsOpen(!isOpen)}
