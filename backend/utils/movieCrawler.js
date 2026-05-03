@@ -2,6 +2,11 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const { Logger } = require('./logger');
 
+// VidVault uses TMDb IDs — we use their own public key (embedded in their frontend)
+const TMDB_API_KEY = '54e00466a09676df57ba51c4ca30b1a6';
+const VIDVAULT_API = 'https://vidvault.ru/api';
+const VIDVAULT_CDN = 'https://dl.gemlelispe.workers.dev';
+
 class MovieCrawler {
     constructor(options = {}) {
         this.config = options;
@@ -62,7 +67,177 @@ class MovieCrawler {
         return null;
     }
 
+    /**
+     * Helper: Convert bytes to human-readable size (e.g. "1.34 GB")
+     */
+    _formatBytes(bytes, decimals = 2) {
+        if (!bytes || bytes <= 0) return null;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        const idx = Math.min(i, sizes.length - 1);
+        return (bytes / Math.pow(1024, idx)).toFixed(decimals) + ' ' + sizes[idx];
+    }
 
+    /**
+     * Helper: Resolve a movie/TV title to a TMDb ID using TMDb search API.
+     * Returns { tmdbId, mediaType } or null.
+     */
+    async _getTmdbId(title, year, type) {
+        try {
+            const mediaType = type === 'tv' ? 'tv' : 'movie';
+            const query = encodeURIComponent(title);
+            const yearParam = year ? `&year=${year}` : '';
+            const url = `https://api.themoviedb.org/3/search/${mediaType}?api_key=${TMDB_API_KEY}&query=${query}${yearParam}&language=en-US&page=1`;
+            
+            const response = await axios.get(url, { timeout: 8000 });
+            const results = response.data.results;
+            
+            if (results && results.length > 0) {
+                // Try to find exact year match first
+                let match = results[0];
+                if (year) {
+                    const dateField = mediaType === 'tv' ? 'first_air_date' : 'release_date';
+                    const yearMatch = results.find(r => r[dateField] && r[dateField].startsWith(String(year)));
+                    if (yearMatch) match = yearMatch;
+                }
+                return { tmdbId: String(match.id), mediaType };
+            }
+        } catch (e) {
+            this.logger.warn(`TMDb lookup failed: ${e.message}`);
+        }
+        return null;
+    }
+
+    /**
+     * VidVault.ru — Direct MP4/MKV downloads via their REST API.
+     * Uses TMDb IDs for lookups, provides multiple quality options with file sizes.
+     */
+    async _searchVidVault(title, year, tvInfo = {}) {
+        try {
+            this.logger.info(`🔍 Searching VidVault...`);
+            const { type, season, episode } = tvInfo;
+            
+            // Step 1: Get TMDb ID
+            const tmdbResult = await this._getTmdbId(title, year, type);
+            if (!tmdbResult) {
+                this.logger.warn('VidVault: Could not resolve TMDb ID');
+                return null;
+            }
+            
+            this.logger.info(`📄 [VidVault] TMDb ID: ${tmdbResult.tmdbId}`);
+            
+            // Step 2: Get auth token
+            const tokenRes = await axios.get(`${VIDVAULT_API}/get-token`, { timeout: 8000 });
+            const token = tokenRes.data?.t || '';
+            
+            if (!token) {
+                this.logger.warn('VidVault: Failed to get auth token');
+                return null;
+            }
+            
+            // Step 3: Fetch download links
+            const payload = {
+                type: type === 'tv' ? 'tv' : 'movie',
+                tmdbId: tmdbResult.tmdbId,
+                season: season ? Number(season) : undefined,
+                episode: episode ? Number(episode) : undefined
+            };
+            
+            const dlRes = await axios.post(`${VIDVAULT_API}/download-proxy`, payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-request-token': token
+                },
+                timeout: 15000
+            });
+            
+            const extractData = dlRes.data?.extractData;
+            const mkvData = dlRes.data?.mkvData;
+            const coreData = extractData?.data?.data || extractData?.data;
+            
+            const qualities = {};
+            const links = { direct: [], magnet: [], torrent: [] };
+            const displayName = year ? `${title} (${year})` : title;
+            const encodedName = encodeURIComponent(displayName);
+            
+            // Parse MP4 streams
+            if (coreData?.streams) {
+                for (const stream of coreData.streams) {
+                    if (!stream.size || !stream.url) continue;
+                    const resolution = stream.resolutions || stream.resolution || null;
+                    const q = resolution ? this._detectQuality(`${resolution}p`) || resolution + 'p' : 'other';
+                    const size = this._formatBytes(Number(stream.size));
+                    const proxyUrl = `${VIDVAULT_CDN}/${encodeURIComponent(stream.url)}?n=${encodedName}`;
+                    
+                    if (!qualities[q]) qualities[q] = [];
+                    const linkObj = {
+                        url: proxyUrl,
+                        name: `VidVault: ${q} MP4 [${size || 'Unknown'}]`,
+                        type: 'direct',
+                        size: size
+                    };
+                    qualities[q].push(linkObj);
+                    links.direct.push(linkObj);
+                    this.stats.directLinks++;
+                }
+            }
+            
+            // Parse MP4 downloads (alternative format)
+            if (coreData?.downloads) {
+                for (const dl of coreData.downloads) {
+                    if (!dl.size || !dl.url) continue;
+                    const resolution = dl.resolution || null;
+                    const q = resolution ? this._detectQuality(`${resolution}p`) || resolution + 'p' : 'other';
+                    const size = this._formatBytes(Number(dl.size));
+                    const proxyUrl = `${VIDVAULT_CDN}/${encodeURIComponent(dl.url)}?n=${encodedName}`;
+                    
+                    if (!qualities[q]) qualities[q] = [];
+                    const linkObj = {
+                        url: proxyUrl,
+                        name: `VidVault: ${q} MP4 [${size || 'Unknown'}]`,
+                        type: 'direct',
+                        size: size
+                    };
+                    // Avoid duplicate URLs
+                    if (!qualities[q].some(l => l.url === proxyUrl)) {
+                        qualities[q].push(linkObj);
+                        links.direct.push(linkObj);
+                        this.stats.directLinks++;
+                    }
+                }
+            }
+            
+            // Parse MKV downloads (embedded subtitles)
+            if (mkvData?.files) {
+                for (const file of mkvData.files) {
+                    if (!file.url) continue;
+                    const size = typeof file.size === 'number' ? this._formatBytes(file.size) : String(file.size || 'Unknown');
+                    // MKV files are usually 480p+
+                    const q = '480p';
+                    if (!qualities[q]) qualities[q] = [];
+                    const linkObj = {
+                        url: file.url,
+                        name: `VidVault: MKV [${size}] (embedded subs)`,
+                        type: 'direct',
+                        size: size
+                    };
+                    qualities[q].push(linkObj);
+                    links.direct.push(linkObj);
+                    this.stats.directLinks++;
+                }
+            }
+            
+            if (links.direct.length > 0) {
+                this.logger.info(`✅ [VidVault] Found ${links.direct.length} direct download links`);
+                return { title: displayName, qualities, links };
+            }
+            
+            this.logger.warn('VidVault: No download links in response');
+        } catch (e) {
+            this.logger.warn(`VidVault search failed: ${e.message}`);
+        }
+        return null;
+    }
 
     async _searchGenericTypesense(title, year, name, baseUrl) {
         try {
@@ -268,6 +443,7 @@ class MovieCrawler {
         try {
             const sources = [
                 () => type !== 'tv' ? this._searchYTS(title, year) : Promise.resolve(null),
+                () => this._searchVidVault(title, year, tvInfo),
                 () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
                 () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba/"),
@@ -280,7 +456,7 @@ class MovieCrawler {
             const sourceResults = await Promise.allSettled(sources.map(s => s()));
             
             let mergedMovie = null;
-            const sourceNames = ['YTS', 'HDHub4u', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
+            const sourceNames = ['YTS', 'VidVault', 'HDHub4u', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
             
             sourceResults.forEach((res, index) => {
                 results.meta.sourcesTried.push(sourceNames[index]);
