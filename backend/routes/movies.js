@@ -7,7 +7,6 @@ const API_KEYS = Object.keys(process.env)
   .map(key => process.env[key])
   .filter(Boolean);
 
-// Fallback to old key name if new ones aren't found
 if (API_KEYS.length === 0 && process.env.TMDB_API_KEY) {
   API_KEYS.push(process.env.TMDB_API_KEY);
 }
@@ -28,7 +27,7 @@ const fetchWithRetry = async (url, retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
       const response = await fetch(url);
-      if (response.status === 429) { // Rate limited
+      if (response.status === 429) {
         const retryAfter = response.headers.get('retry-after') || 1;
         await new Promise(res => setTimeout(res, retryAfter * 1000));
         continue;
@@ -36,7 +35,6 @@ const fetchWithRetry = async (url, retries = 3) => {
       return response;
     } catch (err) {
       if (i === retries - 1) throw err;
-      console.warn(`[TMDB] Connection reset, retrying in ${500 * (i+1)}ms...`);
       await new Promise(res => setTimeout(res, 500 * (i + 1)));
     }
   }
@@ -44,7 +42,6 @@ const fetchWithRetry = async (url, retries = 3) => {
 
 const formatMovie = (m, forceType = null) => {
   const mediaType = forceType || m.media_type || (m.first_air_date ? 'tv' : 'movie');
-  
   let cast = [];
   if (m.credits && m.credits.cast) {
     cast = m.credits.cast.slice(0, 10).map(actor => ({
@@ -54,7 +51,6 @@ const formatMovie = (m, forceType = null) => {
       profile: actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : null
     }));
   }
-
   return {
     id: m.id,
     title: m.title || m.name,
@@ -70,9 +66,8 @@ const formatMovie = (m, forceType = null) => {
 
 const cache = new Map();
 const pendingRequests = new Map();
-
-const CACHE_TTL = 30 * 60 * 1000; // 30 minutes fresh
-const CACHE_HARD_TTL = 24 * 60 * 60 * 1000; // 24 hours fallback
+const CACHE_TTL = 30 * 60 * 1000;
+const CACHE_HARD_TTL = 24 * 60 * 60 * 1000;
 
 const getCacheKey = (url) => {
   try {
@@ -88,7 +83,6 @@ const fetchAndFormat = async (url, forceType = null) => {
   const now = Date.now();
   const cacheKey = getCacheKey(url);
   const cached = cache.get(cacheKey);
-
   if (cached && now < cached.expiresAt) return cached.data;
   if (cached && now < cached.hardExpiresAt) {
     revalidate(url, forceType, cacheKey).catch(err => console.error(`[SWR] Error:`, err.message));
@@ -100,7 +94,6 @@ const fetchAndFormat = async (url, forceType = null) => {
 const revalidate = async (url, forceType, cacheKey) => {
   let promise = pendingRequests.get(cacheKey);
   if (promise) return await promise;
-
   const fetchPromise = (async () => {
     try {
       const response = await fetchWithRetry(url);
@@ -117,13 +110,11 @@ const revalidate = async (url, forceType, cacheKey) => {
       pendingRequests.delete(cacheKey);
     }
   })();
-
   pendingRequests.set(cacheKey, fetchPromise);
   return await fetchPromise;
 };
 
-// --- ROUTES ---
-
+// --- CORE ROUTES ---
 router.get('/trending', async (req, res) => {
   try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}&page=${req.query.page || 1}`)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
@@ -131,9 +122,7 @@ router.get('/trending', async (req, res) => {
 router.get('/search', async (req, res) => {
   const { query, visitorId } = req.query;
   try {
-    const url = query 
-      ? `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}`
-      : `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}`;
+    const url = query ? `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}` : `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}`;
     const data = await fetchAndFormat(url);
     if (query && query.trim()) {
       try { await db.query("INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)", [query.trim().toLowerCase(), data && data.length > 0, visitorId || null]); } catch (l) {}
@@ -153,15 +142,34 @@ router.get('/discover', async (req, res) => {
   try { res.json(await fetchAndFormat(url, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
+// --- HOME PAGE ENDPOINTS (RESTORED) ---
+router.get('/originals', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/tv?api_key=${getApiKey()}&with_networks=213&page=${req.query.page || 1}`, 'tv')); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+router.get('/continue-watching', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/movie/popular?api_key=${getApiKey()}&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+router.get('/top-rated', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/movie/top_rated?api_key=${getApiKey()}&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+router.get('/action', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=28&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+router.get('/comedy', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=35&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+router.get('/horror', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=27&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
 router.get('/genre/:id', async (req, res) => {
   try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=${req.params.id}&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
+// --- DETAILS & TV ENDPOINTS ---
 router.get('/:id/videos', async (req, res) => {
-  const { id } = req.params;
   const mediaType = req.query.type === 'Series' ? 'tv' : 'movie';
   try {
-    const r = await fetchWithRetry(`${TMDB_BASE_URL}/${mediaType}/${id}/videos?api_key=${getApiKey()}`);
+    const r = await fetchWithRetry(`${TMDB_BASE_URL}/${mediaType}/${req.params.id}/videos?api_key=${getApiKey()}`);
     const d = await r.json();
     const trailer = (d.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube') || (d.results || [])[0];
     res.json(trailer || { key: null });
