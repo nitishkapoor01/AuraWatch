@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import styles from './Search.module.css';
 import homeStyles from './Home.module.css';
-import FilterBar from '../components/layout/FilterBar';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -48,8 +47,6 @@ const Search = () => {
   return (
     <div className={styles.searchPage}>
       <div className={styles.searchHeader}>
-        <FilterBar onFilterChange={(newFilters) => setFilters(newFilters)} />
-        
         {query ? (
           <h1 className={styles.searchTitle}>
             Results for <span className={styles.query}>"{query}"</span>
