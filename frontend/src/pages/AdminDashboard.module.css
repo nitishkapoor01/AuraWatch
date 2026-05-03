@@ -23,6 +23,48 @@
   font-size: 16px;
 }
 
+/* Tabs Navigation */
+.tabsNav {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.tabsNav::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tabBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.tabBtn.activeTab {
+  background: #e50914;
+  border-color: #e50914;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+}
+
 /* Live Stats Banner */
 .liveStatsBanner {
   background: linear-gradient(90deg, rgba(46, 204, 113, 0.1) 0%, rgba(46, 204, 113, 0.02) 100%);
@@ -866,3 +908,231 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* Live Activity Feed */
+.liveFeedList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feedItem {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feedUser {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feedAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.feedInfo h4 {
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.feedInfo p {
+  font-size: 12px;
+  color: #777;
+}
+
+.feedAction {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.actionBadge {
+  background: rgba(0, 113, 235, 0.15);
+  color: #0071eb;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.feedTime {
+  font-size: 11px;
+  color: #555;
+}
+
+/* Log Tables */
+.logTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.logTable th {
+  text-align: left;
+  padding: 12px;
+  font-size: 12px;
+  color: #555 !important;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logTable td {
+  padding: 12px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.logSuccess { color: #2ecc71; }
+.logFailure { color: #e50914; }
+
+/* Analytics Grid */
+.analyticsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.analyticsCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.analyticsCard h3 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #999;
+}
+
+.keywordList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.keywordItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.keywordText {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.keywordCount {
+  font-size: 12px;
+  color: #555;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Security Controls */
+.securityControls {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+}
+
+.blockIpForm {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputField {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.primaryBtn {
+  background: #e50914;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondaryBtn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.unblockBtn {
+  color: #e50914;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.userActionBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.banBtn {
+  background: rgba(229, 9, 20, 0.1);
+  color: #e50914;
+  border: 1px solid rgba(229, 9, 20, 0.2);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.unbanBtn {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.roleSelect {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+

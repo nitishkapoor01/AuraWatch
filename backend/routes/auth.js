@@ -94,6 +94,13 @@ router.post('/login', async (req, res) => {
     return res.status(403).json({ message: `Account is temporarily locked due to too many failed attempts. Try again in ${lockTimeLeft} minutes.` });
   }
 
+  // Check if account is banned
+  if (user.is_banned) {
+    return res.status(403).json({ message: 'Your account has been permanently banned by an administrator.' });
+  }
+
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
   try {
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
@@ -102,12 +109,16 @@ router.post('/login', async (req, res) => {
       if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
         const lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MINUTES * 60000).toISOString();
         await db.query('UPDATE users SET failed_login_attempts = $1, locked_until = $2 WHERE id = $3', [newAttempts, lockedUntil, user.id]);
+        await db.query('INSERT INTO login_logs (user_id, ip_address, success) VALUES ($1, $2, false)', [user.id, ip]);
         return res.status(403).json({ message: `Account locked due to too many failed attempts. Try again in ${LOCKOUT_DURATION_MINUTES} minutes.` });
       } else {
         await db.query('UPDATE users SET failed_login_attempts = $1 WHERE id = $2', [newAttempts, user.id]);
+        await db.query('INSERT INTO login_logs (user_id, ip_address, success) VALUES ($1, $2, false)', [user.id, ip]);
         return res.status(401).json({ message: `Invalid email or password. ${MAX_LOGIN_ATTEMPTS - newAttempts} attempts remaining.` });
       }
     }
+
+    await db.query('INSERT INTO login_logs (user_id, ip_address, success) VALUES ($1, $2, true)', [user.id, ip]);
 
     // Reset failed attempts on success
     if (user.failed_login_attempts > 0 || user.locked_until !== null) {

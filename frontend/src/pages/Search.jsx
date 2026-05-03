@@ -13,7 +13,8 @@ const Search = () => {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/movies/search?query=${query}`);
+        const visitorId = localStorage.getItem('trackingVisitorId') || '';
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/movies/search?query=${query}&visitorId=${visitorId}`);
         const data = await res.json();
         setResults(Array.isArray(data) ? data : []);
       } catch (error) {

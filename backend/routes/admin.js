@@ -165,4 +165,143 @@ router.post('/settings', async (req, res) => {
   }
 });
 
+// --- NEW ADMIN ENDPOINTS ---
+
+// Fetch Search Logs
+router.get('/search-logs', async (req, res) => {
+  try {
+    const recentSearches = await db.query('SELECT * FROM search_logs ORDER BY created_at DESC LIMIT 50');
+    
+    // Most frequent search terms today
+    const topKeywords = await db.query(`
+      SELECT query, COUNT(*) as count 
+      FROM search_logs 
+      WHERE created_at >= CURRENT_DATE 
+      GROUP BY query 
+      ORDER BY count DESC 
+      LIMIT 10
+    `);
+
+    // Top searches that resulted in NO results
+    const noResults = await db.query(`
+      SELECT query, COUNT(*) as count 
+      FROM search_logs 
+      WHERE has_results = false 
+      GROUP BY query 
+      ORDER BY count DESC 
+      LIMIT 10
+    `);
+
+    res.json({
+      recent: recentSearches.rows,
+      topKeywords: topKeywords.rows,
+      noResults: noResults.rows
+    });
+  } catch (error) {
+    console.error('Fetch search logs error:', error);
+    res.status(500).json({ message: 'Failed to fetch search logs.' });
+  }
+});
+
+// Update User Role
+router.put('/users/:id/role', async (req, res) => {
+  const { id } = req.params;
+  const { role } = req.body;
+  if (role !== 'admin' && role !== 'user') return res.status(400).json({ message: 'Invalid role' });
+  
+  if (parseInt(id) === req.user.id) {
+    return res.status(400).json({ message: 'You cannot change your own role.' });
+  }
+
+  try {
+    await db.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
+    res.json({ message: `User role updated to ${role}` });
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to update user role' });
+  }
+});
+
+// Ban/Unban User
+router.put('/users/:id/ban', async (req, res) => {
+  const { id } = req.params;
+  const { is_banned } = req.body;
+  
+  if (parseInt(id) === req.user.id) {
+    return res.status(400).json({ message: 'You cannot ban yourself.' });
+  }
+
+  try {
+    await db.query('UPDATE users SET is_banned = $1 WHERE id = $2', [is_banned, id]);
+    res.json({ message: `User ${is_banned ? 'banned' : 'unbanned'} successfully` });
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to update user ban status' });
+  }
+});
+
+// Analytics: Most Watched Movies (Heatmap data)
+router.get('/analytics/most-watched', async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT title, movie_type, COUNT(*) as watches 
+      FROM watch_history 
+      GROUP BY title, movie_type 
+      ORDER BY watches DESC 
+      LIMIT 20
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to fetch most watched' });
+  }
+});
+
+// Security: Block IP
+router.post('/security/block-ip', async (req, res) => {
+  const { ip_address, reason } = req.body;
+  if (!ip_address) return res.status(400).json({ message: 'IP address is required' });
+
+  try {
+    await db.query('INSERT INTO blocked_ips (ip_address, reason) VALUES ($1, $2) ON CONFLICT (ip_address) DO UPDATE SET reason = EXCLUDED.reason', [ip_address, reason || 'Banned by admin']);
+    res.json({ message: `IP ${ip_address} blocked successfully` });
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to block IP' });
+  }
+});
+
+// Security: Unblock IP
+router.delete('/security/block-ip/:ip', async (req, res) => {
+  const { ip } = req.params;
+  try {
+    await db.query('DELETE FROM blocked_ips WHERE ip_address = $1', [ip]);
+    res.json({ message: `IP ${ip} unblocked successfully` });
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to unblock IP' });
+  }
+});
+
+// Security: Get Blocked IPs
+router.get('/security/blocked-ips', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM blocked_ips ORDER BY blocked_at DESC');
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to fetch blocked IPs' });
+  }
+});
+
+// Security: Get Login Logs
+router.get('/security/login-logs', async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT l.*, u.name, u.email 
+      FROM login_logs l 
+      LEFT JOIN users u ON l.user_id = u.id 
+      ORDER BY l.created_at DESC 
+      LIMIT 100
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to fetch login logs' });
+  }
+});
+
 module.exports = router;

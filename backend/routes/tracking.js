@@ -9,7 +9,7 @@ const activeSessions = new Map();
 
 // Ping endpoint - called by all clients every ~30s
 router.post('/heartbeat', async (req, res) => {
-  const { sessionId, isGuest, userId, visitorId } = req.body;
+  const { sessionId, isGuest, userId, visitorId, path, action } = req.body;
   if (!sessionId) {
     return res.status(400).json({ error: 'sessionId required' });
   }
@@ -17,7 +17,10 @@ router.post('/heartbeat', async (req, res) => {
   activeSessions.set(sessionId, {
     lastSeen: Date.now(),
     isGuest: !!isGuest,
-    userId: userId || null
+    userId: userId || null,
+    visitorId: visitorId || null,
+    path: path || '/',
+    action: action || null
   });
 
   if (userId) {
@@ -64,17 +67,34 @@ router.get('/live-stats', authMiddleware, isAdmin, (req, res) => {
   let total = 0;
   let guests = 0;
   let loggedIn = 0;
+  const sessions = [];
 
-  for (const data of activeSessions.values()) {
+  for (const [sessionId, data] of activeSessions.entries()) {
     total++;
     if (data.isGuest) {
       guests++;
     } else {
       loggedIn++;
     }
+    
+    // Only return data from the last 5 minutes to keep it clean
+    if (Date.now() - data.lastSeen < 300000) {
+      sessions.push({
+        id: sessionId,
+        isGuest: data.isGuest,
+        userId: data.userId,
+        visitorId: data.visitorId,
+        path: data.path,
+        action: data.action,
+        lastSeen: data.lastSeen
+      });
+    }
   }
+  
+  // Sort by most recently active
+  sessions.sort((a, b) => b.lastSeen - a.lastSeen);
 
-  res.json({ total, guests, loggedIn });
+  res.json({ total, guests, loggedIn, sessions });
 });
 
 module.exports = router;

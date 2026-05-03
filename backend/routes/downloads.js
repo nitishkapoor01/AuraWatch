@@ -64,7 +64,7 @@ async function saveToCacheDB(title, year, cacheKey, responseData) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.post('/movie', async (req, res) => {
-    const { title, year, season, episode, type, forceRefresh } = req.body;
+    const { title, year, season, episode, type, forceRefresh, visitorId } = req.body;
 
     if (!title) {
         return res.status(400).json({
@@ -150,6 +150,16 @@ router.post('/movie', async (req, res) => {
 
         // ── STEP 3: Save to Cache ────────────────────────────────────────
         await saveToCacheDB(title, year, cacheKey, responseData);
+
+        // ── STEP 4: Log Search ──────────────────────────────────────────
+        try {
+            await db.query(
+                "INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)",
+                [title.trim().toLowerCase(), true, visitorId || null]
+            );
+        } catch (logError) {
+            console.error('Failed to log search query in downloads:', logError);
+        }
 
         res.json({ ...responseData, cached: false });
 

@@ -1,23 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trash2, ShieldAlert, Film, Clock, BarChart3, AlertCircle, Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, X } from 'lucide-react';
+import { 
+  Users, Trash2, ShieldAlert, Film, Clock, BarChart3, AlertCircle, 
+  Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, 
+  X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
+  Ban, ShieldCheck, UserCog, History
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from './AdminDashboard.module.css';
 
 const AdminDashboard = () => {
-  const { token, isLoggedIn } = useAuth();
+  const { token, isLoggedIn, user: currentUser } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  // Data States
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Live Feed & Security States
   const [liveStats, setLiveStats] = useState(null);
-
+  const [searchLogs, setSearchLogs] = useState({ recent: [], topKeywords: [], noResults: [] });
+  const [loginLogs, setLoginLogs] = useState([]);
+  const [blockedIps, setBlockedIps] = useState([]);
+  const [mostWatched, setMostWatched] = useState([]);
+  
+  // Control States
   const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' });
   const [savingAnnouncement, setSavingAnnouncement] = useState(false);
-
   const [globalSettings, setGlobalSettings] = useState({ skip_ads_timer: false });
   const [savingSettings, setSavingSettings] = useState(false);
+  const [newBlockIp, setNewBlockIp] = useState({ ip: '', reason: '' });
 
   const fetchLiveStats = async () => {
     try {
@@ -28,69 +43,18 @@ const AdminDashboard = () => {
         const data = await res.json();
         setLiveStats(data);
       }
-    } catch (e) {
-      console.error('Failed to fetch live stats', e);
-    }
+    } catch (e) { console.error('Failed to fetch live stats', e); }
   };
-
-  const fetchAnnouncement = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/announcement`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data) setAnnouncement(data);
-      }
-    } catch (e) {
-      console.error('Failed to fetch announcement', e);
-    }
-  };
-
-  const fetchGlobalSettings = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/settings`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setGlobalSettings({
-          skip_ads_timer: data.skip_ads_timer === 'true' || data.skip_ads_timer === true
-        });
-      }
-    } catch (e) {
-      console.error('Failed to fetch global settings', e);
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-      return;
-    }
-    fetchAdminData(true);
-    fetchLiveStats();
-    fetchAnnouncement();
-    fetchGlobalSettings();
-    
-    // Auto-refresh both live stats and platform stats every 10s
-    const liveInterval = setInterval(fetchLiveStats, 10000);
-    const statsInterval = setInterval(() => fetchAdminData(false), 10000);
-    return () => {
-      clearInterval(liveInterval);
-      clearInterval(statsInterval);
-    };
-  }, [isLoggedIn]);
 
   const fetchAdminData = async (showLoader = false) => {
     try {
       if (showLoader) setLoading(true);
-      setError(null);
       const headers = { Authorization: `Bearer ${token}` };
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
       const [statsRes, usersRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/stats`, { headers }),
-        fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/users`, { headers })
+        fetch(`${baseUrl}/admin/stats`, { headers }),
+        fetch(`${baseUrl}/admin/users`, { headers })
       ]);
 
       if (!statsRes.ok || !usersRes.ok) {
@@ -98,464 +62,402 @@ const AdminDashboard = () => {
         throw new Error('Failed to fetch admin data');
       }
 
-      const statsData = await statsRes.json();
-      const usersData = await usersRes.json();
+      setStats(await statsRes.json());
+      setUsers(await usersRes.json());
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
+  };
 
-      setStats(statsData);
-      setUsers(usersData);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  const fetchTabSpecificData = async (tab) => {
+    const headers = { Authorization: `Bearer ${token}` };
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+
+    if (tab === 'security') {
+      const [blockedRes, loginRes] = await Promise.all([
+        fetch(`${baseUrl}/admin/security/blocked-ips`, { headers }),
+        fetch(`${baseUrl}/admin/security/login-logs`, { headers })
+      ]);
+      if (blockedRes.ok) setBlockedIps(await blockedRes.json());
+      if (loginRes.ok) setLoginLogs(await loginRes.json());
+    } else if (tab === 'analytics') {
+      const [searchRes, watchedRes] = await Promise.all([
+        fetch(`${baseUrl}/admin/search-logs`, { headers }),
+        fetch(`${baseUrl}/admin/analytics/most-watched`, { headers })
+      ]);
+      if (searchRes.ok) setSearchLogs(await searchRes.json());
+      if (watchedRes.ok) setMostWatched(await watchedRes.json());
     }
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) { navigate('/login'); return; }
+    fetchAdminData(true);
+    fetchLiveStats();
+    
+    // Auto-refresh logic
+    const liveInterval = setInterval(fetchLiveStats, 10000);
+    const statsInterval = setInterval(() => fetchAdminData(false), 30000);
+    
+    return () => { clearInterval(liveInterval); clearInterval(statsInterval); };
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    fetchTabSpecificData(activeTab);
+  }, [activeTab]);
+
+  // Actions
+  const handleUpdateRole = async (userId, newRole) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/users/${userId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ role: newRole })
+      });
+      if (res.ok) {
+        setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Failed to update role');
+      }
+    } catch (e) { alert('Error updating role'); }
+  };
+
+  const handleToggleBan = async (userId, isBanned) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/users/${userId}/ban`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ is_banned: !isBanned })
+      });
+      if (res.ok) {
+        setUsers(users.map(u => u.id === userId ? { ...u, is_banned: !isBanned } : u));
+      }
+    } catch (e) { alert('Error toggling ban'); }
+  };
+
+  const handleBlockIp = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/security/block-ip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ip_address: newBlockIp.ip, reason: newBlockIp.reason })
+      });
+      if (res.ok) {
+        setNewBlockIp({ ip: '', reason: '' });
+        fetchTabSpecificData('security');
+      }
+    } catch (e) { alert('Error blocking IP'); }
+  };
+
+  const handleUnblockIp = async (ip) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/security/block-ip/${ip}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchTabSpecificData('security');
+    } catch (e) { alert('Error unblocking IP'); }
   };
 
   const handleSaveAnnouncement = async () => {
     try {
       setSavingAnnouncement(true);
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/announcement`, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/announcement`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(announcement)
       });
-      if (!res.ok) throw new Error('Failed to save announcement');
-      alert('Announcement updated successfully! It will appear for all users within 30 seconds.');
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setSavingAnnouncement(false);
-    }
+      alert('Announcement updated!');
+    } catch (e) { alert('Failed to save announcement'); }
+    finally { setSavingAnnouncement(false); }
   };
 
   const handleUpdateSetting = async (key, value) => {
     try {
       setSavingSettings(true);
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/settings`, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/settings`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ key, value })
       });
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to update setting');
-      }
-      
       setGlobalSettings(prev => ({ ...prev, [key]: value }));
-      alert(`Setting updated: ${key} is now ${value ? 'ON' : 'OFF'}`);
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setSavingSettings(false);
-    }
+    } catch (e) { alert('Failed to update setting'); }
+    finally { setSavingSettings(false); }
   };
 
-  const handleDeleteUser = async (userId, name) => {
-    if (!window.confirm(`Are you sure you want to permanently delete user ${name}? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || 'Failed to delete user');
-      }
-
-      setUsers(users.filter(u => u.id !== userId));
-      setStats(prev => ({ ...prev, totalUsers: prev.totalUsers - 1 }));
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className={styles.adminPage}>
-        <div className={styles.loader}></div>
+  if (loading) return <div className={styles.adminPage}><div className={styles.loader}></div></div>;
+  if (error) return (
+    <div className={styles.adminPage}>
+      <div className={styles.errorState}>
+        <ShieldAlert size={64} color="#e50914" />
+        <h2>Access Restricted</h2>
+        <p>{error}</p>
+        <button className={styles.backBtn} onClick={() => navigate('/')}>Return to Home</button>
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.adminPage}>
-        <div className={styles.errorState}>
-          <ShieldAlert size={64} color="#e50914" />
-          <h2>Access Restricted</h2>
-          <p>{error}</p>
-          <button className={styles.backBtn} onClick={() => navigate('/')}>Return to Home</button>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div className={styles.adminPage}>
       <div className={styles.header}>
         <h1>Admin Control Panel</h1>
-        <p>Monitor platform statistics and manage user accounts</p>
+        <p>Comprehensive observability and platform management</p>
       </div>
 
-      {liveStats && (
-        <div className={styles.liveStatsBanner}>
-          <div className={styles.liveIndicator}>
-            <span className={styles.ping}></span>
-            <span className={styles.dot}></span>
+      <div className={styles.tabsNav}>
+        <button className={`${styles.tabBtn} ${activeTab === 'overview' ? styles.activeTab : ''}`} onClick={() => setActiveTab('overview')}>
+          <LayoutDashboard size={18} /> Overview
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'users' ? styles.activeTab : ''}`} onClick={() => setActiveTab('users')}>
+          <Users size={18} /> Users
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'security' ? styles.activeTab : ''}`} onClick={() => setActiveTab('security')}>
+          <Shield size={18} /> Security
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'analytics' ? styles.activeTab : ''}`} onClick={() => setActiveTab('analytics')}>
+          <BarChart size={18} /> Analytics
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'live' ? styles.activeTab : ''}`} onClick={() => setActiveTab('live')}>
+          <Zap size={18} /> Live Feed
+        </button>
+      </div>
+
+      {/* OVERVIEW TAB */}
+      {activeTab === 'overview' && stats && (
+        <div className={styles.tabContent}>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(229, 9, 20, 0.15)', color: '#e50914' }}><Users size={28} /></div>
+              <div className={styles.statInfo}><h3>{stats.uniqueVisitorsToday}</h3><p>Unique Visitors Today</p></div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}><Zap size={28} /></div>
+              <div className={styles.statInfo}><h3>{liveStats?.total || 0}</h3><p>Users Online Now</p></div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}><History size={28} /></div>
+              <div className={styles.statInfo}><h3>{stats.totalWatches}</h3><p>Total Watches</p></div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}><Clock size={28} /></div>
+              <div className={styles.statInfo}><h3>{Math.round(stats.totalWatchTimeHours)}h</h3><p>Total Watch Time</p></div>
+            </div>
           </div>
-          <div className={styles.liveStatsContent}>
-            <h2>{liveStats.total} Active Users Right Now</h2>
-            <p>{liveStats.loggedIn} Logged In • {liveStats.guests} Guests</p>
+
+          <div className={styles.analyticsSection}>
+            <div className={styles.sectionHeader}><h2>Announcements & Broadcasts</h2></div>
+            <div className={styles.announcementPanel}>
+              <div className={styles.announcementControls}>
+                <textarea 
+                  value={announcement.message}
+                  onChange={(e) => setAnnouncement({...announcement, message: e.target.value})}
+                  placeholder="Broadcast message to all users..."
+                  className={styles.textArea}
+                  rows="2"
+                />
+                <div className={styles.controlGrid}>
+                  <div className={styles.inputGroup}>
+                    <label>Theme</label>
+                    <div className={styles.themeSelector}>
+                      {['info', 'warning', 'alert'].map(t => (
+                        <button key={t} className={`${styles.themeOption} ${announcement.type === t ? styles.selected : ''} ${styles[t]}`} onClick={() => setAnnouncement({...announcement, type: t})}>
+                          {t.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.toggleGroup}>
+                    <label>Status</label>
+                    <button className={`${styles.statusBtn} ${announcement.active ? styles.active : ''}`} onClick={() => setAnnouncement({...announcement, active: !announcement.active})}>
+                      {announcement.active ? 'PUBLISHED' : 'DRAFT'}
+                    </button>
+                  </div>
+                </div>
+                <button className={styles.saveAnnouncementBtn} onClick={handleSaveAnnouncement} disabled={savingAnnouncement}>
+                  {savingAnnouncement ? 'UPDATING...' : 'PUSH TO ALL DEVICES'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.analyticsSection} style={{ marginTop: '40px' }}>
+            <div className={styles.sectionHeader}><h2>Feature Controls</h2></div>
+            <div className={styles.settingsGrid}>
+              <div className={styles.settingCard}>
+                <div className={styles.settingInfo}><h3>Skip Download Timer</h3><p>Users bypass the 30s wait when enabled.</p></div>
+                <button className={`${styles.toggleBtn} ${globalSettings.skip_ads_timer ? styles.active : ''}`} onClick={() => handleUpdateSetting('skip_ads_timer', !globalSettings.skip_ads_timer)} disabled={savingSettings}>
+                  <div className={styles.toggleThumb}></div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      <div className={styles.analyticsSection}>
-        <div className={styles.sectionHeader}>
-          <h2>Global Platform Settings</h2>
-          <p className={styles.sectionSub}>Control premium features and monetization</p>
-        </div>
-        <div className={styles.settingsGrid}>
-          <div className={styles.settingCard}>
-            <div className={styles.settingInfo}>
-              <h3>Skip 30s Download Wait</h3>
-              <p>When enabled, users will bypass the 30-second countdown and see download links immediately.</p>
-            </div>
-            <button 
-              className={`${styles.toggleBtn} ${globalSettings.skip_ads_timer ? styles.active : ''}`}
-              onClick={() => handleUpdateSetting('skip_ads_timer', !globalSettings.skip_ads_timer)}
-              disabled={savingSettings}
-            >
-              <div className={styles.toggleThumb}></div>
-              <span>{globalSettings.skip_ads_timer ? 'BYPASS ACTIVE' : '30s TIMER ON'}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {stats && (
-        <>
-          <div className={styles.analyticsSection}>
-            <div className={styles.sectionHeader}>
-              <h2>Site Traffic</h2>
-              <p className={styles.sectionSub}>Session visits vs Unique browser visitors</p>
-            </div>
-            <div className={styles.statsGrid}>
-              <div className={styles.statCard}>
-                <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
-                  <Users size={28} />
-                </div>
-                <div className={styles.statInfo}>
-                  <h3>{stats.uniqueVisitorsToday}</h3>
-                  <p>Unique Visitors Today</p>
-                </div>
-              </div>
-              <div className={styles.statCard}>
-                <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
-                  <Activity size={28} />
-                </div>
-                <div className={styles.statInfo}>
-                  <h3>{stats.totalVisitsToday}</h3>
-                  <p>Visits Today</p>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
-                  <CalendarDays size={28} />
-                </div>
-                <div className={styles.statInfo}>
-                  <h3>{stats.totalVisitsWeekly}</h3>
-                  <p>Weekly Visits</p>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
-                  <Calendar size={28} />
-                </div>
-                <div className={styles.statInfo}>
-                  <h3>{stats.totalVisitsMonthly}</h3>
-                  <p>Monthly Visits</p>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
-                  <CalendarCheck size={28} />
-                </div>
-                <div className={styles.statInfo}>
-                  <h3>{stats.totalVisitsYearly}</h3>
-                  <p>Yearly Visits</p>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
-                  <Activity size={28} />
-                </div>
-                <div className={styles.statInfo}>
-                  <h3>{stats.totalVisitsAllTime}</h3>
-                  <p>All-Time Visits</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.analyticsSection}>
-            <div className={styles.sectionHeader}>
-              <h2>Push Announcements</h2>
-              <p className={styles.sectionSub}>Broadcast a message to all active users</p>
-            </div>
-            <div className={styles.announcementPanel}>
-              <div className={styles.announcementContent}>
-                <div className={styles.previewContainer}>
-                  <label className={styles.previewLabel}>Live Preview</label>
-                  <div className={`${styles.previewBanner} ${styles[announcement.type]}`}>
-                    <div className={styles.previewIcon}>
-                      {announcement.type === 'alert' && <AlertCircle size={16} />}
-                      {announcement.type === 'warning' && <AlertTriangle size={16} />}
-                      {announcement.type === 'info' && <Info size={16} />}
-                    </div>
-                    <p className={styles.previewText}>{announcement.message || 'Announcement message preview...'}</p>
-                    <div className={styles.previewClose}><X size={14} /></div>
-                  </div>
-                </div>
-
-                <div className={styles.announcementControls}>
-                  <div className={styles.inputGroup}>
-                    <label>Broadcast Message</label>
-                    <textarea 
-                      value={announcement.message}
-                      onChange={(e) => setAnnouncement({...announcement, message: e.target.value})}
-                      placeholder="e.g. Server maintenance at 12 PM..."
-                      className={styles.textArea}
-                      rows="2"
-                    />
-                  </div>
-                  
-                  <div className={styles.controlGrid}>
-                    <div className={styles.inputGroup}>
-                      <label>Banner Theme</label>
-                      <div className={styles.themeSelector}>
-                        {['info', 'warning', 'alert'].map(t => (
-                          <button 
-                            key={t}
-                            className={`${styles.themeOption} ${styles[t]} ${announcement.type === t ? styles.selected : ''}`}
-                            onClick={() => setAnnouncement({...announcement, type: t})}
-                          >
-                            {t.toUpperCase()}
+      {/* USERS TAB */}
+      {activeTab === 'users' && (
+        <div className={styles.tabContent}>
+          <div className={styles.usersSection}>
+            <div className={styles.sectionHeader}><h2>User Management</h2><span className={styles.userCount}>{users.length} Users</span></div>
+            <div className={styles.tableContainer}>
+              <table className={styles.usersTable}>
+                <thead>
+                  <tr><th>User</th><th>Role</th><th>Joined</th><th>Security</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  {users.map(u => (
+                    <tr key={u.id}>
+                      <td>
+                        <div className={styles.userInfo}>
+                          <img src={u.avatar?.startsWith('http') ? u.avatar : `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.avatar || 'red'}`} className={styles.userAvatar} />
+                          <div><div className={styles.userName}>{u.name}</div><div className={styles.userEmail}>{u.email}</div></div>
+                        </div>
+                      </td>
+                      <td>
+                        <select className={styles.roleSelect} value={u.role} onChange={(e) => handleUpdateRole(u.id, e.target.value)} disabled={u.id === currentUser.id}>
+                          <option value="user">User</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </td>
+                      <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                      <td>
+                        {u.failed_login_attempts > 0 && <span className={styles.logFailure}><AlertTriangle size={14} /> {u.failed_login_attempts}</span>}
+                      </td>
+                      <td>
+                        <div className={styles.userActionBtns}>
+                          <button className={u.is_banned ? styles.unbanBtn : styles.banBtn} onClick={() => handleToggleBan(u.id, u.is_banned)} disabled={u.id === currentUser.id}>
+                            {u.is_banned ? <ShieldCheck size={18} /> : <Ban size={18} />}
                           </button>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
-                    <div className={styles.toggleGroup}>
-                      <label>Status</label>
-                      <div className={styles.statusToggleWrapper}>
-                        <button 
-                          className={`${styles.statusBtn} ${announcement.active ? styles.active : ''}`}
-                          onClick={() => setAnnouncement({...announcement, active: !announcement.active})}
-                        >
-                          {announcement.active ? 'PUBLISHED' : 'DRAFT'}
-                        </button>
-                        <p className={styles.statusDesc}>
-                          {announcement.active ? 'Visible to all users' : 'Hidden from site'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+      {/* SECURITY TAB */}
+      {activeTab === 'security' && (
+        <div className={styles.tabContent}>
+          <div className={styles.securityControls}>
+            <div className={styles.blockIpSection}>
+              <h3>Block IP Address</h3>
+              <form onSubmit={handleBlockIp} className={styles.blockIpForm}>
+                <input type="text" placeholder="IP Address (e.g. 1.2.3.4)" className={styles.inputField} value={newBlockIp.ip} onChange={e => setNewBlockIp({...newBlockIp, ip: e.target.value})} required />
+                <input type="text" placeholder="Reason for blocking" className={styles.inputField} value={newBlockIp.reason} onChange={e => setNewBlockIp({...newBlockIp, reason: e.target.value})} />
+                <button type="submit" className={styles.primaryBtn}>Block IP</button>
+              </form>
+              
+              <h3 style={{ marginTop: '30px' }}>Blocked IPs</h3>
+              <div className={styles.tableContainer}>
+                <table className={styles.logTable}>
+                  <thead><tr><th>IP</th><th>Reason</th><th>Action</th></tr></thead>
+                  <tbody>
+                    {blockedIps.map(item => (
+                      <tr key={item.ip_address}>
+                        <td>{item.ip_address}</td>
+                        <td>{item.reason}</td>
+                        <td><button className={styles.unblockBtn} onClick={() => handleUnblockIp(item.ip_address)}>Unblock</button></td>
+                      </tr>
+                    ))}
+                    {blockedIps.length === 0 && <tr><td colSpan="3">No blocked IPs</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-                  <button 
-                    className={styles.saveAnnouncementBtn}
-                    onClick={handleSaveAnnouncement}
-                    disabled={savingAnnouncement || (!announcement.message.trim() && announcement.active)}
-                  >
-                    {savingAnnouncement ? 'UPDATING...' : 'PUSH TO ALL DEVICES'}
-                  </button>
-                </div>
+            <div className={styles.loginLogsSection}>
+              <h3>Recent Login Attempts</h3>
+              <div className={styles.tableContainer}>
+                <table className={styles.logTable}>
+                  <thead><tr><th>User</th><th>IP</th><th>Status</th><th>Time</th></tr></thead>
+                  <tbody>
+                    {loginLogs.map((log, idx) => (
+                      <tr key={idx}>
+                        <td>{log.name || 'Unknown'}</td>
+                        <td>{log.ip_address}</td>
+                        <td className={log.success ? styles.logSuccess : styles.logFailure}>{log.success ? 'Success' : 'Failed'}</td>
+                        <td className={styles.feedTime}>{new Date(log.created_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
+        </div>
+      )}
 
-          <div className={styles.analyticsSection}>
-            <div className={styles.sectionHeader}>
-              <h2>Engagement Analytics</h2>
-              <p className={styles.sectionSub}>Unique active logged-in users over time</p>
-            </div>
-            <div className={styles.statsGrid}>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}>
-                <Users size={28} />
-              </div>
-              <div className={styles.statInfo}>
-                <h3>{stats.dailyActive}</h3>
-                <p>Daily Active (DAU)</p>
+      {/* ANALYTICS TAB */}
+      {activeTab === 'analytics' && (
+        <div className={styles.tabContent}>
+          <div className={styles.analyticsGrid}>
+            <div className={styles.analyticsCard}>
+              <h3><SearchIcon size={18} /> Top Search Keywords</h3>
+              <div className={styles.keywordList}>
+                {searchLogs.topKeywords.map((k, idx) => (
+                  <div key={idx} className={styles.keywordItem}>
+                    <span className={styles.keywordText}>{k.query}</span>
+                    <span className={styles.keywordCount}>{k.count} searches</span>
+                  </div>
+                ))}
               </div>
             </div>
             
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}>
-                <CalendarDays size={28} />
-              </div>
-              <div className={styles.statInfo}>
-                <h3>{stats.weeklyActive}</h3>
-                <p>Weekly Active (WAU)</p>
-              </div>
-            </div>
-
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}>
-                <Calendar size={28} />
-              </div>
-              <div className={styles.statInfo}>
-                <h3>{stats.monthlyActive}</h3>
-                <p>Monthly Active (MAU)</p>
+            <div className={styles.analyticsCard}>
+              <h3><Film size={18} /> Most Watched (Engagement)</h3>
+              <div className={styles.keywordList}>
+                {mostWatched.map((m, idx) => (
+                  <div key={idx} className={styles.keywordItem}>
+                    <span className={styles.keywordText}>{m.title} <span style={{fontSize: '10px', color: '#555'}}>{m.movie_type}</span></span>
+                    <span className={styles.keywordCount}>{m.watches} views</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: 'rgba(230, 126, 34, 0.15)', color: '#e67e22' }}>
-                <CalendarCheck size={28} />
+            <div className={styles.analyticsCard}>
+              <h3><AlertTriangle size={18} /> Searches with No Results</h3>
+              <div className={styles.keywordList}>
+                {searchLogs.noResults.map((k, idx) => (
+                  <div key={idx} className={styles.keywordItem}>
+                    <span className={styles.keywordText} style={{color: '#e50914'}}>{k.query}</span>
+                    <span className={styles.keywordCount}>{k.count} failures</span>
+                  </div>
+                ))}
               </div>
-              <div className={styles.statInfo}>
-                <h3>{stats.yearlyActive}</h3>
-                <p>Yearly Active (YAU)</p>
-              </div>
             </div>
-          </div>
-        </div>
-        </>
-      )}
-
-      {stats && (
-        <div className={styles.platformStatsSection}>
-          <div className={styles.sectionHeader}>
-            <h2>Platform Totals</h2>
-          </div>
-          <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: 'rgba(229, 9, 20, 0.15)', color: '#e50914' }}>
-              <Users size={28} />
-            </div>
-            <div className={styles.statInfo}>
-              <h3>{stats.totalUsers}</h3>
-              <p>Registered Users</p>
-            </div>
-          </div>
-          
-          <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}>
-              <Clock size={28} />
-            </div>
-            <div className={styles.statInfo}>
-              <h3>{stats.totalWatchTimeHours} hrs</h3>
-              <p>Total Watch Time</p>
-            </div>
-          </div>
-
-          <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}>
-              <BarChart3 size={28} />
-            </div>
-            <div className={styles.statInfo}>
-              <h3>{stats.totalWatches}</h3>
-              <p>Sessions Logged</p>
-            </div>
-          </div>
-
-          <div className={styles.statCard}>
-            <div className={styles.statIcon} style={{ background: 'rgba(229, 185, 9, 0.15)', color: '#e5b909' }}>
-              <Film size={28} />
-            </div>
-            <div className={styles.statInfo}>
-              <h3>{stats.totalFavorites}</h3>
-              <p>Titles Favorited</p>
-            </div>
-          </div>
           </div>
         </div>
       )}
 
-      <div className={styles.usersSection}>
-        <div className={styles.sectionHeader}>
-          <h2>User Management</h2>
-          <span className={styles.userCount}>{users.length} Users</span>
+      {/* LIVE FEED TAB */}
+      {activeTab === 'live' && liveStats && (
+        <div className={styles.tabContent}>
+          <div className={styles.liveFeedList}>
+            {liveStats.sessions.map(session => (
+              <div key={session.id} className={styles.feedItem}>
+                <div className={styles.feedUser}>
+                  <div className={styles.feedAvatar} style={{background: session.isGuest ? '#333' : '#e50914'}}></div>
+                  <div className={styles.feedInfo}>
+                    <h4>{session.isGuest ? `Guest (${session.id.substring(0, 6)})` : `User ID: ${session.userId}`}</h4>
+                    <p>{session.path}</p>
+                  </div>
+                </div>
+                <div className={styles.feedAction}>
+                  <span className={styles.actionBadge}>{session.action || 'Browsing'}</span>
+                  <span className={styles.feedTime}>{Math.round((Date.now() - session.lastSeen) / 1000)}s ago</span>
+                </div>
+              </div>
+            ))}
+            {liveStats.sessions.length === 0 && <div className={styles.emptyTable}>No active users in the last 5 minutes.</div>}
+          </div>
         </div>
-        
-        <div className={styles.tableContainer}>
-          <table className={styles.usersTable}>
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Joined Date</th>
-                <th>Failed Logins</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id}>
-                  <td>
-                    <div className={styles.userInfo}>
-                      <img 
-                        src={user.avatar && user.avatar.startsWith('http') ? user.avatar : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar || 'red'}`} 
-                        alt="avatar" 
-                        className={styles.userAvatar}
-                        style={user.avatar && user.avatar.startsWith('http') ? { objectFit: 'cover' } : {}}
-                      />
-                      <div>
-                        <div className={styles.userName}>{user.name}</div>
-                        <div className={styles.userEmail}>{user.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`${styles.roleBadge} ${user.role === 'admin' ? styles.roleAdmin : styles.roleUser}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                  <td>
-                    {user.failed_login_attempts > 0 ? (
-                      <span className={styles.warningText}>
-                        <AlertCircle size={14} /> {user.failed_login_attempts}
-                      </span>
-                    ) : '0'}
-                  </td>
-                  <td>
-                    <button 
-                      className={styles.deleteBtn}
-                      onClick={() => handleDeleteUser(user.id, user.name)}
-                      disabled={user.role === 'admin'}
-                      title={user.role === 'admin' ? "Cannot delete admins" : "Delete user"}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {users.length === 0 && (
-                <tr>
-                  <td colSpan="5" className={styles.emptyTable}>No users found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

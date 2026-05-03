@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../db');
 
 const API_KEYS = Object.keys(process.env)
   .filter(key => key.startsWith('TMDB_API_KEY_'))
@@ -241,12 +242,26 @@ router.get('/genre/:id', async (req, res) => {
 
 // Search movies
 router.get('/search', async (req, res) => {
-  const { query } = req.query;
+  const { query, visitorId } = req.query;
   try {
     const url = query 
       ? `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}`
       : `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}`;
     const data = await fetchAndFormat(url);
+    
+    // Log the search if it's a real query
+    if (query && query.trim() !== '') {
+      try {
+        const hasResults = data && data.length > 0;
+        await db.query(
+          "INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)",
+          [query.trim().toLowerCase(), hasResults, visitorId || null]
+        );
+      } catch (logError) {
+        console.error('Failed to log search query:', logError);
+      }
+    }
+
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: 'Failed to search' });

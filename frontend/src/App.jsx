@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Sidebar from './components/layout/Sidebar';
 import TopNav from './components/layout/TopNav';
@@ -18,6 +18,7 @@ import './App.css';
 function App() {
   const { isLoggedIn, user } = useAuth();
   const [announcement, setAnnouncement] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     // Generate an anonymous session ID for this browser session
@@ -42,7 +43,9 @@ function App() {
             sessionId,
             visitorId,
             isGuest: !isLoggedIn,
-            userId: user ? user.id : null
+            userId: user ? user.id : null,
+            path: location.pathname + location.search,
+            action: getActionFromPath(location.pathname)
           })
         });
         if (res.ok) {
@@ -62,7 +65,21 @@ function App() {
     // Send every 30 seconds
     const interval = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(interval);
-  }, [isLoggedIn, user]);
+  }, [isLoggedIn, user, location.pathname, location.search]);
+
+  const getActionFromPath = (path) => {
+    if (path === '/') return 'Browsing Home';
+    if (path.startsWith('/search')) return 'Searching';
+    if (path.startsWith('/movie/')) return 'Viewing Movie Details';
+    if (path.startsWith('/play/')) return 'Watching Video';
+    if (path.startsWith('/tv')) return 'Browsing TV Shows';
+    if (path.startsWith('/movies')) return 'Browsing Movies';
+    if (path.startsWith('/login')) return 'At Login Page';
+    if (path.startsWith('/list')) return 'Viewing My List';
+    if (path.startsWith('/history')) return 'Viewing Watch History';
+    if (path.startsWith('/admin')) return 'In Admin Dashboard';
+    return 'Browsing Site';
+  };
 
   return (
     <div className="appContainer">

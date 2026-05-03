@@ -209,6 +209,7 @@ const MovieDetail = () => {
     }
 
     try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/downloads/movie`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -218,7 +219,8 @@ const MovieDetail = () => {
           type: movie.type,
           season: isTV ? selectedSeason : null,
           episode: isTV ? selectedEpisode : null,
-          forceRefresh: isForceRefresh
+          forceRefresh: isForceRefresh,
+          visitorId
         })
       });
       const data = await res.json();
