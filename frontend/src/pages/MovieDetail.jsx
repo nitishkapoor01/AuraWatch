@@ -37,6 +37,31 @@ const AdScript = () => {
   return null;
 };
 
+const BannerAd = () => {
+  const bannerRef = React.useRef(null);
+
+  useEffect(() => {
+    if (bannerRef.current && !bannerRef.current.firstChild) {
+      const conf = document.createElement('script');
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = "//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js";
+      conf.type = 'text/javascript';
+      conf.innerHTML = `atOptions = {
+        'key' : '8e9991a7d4aa3fef2ca28a617f3c1844',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };`;
+      bannerRef.current.append(conf);
+      bannerRef.current.append(script);
+    }
+  }, []);
+
+  return <div ref={bannerRef} style={{ width: '300px', height: '250px', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}></div>;
+};
+
 const MovieDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -620,10 +645,9 @@ const MovieDetail = () => {
                 {(!user || (user.role !== 'admin' && !user.is_super_admin)) && !globalSkipAds ? (
                   <>
                     {/* ADVERTISEMENT SCRIPT */}
-                    <div className={styles.adPlaceholder}>
+                    <div className={styles.adPlaceholder} style={{ padding: 0, background: 'transparent', border: 'none' }}>
                       <AdScript />
-                      <span>ADVERTISEMENT</span>
-                      <p>Support us by viewing this ad.</p>
+                      <BannerAd />
                     </div>
                     
                     <div className={styles.timerBox}>
