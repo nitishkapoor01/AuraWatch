@@ -33,7 +33,12 @@ class MovieCrawler {
             const response = await axios.get(url, { timeout: 10000 });
             
             if (response.data.status === 'ok' && response.data.data.movie_count > 0) {
-                const movies = response.data.data.movies;
+                let movies = response.data.data.movies;
+                
+                // Filter movies by strict title match
+                movies = movies.filter(m => this._isTitleMatch(m.title, title, year));
+                if (movies.length === 0) return null;
+
                 const match = year ? movies.find(m => String(m.year) === String(year)) || movies[0] : movies[0];
                 
                 if (match && match.torrents) {
@@ -93,11 +98,22 @@ class MovieCrawler {
             const results = response.data.results;
             
             if (results && results.length > 0) {
-                // Try to find exact year match first
-                let match = results[0];
+                // Filter results to ensure the title actually matches our strict criteria
+                const validResults = results.filter(r => {
+                    const rTitle = mediaType === 'tv' ? r.name : r.title;
+                    return this._isTitleMatch(rTitle, title, year);
+                });
+                
+                if (validResults.length === 0) {
+                    this.logger.warn(`TMDb lookup found results but none passed strict title match for: ${title}`);
+                    return null;
+                }
+
+                // Try to find exact year match first among valid results
+                let match = validResults[0];
                 if (year) {
                     const dateField = mediaType === 'tv' ? 'first_air_date' : 'release_date';
-                    const yearMatch = results.find(r => r[dateField] && r[dateField].startsWith(String(year)));
+                    const yearMatch = validResults.find(r => r[dateField] && r[dateField].startsWith(String(year)));
                     if (yearMatch) match = yearMatch;
                 }
                 return { tmdbId: String(match.id), mediaType };
@@ -270,10 +286,12 @@ class MovieCrawler {
             const links = { direct: [], magnet: [], torrent: [] };
             const trackers = 'tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://open.demonii.com:1337/announce&tr=udp://tracker.openbittorrent.com:80';
             
-            // Take top 8 results with seeders > 0
+            // Filter by strict title match first, then seeders, then take top 8
             const topResults = response.data
-                .filter(t => parseInt(t.seeders) > 0)
+                .filter(t => this._isTitleMatch(t.name, title, year) && parseInt(t.seeders) > 0)
                 .slice(0, 8);
+                
+            if (topResults.length === 0) return null;
             
             for (const torrent of topResults) {
                 const magnet = `magnet:?xt=urn:btih:${torrent.info_hash}&dn=${encodeURIComponent(torrent.name)}&${trackers}`;
@@ -337,16 +355,19 @@ class MovieCrawler {
             // Fetch magnet links from individual torrent pages (limit to 3 for speed)
             const torrentLinks = [];
             resultRows.each((i, el) => {
-                if (i >= 3) return; // Max 3 pages to keep it fast
+                if (torrentLinks.length >= 3) return; // Max 3 valid pages to keep it fast
                 const nameEl = $(el).find('td.name a').eq(1);
                 const href = nameEl.attr('href');
                 const name = nameEl.text().trim();
                 const seeders = $(el).find('td.seeds').text().trim();
                 const size = $(el).find('td.size').text().replace(/[\n\r]/g, '').trim();
-                if (href && parseInt(seeders) > 0) {
+                
+                if (href && parseInt(seeders) > 0 && this._isTitleMatch(name, title, year)) {
                     torrentLinks.push({ href: `https://1337x.to${href}`, name, seeders, size });
                 }
             });
+            
+            if (torrentLinks.length === 0) return null;
             
             // Fetch magnet from each torrent page in parallel
             const magnetPromises = torrentLinks.map(async (t) => {
@@ -443,10 +464,12 @@ class MovieCrawler {
                 }
             }
             
-            // Take top 6 results
+            // Filter by title match and take top 5
             const topResults = filteredTorrents
-                .filter(t => parseInt(t.seeds) > 0)
-                .slice(0, 6);
+                .filter(t => this._isTitleMatch(t.title, title, year) && parseInt(t.seeds) > 0)
+                .slice(0, 5);
+                
+            if (topResults.length === 0) return null;
             
             for (const torrent of topResults) {
                 const magnet = torrent.magnet_url;
