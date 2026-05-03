@@ -133,7 +133,7 @@ const Home = () => {
 
 
         <div className={styles.ageRatingBadge}>TV-14</div>
-      </section>
+      </div>
 
       {/* Rows */}
       <div className={styles.sectionContainer}>
