@@ -268,6 +268,7 @@ const MovieDetail = () => {
           type: movie.type,
           season: isTV ? selectedSeason : null,
           episode: isTV ? selectedEpisode : null,
+          tmdbId: id,
           forceRefresh: isForceRefresh,
           visitorId
         })

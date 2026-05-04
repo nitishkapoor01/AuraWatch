@@ -64,7 +64,7 @@ async function saveToCacheDB(title, year, cacheKey, responseData) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.post('/movie', async (req, res) => {
-    const { title, year, season, episode, type, forceRefresh, visitorId } = req.body;
+    const { title, year, season, episode, type, forceRefresh, visitorId, tmdbId } = req.body;
 
     if (!title) {
         return res.status(400).json({
@@ -100,7 +100,8 @@ router.post('/movie', async (req, res) => {
         const results = await crawler.searchExactMovie(title, year || null, { 
             type, 
             season, 
-            episode 
+            episode,
+            tmdbId 
         });
 
         if (!results.movie) {

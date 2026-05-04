@@ -131,16 +131,20 @@ class MovieCrawler {
     async _searchVidVault(title, year, tvInfo = {}) {
         try {
             this.logger.info(`🔍 Searching VidVault...`);
-            const { type, season, episode } = tvInfo;
+            const { type, season, episode, tmdbId } = tvInfo;
             
-            // Step 1: Get TMDb ID
-            const tmdbResult = await this._getTmdbId(title, year, type);
-            if (!tmdbResult) {
-                this.logger.warn('VidVault: Could not resolve TMDb ID');
-                return null;
+            // Step 1: Get TMDb ID (use provided one if available)
+            let finalTmdbId = tmdbId;
+            if (!finalTmdbId) {
+                const tmdbResult = await this._getTmdbId(title, year, type);
+                if (!tmdbResult) {
+                    this.logger.warn('VidVault: Could not resolve TMDb ID');
+                    return null;
+                }
+                finalTmdbId = tmdbResult.tmdbId;
             }
             
-            this.logger.info(`📄 [VidVault] TMDb ID: ${tmdbResult.tmdbId}`);
+            this.logger.info(`📄 [VidVault] TMDb ID: ${finalTmdbId}`);
             
             // Step 2: Get auth token
             const tokenRes = await axios.get(`${VIDVAULT_API}/get-token`, { timeout: 8000 });
@@ -154,7 +158,7 @@ class MovieCrawler {
             // Step 3: Fetch download links
             const payload = {
                 type: type === 'tv' ? 'tv' : 'movie',
-                tmdbId: tmdbResult.tmdbId,
+                tmdbId: finalTmdbId,
                 season: season ? Number(season) : undefined,
                 episode: episode ? Number(episode) : undefined
             };
@@ -419,20 +423,24 @@ class MovieCrawler {
      */
     async _searchEZTV(title, year, tvInfo = {}) {
         try {
-            const { type, season, episode } = tvInfo;
+            const { type, season, episode, tmdbId } = tvInfo;
             if (type !== 'tv') return null; // EZTV is TV-only
             
             this.logger.info(`🔍 Searching EZTV...`);
             
             // First get IMDb ID from TMDb
-            const tmdbResult = await this._getTmdbId(title, year, 'tv');
-            if (!tmdbResult) return null;
+            let finalTmdbId = tmdbId;
+            if (!finalTmdbId) {
+                const tmdbResult = await this._getTmdbId(title, year, 'tv');
+                if (!tmdbResult) return null;
+                finalTmdbId = tmdbResult.tmdbId;
+            }
             
             // Get IMDb ID from TMDb
             let imdbId = null;
             try {
                 const tmdbRes = await axios.get(
-                    `https://api.themoviedb.org/3/tv/${tmdbResult.tmdbId}/external_ids?api_key=${TMDB_API_KEY}`,
+                    `https://api.themoviedb.org/3/tv/${finalTmdbId}/external_ids?api_key=${TMDB_API_KEY}`,
                     { timeout: 8000 }
                 );
                 imdbId = tmdbRes.data?.imdb_id;
