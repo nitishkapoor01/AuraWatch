@@ -84,14 +84,15 @@ class MovieCrawler {
                 });
                 // The final redirect URL is what we want
                 const finalRedirectUrl = step3.request?.res?.responseUrl || step3.config?.url;
-                if (finalRedirectUrl && !finalRedirectUrl.includes('unblockedgames') && !finalRedirectUrl.includes('modlist')) {
+                const shortenerPatterns = ['unblockedgames', 'modlist', 'kmhd', 'katmoviehd'];
+                if (finalRedirectUrl && !shortenerPatterns.some(p => finalRedirectUrl.includes(p))) {
                     return finalRedirectUrl;
                 }
                 // Also check for links on the final page
                 const $3 = cheerio.load(step3.data);
                 $3('a[href]').each((_, el) => {
                     const href = $3(el).attr('href');
-                    if (href && href.startsWith('http') && !href.includes('unblockedgames') && !href.includes('google.com')) {
+                    if (href && href.startsWith('http') && !shortenerPatterns.some(p => href.includes(p)) && !href.includes('google.com')) {
                         finalUrl = href;
                         return false;
                     }
@@ -745,7 +746,7 @@ class MovieCrawler {
                 const extractFromPage = async (dom) => {
                     let found = false;
                     const linkEls = [];
-                    dom('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive.google"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"], a[href*="hblinks"], a[href*="unblockedgames"], a[href*="modlist.in"], a[href*="driveleech"], a[href*="drivelinks"], a[href*="fastdl"], a[href*="fastlinks"], a[href*="sendcm"], a[href*="buzzheavier"], a[href*="fc2dl"]').each((i, el) => {
+                    dom('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive.google"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"], a[href*="hblinks"], a[href*="unblockedgames"], a[href*="modlist.in"], a[href*="kmhd.eu"], a[href*="katmoviehd"], a[href*="driveleech"], a[href*="drivelinks"], a[href*="fastdl"], a[href*="fastlinks"], a[href*="sendcm"], a[href*="buzzheavier"], a[href*="fc2dl"]').each((i, el) => {
                         linkEls.push(el);
                     });
 
@@ -755,12 +756,13 @@ class MovieCrawler {
                         
                         if (!href || href.includes('google.com/search') || href.includes('wp-content') || href.includes('facebook.com')) continue;
                         
-                        // Resolve unblockedgames and modlist shorteners server-side
-                        if (href.includes('unblockedgames') || href.includes('modlist.in')) {
+                        // Resolve known shorteners server-side
+                        const shortenerPatterns = ['unblockedgames', 'modlist.in', 'kmhd.eu', 'katmoviehd'];
+                        if (shortenerPatterns.some(p => href.includes(p))) {
                             this.logger.info(`Resolving shortener: ${href.substring(0, 60)}...`);
                             const resolved = await this._resolveShortener(href);
                             // If still pointing to shortener (CAPTCHA blocked), keep original so user can click manually
-                            if (!resolved.includes('unblockedgames') && !resolved.includes('modlist.in') && !resolved.includes('google.com')) {
+                            if (!shortenerPatterns.some(p => resolved.includes(p)) && !resolved.includes('google.com')) {
                                 href = resolved;
                             }
                         }
