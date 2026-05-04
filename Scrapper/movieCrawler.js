@@ -378,7 +378,8 @@ class MovieCrawler {
             { name: 'Movies4u', url: `https://movies4u.ba/?s=${plused}` },
             { name: 'Movie4in', url: `https://movie4in.com/?s=${plused}` },
             { name: 'KatMovieHD', url: `https://new1.katmoviehd.cymru/?s=${plused}` },
-            { name: 'WatchAnimeWorld', url: `https://watchanimeworld.net/?s=${plused}` }
+            { name: 'WatchAnimeWorld', url: `https://watchanimeworld.net/?s=${plused}` },
+            { name: 'UHDMovies', url: `https://uhdmovies.pink/?s=${plused}` }
         ];
     }
 

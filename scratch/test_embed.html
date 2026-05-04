@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed Player Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f172a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #38bdf8;
+        }
+        iframe {
+            border: 2px solid #334155;
+            border-radius: 8px;
+            background: black;
+        }
+        .info {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VidKing Embed Player Test</h1>
+        <iframe 
+            src="https://www.vidking.net/embed/movie/1078605" 
+            width="100%" 
+            height="600" 
+            frameborder="0" 
+            allowfullscreen>
+        </iframe>
+        <div class="info">
+            <p>Source: <code>https://www.vidking.net/embed/movie/1078605</code></p>
+        </div>
+    </div>
+</body>
+</html>
