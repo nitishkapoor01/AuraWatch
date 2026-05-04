@@ -618,7 +618,7 @@ class MovieCrawler {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                     'Accept': 'application/json, text/plain, */*',
                     'Referer': baseUrl,
-                    'Origin': baseUrl.slice(0, -1)
+                    'Origin': new URL(baseUrl).origin
                 },
                 timeout: 12000
             });
@@ -879,15 +879,22 @@ class MovieCrawler {
                 () => this._search1337x(title, year, tvInfo),
                 () => type === 'tv' ? this._searchEZTV(title, year, tvInfo) : Promise.resolve(null),
                 () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/?utm=mn1"),
+                () => this._searchGenericTypesense(searchQuery, year, "HDHub4u (Alt)", "https://hdhub4u.fo/"),
                 () => this._searchWordpressSite(searchQuery, year, "MoviesVerse", "https://moviesmod.org/"),
                 () => this._searchWordpressSite(searchQuery, year, "UHDMovies", "https://uhdmovies.pink/"),
                 () => this._searchWordpressSite(searchQuery, year, "MoviezFlix", "https://moviezflix.net/"),
+                () => this._searchWordpressSite(searchQuery, year, "MoviezFlix (Alt)", "https://moviezflix.pro/"),
                 () => this._searchWordpressSite(searchQuery, year, "BollyFlix", "https://bollyflix.re/"),
+                () => this._searchWordpressSite(searchQuery, year, "BollyFlix (Alt)", "https://bollyflix.icu/"),
                 () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app"),
+                () => this._searchWordpressSite(searchQuery, year, "OlaMovies (Alt)", "https://olamovies.icu/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba"),
+                () => this._searchWordpressSite(searchQuery, year, "Movies4u (Alt)", "https://movies4u.vg/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movie4in", "https://movie4in.com"),
                 () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.nf"),
+                () => this._searchWordpressSite(searchQuery, year, "VegaMovies (Alt)", "https://vegamovies.mx/"),
                 () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://new1.katmoviehd.cymru"),
+                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD (Alt)", "https://katmoviehd.to/"),
                 () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net"),
                 () => this._searchWordpressSite(searchQuery, year, "CineVood", "https://cinevood.com/"),
                 () => this._searchWordpressSite(searchQuery, year, "DotMovies", "https://dotmovies.men/"),
