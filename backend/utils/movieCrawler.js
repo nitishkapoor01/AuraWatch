@@ -872,14 +872,19 @@ class MovieCrawler {
                 () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
                 () => this._searchWordpressSite(searchQuery, year, "MoviesVerse", "https://moviesmod.org/"),
                 () => this._searchWordpressSite(searchQuery, year, "UHDMovies", "https://uhdmovies.pink/"),
-                () => this._searchWordpressSite(searchQuery, year, "MoviezFlix", "https://moviezflix.pro/"),
-                () => this._searchWordpressSite(searchQuery, year, "BollyFlix", "https://bollyflix.icu/"),
-                () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.icu/"),
-                () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba/"),
+                () => this._searchWordpressSite(searchQuery, year, "MoviezFlix", "https://moviezflix.net/"),
+                () => this._searchWordpressSite(searchQuery, year, "BollyFlix", "https://bollyflix.re/"),
+                () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.vip/"),
+                () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.vg/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movie4in", "https://movie4in.com/"),
-                () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.ngo/"),
-                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://katmoviehd.nz/"),
-                () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net/")
+                () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.mx/"),
+                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://katmoviehd.to/"),
+                () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net/"),
+                () => this._searchWordpressSite(searchQuery, year, "CineVood", "https://cinevood.com/"),
+                () => this._searchWordpressSite(searchQuery, year, "DotMovies", "https://dotmovies.men/"),
+                () => this._searchWordpressSite(searchQuery, year, "G-DriveMovies", "https://gdrivemovies.net/"),
+                () => this._searchWordpressSite(searchQuery, year, "ExtraMovies", "https://extramovies.ink/"),
+                () => this._searchWordpressSite(searchQuery, year, "FilmyZilla", "https://filmyzilla.ink/")
             ];
 
             const sourceResults = [];
