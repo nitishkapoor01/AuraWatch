@@ -202,12 +202,12 @@ class MovieCrawler {
         this.logger.info(`Searching across ${searchUrls.length} sources...`);
         this.isStopped = false;
 
-        // Force stop after 28 seconds to ensure frontend 30s timer is respected
+        // Force stop after 45 seconds to ensure frontend timer is respected
         const hardTimeout = setTimeout(() => {
-            this.logger.warn(`⏳ Hard 28s timeout reached! Forcing early stop to return partial results...`);
+            this.logger.warn(`⏳ Hard 45s timeout reached! Forcing early stop to return partial results...`);
             this.isStopped = true;
             this.queue = []; // Clear queue to stop drainQueue
-        }, 28000);
+        }, 45000);
 
         try {
             await this._launchBrowser();
@@ -365,8 +365,7 @@ class MovieCrawler {
         const dotted = query.replace(/\s+/g, '.').toLowerCase();
 
         return [
-            // ── FASTEST & MOST RELIABLE SOURCES ONLY ──────────────────
-            // Trimmed down to prevent 30s timeout on the frontend
+            { name: 'UHDMovies', url: `https://uhdmovies.pink/?s=${plused}` },
             { name: '1337x', url: `https://1337x.to/search/${encoded}/1/` },
             { name: 'YTS', url: `https://yts.mx/browse-movies/${encoded}` },
             
@@ -378,8 +377,7 @@ class MovieCrawler {
             { name: 'Movies4u', url: `https://movies4u.ba/?s=${plused}` },
             { name: 'Movie4in', url: `https://movie4in.com/?s=${plused}` },
             { name: 'KatMovieHD', url: `https://new1.katmoviehd.cymru/?s=${plused}` },
-            { name: 'WatchAnimeWorld', url: `https://watchanimeworld.net/?s=${plused}` },
-            { name: 'UHDMovies', url: `https://uhdmovies.pink/?s=${plused}` }
+            { name: 'WatchAnimeWorld', url: `https://watchanimeworld.net/?s=${plused}` }
         ];
     }
 
@@ -584,7 +582,7 @@ class MovieCrawler {
             const hasExt = allExtensions.some(ext => lowerHref.includes(ext));
 
             // Common download hosting patterns
-            const isDownloadHost = /drive\.google|mega\.nz|mediafire|zippyshare|uploadhaven|racaty|1fichier|uptobox|rapidgator|nitroflare|turbobit|filefactory|uploaded\.net|ddownload|pixeldrain|gofile|send\.cm|streamtape|mixdrop|upstream|usersdrive|gdtot|hubcloud|apkadmin|gdflix|vcloud|fastdl|spix|adangle|linkstaker|hblinks/i.test(lowerHref);
+            const isDownloadHost = /drive\.google|mega\.nz|mediafire|zippyshare|uploadhaven|racaty|1fichier|uptobox|rapidgator|nitroflare|turbobit|filefactory|uploaded\.net|ddownload|pixeldrain|gofile|send\.cm|streamtape|mixdrop|upstream|usersdrive|gdtot|hubcloud|apkadmin|gdflix|vcloud|fastdl|spix|adangle|linkstaker|hblinks|unblockedgames/i.test(lowerHref);
 
             // Download button/link patterns
             const text = $(el).text().trim().toLowerCase();
@@ -766,7 +764,7 @@ class MovieCrawler {
      */
     async _resolveShortlinkWithBrowser(url) {
         if (!this.context) return url;
-        const shorteners = ['shrink', 'gplink', 'droplink', 'ouo.io', 'adf.ly', 'bit.ly', 'tinyurl', 'urlshortx', 'vcloud', 'fastdl', 'spix', 'adangle', 'linkstaker', 'tnshort', 'mdisk', 'hblinks'];
+        const shorteners = ['shrink', 'gplink', 'droplink', 'ouo.io', 'adf.ly', 'bit.ly', 'tinyurl', 'urlshortx', 'vcloud', 'fastdl', 'spix', 'adangle', 'linkstaker', 'tnshort', 'mdisk', 'hblinks', 'unblockedgames'];
         const isShort = shorteners.some(s => url.toLowerCase().includes(s));
         if (!isShort) return url;
 
@@ -779,20 +777,18 @@ class MovieCrawler {
 
             await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
 
-            let currentUrl = page.url();
             let attempts = 0;
-            const maxAttempts = 3; // Reduced from 4
+            const maxAttempts = 5; // Increased for slow timers
 
             while (attempts < maxAttempts && !this.isStopped) {
                 attempts++;
 
-                // Wait for any countdowns (faster 2s wait)
-                await page.waitForTimeout(2000);
+                // Wait for any countdowns
+                await page.waitForTimeout(3000);
 
-                currentUrl = page.url();
-
+                const currentUrl = page.url();
                 // If we reached a known destination, stop.
-                const isDest = /drive\.google|mega\.nz|mediafire|zippyshare|racaty|1fichier|uptobox|rapidgator|gofile|send\.cm|hubcloud/i.test(currentUrl);
+                const isDest = /drive\.google|mega\.nz|mediafire|zippyshare|racaty|1fichier|uptobox|rapidgator|gofile|send\.cm|hubcloud|gdflix|gdtot/i.test(currentUrl);
                 if (isDest) {
                     this.logger.success(`✅ Deep Bypassed to: ${currentUrl}`);
                     return currentUrl;
@@ -803,10 +799,10 @@ class MovieCrawler {
 
                 // Click common Indian/Global shortener bypass buttons
                 const clicked = await page.evaluate(() => {
-                    const keywords = ['start verification', 'verify to continue', 'click here to continue', 'continue', 'get link', 'go to link', 'download', 'skip ad', 'generate link'];
-                    const elements = Array.from(document.querySelectorAll('a, button'));
+                    const keywords = ['start verification', 'verify to continue', 'click here to continue', 'continue', 'get link', 'go to link', 'download', 'skip ad', 'generate link', 'generating link', 'verify'];
+                    const elements = Array.from(document.querySelectorAll('a, button, div.button, span.button'));
                     for (const el of elements) {
-                        const text = el.innerText.trim().toLowerCase();
+                        const text = (el.innerText || el.textContent || '').trim().toLowerCase();
                         // Ignore login/register buttons
                         if (text.includes('login') || text.includes('sign in')) continue;
 
@@ -835,18 +831,30 @@ class MovieCrawler {
                         await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 10000 });
                     } catch (e) { }
                 } else {
-                    // No buttons found, maybe it's just a meta refresh or we reached the end
+                    // Check if there is a timer/generating text, if so, just wait and retry
+                    const hasTimer = await page.evaluate(() => {
+                        const text = document.body.innerText.toLowerCase();
+                        return text.includes('generating') || text.includes('please wait') || text.includes('seconds');
+                    });
+                    if (hasTimer) {
+                        this.logger.info(`⏳ Waiting for timer/generating link...`);
+                        continue;
+                    }
                     break;
                 }
             }
 
             const finalUrl = page.url();
-            if (finalUrl !== url && finalUrl !== 'about:blank') {
-                this.logger.success(`✅ Bypassed to: ${finalUrl}`);
+            const isFinalDest = /drive\.google|mega\.nz|mediafire|zippyshare|racaty|1fichier|uptobox|rapidgator|gofile|send\.cm|hubcloud|gdflix|gdtot/i.test(finalUrl);
+            if (isFinalDest) {
+                this.logger.success(`✅ Deep Bypassed to: ${finalUrl}`);
                 return finalUrl;
             }
+
+            this.logger.warn(`⚠️ Failed to fully bypass shortlink, returning original url: ${url}`);
             return url;
         } catch (e) {
+            this.logger.warn(`⚠️ Shortlink bypass failed: ${e.message}`);
             return url;
         } finally {
             if (page) await page.close();
@@ -920,8 +928,9 @@ class MovieCrawler {
             // Get the last path segment (the movie slug)
             const segments = path.split('/');
             let slug = segments[segments.length - 1] || segments[segments.length - 2] || '';
-            // ─── FIX: Remove leading numeric post IDs like "3501621-" or "52263-"
+            // ─── FIX: Remove leading numeric post IDs like "3501621-" or "52263-" or "download-"
             slug = slug.replace(/^\d+-/, '');
+            slug = slug.replace(/^download-/, '');
             // Remove common suffixes
             slug = slug.replace(/-(full-movie|download|free|hd|bluray|webrip|camrip|hindi|english|dubbed|dual-audio|dd[0-9.-]+|x264|x265|hevc|esub|hc-esub|hdrip|dvdrip|brrip|web-dl).*$/gi, '');
             // Remove quality tags like 1080p-720p-480p
