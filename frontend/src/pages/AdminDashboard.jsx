@@ -56,9 +56,11 @@ const AdminDashboard = () => {
       const headers = { Authorization: `Bearer ${token}` };
       const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
-      const [statsRes, usersRes] = await Promise.all([
+      const [statsRes, usersRes, settingsRes, announcementRes] = await Promise.all([
         fetch(`${baseUrl}/admin/stats`, { headers }),
-        fetch(`${baseUrl}/admin/users`, { headers })
+        fetch(`${baseUrl}/admin/users`, { headers }),
+        fetch(`${baseUrl}/admin/settings`, { headers }),
+        fetch(`${baseUrl}/admin/announcement`, { headers })
       ]);
 
       if (!statsRes.ok || !usersRes.ok) {
@@ -68,6 +70,16 @@ const AdminDashboard = () => {
 
       setStats(await statsRes.json());
       setUsers(await usersRes.json());
+      
+      if (settingsRes.ok) {
+        const settings = await settingsRes.json();
+        setGlobalSettings(prev => ({ ...prev, ...settings }));
+      }
+      
+      if (announcementRes.ok) {
+        const announcementData = await announcementRes.json();
+        if (announcementData) setAnnouncement(announcementData);
+      }
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
