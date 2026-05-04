@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Search.module.css'; // Reusing search grid styles
 import homeStyles from './Home.module.css';
+import SEO from '../components/SEO';
 
 const Category = ({ type, title }) => {
   const [results, setResults] = useState([]);
@@ -37,6 +38,10 @@ const Category = ({ type, title }) => {
 
   return (
     <div className={styles.searchPage}>
+      <SEO 
+        title={`Watch ${title} - Free HD Online`}
+        description={`Explore the best ${title} on AuraWatch. Watch for free in 1080p HD with dual audio.`}
+      />
       <div className={styles.searchHeader}>
         <h1 className={styles.searchTitle} style={{color: 'white', fontWeight: 700}}>
           {title}

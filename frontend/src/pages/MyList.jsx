@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Film, Heart, BookmarkPlus, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from './MyList.module.css';
+import SEO from '../components/SEO';
 
 const MyList = () => {
   const { isLoggedIn, token } = useAuth();
@@ -108,6 +109,10 @@ const MyList = () => {
 
   return (
     <div className={styles.myListPage}>
+      <SEO 
+        title="My List - AuraWatch"
+        description="Your personal watchlist on AuraWatch. Save and organize your favorite movies and TV shows."
+      />
       <h1 className={styles.pageTitle}>My List</h1>
       <p className={styles.subtitle}>{favorites.length} title{favorites.length !== 1 ? 's' : ''} saved</p>
 

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Film } from 'lucide-react';
 import styles from './Login.module.css';
+import SEO from '../components/SEO';
 
 const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
 
@@ -314,6 +315,10 @@ const Login = () => {
 
   return (
     <div className={styles.loginPage}>
+      <SEO 
+        title={`${getTitle()} - AuraWatch`}
+        description="Login or Create an Account on AuraWatch to save your favorite movies and track your watch history."
+      />
       <div className={styles.bgOverlay}></div>
       <div className={styles.logo}>
         <img src="/AuraMovie_logo.png.png" alt="AuraWatch Logo" style={{ height: '70px', objectFit: 'contain' }} />

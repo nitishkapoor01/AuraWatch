@@ -9,6 +9,7 @@ const adminRoutes = require('./routes/admin');
 const trackingRoutes = require('./routes/tracking');
 const settingsRoutes = require('./routes/settings');
 const downloadsRoutes = require('./routes/downloads');
+const sitemapRoutes = require('./routes/sitemap');
 const securityMiddleware = require('./middleware/security');
 
 // Initialize database
@@ -37,6 +38,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/tracking', trackingRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/downloads', downloadsRoutes);
+app.use('/api', sitemapRoutes);
 
 app.get('/', (req, res) => {
   res.send('AuraWatch API is running');

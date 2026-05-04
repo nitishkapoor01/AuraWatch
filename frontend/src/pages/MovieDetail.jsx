@@ -407,6 +407,21 @@ const MovieDetail = () => {
   if (loading) return <div style={{color:'white', padding:'100px', fontSize: '18px'}}>Loading...</div>;
   if (!movie) return <div style={{color:'white', padding:'100px', fontSize: '18px'}}>Movie not found!</div>;
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": isTV ? "TVSeries" : "Movie",
+    "name": movie?.title,
+    "image": movie?.poster || movie?.backdrop,
+    "description": movie?.overview,
+    "datePublished": movie?.year,
+    "aggregateRating": movie?.rating ? {
+      "@type": "AggregateRating",
+      "ratingValue": movie.rating,
+      "bestRating": "10",
+      "worstRating": "1"
+    } : undefined
+  };
+
   return (
     <div className={styles.detailPage}>
       <SEO 
@@ -414,6 +429,7 @@ const MovieDetail = () => {
         description={movie?.overview || `Watch and download ${movie?.title} in 1080p high quality on AuraWatch.`}
         image={movie?.poster || movie?.backdrop}
         type={isTV ? "video.tv_show" : "video.movie"}
+        schema={schema}
       />
 
       {/* Embed Player Modal */}

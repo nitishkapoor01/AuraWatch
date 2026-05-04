@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Clock, Play, Film, Tv, BarChart3, Calendar, Filter, ExternalLink } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from './WatchHistory.module.css';
+import SEO from '../components/SEO';
 
 const FILTER_OPTIONS = [
   { key: 'all', label: 'All' },
@@ -164,6 +165,10 @@ const WatchHistory = () => {
 
   return (
     <div className={styles.historyPage}>
+      <SEO 
+        title="Watch History - AuraWatch"
+        description="View your watch history on AuraWatch."
+      />
       <h1 className={styles.pageTitle}>Watch History</h1>
       <p className={styles.subtitle}>{history.length} titles in your journey</p>
 

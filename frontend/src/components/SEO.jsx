@@ -1,11 +1,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const SEO = ({ title, description, image, url, type = 'website' }) => {
+const SEO = ({ title, description, image, url, type = 'website', schema }) => {
   const siteName = 'AuraWatch';
   const defaultTitle = 'AuraWatch - Free Movies & TV Shows in HD';
   const defaultDescription = 'Watch and download the latest movies and TV shows in 1080p. Free, fast, and no buffering!';
-  const defaultImage = 'https://aurawatch.netlify.app/AuraMovie_logo.png.png'; // Make sure this is absolute URL
+  const defaultImage = 'https://www.aurawatch.fun/favicon.png'; // Absolute URL for social previews
   
   const seo = {
     title: title ? `${title} | ${siteName}` : defaultTitle,
@@ -32,6 +32,13 @@ const SEO = ({ title, description, image, url, type = 'website' }) => {
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={seo.image} />
+      
+      {/* Schema.org Structured Data */}
+      {schema && (
+        <script type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      )}
     </Helmet>
   );
 };

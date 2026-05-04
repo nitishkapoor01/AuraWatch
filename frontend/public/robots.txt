@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aurawatch-1.onrender.com/api/sitemap.xml
