@@ -594,8 +594,9 @@ class MovieCrawler {
     async _searchWordpressSite(title, year, name, baseUrl) {
         try {
             this.logger.info(`🔍 Searching ${name}...`);
-            const query = year ? `${title} ${year}` : title;
-            const searchUrl = `${baseUrl}?s=${encodeURIComponent(query)}`;
+            // Clean title for WP search (remove dots, dashes)
+            const wpQuery = title.replace(/[\.\-_]/g, ' ').replace(/\s+/g, ' ').trim();
+            const searchUrl = `${baseUrl}?s=${encodeURIComponent(wpQuery)}`;
             
             const response = await axios.get(searchUrl, {
                 headers: { 
@@ -609,17 +610,19 @@ class MovieCrawler {
             });
 
             const $ = cheerio.load(response.data);
-            // Try different selectors for different WP themes
-            const results = $('article h2 a, .post-title a, .result-item a, .entry-title a, .entry-header h2 a');
+            // Broader selectors for different WP themes
+            const results = $('article a, .post-title a, .result-item a, .entry-title a, .entry-header a, .box-inner-p a, h1 a, h2 a, h3 a');
             
             let bestResult = null;
             if (results.length > 0) {
-                // Find the best title match
                 results.each((i, el) => {
-                    const t = $(el).text().trim();
+                    const href = $(el).attr('href');
+                    if (!href || href === baseUrl || href.length < baseUrl.length + 3) return;
+
+                    const t = ($(el).text() || $(el).attr('title') || '').trim();
                     if (this._isTitleMatch(t, title, year)) {
-                        bestResult = { url: $(el).attr('href'), title: t };
-                        return false; // Break loop
+                        bestResult = { url: href, title: t };
+                        return false; 
                     }
                 });
             }
@@ -751,14 +754,15 @@ class MovieCrawler {
                 () => this._search1337x(title, year, tvInfo),
                 () => type === 'tv' ? this._searchEZTV(title, year, tvInfo) : Promise.resolve(null),
                 () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
-                () => this._searchWordpressSite(searchQuery, year, "MoviesVerse", "https://moviesmod.day/"),
+                () => this._searchWordpressSite(searchQuery, year, "MoviesVerse", "https://moviesmod.org/"),
                 () => this._searchWordpressSite(searchQuery, year, "UHDMovies", "https://uhdmovies.pink/"),
+                () => this._searchWordpressSite(searchQuery, year, "MoviezFlix", "https://moviezflix.pro/"),
                 () => this._searchWordpressSite(searchQuery, year, "BollyFlix", "https://bollyflix.icu/"),
-                () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app/"),
+                () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.icu/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movie4in", "https://movie4in.com/"),
-                () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.nf/"),
-                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://new1.katmoviehd.cymru/"),
+                () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.ngo/"),
+                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://katmoviehd.nz/"),
                 () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net/")
             ];
 
@@ -779,7 +783,7 @@ class MovieCrawler {
             ]);
             
             let mergedMovie = null;
-            const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'MoviesVerse', 'UHDMovies', 'BollyFlix', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
+            const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'MoviesVerse', 'UHDMovies', 'MoviezFlix', 'BollyFlix', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
             
             sourceNames.forEach((name, index) => {
                 results.meta.sourcesTried.push(name);
