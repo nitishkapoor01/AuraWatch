@@ -638,34 +638,64 @@ class MovieCrawler {
                 const qualities = {};
                 const links = { direct: [], magnet: [], torrent: [] };
                 
-                // Broad patterns for download buttons and links
-                $$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"]').each((i, el) => {
-                    const href = $$(el).attr('href');
-                    const text = $$(el).text().trim() || $$(el).attr('title') || 'Download';
-                    
-                    if (!href || href.includes('google.com/search') || href.includes('wp-content') || href.includes('facebook.com')) return;
-                    
-                    let q = this._detectQuality(text);
-                    if (!q) q = this._detectQuality(bestResult.title);
-                    if (!q) q = 'other';
-                    
-                    if (!qualities[q]) qualities[q] = [];
-                    
-                    const linkObj = {
-                        url: href,
-                        name: `${name}: ${text}`,
-                        type: 'direct',
-                        size: this._detectSize(text + ' ' + $$(el).parent().text() + ' ' + $$(el).closest('div').text()),
-                        category: this._detectCategory(text + ' ' + bestResult.title + ' ' + href)
-                    };
-                    
-                    // Avoid duplicates from the same source link
-                    if (!qualities[q].some(l => l.url === href)) {
-                        qualities[q].push(linkObj);
-                        links.direct.push(linkObj);
-                        this.stats.directLinks++;
+                const extractFromPage = (dom) => {
+                    let found = false;
+                    dom('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"], a[href*="hblinks"]').each((i, el) => {
+                        const href = dom(el).attr('href');
+                        const text = dom(el).text().trim() || dom(el).attr('title') || 'Download';
+                        
+                        if (!href || href.includes('google.com/search') || href.includes('wp-content') || href.includes('facebook.com')) return;
+                        
+                        let q = this._detectQuality(text);
+                        if (!q) q = this._detectQuality(bestResult.title);
+                        if (!q) q = 'other';
+                        
+                        if (!qualities[q]) qualities[q] = [];
+                        
+                        const linkObj = {
+                            url: href,
+                            name: `${name}: ${text}`,
+                            type: 'direct',
+                            size: this._detectSize(text + ' ' + dom(el).parent().text() + ' ' + dom(el).closest('div').text()),
+                            category: this._detectCategory(text + ' ' + bestResult.title + ' ' + href)
+                        };
+                        
+                        if (!qualities[q].some(l => l.url === href)) {
+                            qualities[q].push(linkObj);
+                            links.direct.push(linkObj);
+                            this.stats.directLinks++;
+                            found = true;
+                        }
+                    });
+                    return found;
+                };
+
+                const foundAny = extractFromPage($$);
+
+                // If no direct links found, check for a "Download Links" button/page
+                if (!foundAny) {
+                    const downloadPageLink = $$('a').filter((i, el) => {
+                        const text = $$(el).text().toLowerCase();
+                        const href = $$(el).attr('href') || '';
+                        return (text.includes('download') || text.includes('links')) && 
+                               href.includes(new URL(baseUrl).hostname) && 
+                               !href.includes('wp-content');
+                    }).first().attr('href');
+
+                    if (downloadPageLink) {
+                        try {
+                            this.logger.info(`🔗 Following download page: ${downloadPageLink}`);
+                            const dlPageRes = await axios.get(downloadPageLink, {
+                                headers: { 'User-Agent': 'Mozilla/5.0' },
+                                timeout: 10000
+                            });
+                            const $$$ = cheerio.load(dlPageRes.data);
+                            extractFromPage($$$);
+                        } catch (e) {
+                            this.logger.warn(`Failed to fetch download page: ${e.message}`);
+                        }
                     }
-                });
+                }
 
                 if (links.direct.length > 0) {
                     return { title: bestResult.title, qualities, links };
@@ -722,7 +752,7 @@ class MovieCrawler {
                 () => type === 'tv' ? this._searchEZTV(title, year, tvInfo) : Promise.resolve(null),
                 () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
                 () => this._searchWordpressSite(searchQuery, year, "MoviesVerse", "https://moviesmod.day/"),
-                () => this._searchWordpressSite(searchQuery, year, "UHDMovies", "https://uhdmovies.wiki/"),
+                () => this._searchWordpressSite(searchQuery, year, "UHDMovies", "https://uhdmovies.pink/"),
                 () => this._searchWordpressSite(searchQuery, year, "BollyFlix", "https://bollyflix.icu/"),
                 () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app/"),
                 () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba/"),
