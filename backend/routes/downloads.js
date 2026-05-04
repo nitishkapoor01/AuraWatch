@@ -199,4 +199,56 @@ router.delete('/cache/clear', async (req, res) => {
     }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  PROXY: Securely proxy VidVault CDN links to bypass Access Denied (Referer)
+// ═══════════════════════════════════════════════════════════════════════════
+
+router.get('/proxy', async (req, res) => {
+    const targetUrl = req.query.url;
+    if (!targetUrl) return res.status(400).send('URL required');
+    
+    try {
+        const axios = require('axios');
+        const headers = {
+            'Referer': 'https://vidvault.ru/',
+            'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        };
+        
+        if (req.headers.range) {
+            headers['Range'] = req.headers.range;
+        }
+
+        const response = await axios({
+            method: 'GET',
+            url: targetUrl,
+            headers,
+            responseType: 'stream',
+            timeout: 0, // Never timeout for large streams
+            maxRedirects: 5
+        });
+
+        // Forward essential headers
+        ['content-length', 'content-type', 'content-range', 'accept-ranges', 'content-disposition'].forEach(h => {
+            if (response.headers[h]) {
+                res.setHeader(h, response.headers[h]);
+            }
+        });
+        
+        res.status(response.status);
+        response.data.pipe(res);
+        
+        req.on('close', () => {
+            response.data.destroy();
+        });
+
+    } catch (e) {
+        console.error('[PROXY] Error:', e.message);
+        if (e.response) {
+            res.status(e.response.status).send('Upstream server error');
+        } else {
+            res.status(500).send('Proxy error');
+        }
+    }
+});
+
 module.exports = router;

@@ -228,6 +228,16 @@ const MovieDetail = () => {
     trackWatch(season, episode);
   };
 
+  // Helper to resolve URLs that need backend proxy
+  const getDownloadUrl = (link) => {
+    if (link.proxyRequired) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+        (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      return `${baseUrl}/downloads/proxy?url=${encodeURIComponent(link.url)}`;
+    }
+    return link.url;
+  };
+
   const handleDownload = async (forceRefresh = false) => {
     // Prevent React synthetic event objects from being treated as true
     const isForceRefresh = typeof forceRefresh === 'boolean' ? forceRefresh : false;
@@ -787,7 +797,7 @@ const MovieDetail = () => {
                       </div>
                       <button 
                         className={styles.primaryBtn}
-                        onClick={() => window.open(link.url, '_blank')}
+                        onClick={() => window.open(getDownloadUrl(link), '_blank')}
                       >
                         <Download size={18} /> Download
                       </button>

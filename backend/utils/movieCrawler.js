@@ -280,7 +280,8 @@ class MovieCrawler {
                         url: stream.url,
                         name: `VidVault: ${q} MP4 [${size || 'Unknown'}]`,
                         type: 'direct',
-                        size: size
+                        size: size,
+                        proxyRequired: true
                     };
                     qualities[q].push(linkObj);
                     links.direct.push(linkObj);
@@ -301,10 +302,11 @@ class MovieCrawler {
                         url: dl.url,
                         name: `VidVault: ${q} MP4 [${size || 'Unknown'}]`,
                         type: 'direct',
-                        size: size
+                        size: size,
+                        proxyRequired: true
                     };
                     // Avoid duplicate URLs
-                    if (!qualities[q].some(l => l.url === proxyUrl)) {
+                    if (!qualities[q].some(l => l.url === dl.url)) {
                         qualities[q].push(linkObj);
                         links.direct.push(linkObj);
                         this.stats.directLinks++;
