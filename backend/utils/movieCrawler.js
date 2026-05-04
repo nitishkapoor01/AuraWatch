@@ -22,6 +22,93 @@ class MovieCrawler {
     }
 
     /**
+     * Resolve multi-step WordPress shorteners like cloud.unblockedgames.world
+     * These sites use a 2-step POST form before redirecting to the real link.
+     * Step 1: GET /?sid=BASE64 → extract hidden _wp_http input
+     * Step 2: POST / with _wp_http → extract _wp_http2 input + next URL
+     * Step 3: POST next URL with _wp_http2 → get real link via redirect
+     * Returns the resolved final URL, or the original URL if it can't be resolved.
+     */
+    async _resolveShortener(shortUrl) {
+        try {
+            const headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+            };
+
+            // Step 1: GET the shortener page
+            const step1 = await axios.get(shortUrl, { headers, timeout: 10000 });
+            const $1 = cheerio.load(step1.data);
+
+            const wpHttp = $1('input[name="_wp_http"]').val();
+            const formAction1 = $1('form').attr('action') || new URL(shortUrl).origin + '/';
+            if (!wpHttp) return shortUrl; // Can't resolve, return as-is
+
+            // Step 2: POST with _wp_http
+            const params2 = new URLSearchParams();
+            params2.append('_wp_http', wpHttp);
+            const step2 = await axios.post(formAction1, params2, {
+                headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded', 'Referer': shortUrl },
+                timeout: 10000,
+                maxRedirects: 5
+            });
+            const $2 = cheerio.load(step2.data);
+
+            // Check for a redirect link first
+            let finalUrl = null;
+            $2('a[href]').each((_, el) => {
+                const href = $2(el).attr('href');
+                const host = shortUrl ? new URL(shortUrl).hostname : '';
+                if (href && !href.includes(host) && !href.startsWith('#') && href.startsWith('http')) {
+                    finalUrl = href;
+                    return false;
+                }
+            });
+            if (finalUrl) return finalUrl;
+
+            // Check for script redirect
+            const scriptRedir = step2.data.match(/window\.location(?:\.href)?\s*=\s*['"]([^'"]+)['"]/);
+            if (scriptRedir) return scriptRedir[1];
+
+            // Step 3: If there's _wp_http2, do one more POST
+            const wpHttp2 = $2('input[name="_wp_http2"]').val();
+            const formAction2 = $2('form').attr('action');
+            if (wpHttp2 && formAction2) {
+                const params3 = new URLSearchParams();
+                params3.append('_wp_http2', wpHttp2);
+                const step3 = await axios.post(formAction2, params3, {
+                    headers: { ...headers, 'Content-Type': 'application/x-www-form-urlencoded', 'Referer': formAction1 },
+                    timeout: 10000,
+                    maxRedirects: 10
+                });
+                // The final redirect URL is what we want
+                const finalRedirectUrl = step3.request?.res?.responseUrl || step3.config?.url;
+                if (finalRedirectUrl && !finalRedirectUrl.includes('unblockedgames') && !finalRedirectUrl.includes('modlist')) {
+                    return finalRedirectUrl;
+                }
+                // Also check for links on the final page
+                const $3 = cheerio.load(step3.data);
+                $3('a[href]').each((_, el) => {
+                    const href = $3(el).attr('href');
+                    if (href && href.startsWith('http') && !href.includes('unblockedgames') && !href.includes('google.com')) {
+                        finalUrl = href;
+                        return false;
+                    }
+                });
+                if (finalUrl) return finalUrl;
+            }
+
+            return shortUrl; // Return original if all else fails
+        } catch (e) {
+            this.logger.warn(`Shortener resolve failed for ${shortUrl}: ${e.message}`);
+            return shortUrl; // Return original on error
+        }
+    }
+
+
+
+    /**
      * Search for an EXACT movie and return only its download links.
      * Uses lightweight axios/cheerio approach for HDHub4u and YTS API.
      */
@@ -187,11 +274,10 @@ class MovieCrawler {
                     const resolution = stream.resolutions || stream.resolution || null;
                     const q = resolution ? this._detectQuality(`${resolution}p`) || resolution + 'p' : 'other';
                     const size = this._formatBytes(Number(stream.size));
-                    const proxyUrl = `${VIDVAULT_CDN}/${encodeURIComponent(stream.url)}?n=${encodedName}`;
                     
                     if (!qualities[q]) qualities[q] = [];
                     const linkObj = {
-                        url: proxyUrl,
+                        url: stream.url,
                         name: `VidVault: ${q} MP4 [${size || 'Unknown'}]`,
                         type: 'direct',
                         size: size
@@ -209,11 +295,10 @@ class MovieCrawler {
                     const resolution = dl.resolution || null;
                     const q = resolution ? this._detectQuality(`${resolution}p`) || resolution + 'p' : 'other';
                     const size = this._formatBytes(Number(dl.size));
-                    const proxyUrl = `${VIDVAULT_CDN}/${encodeURIComponent(dl.url)}?n=${encodedName}`;
                     
                     if (!qualities[q]) qualities[q] = [];
                     const linkObj = {
-                        url: proxyUrl,
+                        url: dl.url,
                         name: `VidVault: ${q} MP4 [${size || 'Unknown'}]`,
                         type: 'direct',
                         size: size
@@ -654,14 +739,29 @@ class MovieCrawler {
                 const qualities = {};
                 const links = { direct: [], magnet: [], torrent: [] };
                 
-                const extractFromPage = (dom) => {
+                const extractFromPage = async (dom) => {
                     let found = false;
+                    const linkEls = [];
                     dom('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive.google"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"], a[href*="hblinks"], a[href*="unblockedgames"], a[href*="modlist.in"], a[href*="driveleech"], a[href*="drivelinks"], a[href*="fastdl"], a[href*="fastlinks"], a[href*="sendcm"], a[href*="buzzheavier"], a[href*="fc2dl"]').each((i, el) => {
-                        const href = dom(el).attr('href');
+                        linkEls.push(el);
+                    });
+
+                    for (const el of linkEls) {
+                        let href = dom(el).attr('href');
                         const text = dom(el).text().trim() || dom(el).attr('title') || 'Download';
                         
-                        if (!href || href.includes('google.com/search') || href.includes('wp-content') || href.includes('facebook.com')) return;
+                        if (!href || href.includes('google.com/search') || href.includes('wp-content') || href.includes('facebook.com')) continue;
                         
+                        // Resolve unblockedgames and modlist shorteners server-side
+                        if (href.includes('unblockedgames') || href.includes('modlist.in')) {
+                            this.logger.info(`Resolving shortener: ${href.substring(0, 60)}...`);
+                            const resolved = await this._resolveShortener(href);
+                            // If still pointing to shortener (CAPTCHA blocked), keep original so user can click manually
+                            if (!resolved.includes('unblockedgames') && !resolved.includes('modlist.in') && !resolved.includes('google.com')) {
+                                href = resolved;
+                            }
+                        }
+
                         let q = this._detectQuality(text);
                         if (!q) q = this._detectQuality(bestResult.title);
                         if (!q) q = 'other';
@@ -682,11 +782,12 @@ class MovieCrawler {
                             this.stats.directLinks++;
                             found = true;
                         }
-                    });
+                    }
                     return found;
                 };
 
-                const foundAny = extractFromPage($$);
+                const foundAny = await extractFromPage($$);
+
 
                 // If no direct links found, check for a "Download Links" button/page
                 if (!foundAny) {
@@ -706,7 +807,7 @@ class MovieCrawler {
                                 timeout: 10000
                             });
                             const $$$ = cheerio.load(dlPageRes.data);
-                            extractFromPage($$$);
+                            await extractFromPage($$$);
                         } catch (e) {
                             this.logger.warn(`Failed to fetch download page: ${e.message}`);
                         }
