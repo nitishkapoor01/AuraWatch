@@ -1,23 +1,28 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const SEO = ({ title, description, image, url, type = 'website', schema }) => {
+const SEO = ({ title, description, image, url, type = 'website', schema, noIndex = false }) => {
   const siteName = 'AuraWatch';
   const defaultTitle = 'AuraWatch - Free Movies & TV Shows in HD';
   const defaultDescription = 'Watch and download the latest movies and TV shows in 1080p. Free, fast, and no buffering!';
   const defaultImage = 'https://www.aurawatch.fun/favicon.png'; // Absolute URL for social previews
   
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : (url || 'https://www.aurawatch.fun');
+  
   const seo = {
     title: title ? `${title} | ${siteName}` : defaultTitle,
     description: description || defaultDescription,
     image: image || defaultImage,
-    url: url || (typeof window !== 'undefined' ? window.location.href : ''),
+    url: currentUrl,
   };
 
   return (
     <Helmet>
+      {/* Basic Meta Tags */}
       <title>{seo.title}</title>
       <meta name="description" content={seo.description} />
+      <link rel="canonical" href={seo.url} />
+      {noIndex && <meta name="robots" content="noindex, nofollow" />}
       
       {/* Open Graph / Facebook / Telegram / WhatsApp */}
       <meta property="og:type" content={type} />
@@ -32,6 +37,12 @@ const SEO = ({ title, description, image, url, type = 'website', schema }) => {
       <meta name="twitter:title" content={seo.title} />
       <meta name="twitter:description" content={seo.description} />
       <meta name="twitter:image" content={seo.image} />
+      <meta name="twitter:site" content="@AuraWatch" />
+      
+      {/* Additional SEO */}
+      <meta name="theme-color" content="#e50914" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       
       {/* Schema.org Structured Data */}
       {schema && (

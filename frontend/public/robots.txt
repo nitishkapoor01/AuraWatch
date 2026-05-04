@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.aurawatch.fun/sitemap.xml
+Sitemap: https://www.aurawatch.fun/sitemap-index.xml

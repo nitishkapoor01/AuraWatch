@@ -414,19 +414,23 @@ const MovieDetail = () => {
     "image": movie?.poster || movie?.backdrop,
     "description": movie?.overview,
     "datePublished": movie?.year,
-    "aggregateRating": movie?.rating ? {
+    "aggregateRating": movie?.rating && movie.rating !== 'N/A' ? {
       "@type": "AggregateRating",
       "ratingValue": movie.rating,
       "bestRating": "10",
       "worstRating": "1"
-    } : undefined
+    } : undefined,
+    "actor": movie?.cast?.map(a => ({
+      "@type": "Person",
+      "name": a.name
+    }))
   };
 
   return (
     <div className={styles.detailPage}>
       <SEO 
-        title={`Download ${movie?.title} (${movie?.year || ''}) Dual Audio HD`}
-        description={movie?.overview || `Watch and download ${movie?.title} in 1080p high quality on AuraWatch.`}
+        title={`${movie?.title} (${movie?.year || ''}) | Watch & Download Dual Audio HD`}
+        description={movie?.overview ? (movie.overview.substring(0, 160) + '...') : `Watch and download ${movie?.title} in 1080p high quality on AuraWatch.`}
         image={movie?.poster || movie?.backdrop}
         type={isTV ? "video.tv_show" : "video.movie"}
         schema={schema}
