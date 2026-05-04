@@ -38,7 +38,7 @@ class MovieCrawler {
             };
 
             // Step 1: GET the shortener page
-            const step1 = await axios.get(shortUrl, { headers, timeout: 10000 });
+            const step1 = await axios.get(shortUrl, { headers, timeout: 6000 });
             const $1 = cheerio.load(step1.data);
 
             const wpHttp = $1('input[name="_wp_http"]').val();
@@ -621,7 +621,7 @@ class MovieCrawler {
                     'Referer': baseUrl,
                     'Origin': new URL(baseUrl).origin
                 },
-                timeout: 12000
+                timeout: 8000
             });
 
             if (response.data.hits && response.data.hits.length > 0) {
@@ -712,7 +712,7 @@ class MovieCrawler {
                     'Referer': baseUrl,
                     'DNT': '1'
                 },
-                timeout: 15000
+                timeout: 10000
             });
 
             if (response.data.includes('cf-challenge') || response.data.includes('cf-browser-verification')) {
@@ -924,14 +924,16 @@ class MovieCrawler {
                 }
             });
 
-            // Increased limit to 35s to allow for deeper extraction on some sites
+            // Reduced total timeout to 18s for better UX
             await Promise.race([
                 Promise.all(wrappedPromises),
-                new Promise(resolve => setTimeout(resolve, 35000))
+                new Promise(resolve => setTimeout(resolve, 18000))
             ]);
             
+            this.logger.info(`🏁 Search finished. Processing results...`);
+            
             let mergedMovie = null;
-            const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'MoviesVerse', 'UHDMovies', 'MoviezFlix', 'BollyFlix', 'OlaMovies', 'Movies4u', 'Movie4in', 'VegaMovies', 'KatMovieHD', 'WatchAnimeWorld'];
+            const sourceNames = ['YTS', 'VidVault', 'PirateBay', '1337x', 'EZTV', 'HDHub4u', 'HDHub4u (Alt)', 'MoviesVerse', 'UHDMovies', 'MoviezFlix', 'MoviezFlix (Alt)', 'BollyFlix', 'BollyFlix (Alt)', 'OlaMovies', 'OlaMovies (Alt)', 'Movies4u', 'Movies4u (Alt)', 'Movie4in', 'VegaMovies', 'VegaMovies (Alt)', 'KatMovieHD', 'KatMovieHD (Alt)', 'WatchAnimeWorld', 'CineVood', 'DotMovies', 'G-DriveMovies', 'ExtraMovies', 'FilmyZilla'];
             
             sourceNames.forEach((name, index) => {
                 results.meta.sourcesTried.push(name);
