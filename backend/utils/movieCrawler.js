@@ -648,7 +648,7 @@ class MovieCrawler {
                 
                 const extractFromPage = (dom) => {
                     let found = false;
-                    dom('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"], a[href*="hblinks"]').each((i, el) => {
+                    dom('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive.google"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"], a[href*="hblinks"], a[href*="unblockedgames"], a[href*="modlist.in"], a[href*="driveleech"], a[href*="drivelinks"], a[href*="fastdl"], a[href*="fastlinks"], a[href*="sendcm"], a[href*="buzzheavier"], a[href*="fc2dl"]').each((i, el) => {
                         const href = dom(el).attr('href');
                         const text = dom(el).text().trim() || dom(el).attr('title') || 'Download';
                         
