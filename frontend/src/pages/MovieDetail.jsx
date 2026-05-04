@@ -23,20 +23,7 @@ const extractLanguage = (name) => {
   return 'Multi / Other';
 };
 
-const AdScript = () => {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "https://heavenlysuspicious.com/0f/1d/e9/0f1de92e83b8f920f72e427960fb1049.js";
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-  return null;
-};
+
 
 const BannerAd = () => {
   const bannerRef = React.useRef(null);
@@ -682,7 +669,6 @@ const MovieDetail = () => {
                   <>
                     {/* ADVERTISEMENT SCRIPT */}
                     <div className={styles.adPlaceholder} style={{ padding: 0, background: 'transparent', border: 'none' }}>
-                      <AdScript />
                       <BannerAd />
                     </div>
                     
