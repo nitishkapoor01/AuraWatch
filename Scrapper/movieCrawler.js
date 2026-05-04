@@ -194,7 +194,7 @@ class MovieCrawler {
      */
     async searchExactMovie(title, year = null, opts = {}) {
         const searchQuery = year ? `${title} ${year}` : title;
-        const mergedConfig = { ...this.config, ...opts, maxDepth: 2, query: searchQuery.toLowerCase(), timeout: 15000 };
+        const mergedConfig = { ...this.config, ...opts, maxDepth: 1, query: searchQuery.toLowerCase(), timeout: 20000 };
         this.logger.banner();
         this.logger.info(`🎯 EXACT SEARCH: "${title}" ${year ? `(${year})` : ''}`);
 
@@ -204,10 +204,10 @@ class MovieCrawler {
 
         // Force stop after 45 seconds to ensure frontend timer is respected
         const hardTimeout = setTimeout(() => {
-            this.logger.warn(`⏳ Hard 45s timeout reached! Forcing early stop to return partial results...`);
+            this.logger.warn(`⏳ Hard 60s timeout reached! Forcing early stop to return partial results...`);
             this.isStopped = true;
             this.queue = []; // Clear queue to stop drainQueue
-        }, 45000);
+        }, 60000);
 
         try {
             await this._launchBrowser();
@@ -253,7 +253,8 @@ class MovieCrawler {
                 searchYear: year,
                 exactMatchFound: !!exactMovie
             },
-            movie: exactMovie
+            movie: exactMovie,
+            all: fullResults.movies
         };
     }
 
@@ -274,7 +275,11 @@ class MovieCrawler {
         const searchWords = searchNorm.split(' ').filter(w => w.length >= 2);
         const yearStr = searchYear ? String(searchYear) : null;
 
-        const scored = movies.map(movie => {
+        const scored = movies
+            .map(movie => {
+            // Skip search pages being treated as movies
+            if (movie.source.includes('?s=') || movie.source.includes('/search/')) return null;
+
             const titleNorm = normalize(movie.title);
             const sourceNorm = normalize(movie.source || '');
             let score = 0;
@@ -319,11 +324,11 @@ class MovieCrawler {
 
             return { movie, score };
         });
+        const scoredFiltered = scored.filter(s => s !== null);
+        scoredFiltered.sort((a, b) => b.score - a.score);
 
-        scored.sort((a, b) => b.score - a.score);
-
-        const best = scored[0];
-        // Return if score is reasonable (lowered from 20 to 15 for better recall)
+        const best = scoredFiltered[0];
+        // Return if score is reasonable
         if (best && best.score > 15) {
             const movie = best.movie;
             return {
@@ -579,15 +584,18 @@ class MovieCrawler {
             const lowerHref = href.toLowerCase();
 
             // Video/archive files
-            const hasExt = allExtensions.some(ext => lowerHref.includes(ext));
+            const pathOnly = lowerHref.split('?')[0].split('#')[0];
+            const isDomainOnly = pathOnly.replace(/^https?:\/\//, '').split('/').filter(Boolean).length <= 1;
+            const hasExt = allExtensions.some(ext => pathOnly.endsWith(ext)) && !isDomainOnly;
 
             // Common download hosting patterns
             const isDownloadHost = /drive\.google|mega\.nz|mediafire|zippyshare|uploadhaven|racaty|1fichier|uptobox|rapidgator|nitroflare|turbobit|filefactory|uploaded\.net|ddownload|pixeldrain|gofile|send\.cm|streamtape|mixdrop|upstream|usersdrive|gdtot|hubcloud|apkadmin|gdflix|vcloud|fastdl|spix|adangle|linkstaker|hblinks|unblockedgames/i.test(lowerHref);
 
             // Download button/link patterns
             const text = $(el).text().trim().toLowerCase();
-            const isDownloadBtn = /download|descargar|telecharger|baixar|скачать|v-cloud|g-drive|mega|gdtot|hubcloud|direct|link|1080p|720p|480p|2160p|4k|bluray|webrip|hevc|x264|x265|fhd|uhd/i.test(text) &&
-                !/screenshot|subtitle|srt|readme/i.test(text) && text.length < 60;
+            const isDownloadBtn = /download|descargar|telecharger|baixar|скачать|v-cloud|g-drive|mega|gdtot|hubcloud|direct|1080p|720p|480p|2160p|4k|bluray|brrip|webrip|hdrip|dvdrip|x264|x265|fhd|\buhd\b/i.test(text) &&
+                !/screenshot|subtitle|srt|readme|uhdmovies|olamovies|vegamovies|home|privacy|contact|about|dmca/i.test(text) && 
+                text.length > 1 && text.length < 60;
 
             let isDownloadLink = (hasExt || isDownloadHost || (isDownloadBtn && !lowerHref.startsWith('magnet:')));
 
@@ -646,13 +654,15 @@ class MovieCrawler {
             if (!resolved) return;
 
             // Match movie detail pages, download pages
-            const isMoviePage = /\/movie[s]?\//i.test(resolved) ||
+            const isMoviePage = (/\/movie[s]?\//i.test(resolved) ||
                 /\/torrent\//i.test(resolved) ||
                 /\/download/i.test(resolved) ||
                 /\/details\//i.test(resolved) ||
                 /\/(film|video|watch|release)\//i.test(resolved) ||
                 /\/[a-z0-9-]+-download-/i.test(resolved) ||
-                /720p|1080p|2160p|4k|bluray|brrip|webrip|hdrip|dvdrip|x264|x265|hevc/i.test(text);
+                /\/download-[\w-]+\/$/i.test(resolved) || // UHDMovies pattern
+                /720p|1080p|2160p|4k|bluray|brrip|webrip|hdrip|dvdrip|x264|x265|hevc/i.test(text)) &&
+                !/search|\?s=|page\/\d+/i.test(resolved); // Exclude search/pagination pages from being crawled deeper as movie pages
 
             if (isMoviePage && !seen.has(resolved)) {
 
@@ -674,7 +684,12 @@ class MovieCrawler {
                     try {
                         const baseDomain = new URL(baseUrl).hostname;
                         const linkDomain = new URL(resolved).hostname;
-                        if (baseDomain === linkDomain || linkDomain.endsWith('.' + baseDomain.replace('www.', ''))) {
+                        
+                        // Flexible domain matching for known movie sites (handles TLD changes like .pink -> .mov)
+                        const knownSites = ['uhdmovies', 'vegamovies', 'hdhub4u', 'katmoviehd', 'olamovies', 'movies4u', 'movie4in', 'watchanimeworld'];
+                        const isKnownSite = knownSites.some(s => linkDomain.includes(s) && baseDomain.includes(s));
+
+                        if (isKnownSite || baseDomain === linkDomain || linkDomain.endsWith('.' + baseDomain.replace('www.', ''))) {
                             seen.add(resolved);
                             result.moviePageLinks.push({ url: resolved, text: text.substring(0, 100) });
                         }
@@ -922,24 +937,42 @@ class MovieCrawler {
     _extractMovieTitle(sourceUrl) {
         try {
             const urlObj = new URL(sourceUrl);
-            let path = urlObj.pathname;
-            // Remove trailing slash and leading slash
-            path = path.replace(/^\/+|\/+$/g, '');
-            // Get the last path segment (the movie slug)
-            const segments = path.split('/');
-            let slug = segments[segments.length - 1] || segments[segments.length - 2] || '';
-            // ─── FIX: Remove leading numeric post IDs like "3501621-" or "52263-" or "download-"
-            slug = slug.replace(/^\d+-/, '');
-            slug = slug.replace(/^download-/, '');
-            // Remove common suffixes
-            slug = slug.replace(/-(full-movie|download|free|hd|bluray|webrip|camrip|hindi|english|dubbed|dual-audio|dd[0-9.-]+|x264|x265|hevc|esub|hc-esub|hdrip|dvdrip|brrip|web-dl).*$/gi, '');
-            // Remove quality tags like 1080p-720p-480p
-            slug = slug.replace(/-(1080p|720p|480p|2160p|4k)(-[0-9]+p)*/gi, '');
-            // Convert dashes to spaces and capitalize
-            const title = slug.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).trim();
-            return title || 'Unknown';
+            let slug = '';
+            
+            // Handle search queries
+            const searchParam = urlObj.searchParams.get('s');
+            if (searchParam) {
+                slug = searchParam;
+            } else {
+                let path = urlObj.pathname.replace(/^\/+|\/+$/g, '');
+                const segments = path.split('/');
+                slug = segments[segments.length - 1] || segments[segments.length - 2] || '';
+            }
+
+            // Normalize: replace +, -, _, . and %20 with space
+            let title = slug.replace(/[+\-_\.]|%20/g, ' ');
+            
+            // Remove file extensions
+            title = title.replace(/\.(html|php|asp|aspx|htm)$/i, '');
+
+            // Remove leading numeric post IDs or "download-"
+            title = title.replace(/^\d+\s+/, '').replace(/^download\s+/i, '');
+            
+            // Clean up: remove common metadata from title
+            title = title.replace(/\b(hindi|dual|audio|web-dl|720p|1080p|2160p|4k|english|esubs|bluray|hevc|x264|x265|full|movie|download|free|hd|bluray|webrip|camrip|dubbed|dual-audio|dd[0-9.-]+|hdrip|dvdrip|brrip|watch|online|collection|bollywood|hollywood|series|season|episode|ep|added)\b/gi, '');
+            
+            // Remove year if it's at the end or in parens
+            title = title.replace(/\s*\(?\d{4}\)?\s*$/g, '');
+
+            // Capitalize and trim
+            return title
+                .split(/\s+/)
+                .filter(w => w.length > 0)
+                .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                .join(' ')
+                .trim() || 'Unknown Movie';
         } catch {
-            return 'Unknown';
+            return 'Unknown Movie';
         }
     }
 
@@ -948,10 +981,13 @@ class MovieCrawler {
         const movieMap = new Map();
         for (const link of this.allDownloadLinks) {
             const movieTitle = this._extractMovieTitle(link.source);
-            if (!movieMap.has(movieTitle)) {
+            const isSearch = link.source.includes('?s=') || link.source.includes('/search/');
+
+            if (!movieMap.has(movieTitle) || (movieMap.get(movieTitle).isSearch && !isSearch)) {
                 movieMap.set(movieTitle, {
                     title: movieTitle,
                     source: link.source,
+                    isSearch: isSearch,
                     links: { direct: [], magnet: [], torrent: [] },
                     byQuality: {}
                 });
