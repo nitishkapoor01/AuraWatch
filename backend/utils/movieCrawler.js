@@ -687,6 +687,30 @@ class MovieCrawler {
                     }
                 });
 
+                const finalLinks = [];
+                for (const link of links.direct) {
+                    if (link.url.includes('hblinks.dad') || link.url.includes('vcloud')) {
+                        this.logger.info(`🔍 Following protector: ${link.url}`);
+                        try {
+                            const protRes = await axios.get(link.url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 8000 });
+                            const $$$ = cheerio.load(protRes.data);
+                            $$$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive.google"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"]').each((_, el) => {
+                                const href = $$$(el).attr('href');
+                                if (href && !href.includes('wp-content')) {
+                                    finalLinks.push({
+                                        ...link,
+                                        url: href,
+                                        name: `${link.name} -> ${$$$(el).text().trim() || 'Direct'}`
+                                    });
+                                }
+                            });
+                        } catch (e) {}
+                    } else {
+                        finalLinks.push(link);
+                    }
+                }
+                links.direct = finalLinks;
+
                 if (links.direct.length > 0) {
                     return { title: hit.post_title, qualities, links };
                 }
@@ -812,8 +836,33 @@ class MovieCrawler {
                 const foundAny = await extractFromPage($$);
 
 
+                // Recursively follow protectors found in the links
+                const finalLinks = [];
+                for (const link of links.direct) {
+                    if (link.url.includes('hblinks.dad') || link.url.includes('vcloud') || link.url.includes('kmhd.eu')) {
+                        this.logger.info(`🔍 Following protector: ${link.url}`);
+                        try {
+                            const protRes = await axios.get(link.url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 8000 });
+                            const $$$ = cheerio.load(protRes.data);
+                            $$$('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive.google"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"]').each((_, el) => {
+                                const href = $$$(el).attr('href');
+                                if (href && !href.includes('wp-content')) {
+                                    finalLinks.push({
+                                        ...link,
+                                        url: href,
+                                        name: `${link.name} -> ${$$$(el).text().trim() || 'Direct'}`
+                                    });
+                                }
+                            });
+                        } catch (e) {}
+                    } else {
+                        finalLinks.push(link);
+                    }
+                }
+                links.direct = finalLinks;
+
                 // If no direct links found, check for a "Download Links" button/page
-                if (!foundAny) {
+                if (links.direct.length === 0) {
                     const downloadPageLink = $$('a').filter((i, el) => {
                         const text = $$(el).text().toLowerCase();
                         const href = $$(el).attr('href') || '';
