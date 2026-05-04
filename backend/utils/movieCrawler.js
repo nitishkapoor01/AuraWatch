@@ -772,10 +772,10 @@ class MovieCrawler {
                 }
             });
 
-            // Strict 25s limit to guarantee we respond before frontend/Render times out
+            // Increased limit to 35s to allow for deeper extraction on some sites
             await Promise.race([
                 Promise.all(wrappedPromises),
-                new Promise(resolve => setTimeout(resolve, 25000))
+                new Promise(resolve => setTimeout(resolve, 35000))
             ]);
             
             let mergedMovie = null;
@@ -878,8 +878,10 @@ class MovieCrawler {
         
         const getPureTitle = (str) => {
             let clean = str.toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+            // Remove common prefixes
+            clean = clean.replace(/^(download|watch|online|full|movie|free|hd)\s+/g, '');
             const words = clean.split(' ');
-            const metadataRegex = /^(19\d{2}|20\d{2}|\d{3,4}p|4k|uhd|hd|sd|s\d+|e\d+|season|episode|complete|batch|pack|dual|audio|hindi|english|tamil|telugu|bluray|webrip|web|dl|x264|x265|hevc|aac|mkv|mp4|avi|rip|dvdrip|hdrip|extended|unrated|directors|cut|remastered|part|hdhub4u|vegamovies|katmoviehd|moviesverse)$/i;
+            const metadataRegex = /^(19\d{2}|20\d{2}|\d{3,4}p|4k|uhd|hd|sd|s\d+|e\d+|season|episode|complete|batch|pack|dual|audio|hindi|english|tamil|telugu|bluray|webrip|web|dl|x264|x265|hevc|aac|mkv|mp4|avi|rip|dvdrip|hdrip|extended|unrated|directors|cut|remastered|part|hdhub4u|vegamovies|katmoviehd|moviesverse|uhdmovies|olamovies|moviesmod|bollyflix|movies4u|movie4in|watchanimeworld|cymru|fo|app|ba|icu|nf)$/i;
             
             let pureWords = [];
             for (let i = 0; i < words.length; i++) {
