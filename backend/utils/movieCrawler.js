@@ -691,7 +691,8 @@ class MovieCrawler {
             this.logger.info(`🔍 Searching ${name}...`);
             // Clean title for WP search (remove dots, dashes)
             const wpQuery = title.replace(/[\.\-_]/g, ' ').replace(/\s+/g, ' ').trim();
-            const searchUrl = `${baseUrl}?s=${encodeURIComponent(wpQuery)}`;
+            const connector = baseUrl.includes('?') ? '&' : '?';
+            const searchUrl = `${baseUrl}${connector}s=${encodeURIComponent(wpQuery)}`;
             
             const response = await axios.get(searchUrl, {
                 headers: { 
@@ -869,17 +870,17 @@ class MovieCrawler {
                 () => this._searchPirateBay(title, year, tvInfo),
                 () => this._search1337x(title, year, tvInfo),
                 () => type === 'tv' ? this._searchEZTV(title, year, tvInfo) : Promise.resolve(null),
-                () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/"),
+                () => this._searchGenericTypesense(searchQuery, year, "HDHub4u", "https://new7.hdhub4u.fo/?utm=mn1"),
                 () => this._searchWordpressSite(searchQuery, year, "MoviesVerse", "https://moviesmod.org/"),
                 () => this._searchWordpressSite(searchQuery, year, "UHDMovies", "https://uhdmovies.pink/"),
                 () => this._searchWordpressSite(searchQuery, year, "MoviezFlix", "https://moviezflix.net/"),
                 () => this._searchWordpressSite(searchQuery, year, "BollyFlix", "https://bollyflix.re/"),
-                () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.vip/"),
-                () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.vg/"),
-                () => this._searchWordpressSite(searchQuery, year, "Movie4in", "https://movie4in.com/"),
-                () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.mx/"),
-                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://katmoviehd.to/"),
-                () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net/"),
+                () => this._searchWordpressSite(searchQuery, year, "OlaMovies", "https://olamovies.app"),
+                () => this._searchWordpressSite(searchQuery, year, "Movies4u", "https://movies4u.ba"),
+                () => this._searchWordpressSite(searchQuery, year, "Movie4in", "https://movie4in.com"),
+                () => this._searchWordpressSite(searchQuery, year, "VegaMovies", "https://vegamovies.nf"),
+                () => this._searchWordpressSite(searchQuery, year, "KatMovieHD", "https://new1.katmoviehd.cymru"),
+                () => this._searchWordpressSite(searchQuery, year, "WatchAnimeWorld", "https://watchanimeworld.net"),
                 () => this._searchWordpressSite(searchQuery, year, "CineVood", "https://cinevood.com/"),
                 () => this._searchWordpressSite(searchQuery, year, "DotMovies", "https://dotmovies.men/"),
                 () => this._searchWordpressSite(searchQuery, year, "G-DriveMovies", "https://gdrivemovies.net/"),
