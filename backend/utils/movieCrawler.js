@@ -771,9 +771,17 @@ class MovieCrawler {
                         
                         if (!qualities[q]) qualities[q] = [];
                         
+                        let descriptiveName = text;
+                        if (descriptiveName.toLowerCase() === 'download' || descriptiveName.toLowerCase() === 'link' || descriptiveName.length < 5) {
+                            const parentText = dom(el).parent().text().trim();
+                            if (parentText && parentText.length > 5) {
+                                descriptiveName = parentText.split('\n')[0].substring(0, 150);
+                            }
+                        }
+
                         const linkObj = {
                             url: href,
-                            name: `${name}: ${text}`,
+                            name: `${name}: ${descriptiveName}`,
                             type: 'direct',
                             size: this._detectSize(text + ' ' + dom(el).parent().text() + ' ' + dom(el).closest('div').text()),
                             category: this._detectCategory(text + ' ' + bestResult.title + ' ' + href)

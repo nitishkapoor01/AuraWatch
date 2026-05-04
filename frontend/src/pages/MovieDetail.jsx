@@ -20,7 +20,7 @@ const extractLanguage = (name) => {
   if (n.includes('korean')) return 'Korean';
   if (n.includes('japanese')) return 'Japanese';
   if (n.includes('english') || n.includes(' eng ')) return 'English';
-  return 'Original / English';
+  return 'Multi / Other';
 };
 
 const AdScript = () => {
@@ -792,7 +792,7 @@ const MovieDetail = () => {
                         <span className={styles.linkQuality}>{selectedQuality}</span>
                         <span className={styles.linkSize}>{link.size || 'Unknown Size'}</span>
                         <span className={styles.linkName} title={link.name}>
-                          {link.name.length > 50 ? link.name.substring(0, 50) + '...' : link.name}
+                          {link.name}
                         </span>
                       </div>
                       <button 

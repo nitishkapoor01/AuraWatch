@@ -880,8 +880,11 @@
 }
 
 .linkName {
-  color: #888;
-  font-size: 12px;
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+  margin-top: 4px;
 }
 
 /* 🖥️ TABLET RESPONSIVENESS (769px–1024px) */
