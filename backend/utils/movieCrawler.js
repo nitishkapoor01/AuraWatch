@@ -652,12 +652,19 @@ class MovieCrawler {
                 const links = { direct: [], magnet: [], torrent: [] };
                 
                 // Broad patterns for movie sites
-                $('a[href*="hblinks"], a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="v-cloud"], a[href*="fastdl"], a[href*="mediafire"]').each((i, el) => {
+                $('a[href*="gdtot"], a[href*="gdflix"], a[href*="hubcloud"], a[href*="filepress"], a[href*="sharer"], a[href*="drive.google"], a[href*="mega"], a[href*="pixeldrain"], a[href*="gofile"], a[href*="mediafire"], a[href*="droplink"], a[href*="v-cloud"], a[href*="hblinks"], a[href*="unblockedgames"], a[href*="modlist.in"], a[href*="kmhd.eu"], a[href*="katmoviehd"], a[href*="driveleech"], a[href*="drivelinks"], a[href*="fastdl"], a[href*="fastlinks"], a[href*="sendcm"], a[href*="buzzheavier"], a[href*="fc2dl"]').each((i, el) => {
                     const href = $(el).attr('href');
                     const text = $(el).text().trim() || $(el).attr('title') || 'Download';
-                    if (!href || href.includes('wp-content')) return;
+                    if (!href || href.includes('wp-content') || href.includes('facebook.com')) return;
                     
-                    // Prioritize detecting quality from the button text first
+                    let descriptiveName = text;
+                    if (descriptiveName.toLowerCase() === 'download' || descriptiveName.toLowerCase() === 'link' || descriptiveName.length < 5) {
+                        const parentText = $(el).parent().text().trim();
+                        if (parentText && parentText.length > 5) {
+                            descriptiveName = parentText.split('\n')[0].substring(0, 150);
+                        }
+                    }
+
                     let q = this._detectQuality(text);
                     if (!q) q = this._detectQuality(hit.post_title);
                     if (!q) q = 'other';
@@ -666,15 +673,17 @@ class MovieCrawler {
                     
                     const linkObj = {
                         url: href,
-                        name: `${name}: ${text}`,
+                        name: `${name}: ${descriptiveName}`,
                         type: 'direct',
-                        size: this._detectSize(text + ' ' + $(el).parent().text()),
+                        size: this._detectSize(text + ' ' + $(el).parent().text() + ' ' + $(el).closest('div').text()),
                         category: this._detectCategory(text + ' ' + hit.post_title + ' ' + href)
                     };
                     
-                    qualities[q].push(linkObj);
-                    links.direct.push(linkObj);
-                    this.stats.directLinks++;
+                    if (!qualities[q].some(l => l.url === href)) {
+                        qualities[q].push(linkObj);
+                        links.direct.push(linkObj);
+                        this.stats.directLinks++;
+                    }
                 });
 
                 if (links.direct.length > 0) {
