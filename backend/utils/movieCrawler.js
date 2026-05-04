@@ -639,7 +639,8 @@ class MovieCrawler {
                     return null;
                 }
 
-                const movieUrl = hit.permalink.startsWith('http') ? hit.permalink : `${baseUrl}${hit.permalink.startsWith('/') ? hit.permalink.slice(1) : hit.permalink}`;
+                const baseOrigin = new URL(baseUrl).origin;
+                const movieUrl = hit.permalink.startsWith('http') ? hit.permalink : `${baseOrigin}${hit.permalink.startsWith('/') ? '' : '/'}${hit.permalink}`;
                 
                 this.logger.info(`📄 [${name}] Found: ${hit.post_title}`);
                 const pageRes = await axios.get(movieUrl, {
