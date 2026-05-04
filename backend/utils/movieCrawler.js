@@ -609,6 +609,11 @@ class MovieCrawler {
                 timeout: 15000
             });
 
+            if (response.data.includes('cf-challenge') || response.data.includes('cf-browser-verification')) {
+                this.logger.warn(`⚠️ [${name}] Blocked by Cloudflare challenge`);
+                return null;
+            }
+
             const $ = cheerio.load(response.data);
             // Broader selectors for different WP themes
             const results = $('article a, .post-title a, .result-item a, .entry-title a, .entry-header a, .box-inner-p a, h1 a, h2 a, h3 a');

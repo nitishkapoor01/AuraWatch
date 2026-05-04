@@ -38,7 +38,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/tracking', trackingRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/downloads', downloadsRoutes);
-app.use('/api', sitemapRoutes);
+app.use('/api', sitemapRoutes); // Keep for backwards compatibility if needed
+app.use('/', sitemapRoutes);    // Mount at root for Search Console (/sitemap.xml)
 
 app.get('/', (req, res) => {
   res.send('AuraWatch API is running');
