@@ -49,4 +49,31 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @route   PUT /api/support/:id/status
+// @desc    Update support ticket status
+// @access  Admin
+router.put('/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+
+    const query = `
+      UPDATE support_tickets 
+      SET status = $1 
+      WHERE id = $2 
+      RETURNING *
+    `;
+    const result = await db.query(query, [status, id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ msg: 'Ticket not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating ticket status:', err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 module.exports = router;

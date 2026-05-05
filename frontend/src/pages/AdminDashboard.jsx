@@ -4,7 +4,7 @@ import {
   Users, Trash2, ShieldAlert, Film, Clock, BarChart3, AlertCircle, 
   Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, 
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
-  Ban, ShieldCheck, UserCog, History
+  Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from './AdminDashboard.module.css';
@@ -30,6 +30,10 @@ const AdminDashboard = () => {
   const [tempPerms, setTempPerms] = useState({ read: true, write: false });
   const [mostWatched, setMostWatched] = useState([]);
   const [visitors, setVisitors] = useState([]);
+  
+  // Support States
+  const [supportTickets, setSupportTickets] = useState([]);
+  const [resolvingTicket, setResolvingTicket] = useState(false);
   
   // Control States
   const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' });
@@ -105,6 +109,9 @@ const AdminDashboard = () => {
     } else if (tab === 'users') {
       const visitorsRes = await fetch(`${baseUrl}/admin/visitors`, { headers });
       if (visitorsRes.ok) setVisitors(await visitorsRes.json());
+    } else if (tab === 'support') {
+      const supportRes = await fetch(`${baseUrl}/support`, { headers });
+      if (supportRes.ok) setSupportTickets(await supportRes.json());
     }
   };
 
@@ -248,6 +255,23 @@ const AdminDashboard = () => {
     finally { setSavingSettings(false); }
   };
 
+  const handleResolveTicket = async (id, currentStatus) => {
+    try {
+      setResolvingTicket(true);
+      const newStatus = currentStatus === 'open' ? 'resolved' : 'open';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/support/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setSupportTickets(supportTickets.map(t => t.id === id ? { ...t, status: newStatus } : t));
+      }
+    } catch (e) { alert('Failed to update ticket'); }
+    finally { setResolvingTicket(false); }
+  };
+
   if (loading) return <div className={styles.adminPage}><div className={styles.loader}></div></div>;
   if (error) return (
     <div className={styles.adminPage}>
@@ -279,6 +303,9 @@ const AdminDashboard = () => {
         </button>
         <button className={`${styles.tabBtn} ${activeTab === 'analytics' ? styles.activeTab : ''}`} onClick={() => setActiveTab('analytics')}>
           <BarChart size={18} /> Analytics
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'support' ? styles.activeTab : ''}`} onClick={() => setActiveTab('support')}>
+          <MessageSquare size={18} /> Support
         </button>
         <button className={`${styles.tabBtn} ${activeTab === 'live' ? styles.activeTab : ''}`} onClick={() => setActiveTab('live')}>
           <Zap size={18} /> Live Feed
@@ -639,6 +666,76 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* SUPPORT TAB */}
+      {activeTab === 'support' && (
+        <div className={styles.tabContent}>
+          <div className={styles.usersSection}>
+            <div className={styles.sectionHeader}>
+              <h2>Support Tickets</h2>
+              <span className={styles.userCount} style={{ background: 'rgba(243, 156, 18, 0.15)', color: '#f39c12' }}>
+                {supportTickets.filter(t => t.status === 'open').length} Open
+              </span>
+            </div>
+            <div className={styles.tableContainer}>
+              <table className={styles.usersTable}>
+                <thead>
+                  <tr><th>Type</th><th>From</th><th>Details</th><th>Date</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                  {supportTickets.map(ticket => (
+                    <tr key={ticket.id} style={{ opacity: ticket.status === 'resolved' ? 0.6 : 1 }}>
+                      <td>
+                        <span className={styles.roleBadge} style={{ 
+                          background: ticket.ticket_type === 'feedback' ? 'rgba(0, 113, 235, 0.1)' : ticket.ticket_type === 'feature_request' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(229, 9, 20, 0.1)', 
+                          color: ticket.ticket_type === 'feedback' ? '#0071eb' : ticket.ticket_type === 'feature_request' ? '#2ecc71' : '#e50914',
+                          borderColor: 'transparent'
+                        }}>
+                          {ticket.ticket_type.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.userName}>{ticket.name}</div>
+                      </td>
+                      <td style={{ maxWidth: '300px' }}>
+                        {ticket.ticket_type === 'feature_request' && <strong>{ticket.title}<br/></strong>}
+                        {ticket.ticket_type === 'report_issue' && <strong>Issue: {ticket.issue_type?.replace(/_/g, ' ')}<br/></strong>}
+                        <div style={{ fontSize: '12px', color: '#aaa', whiteSpace: 'pre-wrap' }}>
+                          {ticket.message || ticket.description}
+                        </div>
+                      </td>
+                      <td style={{ fontSize: '12px' }}>{new Date(ticket.created_at).toLocaleString()}</td>
+                      <td>
+                        <span style={{ 
+                          color: ticket.status === 'resolved' ? '#2ecc71' : '#f39c12',
+                          fontWeight: 'bold',
+                          fontSize: '12px'
+                        }}>
+                          {ticket.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        <button 
+                          className={ticket.status === 'resolved' ? styles.banBtn : styles.unbanBtn}
+                          onClick={() => handleResolveTicket(ticket.id, ticket.status)}
+                          disabled={resolvingTicket}
+                          title={ticket.status === 'resolved' ? "Reopen" : "Mark Resolved"}
+                        >
+                          {ticket.status === 'resolved' ? <HelpCircle size={16} /> : <CheckCircle size={16} />}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {supportTickets.length === 0 && (
+                    <tr><td colSpan="6" className={styles.emptyTable}>No support tickets found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PERMISSION MODAL */}
       {isPermissionModalOpen && (
         <div className={styles.modalOverlay}>
