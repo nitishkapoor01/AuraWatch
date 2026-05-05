@@ -199,12 +199,13 @@ const TopNav = () => {
                       className={styles.dropdownItem} 
                       onClick={(e) => { 
                         if (buttonWarnings.customize_ui) {
-                          if (user?.role !== 'admin') {
+                          const hasBypass = user?.role === 'admin' || user?.role === 'moderator';
+                          if (!hasBypass) {
                             e.preventDefault();
                             showToast(buttonWarnings.customize_ui, 'warning');
                             return;
                           } else {
-                            showToast(`Admin Notice: ${buttonWarnings.customize_ui}`, 'info');
+                            showToast(`${user.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.customize_ui}`, 'info');
                           }
                         }
                         setIsCustomizeOpen(true); setIsDropdownOpen(false); 

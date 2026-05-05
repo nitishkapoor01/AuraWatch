@@ -505,12 +505,13 @@ const MovieDetail = () => {
               title={buttonWarnings.play_movie || ''}
               onClick={(e) => {
                 if (buttonWarnings.play_movie) {
-                  if (currentUser?.role !== 'admin') {
+                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  if (!hasBypass) {
                     e.preventDefault();
                     showToast(buttonWarnings.play_movie, 'warning');
                     return;
                   } else {
-                    showToast(`Admin Notice: ${buttonWarnings.play_movie}`, 'info');
+                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.play_movie}`, 'info');
                   }
                 }
                 
@@ -529,12 +530,13 @@ const MovieDetail = () => {
               title={buttonWarnings.watch_trailer || ''}
               onClick={(e) => {
                 if (buttonWarnings.watch_trailer) {
-                  if (currentUser?.role !== 'admin') {
+                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  if (!hasBypass) {
                     e.preventDefault();
                     showToast(buttonWarnings.watch_trailer, 'warning');
                     return;
                   } else {
-                    showToast(`Admin Notice: ${buttonWarnings.watch_trailer}`, 'info');
+                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.watch_trailer}`, 'info');
                   }
                 }
                 handleWatchTrailer();
@@ -547,12 +549,13 @@ const MovieDetail = () => {
               className={`${styles.listBtn} ${isFavorite ? styles.listBtnActive : ''}`} 
               onClick={(e) => {
                 if (buttonWarnings.add_to_list) {
-                  if (currentUser?.role !== 'admin') {
+                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  if (!hasBypass) {
                     e.preventDefault();
                     showToast(buttonWarnings.add_to_list, 'warning');
                     return;
                   } else {
-                    showToast(`Admin Notice: ${buttonWarnings.add_to_list}`, 'info');
+                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.add_to_list}`, 'info');
                   }
                 }
                 handleToggleFavorite();
@@ -566,12 +569,13 @@ const MovieDetail = () => {
               className={styles.listBtn} 
               onClick={(e) => {
                 if (buttonWarnings.download_movie) {
-                  if (currentUser?.role !== 'admin') {
+                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  if (!hasBypass) {
                     e.preventDefault();
                     showToast(buttonWarnings.download_movie, 'warning');
                     return;
                   } else {
-                    showToast(`Admin Notice: ${buttonWarnings.download_movie}`, 'info');
+                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.download_movie}`, 'info');
                   }
                 }
                 handleDownload();
