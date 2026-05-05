@@ -253,6 +253,7 @@
 
 /* Theme backgrounds */
 .themeLiquidGlass { background: linear-gradient(135deg, rgba(100,100,200,0.3), rgba(200,100,200,0.3)); backdrop-filter: blur(8px); border-color: rgba(255,255,255,0.1); }
+.themeClassic { background: #000000; }
 .themeDark { background: linear-gradient(135deg, #1a1a1a, #2d2d2d); }
 .themeMidnight { background: linear-gradient(135deg, #0d0d1a, #1a1a3a); }
 .themeLight { background: linear-gradient(135deg, #e8e8e8, #ffffff); }

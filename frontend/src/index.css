@@ -121,6 +121,17 @@ body.theme-dark {
   color: var(--text-primary) !important;
 }
 
+body.theme-classic {
+  --bg-main: #000000;
+  --bg-card: #111111;
+  --text-primary: #ffffff;
+  --text-secondary: #999999;
+  --border: #333333;
+  --glass-bg: rgba(0, 0, 0, 0.85);
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
 /* Global font override from ThemeContext */
 body {
   font-family: var(--font-family-base, 'Inter', sans-serif) !important;

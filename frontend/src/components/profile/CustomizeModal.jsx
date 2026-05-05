@@ -8,6 +8,7 @@ import styles from './CustomizeModal.module.css';
 // ---- DATA ----
 const THEMES = [
   { id: 'liquid-glass', label: 'Liquid Glass', cls: styles.themeLiquidGlass },
+  { id: 'classic', label: 'Netflix Classic', cls: styles.themeClassic },
   { id: 'dark', label: 'Dark', cls: styles.themeDark },
   { id: 'midnight', label: 'Midnight', cls: styles.themeMidnight },
   { id: 'light', label: 'Light', cls: styles.themeLight },
