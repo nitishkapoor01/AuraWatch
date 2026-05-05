@@ -196,7 +196,7 @@ const TopNav = () => {
                     <button 
                       className={styles.dropdownItem} 
                       onClick={(e) => { 
-                        if (buttonWarnings.customize_ui) {
+                        if (buttonWarnings.customize_ui && user?.role !== 'admin') {
                           e.preventDefault();
                           alert(`Notice: ${buttonWarnings.customize_ui}`);
                         } else {
