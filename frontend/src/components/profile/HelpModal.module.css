@@ -262,10 +262,11 @@
 @media (max-width: 768px) {
   .modal {
     flex-direction: column;
-    height: 95vh;
-    max-height: 95vh;
-    width: 95%;
-    margin: 10px;
+    height: 80vh;
+    max-height: 80vh;
+    width: 92%;
+    margin: auto;
+    border-radius: 20px; /* Slightly rounder for mobile */
   }
   
   .sidebar {
