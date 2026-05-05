@@ -90,7 +90,7 @@
   padding: 16px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
-  transition: transform 0.2s, background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .promoFeature:hover {
@@ -120,7 +120,7 @@
   font-weight: 700;
   border-radius: 8px;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
 }
 
@@ -152,7 +152,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  transition: transform 0.2s, background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   backdrop-filter: blur(10px);
 }
 
@@ -221,7 +221,7 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -261,7 +261,7 @@
   border-radius: 12px;
   overflow: hidden;
   background: #1a1a1a;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--anim-speed, 0.3s) cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   max-width: 240px;
   margin: 0 auto;
@@ -309,7 +309,7 @@
   gap: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
 }
 
 .card:hover .dateBadge {
@@ -332,7 +332,7 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   box-shadow: 0 10px 25px rgba(0,0,0,0.8);
   border: 1px solid rgba(255,255,255,0.1);
   z-index: 100;
@@ -351,7 +351,7 @@
   background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
   padding: 50px 10px 14px;
   opacity: 0;
-  transition: opacity 0.25s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .card:hover .cardOverlay {
@@ -397,7 +397,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
+  transition: all var(--anim-speed, 0.3s);
   backdrop-filter: blur(4px);
   border: 2px solid rgba(255,255,255,0.3);
 }
@@ -416,7 +416,7 @@
   gap: 8px;
   z-index: 30;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .card:hover .cardActions {
@@ -434,7 +434,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255,255,255,0.1);
 }
@@ -481,7 +481,7 @@
   font-size: 16px;
   font-weight: 700;
   text-decoration: none;
-  transition: background 0.2s, transform 0.15s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .browseBtn:hover {

@@ -45,7 +45,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .backBtn:hover {

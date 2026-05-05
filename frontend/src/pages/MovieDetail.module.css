@@ -57,7 +57,7 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
   border: 1px solid rgba(255,255,255,0.1);
   animation: posterPopIn 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
-  transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.4s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   transform-origin: center bottom;
 }
 
@@ -145,7 +145,7 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   cursor: pointer;
   border: none;
   width: fit-content;
@@ -194,7 +194,7 @@
   font-size: 20px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -216,7 +216,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   position: relative;
 }
 
@@ -235,7 +235,7 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   box-shadow: 0 5px 15px rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.15);
   z-index: 100;
@@ -313,7 +313,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 20px;
-  transition: background 0.2s, transform 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   z-index: 10000;
 }
 
@@ -365,7 +365,7 @@
   font-weight: 600;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .seasonDropdown:hover {
@@ -489,7 +489,7 @@
   padding: 16px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
@@ -531,7 +531,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .episodeCard:hover .episodePlayOverlay {
@@ -621,11 +621,11 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  background: transparent;
+  background: var(--btn-bg);
   border: none;
-  color: #999;
+  color: var(--btn-text);
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .closeModalBtn:hover {
@@ -696,7 +696,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .primaryBtn:hover {
@@ -723,7 +723,7 @@
   border-radius: 4px;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -752,7 +752,7 @@
   padding: 8px 16px;
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .tabBtn:hover {
@@ -770,7 +770,7 @@
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.03));
   padding: 4px;
   border-radius: 8px;
   width: fit-content;
@@ -785,7 +785,7 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .catTabBtn:hover {
@@ -806,14 +806,14 @@
 }
 
 .langTabBtn {
-  background: #222;
+  background: var(--btn-bg);
   border: 1px solid #333;
-  color: #aaa;
+  color: var(--btn-text);
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .langTabBtn:hover {
@@ -854,7 +854,7 @@
   padding: 16px;
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.05);
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .linkCard:hover {

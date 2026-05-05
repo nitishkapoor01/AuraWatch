@@ -47,7 +47,7 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -163,7 +163,7 @@
   align-items: center;
   gap: 20px;
   backdrop-filter: blur(10px);
-  transition: transform 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .statCard:hover {
@@ -319,7 +319,7 @@
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -369,7 +369,7 @@
   border-radius: 4px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .backBtn:hover {
@@ -692,7 +692,7 @@
   cursor: pointer;
   background: transparent;
   color: rgba(255, 255, 255, 0.4);
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .themeOption.selected {
@@ -719,7 +719,7 @@
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .statusBtn.active {
@@ -743,7 +743,7 @@
   color: #fff;
   font-family: inherit;
   font-size: 15px;
-  transition: border-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
@@ -764,7 +764,7 @@
   font-weight: 800;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
 }
 
@@ -865,7 +865,7 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--anim-speed, 0.3s) cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 140px;
 }
 
@@ -874,7 +874,7 @@
   height: 12px;
   border-radius: 50%;
   background: #666;
-  transition: all 0.3s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .toggleBtn span {
@@ -1136,7 +1136,7 @@
   font-weight: 500;
   cursor: pointer;
   outline: none;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .roleSelect:hover {
@@ -1182,7 +1182,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .permBtn:hover {
@@ -1276,7 +1276,7 @@
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .cancelBtn {
@@ -1323,7 +1323,7 @@
   right: 0;
   bottom: 0;
   background-color: #333;
-  transition: .4s;
+  transition: all var(--anim-speed, 0.3s);
   border-radius: 24px;
 }
 
@@ -1335,7 +1335,7 @@
   left: 3px;
   bottom: 3px;
   background-color: white;
-  transition: .4s;
+  transition: all var(--anim-speed, 0.3s);
   border-radius: 50%;
 }
 

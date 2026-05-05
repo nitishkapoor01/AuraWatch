@@ -56,6 +56,10 @@ body.theme-light {
   --text-secondary: #666666;
   --border: #e0e0e0;
   --glass-bg: rgba(255, 255, 255, 0.7);
+  --btn-bg: #e50914;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0,0,0,0.05);
+  --anim-speed: 0.3s;
   background: #f5f6fa !important;
   color: var(--text-primary) !important;
 }
@@ -67,6 +71,10 @@ body.theme-ocean {
   --text-secondary: #8a9cb0;
   --border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(10, 22, 40, 0.7);
+  --btn-bg: #0071eb;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0,0,0,0.3);
+  --anim-speed: 0.4s;
   background: radial-gradient(circle at top left, #0d1b2a, #0b132b) fixed !important;
   color: var(--text-primary) !important;
 }
@@ -78,6 +86,10 @@ body.theme-sunset {
   --text-secondary: #cc9977;
   --border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(26, 10, 0, 0.7);
+  --btn-bg: #ff5722;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(255, 87, 34, 0.1);
+  --anim-speed: 0.35s;
   background: linear-gradient(135deg, #1a0a00 0%, #3d1a00 50%, #1a0a00 100%) fixed !important;
   color: var(--text-primary) !important;
 }
@@ -89,6 +101,10 @@ body.theme-midnight {
   --text-secondary: #8080b0;
   --border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(8, 8, 24, 0.7);
+  --btn-bg: #9b59b6;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0,0,0,0.5);
+  --anim-speed: 0.5s;
   background: radial-gradient(circle at center, #12122b 0%, #050510 100%) fixed !important;
   color: var(--text-primary) !important;
 }
@@ -100,6 +116,10 @@ body.theme-liquid-glass {
   --text-secondary: rgba(255, 255, 255, 0.5);
   --border: rgba(255, 255, 255, 0.08);
   --glass-bg: rgba(15, 15, 24, 0.4);
+  --btn-bg: rgba(255, 255, 255, 0.1);
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0,0,0,0);
+  --anim-speed: 0.6s;
   background: 
     radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
     radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
@@ -117,17 +137,25 @@ body.theme-dark {
   --text-secondary: #888888;
   --border: #222222;
   --glass-bg: rgba(10, 10, 10, 0.8);
+  --btn-bg: #333333;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0,0,0,0.5);
+  --anim-speed: 0.2s;
   background: #0a0a0a !important;
   color: var(--text-primary) !important;
 }
 
 body.theme-classic {
   --bg-main: #000000;
-  --bg-card: #111111;
+  --bg-card: #000000;
   --text-primary: #ffffff;
   --text-secondary: #999999;
   --border: #333333;
-  --glass-bg: rgba(0, 0, 0, 0.85);
+  --glass-bg: rgba(0, 0, 0, 0);
+  --btn-bg: #e50914;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(229, 9, 20, 0.2);
+  --anim-speed: 0.15s;
   background: #000000 !important;
   color: #ffffff !important;
 }
@@ -199,7 +227,7 @@ body {
   font-family: var(--font-family);
   background-color: var(--bg-main);
   color: var(--text-primary);
-  transition: background-color var(--transition-speed), color var(--transition-speed);
+  transition: all var(--anim-speed, 0.3s)peed);
   overflow-x: hidden;
   user-select: none;
   cursor: default;

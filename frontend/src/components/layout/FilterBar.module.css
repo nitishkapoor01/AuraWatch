@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .filterToggle:hover {
@@ -83,7 +83,7 @@
   border-radius: 30px;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   font-weight: 600;
 }
 

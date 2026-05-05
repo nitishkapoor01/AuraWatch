@@ -42,7 +42,7 @@
   border: none;
   color: #808080;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   padding: 8px;
 }
 
@@ -83,7 +83,7 @@
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
-  transition: background-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   width: 100%;
 }
 

@@ -81,7 +81,7 @@
   font-weight: 500;
   cursor: pointer;
   border-radius: 0;
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   width: 100%;
   text-align: left;
   position: relative;
@@ -143,7 +143,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .closeBtn:hover {
@@ -206,7 +206,7 @@
   border: 2px solid transparent;
   cursor: pointer;
   overflow: hidden;
-  transition: all 0.25s;
+  transition: all var(--anim-speed, 0.3s);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -239,7 +239,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .themeLabel {
@@ -273,7 +273,7 @@
   border-radius: 12px;
   padding: 14px 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -361,7 +361,7 @@
   border-radius: 4px;
   outline: none;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .slider::-webkit-slider-thumb {
@@ -372,7 +372,7 @@
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 0 8px rgba(229, 9, 20, 0.4);
-  transition: transform 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
@@ -396,7 +396,7 @@
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   flex-shrink: 0;
 }
 
@@ -444,7 +444,7 @@
   border: 1.5px solid rgba(255,255,255,0.07);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .fontOption:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
@@ -482,7 +482,7 @@
   background: rgba(255,255,255,0.12);
   border-radius: 11px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all var(--anim-speed, 0.3s);
   border: none;
   flex-shrink: 0;
 }
@@ -497,7 +497,7 @@
   height: 16px;
   background: white;
   border-radius: 50%;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--anim-speed, 0.3s) cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
@@ -522,7 +522,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .resetBtn:hover { background: rgba(255,255,255,0.1); color: white; }

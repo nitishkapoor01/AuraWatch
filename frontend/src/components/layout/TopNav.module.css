@@ -50,7 +50,7 @@
   font-weight: bold;
   font-size: 14px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   border: 2px solid transparent;
 }
 
@@ -97,7 +97,7 @@
   font-weight: 500;
   cursor: pointer;
   text-align: left;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   width: 100%;
 }
 
@@ -121,7 +121,7 @@
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .loginBtn:hover {
@@ -166,7 +166,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), flex-grow 0.3s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .filterInline {
@@ -182,7 +182,7 @@
   color: #fff;
   font-size: 14px;
   outline: none;
-  transition: all 0.3s ease;
+  transition: all var(--anim-speed, 0.3s)e;
 }
 
 .searchInput:focus {
@@ -204,7 +204,7 @@
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.4);
   color: #fff;
-  transition: background-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   backdrop-filter: blur(4px);
 }
 
@@ -235,7 +235,7 @@
   padding: 10px;
   gap: 12px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   border-bottom: 1px solid rgba(255,255,255,0.05);
   color: #fff;
 }

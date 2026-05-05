@@ -43,7 +43,7 @@
   border: none;
   color: #808080;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   padding: 8px;
 }
 
@@ -116,7 +116,7 @@
   font-weight: 800;
   color: white;
   cursor: pointer;
-  transition: transform 0.2s, border-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   opacity: 0.8;
 }
 
@@ -172,7 +172,7 @@
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   display: flex;
   align-items: center;
 }
@@ -199,7 +199,7 @@
   font-weight: 600;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   width: 100%;
 }
 
@@ -226,7 +226,7 @@
   font-size: 13px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   width: 100%;
 }
 
@@ -273,7 +273,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: background 0.2s, opacity 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .saveNameBtn:hover:not(:disabled) {
@@ -294,7 +294,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .cancelNameBtn:hover {
@@ -333,7 +333,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   font-family: inherit;
 }
 
@@ -368,7 +368,7 @@
   gap: 4px;
   padding: 4px 0;
   margin-bottom: 4px;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .useSecurityBtn:hover {

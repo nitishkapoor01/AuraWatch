@@ -31,7 +31,7 @@
   justify-content: flex-start;
   padding-left: 28px;
   color: #808080;
-  transition: color 0.15s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all var(--anim-speed, 0.3s) cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   cursor: pointer;
   width: 100%;
@@ -72,7 +72,7 @@
   left: 60px;
   opacity: 0;
   white-space: nowrap;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all var(--anim-speed, 0.3s) cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform: translateX(-15px);
   pointer-events: none;
   
@@ -106,7 +106,7 @@
   border-radius: 4px;
   object-fit: cover;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
 }
 
 .avatar:hover {

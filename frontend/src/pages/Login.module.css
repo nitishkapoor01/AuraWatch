@@ -89,7 +89,7 @@
   font-size: 16px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.3s, background 0.3s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .input:focus {
@@ -105,7 +105,7 @@
   color: rgba(255, 255, 255, 0.4);
   font-size: 16px;
   pointer-events: none;
-  transition: all 0.2s ease;
+  transition: all var(--anim-speed, 0.3s)e;
 }
 
 /* Float label up when input has content or focus */
@@ -129,7 +129,7 @@
   padding: 4px;
   display: flex;
   align-items: center;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .eyeBtn:hover {
@@ -146,7 +146,7 @@
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: all var(--anim-speed, 0.3s);
   margin-top: 8px;
   display: flex;
   align-items: center;
@@ -192,7 +192,7 @@
   cursor: pointer;
   font-size: 15px;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .switchBtn:hover {
@@ -252,7 +252,7 @@
   font-size: 14px;
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .textBtn:hover {

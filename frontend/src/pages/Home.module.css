@@ -30,7 +30,7 @@
   object-fit: cover;
   object-position: center center;
   z-index: 1;
-  transition: opacity 0.8s ease-in-out;
+  transition: all var(--anim-speed, 0.3s)e-in-out;
   animation: heroBackdropZoom 20s linear infinite alternate;
 }
 
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .playBtn:hover {
@@ -167,7 +167,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .infoBtn:hover {
@@ -235,7 +235,7 @@
   flex: 0 0 150px;
   aspect-ratio: 2 / 3;
   cursor: pointer;
-  transition: transform 0.25s ease;
+  transition: all var(--anim-speed, 0.3s)e;
   border-radius: 6px;
   overflow: hidden;
   position: relative;
@@ -277,7 +277,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   border-radius: 4px;
 }
 
@@ -303,7 +303,7 @@
   background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
   padding: 20px 8px 6px;
   opacity: 0;
-  transition: opacity 0.25s;
+  transition: all var(--anim-speed, 0.3s);
 }
 
 .cardContainer:hover .cardOverlay {
@@ -335,7 +335,7 @@
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   z-index: 10;
 }
 
@@ -363,7 +363,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
   margin-bottom: 20px;
 }

@@ -45,7 +45,7 @@
   border: none;
   color: #808080;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   padding: 8px;
   z-index: 10;
 }
@@ -85,7 +85,7 @@
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   text-align: left;
 }
 
@@ -193,7 +193,7 @@
   font-size: 15px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   width: 100%;
 }
 
@@ -232,7 +232,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.2s;
+  transition: all var(--anim-speed, 0.3s);
   margin-top: 8px;
   align-self: flex-start;
 }
