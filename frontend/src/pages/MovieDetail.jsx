@@ -502,16 +502,21 @@ const MovieDetail = () => {
               className={`${styles.playBtn} playBtn`} 
               title={buttonWarnings.play_movie || ''}
               onClick={(e) => {
-                if (buttonWarnings.play_movie && currentUser?.role !== 'admin') {
-                  e.preventDefault();
-                  alert(`Notice: ${buttonWarnings.play_movie}`);
-                } else {
-                  if (isTV) {
-                    const ep = episodes.find(e => e.number === selectedEpisode);
-                    handlePlayEpisode(selectedSeason, selectedEpisode, ep?.name || '');
+                if (buttonWarnings.play_movie) {
+                  if (currentUser?.role !== 'admin') {
+                    e.preventDefault();
+                    alert(`Notice: ${buttonWarnings.play_movie}`);
+                    return;
+                  } else {
+                    alert(`Admin Bypass Notice: ${buttonWarnings.play_movie}`);
                   }
-                  else { setShowPlayer(true); trackWatch(); }
                 }
+                
+                if (isTV) {
+                  const ep = episodes.find(e => e.number === selectedEpisode);
+                  handlePlayEpisode(selectedSeason, selectedEpisode, ep?.name || '');
+                }
+                else { setShowPlayer(true); trackWatch(); }
               }}
             >
               <Play fill="black" size={22} /> Play Now
@@ -521,12 +526,16 @@ const MovieDetail = () => {
               className={`${styles.trailerBtnDetail} trailerBtnDetail`} 
               title={buttonWarnings.watch_trailer || ''}
               onClick={(e) => {
-                if (buttonWarnings.watch_trailer && currentUser?.role !== 'admin') {
-                  e.preventDefault();
-                  alert(`Notice: ${buttonWarnings.watch_trailer}`);
-                } else {
-                  handleWatchTrailer();
+                if (buttonWarnings.watch_trailer) {
+                  if (currentUser?.role !== 'admin') {
+                    e.preventDefault();
+                    alert(`Notice: ${buttonWarnings.watch_trailer}`);
+                    return;
+                  } else {
+                    alert(`Admin Bypass Notice: ${buttonWarnings.watch_trailer}`);
+                  }
                 }
+                handleWatchTrailer();
               }}
             >
               Watch Trailer
@@ -535,12 +544,16 @@ const MovieDetail = () => {
             <button 
               className={`${styles.listBtn} ${isFavorite ? styles.listBtnActive : ''}`} 
               onClick={(e) => {
-                if (buttonWarnings.add_to_list && currentUser?.role !== 'admin') {
-                  e.preventDefault();
-                  alert(`Notice: ${buttonWarnings.add_to_list}`);
-                } else {
-                  handleToggleFavorite();
+                if (buttonWarnings.add_to_list) {
+                  if (currentUser?.role !== 'admin') {
+                    e.preventDefault();
+                    alert(`Notice: ${buttonWarnings.add_to_list}`);
+                    return;
+                  } else {
+                    alert(`Admin Bypass Notice: ${buttonWarnings.add_to_list}`);
+                  }
                 }
+                handleToggleFavorite();
               }}
               data-title={buttonWarnings.add_to_list || (isLoggedIn ? (isFavorite ? 'Remove from My List' : 'Add to My List') : 'Login to save')}
             >
@@ -550,12 +563,16 @@ const MovieDetail = () => {
             <button 
               className={styles.listBtn} 
               onClick={(e) => {
-                if (buttonWarnings.download_movie && currentUser?.role !== 'admin') {
-                  e.preventDefault();
-                  alert(`Notice: ${buttonWarnings.download_movie}`);
-                } else {
-                  handleDownload();
+                if (buttonWarnings.download_movie) {
+                  if (currentUser?.role !== 'admin') {
+                    e.preventDefault();
+                    alert(`Notice: ${buttonWarnings.download_movie}`);
+                    return;
+                  } else {
+                    alert(`Admin Bypass Notice: ${buttonWarnings.download_movie}`);
+                  }
                 }
+                handleDownload();
               }}
               data-title={buttonWarnings.download_movie || "Download Movie"}
               disabled={isDownloading}

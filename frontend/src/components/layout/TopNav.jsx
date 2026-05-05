@@ -196,12 +196,16 @@ const TopNav = () => {
                     <button 
                       className={styles.dropdownItem} 
                       onClick={(e) => { 
-                        if (buttonWarnings.customize_ui && user?.role !== 'admin') {
-                          e.preventDefault();
-                          alert(`Notice: ${buttonWarnings.customize_ui}`);
-                        } else {
-                          setIsCustomizeOpen(true); setIsDropdownOpen(false); 
+                        if (buttonWarnings.customize_ui) {
+                          if (user?.role !== 'admin') {
+                            e.preventDefault();
+                            alert(`Notice: ${buttonWarnings.customize_ui}`);
+                            return;
+                          } else {
+                            alert(`Admin Bypass Notice: ${buttonWarnings.customize_ui}`);
+                          }
                         }
+                        setIsCustomizeOpen(true); setIsDropdownOpen(false); 
                       }}
                       title={buttonWarnings.customize_ui || ''}
                     >
