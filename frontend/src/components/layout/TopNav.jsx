@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, LogOut, User, HelpCircle, Lock, Settings } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import ProfileModal from '../profile/ProfileModal';
 import HelpModal from '../profile/HelpModal';
 import LoginPromptModal from '../profile/LoginPromptModal';
@@ -47,6 +48,7 @@ const TopNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, user, logout, loading } = useAuth();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (location.pathname === '/') {
@@ -199,10 +201,10 @@ const TopNav = () => {
                         if (buttonWarnings.customize_ui) {
                           if (user?.role !== 'admin') {
                             e.preventDefault();
-                            alert(`Notice: ${buttonWarnings.customize_ui}`);
+                            showToast(buttonWarnings.customize_ui, 'warning');
                             return;
                           } else {
-                            alert(`Admin Bypass Notice: ${buttonWarnings.customize_ui}`);
+                            showToast(`Admin Notice: ${buttonWarnings.customize_ui}`, 'info');
                           }
                         }
                         setIsCustomizeOpen(true); setIsDropdownOpen(false); 

@@ -7,6 +7,7 @@ import SEO from '../components/SEO';
 import { fetchWithCache } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useButtonWarnings } from '../hooks/useButtonWarnings';
+import { useToast } from '../context/ToastContext';
 
 const isTVType = (type) => type === 'tv' || type === 'series';
 
@@ -58,6 +59,7 @@ const MovieDetail = () => {
   const isTV = isTVType(type);
   const navigate = useNavigate();
   const { isLoggedIn, token, user } = useAuth();
+  const { showToast } = useToast();
 
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -505,10 +507,10 @@ const MovieDetail = () => {
                 if (buttonWarnings.play_movie) {
                   if (currentUser?.role !== 'admin') {
                     e.preventDefault();
-                    alert(`Notice: ${buttonWarnings.play_movie}`);
+                    showToast(buttonWarnings.play_movie, 'warning');
                     return;
                   } else {
-                    alert(`Admin Bypass Notice: ${buttonWarnings.play_movie}`);
+                    showToast(`Admin Notice: ${buttonWarnings.play_movie}`, 'info');
                   }
                 }
                 
@@ -529,10 +531,10 @@ const MovieDetail = () => {
                 if (buttonWarnings.watch_trailer) {
                   if (currentUser?.role !== 'admin') {
                     e.preventDefault();
-                    alert(`Notice: ${buttonWarnings.watch_trailer}`);
+                    showToast(buttonWarnings.watch_trailer, 'warning');
                     return;
                   } else {
-                    alert(`Admin Bypass Notice: ${buttonWarnings.watch_trailer}`);
+                    showToast(`Admin Notice: ${buttonWarnings.watch_trailer}`, 'info');
                   }
                 }
                 handleWatchTrailer();
@@ -547,10 +549,10 @@ const MovieDetail = () => {
                 if (buttonWarnings.add_to_list) {
                   if (currentUser?.role !== 'admin') {
                     e.preventDefault();
-                    alert(`Notice: ${buttonWarnings.add_to_list}`);
+                    showToast(buttonWarnings.add_to_list, 'warning');
                     return;
                   } else {
-                    alert(`Admin Bypass Notice: ${buttonWarnings.add_to_list}`);
+                    showToast(`Admin Notice: ${buttonWarnings.add_to_list}`, 'info');
                   }
                 }
                 handleToggleFavorite();
@@ -566,10 +568,10 @@ const MovieDetail = () => {
                 if (buttonWarnings.download_movie) {
                   if (currentUser?.role !== 'admin') {
                     e.preventDefault();
-                    alert(`Notice: ${buttonWarnings.download_movie}`);
+                    showToast(buttonWarnings.download_movie, 'warning');
                     return;
                   } else {
-                    alert(`Admin Bypass Notice: ${buttonWarnings.download_movie}`);
+                    showToast(`Admin Notice: ${buttonWarnings.download_movie}`, 'info');
                   }
                 }
                 handleDownload();

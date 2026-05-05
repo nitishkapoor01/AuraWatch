@@ -7,15 +7,18 @@ import './index.css'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 
 import { AuthProvider } from './context/AuthContext'
+import { ToastProvider } from './context/ToastContext.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HelmetProvider>
       <AuthProvider>
         <ThemeProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <ToastProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </ToastProvider>
         </ThemeProvider>
       </AuthProvider>
     </HelmetProvider>
