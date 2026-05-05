@@ -22,7 +22,7 @@ const LoginPromptModal = ({ isOpen, onClose }) => {
           Please login to use this feature. Create an account or sign in to save your progress, customize your profile, and much more.
         </p>
         
-        <Link to="/login" className={styles.loginBtn}>
+        <Link to="/login" className={styles.loginBtn} onClick={onClose}>
           <LogIn size={20} />
           Go to Login
         </Link>
