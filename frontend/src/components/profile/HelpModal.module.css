@@ -16,14 +16,13 @@
   to { opacity: 1; }
 }
 
-.modal {
-  background-color: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  width: 100%;
-  max-width: 800px;
-  height: 80vh;
-  max-height: 700px;
+  background-color: var(--bg-card, #141414);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  border-radius: var(--border-radius-base, 12px);
+  width: 90%;
+  max-width: 850px;
+  height: 85vh;
+  max-height: 750px;
   display: flex;
   flex-direction: row;
   overflow: hidden;
@@ -259,34 +258,56 @@
   animation: fadeIn 0.3s ease;
 }
 
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .modal {
     flex-direction: column;
-    height: 90vh;
+    height: 95vh;
+    max-height: 95vh;
+    width: 95%;
+    margin: 10px;
   }
   
   .sidebar {
     width: 100%;
     flex-direction: row;
     overflow-x: auto;
-    padding: 16px;
+    padding: 10px 16px;
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    background-color: var(--bg-card, #1a1a1a);
+    gap: 4px;
+    flex-shrink: 0;
   }
+
+  .sidebar::-webkit-scrollbar { display: none; }
   
   .sidebarTitle {
     display: none;
   }
   
   .tabBtn {
-    padding: 8px 12px;
+    padding: 10px 14px;
+    font-size: 13px;
     white-space: nowrap;
+    border-radius: 20px;
+    gap: 8px;
   }
+
+  .tabBtn svg { width: 16px; height: 16px; }
   
   .contentArea {
-    padding: 24px 16px;
+    padding: 20px 16px;
   }
+
+  .contentTitle {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .section h3 { font-size: 16px; }
+  .section p, .section li { font-size: 14px; }
+  
+  .form { width: 100%; }
 }
 
 .guideImage {
