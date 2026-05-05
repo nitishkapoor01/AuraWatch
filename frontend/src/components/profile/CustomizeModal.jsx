@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Palette, Layout, Type, Settings2, Check, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -92,7 +93,7 @@ const CustomizeModal = ({ isOpen, onClose }) => {
     updatePreferences(defaultPreferences);
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.panel} onClick={e => e.stopPropagation()}>
 
@@ -317,7 +318,8 @@ const CustomizeModal = ({ isOpen, onClose }) => {
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
