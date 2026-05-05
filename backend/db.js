@@ -121,6 +121,18 @@ const initDB = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS support_tickets (
+        id SERIAL PRIMARY KEY,
+        ticket_type TEXT NOT NULL,
+        name TEXT DEFAULT 'Anonymous',
+        message TEXT,
+        title TEXT,
+        description TEXT,
+        issue_type TEXT,
+        status TEXT DEFAULT 'open',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       CREATE TABLE IF NOT EXISTS unique_visitors (
         visitor_id TEXT PRIMARY KEY,
         first_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
