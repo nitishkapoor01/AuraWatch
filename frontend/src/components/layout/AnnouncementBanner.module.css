@@ -109,11 +109,11 @@
 }
 
 .alert .iconWrapper {
-  color: #e50914;
+  color: var(--primary-color);
   background: rgba(229, 9, 20, 0.15);
 }
 .alert {
-  border-bottom: 2px solid #e50914;
+  border-bottom: 2px solid var(--primary-color);
 }
 
 .glowEffect {
@@ -130,7 +130,7 @@
 
 .info .glowEffect { background: #0071eb; }
 .warning .glowEffect { background: #e5b909; }
-.alert .glowEffect { background: #e50914; }
+.alert .glowEffect { background: var(--primary-color); }
 
 /* 📱 MOBILE (≤768px) */
 @media (max-width: 768px) {

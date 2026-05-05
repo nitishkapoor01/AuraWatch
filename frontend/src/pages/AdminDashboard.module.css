@@ -59,8 +59,8 @@
 }
 
 .tabBtn.activeTab {
-  background: #e50914;
-  border-color: #e50914;
+  background: var(--primary-color);
+  border-color: var(--primary-color);
   color: #fff;
   box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
 }
@@ -134,7 +134,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid rgba(229, 9, 20, 0.3);
-  border-top-color: #e50914;
+  border-top-color: var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 100px auto;
@@ -294,7 +294,7 @@
 
 .roleAdmin {
   background: rgba(229, 9, 20, 0.15);
-  color: #e50914;
+  color: var(--primary-color);
   border: 1px solid rgba(229, 9, 20, 0.3);
 }
 
@@ -327,7 +327,7 @@
 
 .deleteBtn:not(:disabled):hover {
   background: rgba(229, 9, 20, 0.15);
-  color: #e50914;
+  color: var(--primary-color);
 }
 
 .deleteBtn:disabled {
@@ -702,7 +702,7 @@
 
 .themeOption.info.selected { color: #0071eb; background: rgba(0, 113, 235, 0.2); }
 .themeOption.warning.selected { color: #e5b909; background: rgba(229, 185, 9, 0.2); }
-.themeOption.alert.selected { color: #e50914; background: rgba(229, 9, 20, 0.2); }
+.themeOption.alert.selected { color: var(--primary-color); background: rgba(229, 9, 20, 0.2); }
 
 .statusToggleWrapper {
   display: flex;
@@ -750,12 +750,12 @@
 }
 
 .textArea:focus {
-  border-color: #e50914;
+  border-color: var(--primary-color);
   outline: none;
 }
 
 .saveAnnouncementBtn {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   padding: 16px;
@@ -791,8 +791,8 @@
 .previewBanner.warning { border-bottom: 2px solid #e5b909; }
 .previewBanner.warning .previewIcon { color: #e5b909; background: rgba(229, 185, 9, 0.15); }
 
-.previewBanner.alert { border-bottom: 2px solid #e50914; }
-.previewBanner.alert .previewIcon { color: #e50914; background: rgba(229, 9, 20, 0.15); }
+.previewBanner.alert { border-bottom: 2px solid var(--primary-color); }
+.previewBanner.alert .previewIcon { color: var(--primary-color); background: rgba(229, 9, 20, 0.15); }
 
 /* Additional Mobile Responsiveness */
 @media (max-width: 768px) {
@@ -992,7 +992,7 @@
 }
 
 .logSuccess { color: #2ecc71; }
-.logFailure { color: #e50914; }
+.logFailure { color: var(--primary-color); }
 
 /* Analytics Grid */
 .analyticsGrid {
@@ -1067,7 +1067,7 @@
 }
 
 .primaryBtn {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   padding: 12px;
@@ -1091,7 +1091,7 @@
 }
 
 .unblockBtn {
-  color: #e50914;
+  color: var(--primary-color);
   background: none;
   border: none;
   cursor: pointer;
@@ -1106,7 +1106,7 @@
 
 .banBtn {
   background: rgba(229, 9, 20, 0.1);
-  color: #e50914;
+  color: var(--primary-color);
   border: 1px solid rgba(229, 9, 20, 0.2);
   padding: 6px 12px;
   border-radius: 6px;
@@ -1140,7 +1140,7 @@
 }
 
 .roleSelect:hover {
-  border-color: #e50914;
+  border-color: var(--primary-color);
   background: #2a2a2a;
 }
 

@@ -24,7 +24,7 @@
 }
 
 .filterToggle.active {
-  color: #e50914;
+  color: var(--primary-color);
   background: rgba(229, 9, 20, 0.1);
 }
 
@@ -94,8 +94,8 @@
 
 .chipActive {
   background: rgba(229, 9, 20, 0.15);
-  border-color: #e50914;
-  color: #e50914;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 @media (max-width: 768px) {

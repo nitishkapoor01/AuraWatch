@@ -104,7 +104,7 @@
   top: 4px;
   bottom: 4px;
   width: 3px;
-  background: var(--primary-color, #e50914);
+  background: var(--primary-color, var(--primary-color));
   border-radius: 0 4px 4px 0;
 }
 
@@ -220,7 +220,7 @@
 }
 
 .themeCard.selected {
-  border-color: var(--primary-color, #e50914);
+  border-color: var(--primary-color, var(--primary-color));
 }
 
 .themeCard.selected .checkmark {
@@ -231,7 +231,7 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: var(--primary-color, #e50914);
+  background: var(--primary-color, var(--primary-color));
   border-radius: 50%;
   width: 18px;
   height: 18px;
@@ -286,7 +286,7 @@
 }
 
 .layoutCard.selected {
-  border-color: var(--primary-color, #e50914);
+  border-color: var(--primary-color, var(--primary-color));
   background: rgba(229, 9, 20, 0.08);
 }
 
@@ -367,7 +367,7 @@
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
-  background: var(--primary-color, #e50914);
+  background: var(--primary-color, var(--primary-color));
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 0 8px rgba(229, 9, 20, 0.4);
@@ -447,7 +447,7 @@
 }
 
 .fontOption:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
-.fontOption.selectedFont { border-color: var(--primary-color, #e50914); background: rgba(229,9,20,0.06); }
+.fontOption.selectedFont { border-color: var(--primary-color, var(--primary-color)); background: rgba(229,9,20,0.06); }
 
 .fontOptionLabel {
   font-size: 13px;
@@ -486,7 +486,7 @@
   flex-shrink: 0;
 }
 
-.toggle.on { background: var(--primary-color, #e50914); }
+.toggle.on { background: var(--primary-color, var(--primary-color)); }
 
 .toggleThumb {
   position: absolute;

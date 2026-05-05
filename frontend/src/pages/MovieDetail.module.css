@@ -318,8 +318,8 @@
 }
 
 .closeTrailerBtn:hover {
-  background: #e50914;
-  border-color: #e50914;
+  background: var(--primary-color);
+  border-color: var(--primary-color);
   transform: scale(1.1);
 }
 
@@ -373,7 +373,7 @@
 }
 
 .seasonDropdown option {
-  background: #141414;
+  background: var(--bg-card, var(--bg-card));
   color: #fff;
 }
 
@@ -604,7 +604,7 @@
 }
 
 .downloadModal {
-  background: #141414;
+  background: var(--bg-card, var(--bg-card));
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
   width: 90%;
@@ -680,13 +680,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #e50914;
+  color: var(--primary-color);
   font-weight: 600;
   font-size: 18px;
 }
 
 .primaryBtn {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   padding: 12px 24px;
@@ -874,7 +874,7 @@
 }
 
 .linkSize {
-  color: #e50914;
+  color: var(--primary-color);
   font-size: 13px;
   font-weight: 600;
 }

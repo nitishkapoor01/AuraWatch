@@ -60,7 +60,7 @@
   transform: translateY(-50%);
   height: 24px;
   width: 3px;
-  background-color: #e50914;
+  background-color: var(--primary-color);
   border-radius: 0 4px 4px 0;
 }
 
@@ -186,7 +186,7 @@
     transform: translateX(-50%);
     width: 36px;
     height: 3px;
-    background-color: #e50914;
+    background-color: var(--primary-color);
     border-radius: 0 0 4px 4px;
   }
 

@@ -17,7 +17,7 @@
 }
 
 .modal {
-  background-color: #141414;
+  background-color: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   width: 100%;
@@ -178,7 +178,7 @@
 }
 
 .editNameBtn:hover {
-  color: #e50914;
+  color: var(--primary-color);
   background: rgba(229, 9, 20, 0.1);
 }
 
@@ -204,7 +204,7 @@
 }
 
 .nameInput:focus {
-  border-color: #e50914;
+  border-color: var(--primary-color);
 }
 
 .passwordRow {
@@ -231,7 +231,7 @@
 }
 
 .passwordInput:focus {
-  border-color: #e50914;
+  border-color: var(--primary-color);
 }
 
 .passwordInput::placeholder {
@@ -262,7 +262,7 @@
 }
 
 .saveNameBtn {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -303,7 +303,7 @@
 }
 
 .nameError {
-  color: #e50914;
+  color: var(--primary-color);
   font-size: 12px;
   margin: 0;
 }
@@ -338,8 +338,8 @@
 }
 
 .changePasswordToggle:hover {
-  border-color: #e50914;
-  color: #e50914;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
   background: rgba(229, 9, 20, 0.08);
 }
 

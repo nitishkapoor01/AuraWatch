@@ -17,7 +17,7 @@
 }
 
 .modal {
-  background-color: #141414;
+  background-color: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   width: 100%;
@@ -96,7 +96,7 @@
 
 .tabBtn.active {
   background-color: rgba(229, 9, 20, 0.1);
-  color: #e50914;
+  color: var(--primary-color);
 }
 
 /* Content Area styling */
@@ -121,7 +121,7 @@
 
 .section h3 {
   font-size: 18px;
-  color: #e50914;
+  color: var(--primary-color);
   margin: 24px 0 12px 0;
   font-weight: 600;
 }
@@ -153,7 +153,7 @@
 
 .noteBox {
   background: rgba(255, 255, 255, 0.05);
-  border-left: 3px solid #e50914;
+  border-left: 3px solid var(--primary-color);
   padding: 16px;
   border-radius: 4px;
   margin: 16px 0;
@@ -216,11 +216,11 @@
 }
 
 .input:focus, .textarea:focus, .select:focus {
-  border-color: #e50914;
+  border-color: var(--primary-color);
 }
 
 .submitBtn {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 6px;

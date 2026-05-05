@@ -6,7 +6,7 @@
    ============================================= */
 :root {
   /* ThemeContext variables (overridden via JS) */
-  --primary-color: #e50914;
+  --primary-color: var(--primary-color);
   --bg-blur: 10px;
   --panel-bg-alpha: 0.8;
   --font-family-base: 'Inter', sans-serif;
@@ -50,29 +50,58 @@ body.animations-off *::after {
    THEME CLASSES (set on body by ThemeContext)
    ============================================= */
 body.theme-light {
-  background-color: #f0f0f0 !important;
-  color: #121212 !important;
-}
-body.theme-light .topNav,
-body.theme-light nav {
-  background: rgba(240, 240, 240, 0.9) !important;
-  color: #121212;
+  --bg-main: #f0f0f0;
+  --bg-card: #ffffff;
+  --text-primary: #121212;
+  --text-secondary: #666666;
+  --border: #dddddd;
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
 }
 body.theme-ocean {
   --bg-main: #0a1628;
-  background-color: #0a1628 !important;
+  --bg-card: #0f1f35;
+  --text-primary: #e0e8f0;
+  --text-secondary: #8a9cb0;
+  --border: #1a2f4a;
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
 }
 body.theme-sunset {
   --bg-main: #1a0a00;
-  background-color: #1a0a00 !important;
+  --bg-card: #2d1400;
+  --text-primary: #ffe0cc;
+  --text-secondary: #cc9977;
+  --border: #4d2600;
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
 }
 body.theme-midnight {
   --bg-main: #080818;
-  background-color: #080818 !important;
+  --bg-card: #10102a;
+  --text-primary: #d0d0f0;
+  --text-secondary: #8080b0;
+  --border: #1a1a40;
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
 }
 body.theme-liquid-glass {
   --bg-main: #0f0f18;
-  background-color: #0f0f18 !important;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --border: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
+}
+body.theme-dark {
+  --bg-main: var(--bg-main);
+  --bg-card: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --border: #2a2a2a;
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Global font override from ThemeContext */
@@ -94,16 +123,16 @@ body {
   --bg-card-light: #ffffff;
   --text-primary-light: #121212;
   --text-secondary-light: #6c757d;
-  --accent-primary-light: #e50914; /* Netflix red */
+  --accent-primary-light: var(--primary-color); /* Netflix red */
   --border-light: #e0e0e0;
   
   /* Dark Theme Variables */
-  --bg-main-dark: #0f0f0f;
-  --bg-sidebar-dark: #141414;
+  --bg-main-dark: var(--bg-main);
+  --bg-sidebar-dark: var(--bg-card);
   --bg-card-dark: #1a1a1a;
   --text-primary-dark: #ffffff;
   --text-secondary-dark: #aaaaaa;
-  --accent-primary-dark: #e50914;
+  --accent-primary-dark: var(--primary-color);
   --border-dark: #2a2a2a;
   
   /* Shared Variables */

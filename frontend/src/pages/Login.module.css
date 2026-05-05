@@ -29,7 +29,7 @@
   font-size: 22px;
   font-weight: 900;
   letter-spacing: 3px;
-  color: #e50914;
+  color: var(--primary-color);
 }
 
 .formCard {
@@ -93,7 +93,7 @@
 }
 
 .input:focus {
-  border-color: #e50914;
+  border-color: var(--primary-color);
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -139,7 +139,7 @@
 .submitBtn {
   width: 100%;
   padding: 16px;
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -196,7 +196,7 @@
 }
 
 .switchBtn:hover {
-  color: #e50914;
+  color: var(--primary-color);
 }
 
 .divider {
@@ -236,7 +236,7 @@
 }
 
 .select option {
-  background: #141414;
+  background: var(--bg-card);
   color: #fff;
 }
 
@@ -269,7 +269,7 @@
 
 .questionBox {
   background: rgba(255, 255, 255, 0.05);
-  border-left: 4px solid #e50914;
+  border-left: 4px solid var(--primary-color);
   padding: 16px;
   border-radius: 0 8px 8px 0;
   color: #fff;

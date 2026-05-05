@@ -17,7 +17,7 @@
 }
 
 .modal {
-  background-color: #141414;
+  background-color: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   width: 100%;
@@ -54,7 +54,7 @@
   display: flex;
   justify-content: center;
   margin-bottom: 24px;
-  color: #e50914;
+  color: var(--primary-color);
 }
 
 .title {
@@ -76,7 +76,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background-color: #e50914;
+  background-color: var(--primary-color);
   color: white;
   text-decoration: none;
   padding: 12px 24px;

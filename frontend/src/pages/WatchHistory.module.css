@@ -114,7 +114,7 @@
 .promoCta {
   display: inline-block;
   padding: 16px 48px;
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   font-size: 18px;
   font-weight: 700;
@@ -235,9 +235,9 @@
 }
 
 .filterBtnActive {
-  background: #e50914 !important;
+  background: var(--primary-color) !important;
   color: #fff !important;
-  border-color: #e50914 !important;
+  border-color: var(--primary-color) !important;
   box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
 }
 
@@ -314,7 +314,7 @@
 
 .card:hover .dateBadge {
   transform: translateY(-2px);
-  background: #e50914;
+  background: var(--primary-color);
   border-color: transparent;
 }
 
@@ -323,7 +323,7 @@
   position: absolute;
   bottom: 125%;
   left: 0;
-  background: #141414;
+  background: var(--bg-card);
   color: #fff;
   padding: 6px 12px;
   border-radius: 4px;
@@ -381,7 +381,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: #e50914;
+  background: var(--primary-color);
 }
 
 .playOverlay {
@@ -440,7 +440,7 @@
 }
 
 .actionBtn:hover {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   transform: scale(1.1);
   border-color: transparent;
@@ -474,7 +474,7 @@
 .browseBtn {
   margin-top: 16px;
   padding: 14px 32px;
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 6px;

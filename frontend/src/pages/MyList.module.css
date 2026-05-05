@@ -114,7 +114,7 @@
 .promoCta {
   display: inline-block;
   padding: 16px 48px;
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   font-size: 18px;
   font-weight: 700;
@@ -225,7 +225,7 @@
 }
 
 .removeBtn:hover {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
 }
 
@@ -253,7 +253,7 @@
 }
 
 .downloadBtn:hover {
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
 }
 
@@ -284,7 +284,7 @@
 .browseBtn {
   margin-top: 16px;
   padding: 14px 32px;
-  background: #e50914;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 6px;
