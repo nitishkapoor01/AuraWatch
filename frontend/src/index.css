@@ -121,12 +121,12 @@ body.theme-liquid-glass {
   --shadow-color: rgba(0,0,0,0);
   --anim-speed: 0.6s;
   background: 
-    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(339,49%,30%,1) 0, transparent 50%),
-    radial-gradient(at 50% 100%, hsla(225,39%,30%,1) 0, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(253,16%,7%,1) 0, transparent 50%) fixed !important;
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0%, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0%, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0%, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(339,49%,30%,1) 0%, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(225,39%,30%,1) 0%, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(253,16%,7%,1) 0%, transparent 50%) fixed !important;
   color: var(--text-primary) !important;
 }
 
@@ -227,7 +227,7 @@ body {
   font-family: var(--font-family);
   background-color: var(--bg-main);
   color: var(--text-primary);
-  transition: all var(--anim-speed, 0.3s)peed);
+  transition: all var(--anim-speed, 0.3s);
   overflow-x: hidden;
   user-select: none;
   cursor: default;
