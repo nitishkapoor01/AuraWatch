@@ -95,7 +95,7 @@ body.theme-liquid-glass {
   color: var(--text-primary) !important;
 }
 body.theme-dark {
-  --bg-main: var(--bg-main);
+  --bg-main: #0f0f0f;
   --bg-card: #1a1a1a;
   --text-primary: #ffffff;
   --text-secondary: #aaaaaa;
@@ -127,8 +127,8 @@ body {
   --border-light: #e0e0e0;
   
   /* Dark Theme Variables */
-  --bg-main-dark: var(--bg-main);
-  --bg-sidebar-dark: var(--bg-card);
+  --bg-main-dark: #0f0f0f;
+  --bg-sidebar-dark: #141414;
   --bg-card-dark: #1a1a1a;
   --text-primary-dark: #ffffff;
   --text-secondary-dark: #aaaaaa;
