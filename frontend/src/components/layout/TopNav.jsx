@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import ProfileModal from '../profile/ProfileModal';
 import HelpModal from '../profile/HelpModal';
 import LoginPromptModal from '../profile/LoginPromptModal';
+import CustomizeModal from '../profile/CustomizeModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 
@@ -26,6 +27,7 @@ const TopNav = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   
@@ -188,9 +190,8 @@ const TopNav = () => {
                       <User size={16} /> Edit Profile
                       {!isLoggedIn && <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
                     </button>
-                    <button className={styles.dropdownItem} onClick={() => handleRestrictedAction(() => console.log('Customize UI'))}>
+                    <button className={styles.dropdownItem} onClick={() => { setIsCustomizeOpen(true); setIsDropdownOpen(false); }}>
                       <Settings size={16} /> Customize UI
-                      {!isLoggedIn && <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
                     </button>
                     <button className={styles.dropdownItem} onClick={() => { setIsHelpModalOpen(true); setIsDropdownOpen(false); }}>
                       <HelpCircle size={16} /> Help & Support
@@ -227,6 +228,11 @@ const TopNav = () => {
       <LoginPromptModal
         isOpen={isLoginPromptOpen}
         onClose={() => setIsLoginPromptOpen(false)}
+      />
+
+      <CustomizeModal
+        isOpen={isCustomizeOpen}
+        onClose={() => setIsCustomizeOpen(false)}
       />
     </header>
   );

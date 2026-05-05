@@ -153,6 +153,9 @@ const initDB = async () => {
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='admin_permissions') THEN
           ALTER TABLE users ADD COLUMN admin_permissions JSONB DEFAULT '{"all": false}';
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='ui_preferences') THEN
+          ALTER TABLE users ADD COLUMN ui_preferences JSONB DEFAULT '{}';
+        END IF;
       END $$;
 
       CREATE INDEX IF NOT EXISTS idx_download_cache_key ON download_cache(cache_key);

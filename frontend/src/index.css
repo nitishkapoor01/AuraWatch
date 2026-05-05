@@ -1,4 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/* =============================================
+   CUSTOMIZE UI - Dynamic CSS Variables
+   These are controlled by ThemeContext.jsx
+   ============================================= */
+:root {
+  /* ThemeContext variables (overridden via JS) */
+  --primary-color: #e50914;
+  --bg-blur: 10px;
+  --panel-bg-alpha: 0.8;
+  --font-family-base: 'Inter', sans-serif;
+  --font-size-base: 16px;
+  --font-weight-base: normal;
+  --border-radius-base: 12px;
+  --shadow-intensity: 0.5;
+  --density-padding: 16px 24px;
+}
+
+/* =============================================
+   LAYOUT CLASSES (set on body by ThemeContext)
+   ============================================= */
+
+/* Cinematic: default hero + horizontal rows */
+body.layout-cinematic .movieGrid {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Grid: dense card grid */
+body.layout-grid .hero-section {
+  display: none !important;
+}
+
+/* Minimal: centered, clean */
+body.layout-minimal {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Animations off */
+body.animations-off *,
+body.animations-off *::before,
+body.animations-off *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* =============================================
+   THEME CLASSES (set on body by ThemeContext)
+   ============================================= */
+body.theme-light {
+  background-color: #f0f0f0 !important;
+  color: #121212 !important;
+}
+body.theme-light .topNav,
+body.theme-light nav {
+  background: rgba(240, 240, 240, 0.9) !important;
+  color: #121212;
+}
+body.theme-ocean {
+  --bg-main: #0a1628;
+  background-color: #0a1628 !important;
+}
+body.theme-sunset {
+  --bg-main: #1a0a00;
+  background-color: #1a0a00 !important;
+}
+body.theme-midnight {
+  --bg-main: #080818;
+  background-color: #080818 !important;
+}
+body.theme-liquid-glass {
+  --bg-main: #0f0f18;
+  background-color: #0f0f18 !important;
+}
+
+/* Global font override from ThemeContext */
+body {
+  font-family: var(--font-family-base, 'Inter', sans-serif) !important;
+  font-size: var(--font-size-base, 16px);
+  font-weight: var(--font-weight-base, normal);
+}
+
+/* Global border-radius cascade */
+.card, .movieCard, .modal, .dropdown {
+  border-radius: var(--border-radius-base, 12px) !important;
+}
 
 :root {
   /* Light Theme Variables */

@@ -11,13 +11,13 @@ import { AuthProvider } from './context/AuthContext'
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HelmetProvider>
-      <ThemeProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <ThemeProvider>
           <BrowserRouter>
             <App />
           </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </HelmetProvider>
   </React.StrictMode>,
 )

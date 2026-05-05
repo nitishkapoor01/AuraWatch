@@ -47,8 +47,8 @@ router.post('/register', async (req, res) => {
     const answerHash = await bcrypt.hash(normalizeAnswer(securityAnswer), SALT_ROUNDS);
 
     const result = await db.query(
-      'INSERT INTO users (name, email, password_hash, security_question, security_answer_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-      [name.trim(), cleanEmail, passwordHash, securityQuestion.trim(), answerHash]
+      'INSERT INTO users (name, email, password_hash, security_question, security_answer_hash, ui_preferences) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [name.trim(), cleanEmail, passwordHash, securityQuestion.trim(), answerHash, JSON.stringify({})]
     );
     const newUserId = result.rows[0].id;
 
@@ -61,7 +61,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'Account created successfully!',
       token,
-      user: { id: newUserId, email: cleanEmail, name: name.trim(), role: 'user', avatar: 'red', is_super_admin: false, admin_permissions: { all: false } }
+      user: { id: newUserId, email: cleanEmail, name: name.trim(), role: 'user', avatar: 'red', is_super_admin: false, admin_permissions: { all: false }, ui_preferences: {} }
     });
   } catch (error) {
     console.error('[Auth] Register error:', error);
@@ -134,7 +134,7 @@ router.post('/login', async (req, res) => {
     res.json({
       message: 'Login successful!',
       token,
-      user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role, is_super_admin: user.is_super_admin, admin_permissions: user.admin_permissions }
+      user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role, is_super_admin: user.is_super_admin, admin_permissions: user.admin_permissions, ui_preferences: user.ui_preferences || {} }
     });
   } catch (error) {
     console.error('[Auth] Login error:', error);
@@ -243,12 +243,25 @@ router.post('/forgot-password/reset', async (req, res) => {
 
 // Get current user
 router.get('/me', authMiddleware, async (req, res) => {
-  const result = await db.query('SELECT id, name, email, avatar, role, is_super_admin, admin_permissions, created_at FROM users WHERE id = $1', [req.user.id]);
-  const user = result.rows[0];
-  if (!user) {
-    return res.status(404).json({ message: 'User not found.' });
+  const result = await db.query('SELECT id, name, email, avatar, role, is_super_admin, admin_permissions, ui_preferences FROM users WHERE id = $1', [req.user.id]);
+    
+  if (result.rows.length === 0) {
+    return res.status(404).json({ message: 'User not found' });
   }
-  res.json({ user });
+
+  const user = result.rows[0];
+  res.json({
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+      is_super_admin: user.is_super_admin,
+      admin_permissions: user.admin_permissions,
+      ui_preferences: user.ui_preferences || {}
+    }
+  });
 });
 
 // Update Avatar
@@ -387,6 +400,18 @@ router.post('/avatar-upload', authMiddleware, upload.single('avatarFile'), async
   } catch (error) {
     console.error('[Auth] Avatar upload error:', error);
     res.status(500).json({ message: 'Failed to save avatar.' });
+  }
+});
+
+// Update User UI Preferences
+router.put('/preferences', authMiddleware, async (req, res) => {
+  try {
+    const preferences = req.body;
+    await db.query('UPDATE users SET ui_preferences = $1 WHERE id = $2', [JSON.stringify(preferences), req.user.id]);
+    res.json({ message: 'Preferences updated successfully' });
+  } catch (error) {
+    console.error('Error updating preferences:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
