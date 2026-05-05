@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchWithCache } from '../utils/api';
 import styles from '../pages/Home.module.css';
 
-const Row = ({ title, endpoint }) => {
+const Row = ({ title, endpoint, compact = false }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -138,6 +138,11 @@ const Row = ({ title, endpoint }) => {
               to={`/movie/${movie.id}?type=${movie.type ? movie.type.toLowerCase() : 'movie'}`}
               key={`${movie.id}-${idx}`} 
               className={styles.cardContainer}
+              style={{
+                flex: compact ? '0 0 calc(20% - 8px)' : undefined,
+                aspectRatio: compact ? '16 / 9' : '2 / 3',
+                height: compact ? 'auto' : undefined
+              }}
             >
               <img src={movie.poster} alt={movie.title} className={styles.cardImage} loading="lazy" referrerPolicy="no-referrer" />
               <div className={styles.cardOverlay}>
