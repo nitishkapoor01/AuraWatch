@@ -140,8 +140,8 @@
 }
 
 .playBtn {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--btn-bg, #fff);
+  color: var(--btn-text, #000);
   padding: 10px 24px;
   border-radius: 4px;
   font-weight: 700;
@@ -158,8 +158,8 @@
 }
 
 .infoBtn {
-  background-color: rgba(109, 109, 110, 0.7);
-  color: white;
+  background-color: var(--glass-bg, rgba(109, 109, 110, 0.7));
+  color: var(--text-primary, white);
   padding: 10px 24px;
   border-radius: 4px;
   font-weight: 700;
