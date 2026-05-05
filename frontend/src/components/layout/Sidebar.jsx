@@ -13,7 +13,8 @@ const Sidebar = () => {
     { name: 'My List', path: '/list', icon: <List size={22} /> },
   ];
 
-  if (isLoggedIn && user?.role === 'admin') {
+  const canAccessAdmin = isLoggedIn && (user?.role === 'admin' || user?.role === 'moderator');
+  if (canAccessAdmin) {
     navItems.push({ name: 'Admin Dashboard', path: '/admin', icon: <ShieldAlert size={22} /> });
   }
 
