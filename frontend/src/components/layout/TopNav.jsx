@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User } from 'lucide-react';
+import { Search, LogOut, User, HelpCircle } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProfileModal from '../profile/ProfileModal';
+import HelpModal from '../profile/HelpModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 
@@ -22,6 +23,7 @@ const TopNav = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   
@@ -175,6 +177,9 @@ const TopNav = () => {
                     <button className={styles.dropdownItem} onClick={() => { setIsProfileModalOpen(true); setIsDropdownOpen(false); }}>
                       <User size={16} /> Edit Profile
                     </button>
+                    <button className={styles.dropdownItem} onClick={() => { setIsHelpModalOpen(true); setIsDropdownOpen(false); }}>
+                      <HelpCircle size={16} /> Help & Support
+                    </button>
                     <button className={styles.dropdownItem} onClick={() => { handleLogout(); setIsDropdownOpen(false); }}>
                       <LogOut size={16} /> Log Out
                     </button>
@@ -195,6 +200,11 @@ const TopNav = () => {
       <ProfileModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
+      />
+      
+      <HelpModal 
+        isOpen={isHelpModalOpen} 
+        onClose={() => setIsHelpModalOpen(false)} 
       />
     </header>
   );
