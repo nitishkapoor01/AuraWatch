@@ -127,7 +127,7 @@ router.get('/security/blocked-ips', isModerator, async (req, res) => {
 // --- WRITE ROUTES (Admin Only) ---
 
 // Update Announcement
-router.post('/announcement', isModerator, async (req, res) => {
+router.post('/announcement', isAdmin, async (req, res) => {
   try {
     const valueStr = JSON.stringify(req.body);
     await db.query('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value', ['announcement', valueStr]);
@@ -190,7 +190,7 @@ router.put('/users/:id/permissions', isAdmin, async (req, res) => {
 });
 
 // Ban/Unban User
-router.put('/users/:id/ban', isModerator, async (req, res) => {
+router.put('/users/:id/ban', isAdmin, async (req, res) => {
   const { id } = req.params;
   const { is_banned } = req.body;
   if (parseInt(id) === req.user.id) return res.status(400).json({ message: 'You cannot ban yourself.' });
@@ -201,12 +201,12 @@ router.put('/users/:id/ban', isModerator, async (req, res) => {
 });
 
 // Block/Unblock IP
-router.post('/security/block-ip', isModerator, async (req, res) => {
+router.post('/security/block-ip', isAdmin, async (req, res) => {
   const { ip_address, reason } = req.body;
   await db.query('INSERT INTO blocked_ips (ip_address, reason) VALUES ($1, $2) ON CONFLICT (ip_address) DO UPDATE SET reason = EXCLUDED.reason', [ip_address, reason || 'Banned by admin']);
   res.json({ message: `IP ${ip_address} blocked` });
 });
-router.delete('/security/block-ip/:ip', isModerator, async (req, res) => {
+router.delete('/security/block-ip/:ip', isAdmin, async (req, res) => {
   await db.query('DELETE FROM blocked_ips WHERE ip_address = $1', [req.params.ip]);
   res.json({ message: 'IP unblocked' });
 });
