@@ -6,7 +6,7 @@ const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
 
 const defaultPreferences = {
-  theme: 'liquid-glass',
+  theme: 'classic',
   accentColor: '#e50914',
   blurIntensity: 10,
   transparency: 0.8,
