@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User, HelpCircle } from 'lucide-react';
+import { Search, LogOut, User, HelpCircle, Lock, Settings } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProfileModal from '../profile/ProfileModal';
 import HelpModal from '../profile/HelpModal';
+import LoginPromptModal from '../profile/LoginPromptModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 
@@ -24,6 +25,7 @@ const TopNav = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   
@@ -97,6 +99,15 @@ const TopNav = () => {
 
   const isLoginPage = location.pathname === '/login';
 
+  const handleRestrictedAction = (action) => {
+    setIsDropdownOpen(false);
+    if (!isLoggedIn) {
+      setIsLoginPromptOpen(true);
+    } else if (action) {
+      action();
+    }
+  };
+
   return (
     <header className={styles.topNav}>
       {!isLoginPage && (
@@ -149,10 +160,9 @@ const TopNav = () => {
 
         <div className={styles.userProfile}>
           {!loading && (
-            isLoggedIn ? (
-              <div className={styles.profileSection}>
+            <div className={styles.profileSection}>
               <div className={styles.profileDropdownContainer} ref={dropdownRef}>
-                {user?.avatar?.startsWith('http') ? (
+                {isLoggedIn && user?.avatar?.startsWith('http') ? (
                   <img 
                     src={user.avatar} 
                     alt="Profile" 
@@ -165,34 +175,41 @@ const TopNav = () => {
                     className={styles.avatarCircle} 
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     style={{
-                      backgroundColor: AVATARS.find(a => a.id === user?.avatar)?.color || '#e50914'
+                      backgroundColor: isLoggedIn ? (AVATARS.find(a => a.id === user?.avatar)?.color || '#e50914') : '#333'
                     }}
                   >
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    {isLoggedIn ? (user?.name?.charAt(0).toUpperCase() || 'U') : <User size={20} color="#ccc" />}
                   </div>
                 )}
                 
                 {isDropdownOpen && (
                   <div className={styles.dropdownMenu}>
-                    <button className={styles.dropdownItem} onClick={() => { setIsProfileModalOpen(true); setIsDropdownOpen(false); }}>
+                    <button className={styles.dropdownItem} onClick={() => handleRestrictedAction(() => setIsProfileModalOpen(true))}>
                       <User size={16} /> Edit Profile
+                      {!isLoggedIn && <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
+                    </button>
+                    <button className={styles.dropdownItem} onClick={() => handleRestrictedAction(() => console.log('Customize UI'))}>
+                      <Settings size={16} /> Customize UI
+                      {!isLoggedIn && <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
                     </button>
                     <button className={styles.dropdownItem} onClick={() => { setIsHelpModalOpen(true); setIsDropdownOpen(false); }}>
                       <HelpCircle size={16} /> Help & Support
                     </button>
-                    <button className={styles.dropdownItem} onClick={() => { handleLogout(); setIsDropdownOpen(false); }}>
-                      <LogOut size={16} /> Log Out
-                    </button>
+                    
+                    {isLoggedIn ? (
+                      <button className={styles.dropdownItem} onClick={() => { handleLogout(); setIsDropdownOpen(false); }}>
+                        <LogOut size={16} /> Log Out
+                      </button>
+                    ) : (
+                      <button className={styles.dropdownItem} onClick={() => handleRestrictedAction(null)}>
+                        <LogOut size={16} /> Log Out
+                        <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
-              </div>
-            ) : (
-              <Link to="/login" className={styles.loginBtn}>
-                <User size={20} />
-                <span>Login</span>
-              </Link>
-            )
+            </div>
           )}
         </div>
       </div>
@@ -205,6 +222,11 @@ const TopNav = () => {
       <HelpModal 
         isOpen={isHelpModalOpen} 
         onClose={() => setIsHelpModalOpen(false)} 
+      />
+      
+      <LoginPromptModal
+        isOpen={isLoginPromptOpen}
+        onClose={() => setIsLoginPromptOpen(false)}
       />
     </header>
   );

@@ -366,7 +366,7 @@ const AdminDashboard = () => {
                 <button 
                   className={styles.saveAnnouncementBtn} 
                   onClick={handleSaveAnnouncement} 
-                  disabled={savingAnnouncement || currentUser.role !== 'admin'}
+                  disabled={savingAnnouncement || (currentUser.role !== 'admin' && currentUser.role !== 'moderator')}
                 >
                   {savingAnnouncement ? 'UPDATING...' : 'PUSH TO ALL DEVICES'}
                 </button>
@@ -441,7 +441,7 @@ const AdminDashboard = () => {
                           <button 
                             className={u.is_banned ? styles.unbanBtn : styles.banBtn} 
                             onClick={() => handleToggleBan(u.id, u.is_banned)} 
-                            disabled={u.id === currentUser.id || u.is_super_admin || currentUser.role !== 'admin'}
+                            disabled={u.id === currentUser.id || u.is_super_admin || (currentUser.role !== 'admin' && currentUser.role !== 'moderator')}
                           >
                             {u.is_banned ? <ShieldCheck size={18} /> : <Ban size={18} />}
                           </button>
@@ -557,7 +557,7 @@ const AdminDashboard = () => {
               <form onSubmit={handleBlockIp} className={styles.blockIpForm}>
                 <input type="text" placeholder="IP Address (e.g. 1.2.3.4)" className={styles.inputField} value={newBlockIp.ip} onChange={e => setNewBlockIp({...newBlockIp, ip: e.target.value})} required />
                 <input type="text" placeholder="Reason for blocking" className={styles.inputField} value={newBlockIp.reason} onChange={e => setNewBlockIp({...newBlockIp, reason: e.target.value})} />
-                <button type="submit" className={styles.primaryBtn} disabled={currentUser.role !== 'admin'}>Block IP</button>
+                <button type="submit" className={styles.primaryBtn} disabled={currentUser.role !== 'admin' && currentUser.role !== 'moderator'}>Block IP</button>
               </form>
               
               <h3 style={{ marginTop: '30px' }}>Blocked IPs</h3>
@@ -569,7 +569,7 @@ const AdminDashboard = () => {
                       <tr key={item.ip_address}>
                         <td>{item.ip_address}</td>
                         <td>{item.reason}</td>
-                        <td><button className={styles.unblockBtn} onClick={() => handleUnblockIp(item.ip_address)} disabled={currentUser.role !== 'admin'}>Unblock</button></td>
+                        <td><button className={styles.unblockBtn} onClick={() => handleUnblockIp(item.ip_address)} disabled={currentUser.role !== 'admin' && currentUser.role !== 'moderator'}>Unblock</button></td>
                       </tr>
                     ))}
                     {blockedIps.length === 0 && <tr><td colSpan="3">No blocked IPs</td></tr>}
