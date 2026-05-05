@@ -1,6 +1,6 @@
 .detailPage {
   min-height: 100vh;
-  background-color: var(--bg-main);
+  background-color: transparent;
   position: relative;
   max-width: 100vw;
   overflow-x: hidden;

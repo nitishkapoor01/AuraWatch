@@ -50,57 +50,74 @@ body.animations-off *::after {
    THEME CLASSES (set on body by ThemeContext)
    ============================================= */
 body.theme-light {
-  --bg-main: #f0f0f0;
+  --bg-main: #f5f6fa;
   --bg-card: #ffffff;
   --text-primary: #121212;
   --text-secondary: #666666;
-  --border: #dddddd;
-  background-color: var(--bg-main) !important;
+  --border: #e0e0e0;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  background: #f5f6fa !important;
   color: var(--text-primary) !important;
 }
+
 body.theme-ocean {
   --bg-main: #0a1628;
-  --bg-card: #0f1f35;
+  --bg-card: rgba(15, 31, 53, 0.6);
   --text-primary: #e0e8f0;
   --text-secondary: #8a9cb0;
-  --border: #1a2f4a;
-  background-color: var(--bg-main) !important;
+  --border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(10, 22, 40, 0.7);
+  background: radial-gradient(circle at top left, #0d1b2a, #0b132b) fixed !important;
   color: var(--text-primary) !important;
 }
+
 body.theme-sunset {
   --bg-main: #1a0a00;
-  --bg-card: #2d1400;
+  --bg-card: rgba(45, 20, 0, 0.6);
   --text-primary: #ffe0cc;
   --text-secondary: #cc9977;
-  --border: #4d2600;
-  background-color: var(--bg-main) !important;
+  --border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(26, 10, 0, 0.7);
+  background: linear-gradient(135deg, #1a0a00 0%, #3d1a00 50%, #1a0a00 100%) fixed !important;
   color: var(--text-primary) !important;
 }
+
 body.theme-midnight {
   --bg-main: #080818;
-  --bg-card: #10102a;
+  --bg-card: rgba(16, 16, 42, 0.6);
   --text-primary: #d0d0f0;
   --text-secondary: #8080b0;
-  --border: #1a1a40;
-  background-color: var(--bg-main) !important;
+  --border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(8, 8, 24, 0.7);
+  background: radial-gradient(circle at center, #12122b 0%, #050510 100%) fixed !important;
   color: var(--text-primary) !important;
 }
+
 body.theme-liquid-glass {
   --bg-main: #0f0f18;
-  --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-card: rgba(255, 255, 255, 0.03);
   --text-primary: #ffffff;
-  --text-secondary: #aaaaaa;
-  --border: rgba(255, 255, 255, 0.1);
-  background-color: var(--bg-main) !important;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(15, 15, 24, 0.4);
+  background: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(339,49%,30%,1) 0, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(225,39%,30%,1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(253,16%,7%,1) 0, transparent 50%) fixed !important;
   color: var(--text-primary) !important;
 }
+
 body.theme-dark {
-  --bg-main: #0f0f0f;
-  --bg-card: #1a1a1a;
+  --bg-main: #0a0a0a;
+  --bg-card: #141414;
   --text-primary: #ffffff;
-  --text-secondary: #aaaaaa;
-  --border: #2a2a2a;
-  background-color: var(--bg-main) !important;
+  --text-secondary: #888888;
+  --border: #222222;
+  --glass-bg: rgba(10, 10, 10, 0.8);
+  background: #0a0a0a !important;
   color: var(--text-primary) !important;
 }
 
