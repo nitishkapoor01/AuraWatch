@@ -206,6 +206,14 @@ body.cards-medium .cardContainer { flex: 0 0 150px !important; }
 body.cards-large .cardContainer { flex: 0 0 190px !important; }
 body.cards-xlarge .cardContainer { flex: 0 0 230px !important; }
 
+/* Responsive card adjustments for mobile */
+@media (max-width: 600px) {
+  body.cards-small .cardContainer { flex: 0 0 85px !important; }
+  body.cards-medium .cardContainer { flex: 0 0 110px !important; }
+  body.cards-large .cardContainer { flex: 0 0 130px !important; }
+  body.cards-xlarge .cardContainer { flex: 0 0 150px !important; }
+}
+
 /* =============================================
    CARD HOVER EFFECTS
    ============================================= */
