@@ -39,6 +39,7 @@ const AdminDashboard = () => {
   const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' });
   const [savingAnnouncement, setSavingAnnouncement] = useState(false);
   const [globalSettings, setGlobalSettings] = useState({ skip_ads_timer: false });
+  const [buttonWarnings, setButtonWarnings] = useState({});
   const [savingSettings, setSavingSettings] = useState(false);
   const [newBlockIp, setNewBlockIp] = useState({ ip: '', reason: '' });
 
@@ -78,6 +79,9 @@ const AdminDashboard = () => {
       if (settingsRes.ok) {
         const settings = await settingsRes.json();
         setGlobalSettings(prev => ({ ...prev, ...settings }));
+        if (settings.button_warnings) {
+          setButtonWarnings(settings.button_warnings);
+        }
       }
       
       if (announcementRes.ok) {
@@ -242,6 +246,20 @@ const AdminDashboard = () => {
     finally { setSavingAnnouncement(false); }
   };
 
+  const handleUpdateButtonWarnings = async (key, value) => {
+    try {
+      const newWarnings = { ...buttonWarnings, [key]: value };
+      setButtonWarnings(newWarnings);
+      setSavingSettings(true);
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ key: 'button_warnings', value: newWarnings })
+      });
+    } catch (e) { alert('Failed to update button warnings'); }
+    finally { setSavingSettings(false); }
+  };
+
   const handleUpdateSetting = async (key, value) => {
     try {
       setSavingSettings(true);
@@ -387,6 +405,42 @@ const AdminDashboard = () => {
                   <div className={styles.toggleThumb}></div>
                 </button>
               </div>
+            </div>
+            
+            <div className={styles.sectionHeader} style={{ marginTop: '30px' }}><h2>Button Warnings & Tooltips</h2></div>
+            <div className={styles.settingsGrid}>
+              {[
+                { id: 'play_movie', label: 'Play Now (Movie Detail)' },
+                { id: 'download_movie', label: 'Download (Movie Detail)' },
+                { id: 'watch_trailer', label: 'Watch Trailer (Movie Detail)' },
+                { id: 'add_to_list', label: 'Add to List (Movie Detail)' },
+                { id: 'customize_ui', label: 'Customize UI (Top Nav)' }
+              ].map(btn => (
+                <div key={btn.id} className={styles.settingCard} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+                  <div className={styles.settingInfo}>
+                    <h3>{btn.label}</h3>
+                    <p>Leave empty for no warning. Any text here will show as a badge/tooltip.</p>
+                  </div>
+                  <div style={{ display: 'flex', width: '100%', gap: '10px' }}>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Currently in development" 
+                      className={styles.inputField} 
+                      value={buttonWarnings[btn.id] || ''} 
+                      onChange={e => setButtonWarnings({...buttonWarnings, [btn.id]: e.target.value})}
+                      style={{ flex: 1, margin: 0 }}
+                    />
+                    <button 
+                      className={styles.primaryBtn} 
+                      onClick={() => handleUpdateButtonWarnings(btn.id, buttonWarnings[btn.id])}
+                      disabled={savingSettings || currentUser.role !== 'admin'}
+                      style={{ padding: '0 16px' }}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

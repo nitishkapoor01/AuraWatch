@@ -182,7 +182,7 @@
   color: #fff;
   font-size: 14px;
   outline: none;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
 }
 
 .searchInput:focus {

@@ -6,14 +6,40 @@ const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
 
 const defaultPreferences = {
+  // === APPEARANCE ===
   theme: 'classic',
   accentColor: '#e50914',
   blurIntensity: 10,
   transparency: 0.8,
-  layout: 'cinematic',
+  backgroundEffect: 'none',       // 'none' | 'particles' | 'gradient-mesh' | 'grain'
+  glowEffects: false,
+
+  // === LAYOUT & STRUCTURE ===
+  layout: 'cinematic',            // 'cinematic' | 'grid' | 'minimal'
+  heroSize: 'full',               // 'full' | 'half' | 'compact' | 'hidden'
+  contentWidth: 'full',           // 'full' | 'contained' | 'narrow'
+  navStyle: 'transparent',        // 'transparent' | 'solid' | 'glass' | 'hidden'
+  sidebarPosition: 'left',        // 'left' | 'hidden'
+  rowStyle: 'scroll',             // 'scroll' | 'wrap'
+
+  // === CARDS ===
+  cardStyle: 'poster',            // 'poster' | 'backdrop' | 'minimal' | 'rounded'
+  cardSize: 'large',             // 'small' | 'medium' | 'large' | 'xlarge'
+  cardHoverEffect: 'scale',       // 'scale' | 'glow' | 'lift' | 'flip' | 'none'
+
+  // === TYPOGRAPHY ===
   fontFamily: "'Inter', sans-serif",
+  headingFont: "'Inter', sans-serif",
   fontSize: 16,
   fontWeight: 'normal',
+  lineHeight: 1.6,
+  letterSpacing: 0,
+
+  // === BUTTONS & CHROME ===
+  buttonStyle: 'filled',          // 'filled' | 'outline' | 'ghost' | 'pill' | 'sharp'
+  scrollbarStyle: 'thin',         // 'thin' | 'hidden' | 'default'
+
+  // === ADVANCED ===
   density: 'comfortable',
   borderRadius: 12,
   shadowIntensity: 0.5,
@@ -60,22 +86,48 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const root = document.documentElement;
     
-    // Apply CSS Variables
+    // === CSS Variables ===
     root.style.setProperty('--primary-color', preferences.accentColor);
     root.style.setProperty('--bg-blur', `${preferences.blurIntensity}px`);
     root.style.setProperty('--panel-bg-alpha', preferences.transparency);
     root.style.setProperty('--font-family-base', preferences.fontFamily);
+    root.style.setProperty('--heading-font', preferences.headingFont);
     root.style.setProperty('--font-size-base', `${preferences.fontSize}px`);
     root.style.setProperty('--font-weight-base', preferences.fontWeight);
     root.style.setProperty('--border-radius-base', `${preferences.borderRadius}px`);
     root.style.setProperty('--shadow-intensity', preferences.shadowIntensity);
+    root.style.setProperty('--line-height-base', preferences.lineHeight);
+    root.style.setProperty('--letter-spacing-base', `${preferences.letterSpacing}px`);
     
     // Density scaling
     const paddingMap = { compact: '8px 12px', comfortable: '16px 24px' };
     root.style.setProperty('--density-padding', paddingMap[preferences.density] || paddingMap.comfortable);
 
-    // Apply layout classes to body
-    document.body.className = `layout-${preferences.layout} theme-${preferences.theme} ${preferences.animations ? 'animations-on' : 'animations-off'}`;
+    // Card size mapping
+    const cardSizeMap = { small: '110px', medium: '150px', large: '190px', xlarge: '230px' };
+    root.style.setProperty('--card-width', cardSizeMap[preferences.cardSize] || '150px');
+
+    // === Body Classes ===
+    // Collect all dynamic classes
+    const classes = [
+      `layout-${preferences.layout}`,
+      `theme-${preferences.theme}`,
+      preferences.animations ? 'animations-on' : 'animations-off',
+      `hero-${preferences.heroSize}`,
+      `cards-${preferences.cardStyle}`,
+      `cards-${preferences.cardSize}`,
+      `hover-${preferences.cardHoverEffect}`,
+      `nav-${preferences.navStyle}`,
+      `sidebar-${preferences.sidebarPosition}`,
+      `btn-${preferences.buttonStyle}`,
+      `rows-${preferences.rowStyle}`,
+      `width-${preferences.contentWidth}`,
+      `scrollbar-${preferences.scrollbarStyle}`,
+      preferences.backgroundEffect !== 'none' ? `bg-${preferences.backgroundEffect}` : '',
+      preferences.glowEffects ? 'glow-on' : '',
+    ].filter(Boolean);
+
+    document.body.className = classes.join(' ');
     
   }, [preferences]);
 

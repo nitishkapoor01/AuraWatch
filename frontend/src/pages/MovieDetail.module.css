@@ -19,6 +19,8 @@
   object-fit: cover;
   object-position: center 20%;
   animation: backdropZoom 10s ease-out forwards;
+  -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 }
 
 @keyframes backdropZoom {
@@ -32,7 +34,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(0deg, var(--bg-main) 5%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.5) 100%);
+  background: linear-gradient(0deg, transparent 50%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
 }
 
 .content {
@@ -57,7 +60,7 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.8);
   border: 1px solid rgba(255,255,255,0.1);
   animation: posterPopIn 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
   transform-origin: center bottom;
 }
 
@@ -216,7 +219,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
   position: relative;
 }
 
@@ -235,7 +238,7 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
   box-shadow: 0 5px 15px rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.15);
   z-index: 100;

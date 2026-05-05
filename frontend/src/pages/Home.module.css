@@ -30,8 +30,10 @@
   object-fit: cover;
   object-position: center center;
   z-index: 1;
-  transition: all var(--anim-speed, 0.3s)e-in-out;
+  transition: all var(--anim-speed, 0.3s) ease-in-out;
   animation: heroBackdropZoom 20s linear infinite alternate;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 
 @keyframes heroBackdropZoom {
@@ -54,12 +56,11 @@
   left: 0;
   width: 100%;
   height: 100%;
-  /* Lighter gradient so images are clearly visible */
+  /* Darken the image for text readability, but let the CSS mask handle the bottom fade */
   background: 
-    linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.05) 55%, transparent 70%),
-    linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 10%, transparent 30%),
-    linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 15%);
+    linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 40%, transparent 70%);
   z-index: 2;
+  pointer-events: none;
 }
 
 .heroContent {
@@ -235,7 +236,7 @@
   flex: 0 0 150px;
   aspect-ratio: 2 / 3;
   cursor: pointer;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
   border-radius: 6px;
   overflow: hidden;
   position: relative;

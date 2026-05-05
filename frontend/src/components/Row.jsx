@@ -112,8 +112,8 @@ const Row = ({ title, endpoint, compact = false }) => {
     return (
       <section className={styles.section} ref={sentinelRef}>
         <div className={styles.sectionHeader}><div className="skeleton" style={{ width: '150px', height: '18px' }}></div></div>
-        <div className={styles.movieGrid}>
-          {[...Array(8)].map((_, i) => <div key={i} className={`skeleton ${styles.cardContainer}`}></div>)}
+        <div className={`${styles.movieGrid} movieGrid`}>
+          {[...Array(8)].map((_, i) => <div key={i} className={`skeleton ${styles.cardContainer} cardContainer`}></div>)}
         </div>
       </section>
     );
@@ -129,15 +129,15 @@ const Row = ({ title, endpoint, compact = false }) => {
 
       <div className={styles.rowWrapper}>
         {canScrollLeft && (
-          <button className={`${styles.scrollBtn} ${styles.scrollBtnLeft}`} onClick={() => scroll('left')}><ChevronLeft size={24} /></button>
+          <button className={`${styles.scrollBtn} ${styles.scrollBtnLeft} scrollBtn`} onClick={() => scroll('left')}><ChevronLeft size={24} /></button>
         )}
 
-        <div className={styles.movieGrid} ref={rowRef}>
+        <div className={`${styles.movieGrid} movieGrid`} ref={rowRef}>
           {movies.map((movie, idx) => (
             <Link 
               to={`/movie/${movie.id}?type=${movie.type ? movie.type.toLowerCase() : 'movie'}`}
               key={`${movie.id}-${idx}`} 
-              className={styles.cardContainer}
+              className={`${styles.cardContainer} cardContainer`}
               style={{
                 flex: compact ? '0 0 calc(20% - 8px)' : undefined,
                 aspectRatio: compact ? '16 / 9' : '2 / 3',
@@ -153,7 +153,7 @@ const Row = ({ title, endpoint, compact = false }) => {
         </div>
 
         {canScrollRight && (
-          <button className={`${styles.scrollBtn} ${styles.scrollBtnRight}`} onClick={() => scroll('right')}><ChevronRight size={24} /></button>
+          <button className={`${styles.scrollBtn} ${styles.scrollBtnRight} scrollBtn`} onClick={() => scroll('right')}><ChevronRight size={24} /></button>
         )}
       </div>
     </section>

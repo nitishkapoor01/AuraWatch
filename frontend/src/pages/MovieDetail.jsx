@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2 } from 'lucide-react';
+import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle } from 'lucide-react';
 import styles from './MovieDetail.module.css';
 import Row from '../components/Row';
 import SEO from '../components/SEO';
 import { fetchWithCache } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { useButtonWarnings } from '../hooks/useButtonWarnings';
 
 const isTVType = (type) => type === 'tv' || type === 'series';
 
@@ -78,6 +79,8 @@ const MovieDetail = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('episode'); // 'episode' or 'batch'
   const [downloadErrorMsg, setDownloadErrorMsg] = useState('');
+  
+  const buttonWarnings = useButtonWarnings();
   const [globalSkipAds, setGlobalSkipAds] = useState(false);
 
   // TV Specific
@@ -476,7 +479,7 @@ const MovieDetail = () => {
       </div>
 
       {/* Main Info */}
-      <div className={styles.content}>
+      <div className={`${styles.content} content`}>
         <img src={movie.poster} alt={movie.title} className={styles.poster} referrerPolicy="no-referrer" />
         <div className={styles.info}>
           <h1 className={styles.title}>{movie.title}</h1>
@@ -495,32 +498,70 @@ const MovieDetail = () => {
           <p className={styles.overview}>{movie.overview}</p>
 
           <div className={styles.actions}>
-            <button className={styles.playBtn} onClick={() => {
-              if (isTV) {
-                const ep = episodes.find(e => e.number === selectedEpisode);
-                handlePlayEpisode(selectedSeason, selectedEpisode, ep?.name || '');
-              }
-              else { setShowPlayer(true); trackWatch(); }
-            }}>
+            <button 
+              className={`${styles.playBtn} playBtn`} 
+              title={buttonWarnings.play_movie || ''}
+              onClick={(e) => {
+                if (buttonWarnings.play_movie) {
+                  e.preventDefault();
+                  alert(`Notice: ${buttonWarnings.play_movie}`);
+                } else {
+                  if (isTV) {
+                    const ep = episodes.find(e => e.number === selectedEpisode);
+                    handlePlayEpisode(selectedSeason, selectedEpisode, ep?.name || '');
+                  }
+                  else { setShowPlayer(true); trackWatch(); }
+                }
+              }}
+            >
               <Play fill="black" size={22} /> Play Now
+              {buttonWarnings.play_movie && <AlertTriangle size={18} color="#e50914" style={{marginLeft: '6px'}} />}
             </button>
-            <button className={styles.trailerBtnDetail} onClick={handleWatchTrailer}>
+            <button 
+              className={`${styles.trailerBtnDetail} trailerBtnDetail`} 
+              title={buttonWarnings.watch_trailer || ''}
+              onClick={(e) => {
+                if (buttonWarnings.watch_trailer) {
+                  e.preventDefault();
+                  alert(`Notice: ${buttonWarnings.watch_trailer}`);
+                } else {
+                  handleWatchTrailer();
+                }
+              }}
+            >
               Watch Trailer
+              {buttonWarnings.watch_trailer && <AlertTriangle size={18} color="#e50914" style={{marginLeft: '6px'}} />}
             </button>
             <button 
               className={`${styles.listBtn} ${isFavorite ? styles.listBtnActive : ''}`} 
-              onClick={handleToggleFavorite}
-              data-title={isLoggedIn ? (isFavorite ? 'Remove from My List' : 'Add to My List') : 'Login to save'}
+              onClick={(e) => {
+                if (buttonWarnings.add_to_list) {
+                  e.preventDefault();
+                  alert(`Notice: ${buttonWarnings.add_to_list}`);
+                } else {
+                  handleToggleFavorite();
+                }
+              }}
+              data-title={buttonWarnings.add_to_list || (isLoggedIn ? (isFavorite ? 'Remove from My List' : 'Add to My List') : 'Login to save')}
             >
               {isFavorite ? <Check size={22} /> : <Plus size={22} />}
+              {buttonWarnings.add_to_list && <AlertTriangle size={14} color="#e50914" style={{position: 'absolute', top: -5, right: -5}} />}
             </button>
             <button 
               className={styles.listBtn} 
-              onClick={handleDownload} 
-              data-title="Download Movie"
+              onClick={(e) => {
+                if (buttonWarnings.download_movie) {
+                  e.preventDefault();
+                  alert(`Notice: ${buttonWarnings.download_movie}`);
+                } else {
+                  handleDownload();
+                }
+              }}
+              data-title={buttonWarnings.download_movie || "Download Movie"}
               disabled={isDownloading}
             >
               {isDownloading ? <Loader2 size={22} className={styles.spinner} /> : <Download size={22} />}
+              {buttonWarnings.download_movie && <AlertTriangle size={14} color="#e50914" style={{position: 'absolute', top: -5, right: -5}} />}
             </button>
           </div>
 
@@ -587,7 +628,7 @@ const MovieDetail = () => {
 
       {/* Episodes Section (Netflix Style) */}
       {isTV && seasons.length > 0 && (
-        <div className={styles.seasonsSection}>
+        <div className={`${styles.seasonsSection} seasonsSection`}>
           <div className={styles.seasonHeader}>
             <h2 className={styles.episodesTitle}>Episodes</h2>
             <div className={styles.seasonDropdownWrapper}>
@@ -645,7 +686,7 @@ const MovieDetail = () => {
       )}
 
       {/* More Like This */}
-      <div className={styles.recommendations}>
+      <div className={`${styles.recommendations} recommendations`}>
         <Row title="More Like This" endpoint={`${id}/similar?type=${type}`} />
       </div>
 
@@ -691,8 +732,8 @@ const MovieDetail = () => {
                 <h2 style={{color: '#e50914'}}>Oops!</h2>
                 <p>{downloadErrorMsg}</p>
                 <div style={{display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px'}}>
-                  <button className={styles.primaryBtn} onClick={() => setShowDownloadModal(false)}>Close</button>
-                  <button className={styles.primaryBtn} style={{background: '#333'}} onClick={() => handleDownload(true)}>Try Again</button>
+                  <button className={`${styles.primaryBtn} primaryBtn`} onClick={() => setShowDownloadModal(false)}>Close</button>
+                  <button className={`${styles.primaryBtn} primaryBtn`} style={{background: '#333'}} onClick={() => handleDownload(true)}>Try Again</button>
                 </div>
               </div>
             )}
@@ -702,8 +743,8 @@ const MovieDetail = () => {
                 <h2>No Links Found</h2>
                 <p>We couldn't find any direct download links for this title right now. Please check back later.</p>
                 <div style={{display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px'}}>
-                  <button className={styles.primaryBtn} onClick={() => setShowDownloadModal(false)}>Close</button>
-                  <button className={styles.primaryBtn} style={{background: '#333'}} onClick={() => handleDownload(true)}>Search Again</button>
+                  <button className={`${styles.primaryBtn} primaryBtn`} onClick={() => setShowDownloadModal(false)}>Close</button>
+                  <button className={`${styles.primaryBtn} primaryBtn`} style={{background: '#333'}} onClick={() => handleDownload(true)}>Search Again</button>
                 </div>
               </div>
             )}
@@ -782,7 +823,7 @@ const MovieDetail = () => {
                         </span>
                       </div>
                       <button 
-                        className={styles.primaryBtn}
+                        className={`${styles.primaryBtn} primaryBtn`}
                         onClick={() => window.open(getDownloadUrl(link), '_blank')}
                       >
                         <Download size={18} /> Download

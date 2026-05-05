@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import MyList from './pages/MyList';
 import WatchHistory from './pages/WatchHistory';
 import AdminDashboard from './pages/AdminDashboard';
+import BackgroundEffects from './components/BackgroundEffects';
 import './App.css';
 
 function App() {
@@ -84,6 +85,7 @@ function App() {
 
   return (
     <div className="appContainer">
+      <BackgroundEffects />
       <AnnouncementBanner announcement={announcement} />
       <Sidebar />
       <div className="mainContent">

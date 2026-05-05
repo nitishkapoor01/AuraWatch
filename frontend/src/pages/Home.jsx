@@ -16,7 +16,8 @@ const Home = () => {
   const timerRef = useRef(null);
   const { preferences } = useTheme();
   const layout = preferences?.layout || 'cinematic';
-  const showHero = layout === 'cinematic';
+  const heroSize = preferences?.heroSize || 'full';
+  const showHero = layout !== 'grid' && heroSize !== 'hidden';
 
   useEffect(() => {
     const fetchHero = async () => {
@@ -69,7 +70,7 @@ const Home = () => {
 
       {/* Hero Section — only shown in Cinematic layout */}
       {showHero && (
-        <section className={styles.hero}>
+        <section className={`${styles.hero} hero`}>
           {loading ? (
             <div className="skeleton" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}></div>
           ) : (
@@ -104,10 +105,10 @@ const Home = () => {
                 {heroMovie.overview ? heroMovie.overview.slice(0, 200) + '...' : ''}
               </p>
               <div className={styles.heroButtons}>
-                <button className={styles.playBtn} onClick={() => navigate(`/movie/${heroMovie.id}?type=${heroType}`)}>
+                <button className={`${styles.playBtn} playBtn`} onClick={() => navigate(`/movie/${heroMovie.id}?type=${heroType}`)}>
                   <Play fill="black" size={22} /> Play
                 </button>
-                <button className={styles.infoBtn} onClick={() => navigate(`/movie/${heroMovie.id}?type=${heroType}`)}>
+                <button className={`${styles.infoBtn} infoBtn`} onClick={() => navigate(`/movie/${heroMovie.id}?type=${heroType}`)}>
                   <Info size={22} /> More Info
                 </button>
               </div>
@@ -119,7 +120,7 @@ const Home = () => {
 
       {/* Content Rows — layout-aware */}
       <div
-        className={styles.sectionContainer}
+        className={`${styles.sectionContainer} sectionContainer`}
         style={{
           marginTop: showHero ? undefined : '80px',
           paddingLeft: layout === 'minimal' ? '120px' : undefined,

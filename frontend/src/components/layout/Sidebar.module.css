@@ -106,7 +106,7 @@
   border-radius: 4px;
   object-fit: cover;
   cursor: pointer;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
 }
 
 .avatar:hover {

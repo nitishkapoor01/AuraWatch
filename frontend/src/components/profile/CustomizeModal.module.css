@@ -5,8 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.1);
   z-index: 4000;
   display: flex;
   justify-content: flex-end;
@@ -19,12 +18,12 @@
 }
 
 .panel {
-  width: 680px;
+  width: 720px;
   max-width: 95vw;
   height: 100vh;
   display: flex;
   flex-direction: row;
-  background: rgba(12, 12, 18, 0.85);
+  background: rgba(12, 12, 18, 0.88);
   backdrop-filter: blur(24px);
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5);
@@ -81,7 +80,7 @@
   font-weight: 500;
   cursor: pointer;
   border-radius: 0;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
   width: 100%;
   text-align: left;
   position: relative;
@@ -104,7 +103,7 @@
   top: 4px;
   bottom: 4px;
   width: 3px;
-  background: var(--primary-color, var(--primary-color));
+  background: var(--primary-color);
   border-radius: 0 4px 4px 0;
 }
 
@@ -220,7 +219,7 @@
 }
 
 .themeCard.selected {
-  border-color: var(--primary-color, var(--primary-color));
+  border-color: var(--primary-color);
 }
 
 .themeCard.selected .checkmark {
@@ -231,7 +230,7 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: var(--primary-color, var(--primary-color));
+  background: var(--primary-color);
   border-radius: 50%;
   width: 18px;
   height: 18px;
@@ -260,71 +259,162 @@
 .themeOcean { background: linear-gradient(135deg, #0a2342, #1a6b8a); }
 .themeSunset { background: linear-gradient(135deg, #8b0000, #ff6b35); }
 
-/* ---- LAYOUT CARDS ---- */
-.layoutGrid {
+/* ---- CHIP SELECTOR (reusable) ---- */
+.chipGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.layoutCard {
-  background: rgba(255,255,255,0.04);
-  border: 2px solid rgba(255,255,255,0.07);
-  border-radius: 12px;
-  padding: 14px 10px;
-  cursor: pointer;
-  transition: all var(--anim-speed, 0.3s);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 8px;
 }
 
-.layoutCard:hover {
+.chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 12px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all var(--anim-speed, 0.3s);
+  color: rgba(255,255,255,0.7);
+}
+
+.chip:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.chipActive {
+  border-color: var(--primary-color) !important;
+  background: rgba(229, 9, 20, 0.08) !important;
+  color: white !important;
+}
+
+.chipLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chipDesc {
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 400;
+}
+
+.chipActive .chipDesc {
+  color: rgba(255,255,255,0.5);
+}
+
+/* ---- CARD STYLE PREVIEWS ---- */
+.cardStyleGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.cardStyleOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all var(--anim-speed, 0.3s);
+}
+
+.cardStyleOption:hover {
   background: rgba(255,255,255,0.08);
   border-color: rgba(255,255,255,0.15);
 }
 
-.layoutCard.selected {
-  border-color: var(--primary-color, var(--primary-color));
-  background: rgba(229, 9, 20, 0.08);
+.cardStyleActive {
+  border-color: var(--primary-color) !important;
+  background: rgba(229, 9, 20, 0.08) !important;
 }
 
-.layoutPreview {
-  width: 48px;
-  height: 36px;
-  background: rgba(255,255,255,0.08);
+.cardPreviewBox {
+  width: 40px;
+  background: rgba(255,255,255,0.15);
   border-radius: 6px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 3px;
+  transition: all 0.3s;
 }
 
-.layoutPreviewHero {
-  flex-shrink: 0;
-  background: rgba(255,255,255,0.2);
-  border-radius: 3px;
-}
-
-.layoutPreviewRow {
-  display: flex;
-  gap: 2px;
-  flex: 1;
-}
-
-.layoutPreviewCard {
-  flex: 1;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-}
-
-.layoutLabel {
+.cardStyleLabel {
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255,255,255,0.85);
+}
+
+.cardStyleDesc {
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ---- CARD SIZE SELECTOR ---- */
+.sizeSelector {
+  display: flex;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.sizeBtn {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--anim-speed, 0.3s);
+}
+
+.sizeBtn:hover {
+  color: white;
+  background: rgba(255,255,255,0.06);
+}
+
+.sizeBtnActive {
+  background: var(--primary-color) !important;
+  color: white !important;
+  box-shadow: 0 2px 10px rgba(229, 9, 20, 0.3);
+}
+
+/* ---- BUTTON STYLE PREVIEWS ---- */
+.btnStyleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.btnStyleOption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all var(--anim-speed, 0.3s);
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 44px;
+}
+
+.btnStyleOption:hover {
+  transform: scale(1.05);
+}
+
+.btnStyleActive {
+  box-shadow: 0 0 0 2px var(--primary-color), 0 4px 15px rgba(229, 9, 20, 0.25) !important;
 }
 
 /* ---- SLIDERS & CONTROLS ---- */
@@ -368,7 +458,7 @@
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
-  background: var(--primary-color, var(--primary-color));
+  background: var(--primary-color);
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 0 8px rgba(229, 9, 20, 0.4);
@@ -448,7 +538,7 @@
 }
 
 .fontOption:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
-.fontOption.selectedFont { border-color: var(--primary-color, var(--primary-color)); background: rgba(229,9,20,0.06); }
+.fontOption.selectedFont { border-color: var(--primary-color); background: rgba(229,9,20,0.06); }
 
 .fontOptionLabel {
   font-size: 13px;
@@ -487,7 +577,7 @@
   flex-shrink: 0;
 }
 
-.toggle.on { background: var(--primary-color, var(--primary-color)); }
+.toggle.on { background: var(--primary-color); }
 
 .toggleThumb {
   position: absolute;
@@ -506,7 +596,7 @@
 /* ---- FOOTER ---- */
 .footer {
   padding: 16px 24px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   gap: 10px;
   flex-shrink: 0;
@@ -530,13 +620,12 @@
 /* Responsive */
 @media (max-width: 600px) {
   .overlay {
-    background: rgba(0, 0, 0, 0.2); /* Much lighter overlay on mobile to see changes */
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.1);
   }
 
   .panel { 
-    width: 85vw; /* Leave 15% of screen visible for live preview */
-    background: rgba(12, 12, 18, 0.7); /* More transparent on mobile */
+    width: 85vw;
+    background: rgba(12, 12, 18, 0.7);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.4);
   }
   
@@ -567,8 +656,8 @@
     gap: 20px;
   }
 
-  .themeGrid, .layoutGrid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile for better fit */
+  .themeGrid, .chipGrid, .cardStyleGrid, .btnStyleGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .navItem.active::before { 

@@ -18,14 +18,14 @@ const Sidebar = () => {
   }
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} sidebar`}>
       <nav className={styles.navSection}>
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             className={({ isActive }) => 
-              `${styles.navItem} ${isActive ? styles.active : ''}`
+              `${styles.navItem} navItem ${isActive ? styles.active : ''}`
             }
           >
             {item.icon}

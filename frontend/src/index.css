@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* =============================================
    CUSTOMIZE UI - Dynamic CSS Variables
@@ -6,49 +6,70 @@
    ============================================= */
 :root {
   /* ThemeContext variables (overridden via JS) */
-  --primary-color: var(--primary-color);
+  --primary-color: #e50914;
   --bg-blur: 10px;
   --panel-bg-alpha: 0.8;
   --font-family-base: 'Inter', sans-serif;
+  --heading-font: 'Inter', sans-serif;
   --font-size-base: 16px;
   --font-weight-base: normal;
   --border-radius-base: 12px;
   --shadow-intensity: 0.5;
   --density-padding: 16px 24px;
-}
-
-/* =============================================
-   LAYOUT CLASSES (set on body by ThemeContext)
-   ============================================= */
-
-/* Cinematic: default hero + horizontal rows */
-body.layout-cinematic .movieGrid {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Grid: dense card grid */
-body.layout-grid .hero-section {
-  display: none !important;
-}
-
-/* Minimal: centered, clean */
-body.layout-minimal {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Animations off */
-body.animations-off *,
-body.animations-off *::before,
-body.animations-off *::after {
-  animation-duration: 0.001ms !important;
-  transition-duration: 0.001ms !important;
+  --card-width: 150px;
+  --line-height-base: 1.6;
+  --letter-spacing-base: 0px;
 }
 
 /* =============================================
    THEME CLASSES (set on body by ThemeContext)
    ============================================= */
+
+body.theme-classic {
+  --bg-main: #000000;
+  --bg-card: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #999999;
+  --border: #333333;
+  --glass-bg: rgba(0, 0, 0, 0);
+  --btn-bg: #e50914;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(229, 9, 20, 0.2);
+  --anim-speed: 0.15s;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+body.theme-dark {
+  --bg-main: #0a0a0a;
+  --bg-card: #141414;
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --border: #222222;
+  --glass-bg: rgba(10, 10, 10, 0.8);
+  --btn-bg: #333333;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0,0,0,0.5);
+  --anim-speed: 0.2s;
+  background: #0a0a0a !important;
+  color: var(--text-primary) !important;
+}
+
+body.theme-midnight {
+  --bg-main: #080818;
+  --bg-card: rgba(16, 16, 42, 0.6);
+  --text-primary: #d0d0f0;
+  --text-secondary: #8080b0;
+  --border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(8, 8, 24, 0.7);
+  --btn-bg: #9b59b6;
+  --btn-text: #ffffff;
+  --shadow-color: rgba(0,0,0,0.5);
+  --anim-speed: 0.5s;
+  background: radial-gradient(circle at center, #12122b 0%, #050510 100%) fixed !important;
+  color: var(--text-primary) !important;
+}
+
 body.theme-light {
   --bg-main: #f5f6fa;
   --bg-card: #ffffff;
@@ -94,21 +115,6 @@ body.theme-sunset {
   color: var(--text-primary) !important;
 }
 
-body.theme-midnight {
-  --bg-main: #080818;
-  --bg-card: rgba(16, 16, 42, 0.6);
-  --text-primary: #d0d0f0;
-  --text-secondary: #8080b0;
-  --border: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(8, 8, 24, 0.7);
-  --btn-bg: #9b59b6;
-  --btn-text: #ffffff;
-  --shadow-color: rgba(0,0,0,0.5);
-  --anim-speed: 0.5s;
-  background: radial-gradient(circle at center, #12122b 0%, #050510 100%) fixed !important;
-  color: var(--text-primary) !important;
-}
-
 body.theme-liquid-glass {
   --bg-main: #0f0f18;
   --bg-card: rgba(255, 255, 255, 0.03);
@@ -120,57 +126,276 @@ body.theme-liquid-glass {
   --btn-text: #ffffff;
   --shadow-color: rgba(0,0,0,0);
   --anim-speed: 0.6s;
-  background: 
-    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0%, transparent 50%), 
-    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0%, transparent 50%), 
-    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0%, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(339,49%,30%,1) 0%, transparent 50%),
-    radial-gradient(at 50% 100%, hsla(225,39%,30%,1) 0%, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(253,16%,7%,1) 0%, transparent 50%) fixed !important;
+  background: linear-gradient(135deg, #100a26 0%, #1e204c 50%, #301025 100%) fixed !important;
   color: var(--text-primary) !important;
 }
 
-body.theme-dark {
-  --bg-main: #0a0a0a;
-  --bg-card: #141414;
-  --text-primary: #ffffff;
-  --text-secondary: #888888;
-  --border: #222222;
-  --glass-bg: rgba(10, 10, 10, 0.8);
-  --btn-bg: #333333;
-  --btn-text: #ffffff;
-  --shadow-color: rgba(0,0,0,0.5);
-  --anim-speed: 0.2s;
-  background: #0a0a0a !important;
-  color: var(--text-primary) !important;
+/* =============================================
+   LAYOUT CLASSES
+   ============================================= */
+
+/* Cinematic: default hero + horizontal rows */
+/* Removed broken .movieGrid flex-direction rule */
+
+/* Grid: hide hero, dense card grid */
+body.layout-grid .hero-section {
+  display: none !important;
 }
 
-body.theme-classic {
-  --bg-main: #000000;
-  --bg-card: #000000;
-  --text-primary: #ffffff;
-  --text-secondary: #999999;
-  --border: #333333;
-  --glass-bg: rgba(0, 0, 0, 0);
-  --btn-bg: #e50914;
-  --btn-text: #ffffff;
-  --shadow-color: rgba(229, 9, 20, 0.2);
-  --anim-speed: 0.15s;
-  background: #000000 !important;
-  color: #ffffff !important;
+/* Minimal: centered, clean */
+body.layout-minimal {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Global font override from ThemeContext */
-body {
-  font-family: var(--font-family-base, 'Inter', sans-serif) !important;
-  font-size: var(--font-size-base, 16px);
-  font-weight: var(--font-weight-base, normal);
+/* =============================================
+   HERO SIZE CLASSES
+   ============================================= */
+body.hero-full .hero { height: 100vh; }
+body.hero-half .hero { height: 55vh; }
+body.hero-compact .hero { height: 40vh; padding-bottom: 8vh; }
+body.hero-hidden .hero { display: none !important; }
+
+/* =============================================
+   CONTENT WIDTH
+   ============================================= */
+body.width-contained .sectionContainer,
+body.width-contained .content,
+body.width-contained .seasonsSection,
+body.width-contained .recommendations {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Global border-radius cascade */
-.card, .movieCard, .modal, .dropdown {
-  border-radius: var(--border-radius-base, 12px) !important;
+body.width-narrow .sectionContainer,
+body.width-narrow .content,
+body.width-narrow .seasonsSection,
+body.width-narrow .recommendations {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
+
+/* =============================================
+   CARD STYLE CLASSES
+   ============================================= */
+/* Poster is default (2:3 aspect ratio) — no override needed */
+
+body.cards-backdrop .cardContainer {
+  aspect-ratio: 16 / 9 !important;
+  flex: 0 0 var(--card-width) !important;
+}
+
+body.cards-minimal .cardContainer {
+  aspect-ratio: 2 / 3 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+}
+
+body.cards-rounded .cardContainer {
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 50% !important;
+  overflow: hidden;
+}
+
+/* Card size override */
+body.cards-small .cardContainer { flex: 0 0 110px !important; }
+body.cards-medium .cardContainer { flex: 0 0 150px !important; }
+body.cards-large .cardContainer { flex: 0 0 190px !important; }
+body.cards-xlarge .cardContainer { flex: 0 0 230px !important; }
+
+/* =============================================
+   CARD HOVER EFFECTS
+   ============================================= */
+body.hover-scale .cardContainer:hover {
+  transform: scale(1.08);
+  z-index: 100;
+}
+
+body.hover-glow .cardContainer:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 25px var(--primary-color), 0 0 50px rgba(229, 9, 20, 0.15) !important;
+  z-index: 100;
+}
+
+body.hover-lift .cardContainer:hover {
+  transform: translateY(-16px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
+  z-index: 100;
+}
+
+body.hover-flip .cardContainer {
+  perspective: 800px;
+}
+body.hover-flip .cardContainer:hover {
+  transform: rotateY(8deg) scale(1.02);
+  z-index: 100;
+}
+
+body.hover-none .cardContainer:hover {
+  transform: none !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+}
+
+/* =============================================
+   ROW STYLE
+   ============================================= */
+body.rows-wrap .movieGrid {
+  flex-wrap: wrap !important;
+  overflow-x: visible !important;
+  gap: 12px !important;
+  justify-content: flex-start;
+}
+
+body.rows-wrap .scrollBtn {
+  display: none !important;
+}
+
+/* =============================================
+   NAVBAR STYLE
+   ============================================= */
+body.nav-solid .topNav {
+  background: var(--bg-main, #000) !important;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.1));
+}
+
+body.nav-glass .topNav {
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+body.nav-hidden .topNav {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  transition: all 0.3s ease;
+}
+body.nav-hidden:hover .topNav,
+body.nav-hidden .topNav:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* =============================================
+   SIDEBAR
+   ============================================= */
+body.sidebar-hidden .sidebar {
+  display: none !important;
+}
+
+body.sidebar-hidden .sectionContainer {
+  padding-left: 40px !important;
+}
+
+body.sidebar-hidden .content {
+  padding-left: 40px !important;
+}
+
+body.sidebar-hidden .hero {
+  padding-left: 40px !important;
+}
+
+body.sidebar-hidden .seasonsSection,
+body.sidebar-hidden .recommendations {
+  padding-left: 40px !important;
+}
+
+/* =============================================
+   BUTTON STYLES
+   ============================================= */
+body.btn-filled .playBtn,
+body.btn-filled .primaryBtn {
+  border-radius: 4px;
+}
+
+body.btn-outline .playBtn {
+  background: transparent !important;
+  border: 2px solid #fff !important;
+  color: #fff !important;
+}
+body.btn-outline .playBtn:hover {
+  background: rgba(255,255,255,0.1) !important;
+}
+body.btn-outline .primaryBtn {
+  background: transparent !important;
+  border: 2px solid var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+body.btn-ghost .playBtn {
+  background: rgba(255,255,255,0.08) !important;
+  color: #fff !important;
+  backdrop-filter: blur(10px);
+}
+body.btn-ghost .primaryBtn {
+  background: rgba(229, 9, 20, 0.15) !important;
+  color: var(--primary-color) !important;
+}
+
+body.btn-pill .playBtn,
+body.btn-pill .primaryBtn,
+body.btn-pill .infoBtn,
+body.btn-pill .trailerBtnDetail {
+  border-radius: 50px !important;
+}
+
+body.btn-sharp .playBtn,
+body.btn-sharp .primaryBtn,
+body.btn-sharp .infoBtn,
+body.btn-sharp .trailerBtnDetail {
+  border-radius: 0 !important;
+}
+
+/* =============================================
+   SCROLLBAR STYLE
+   ============================================= */
+body.scrollbar-hidden ::-webkit-scrollbar {
+  display: none;
+}
+body.scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+body.scrollbar-thin ::-webkit-scrollbar { width: 4px; }
+body.scrollbar-thin ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+body.scrollbar-thin ::-webkit-scrollbar-track { background: transparent; }
+
+body.scrollbar-default ::-webkit-scrollbar { width: 8px; }
+
+/* =============================================
+   GLOW EFFECTS
+   ============================================= */
+body.glow-on .playBtn,
+body.glow-on .primaryBtn {
+  box-shadow: 0 0 20px var(--primary-color), 0 0 40px rgba(229, 9, 20, 0.2);
+}
+
+body.glow-on .navItem.active::before {
+  box-shadow: 0 0 12px var(--primary-color);
+}
+
+body.glow-on .colorSwatch.selectedColor {
+  box-shadow: 0 0 15px currentColor;
+}
+
+/* =============================================
+   ANIMATIONS OFF
+   ============================================= */
+body.animations-off *,
+body.animations-off *::before,
+body.animations-off *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* =============================================
+   GLOBAL BASE STYLES
+   ============================================= */
 
 :root {
   /* Light Theme Variables */
@@ -179,7 +404,7 @@ body {
   --bg-card-light: #ffffff;
   --text-primary-light: #121212;
   --text-secondary-light: #6c757d;
-  --accent-primary-light: var(--primary-color); /* Netflix red */
+  --accent-primary-light: var(--primary-color);
   --border-light: #e0e0e0;
   
   /* Dark Theme Variables */
@@ -224,13 +449,27 @@ body {
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: var(--font-family-base, 'Inter', sans-serif) !important;
+  font-size: var(--font-size-base, 16px);
+  font-weight: var(--font-weight-base, normal);
+  line-height: var(--line-height-base, 1.6);
+  letter-spacing: var(--letter-spacing-base, 0px);
   background-color: var(--bg-main);
   color: var(--text-primary);
   transition: all var(--anim-speed, 0.3s);
   overflow-x: hidden;
   user-select: none;
   cursor: default;
+}
+
+/* Heading font override */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--heading-font, var(--font-family-base, 'Inter', sans-serif)) !important;
+}
+
+/* Global border-radius cascade */
+.card, .movieCard, .modal, .dropdown {
+  border-radius: var(--border-radius-base, 12px) !important;
 }
 
 input, textarea, [contenteditable="true"] {

@@ -8,6 +8,8 @@ import LoginPromptModal from '../profile/LoginPromptModal';
 import CustomizeModal from '../profile/CustomizeModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
+import { useButtonWarnings } from '../../hooks/useButtonWarnings';
+import { AlertTriangle } from 'lucide-react';
 
 const AVATARS = [
   { id: 'red', color: '#e50914' },
@@ -30,6 +32,7 @@ const TopNav = () => {
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const buttonWarnings = useButtonWarnings();
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -111,7 +114,7 @@ const TopNav = () => {
   };
 
   return (
-    <header className={styles.topNav}>
+    <header className={`${styles.topNav} topNav`}>
       {!isLoginPage && (
         <Link to="/" className={styles.branding} style={{ textDecoration: 'none' }}>
           <img src="/AuraMovie_logo.png.png" alt="Logo" className={styles.brandLogo} />
@@ -190,8 +193,20 @@ const TopNav = () => {
                       <User size={16} /> Edit Profile
                       {!isLoggedIn && <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
                     </button>
-                    <button className={styles.dropdownItem} onClick={() => { setIsCustomizeOpen(true); setIsDropdownOpen(false); }}>
+                    <button 
+                      className={styles.dropdownItem} 
+                      onClick={(e) => { 
+                        if (buttonWarnings.customize_ui) {
+                          e.preventDefault();
+                          alert(`Notice: ${buttonWarnings.customize_ui}`);
+                        } else {
+                          setIsCustomizeOpen(true); setIsDropdownOpen(false); 
+                        }
+                      }}
+                      title={buttonWarnings.customize_ui || ''}
+                    >
                       <Settings size={16} /> Customize UI
+                      {buttonWarnings.customize_ui && <AlertTriangle size={14} color="#f39c12" style={{ marginLeft: 'auto' }} />}
                     </button>
                     <button className={styles.dropdownItem} onClick={() => { setIsHelpModalOpen(true); setIsDropdownOpen(false); }}>
                       <HelpCircle size={16} /> Help & Support
