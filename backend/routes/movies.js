@@ -114,32 +114,57 @@ const revalidate = async (url, forceType, cacheKey) => {
   return await fetchPromise;
 };
 
+const fetchMultiPages = async (urlBuilder, forceType, maxPages = 4) => {
+  const promises = [];
+  for (let i = 1; i <= maxPages; i++) {
+    promises.push(fetchAndFormat(urlBuilder(i), forceType).catch(() => []));
+  }
+  const results = await Promise.all(promises);
+  const combined = results.flat();
+  // Deduplicate by ID
+  const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+  return unique;
+};
+
 // --- CORE ROUTES ---
 router.get('/trending', async (req, res) => {
-  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}&page=${req.query.page || 1}`)); } catch (e) { res.status(500).json({ message: 'Error' }); }
+  try {
+    const urlBuilder = (page) => `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}&page=${page}`;
+    res.json(await fetchMultiPages(urlBuilder, null, 4));
+  } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
 router.get('/search', async (req, res) => {
   const { query, visitorId } = req.query;
   try {
-    const url = query ? `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}` : `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}`;
-    const data = await fetchAndFormat(url);
+    let data = [];
     if (query && query.trim()) {
-      try { await db.query("INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)", [query.trim().toLowerCase(), data && data.length > 0, visitorId || null]); } catch (l) {}
+      const urlBuilder = (page) => `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}&page=${page}`;
+      data = await fetchMultiPages(urlBuilder, null, 4);
+      try { await db.query("INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)", [query.trim().toLowerCase(), data.length > 0, visitorId || null]); } catch (l) {}
+    } else {
+      const urlBuilder = (page) => `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}&page=${page}`;
+      data = await fetchMultiPages(urlBuilder, null, 4);
     }
     res.json(data);
   } catch (error) { res.status(500).json({ message: 'Error' }); }
 });
 
 router.get('/discover', async (req, res) => {
-  const { type, genre, lang, page = 1 } = req.query;
+  const { type, genre, lang } = req.query;
   const langMap = { 'hollywood': 'en', 'bollywood': 'hi', 'south': 'te|ta|kn|ml', 'anime': 'ja' };
   const mediaType = (type === 'Series' || type === 'tv') ? 'tv' : 'movie';
   const tmdbLang = langMap[lang] || '';
-  let url = `${TMDB_BASE_URL}/discover/${mediaType}?api_key=${getApiKey()}&page=${page}&sort_by=popularity.desc`;
-  if (genre && genre !== 'all') url += `&with_genres=${genre}`;
-  if (tmdbLang) url += `&with_original_language=${tmdbLang}`;
-  try { res.json(await fetchAndFormat(url, mediaType)); } catch (e) { res.status(500).json({ message: 'Error' }); }
+  
+  try {
+    const urlBuilder = (page) => {
+      let url = `${TMDB_BASE_URL}/discover/${mediaType}?api_key=${getApiKey()}&page=${page}&sort_by=popularity.desc`;
+      if (genre && genre !== 'all') url += `&with_genres=${genre}`;
+      if (tmdbLang) url += `&with_original_language=${tmdbLang}`;
+      return url;
+    };
+    res.json(await fetchMultiPages(urlBuilder, mediaType, 4));
+  } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
 // --- HOME PAGE ENDPOINTS ---
