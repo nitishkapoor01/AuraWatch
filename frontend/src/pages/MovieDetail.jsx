@@ -433,10 +433,11 @@ const MovieDetail = () => {
     <div className={styles.detailPage}>
       <SEO 
         title={`${movie?.title} (${movie?.year || ''}) | Watch & Download Dual Audio HD`}
-        description={movie?.overview ? (movie.overview.substring(0, 160) + '...') : `Watch and download ${movie?.title} in 1080p high quality on AuraWatch.`}
+        description={`Watch and download ${movie?.title} (${movie?.year || ''}) free in HD on AuraWatch Fun. ${movie?.overview ? movie.overview.substring(0, 100) + '...' : ''}`}
         image={movie?.poster || movie?.backdrop}
         type={isTV ? "video.tv_show" : "video.movie"}
         schema={schema}
+        keywords={`${movie?.title} aurawatch, ${movie?.title} aurawatch fun, watch ${movie?.title} free, download ${movie?.title}`}
       />
 
       {/* Embed Player Modal */}
