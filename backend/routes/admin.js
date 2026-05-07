@@ -107,7 +107,7 @@ router.get('/announcement', isModerator, async (req, res) => {
 
 // GET Visitors, Most Watched, Login Logs
 router.get('/visitors', isModerator, async (req, res) => {
-  const result = await db.query('SELECT * FROM unique_visitors ORDER BY last_seen DESC LIMIT 50');
+  const result = await db.query('SELECT * FROM unique_visitors ORDER BY last_seen DESC LIMIT 5000');
   res.json(result.rows);
 });
 router.get('/analytics/most-watched', isModerator, async (req, res) => {
