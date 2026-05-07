@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, PlayCircle, BookOpen, MessageSquare, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
+import { X, PlayCircle, BookOpen, MessageSquare, Lightbulb, AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
 import styles from './HelpModal.module.css';
 
 const TABS = {
@@ -7,7 +7,8 @@ const TABS = {
   PLAYER_GUIDE: 'player_guide',
   FEEDBACK: 'feedback',
   FEATURE_REQUEST: 'feature_request',
-  REPORT_ISSUE: 'report_issue'
+  REPORT_ISSUE: 'report_issue',
+  DMCA: 'dmca'
 };
 
 const HelpModal = ({ isOpen, onClose }) => {
@@ -256,6 +257,21 @@ const HelpModal = ({ isOpen, onClose }) => {
           </div>
         );
 
+      case TABS.DMCA:
+        return (
+          <div className={styles.section}>
+            <h2 className={styles.contentTitle}>DMCA & Copyright Policy</h2>
+            <p>AuraWatch <strong>does not host, store, or upload</strong> any video files, media, or movies on our servers.</p>
+            <p>We simply act as a search engine and indexer, providing embedded players and links scraped from third-party websites across the internet. We have no direct control over the content hosted on these external servers.</p>
+            <div className={styles.noteBox} style={{marginTop: '15px', marginBottom: '15px'}}>
+              <p>We do not support or promote piracy. If you are a copyright owner and find your copyrighted material linked on our site, please feel free to ask us to remove the indexing.</p>
+            </div>
+            <h3>How to Request Removal</h3>
+            <p>Since we do not host the actual files, removing a link from our site will not remove the video from the internet. To have the content permanently taken down, you must contact the external third-party video host directly.</p>
+            <p>However, we respect copyright laws. If you want us to remove a specific embedded link from AuraWatch, please use the <strong>Report Issue</strong> tab or contact our admin team with proof of ownership.</p>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -304,6 +320,13 @@ const HelpModal = ({ isOpen, onClose }) => {
             onClick={() => handleTabChange(TABS.REPORT_ISSUE)}
           >
             <AlertTriangle size={18} /> Report Issue
+          </button>
+          
+          <button 
+            className={`${styles.tabBtn} ${activeTab === TABS.DMCA ? styles.active : ''}`}
+            onClick={() => handleTabChange(TABS.DMCA)}
+          >
+            <ShieldAlert size={18} /> DMCA / Copyright
           </button>
         </div>
 
