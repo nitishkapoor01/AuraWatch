@@ -375,7 +375,7 @@ const AdminDashboard = () => {
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(229, 9, 20, 0.15)', color: '#e50914' }}><Users size={28} /></div>
-              <div className={styles.statInfo}><h3>{stats.uniqueVisitorsToday}</h3><p>Unique Visitors Today</p></div>
+              <div className={styles.statInfo}><h3>{stats?.uniqueVisitorsToday}</h3><p>Unique Visitors Today</p></div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}><Zap size={28} /></div>
@@ -383,15 +383,15 @@ const AdminDashboard = () => {
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(39, 174, 96, 0.15)', color: '#27ae60' }}><CheckCircle size={28} /></div>
-              <div className={styles.statInfo}><h3>{stats.totalWatches}</h3><p>Completed Watches</p></div>
+              <div className={styles.statInfo}><h3>{stats?.totalWatches || 0}</h3><p>Completed Watches</p></div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}><Activity size={28} /></div>
-              <div className={styles.statInfo}><h3>{stats.totalAttempts}</h3><p>Total Clicks</p></div>
+              <div className={styles.statInfo}><h3>{stats?.totalAttempts || 0}</h3><p>Total Clicks</p></div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}><Clock size={28} /></div>
-              <div className={styles.statInfo}><h3>{Math.round(stats.totalWatchTimeHours)}h</h3><p>Total Watch Time</p></div>
+              <div className={styles.statInfo}><h3>{Math.round(stats?.totalWatchTimeHours || 0)}h</h3><p>Total Watch Time</p></div>
             </div>
           </div>
 
