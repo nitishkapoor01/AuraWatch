@@ -7,10 +7,12 @@ import {
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import styles from './AdminDashboard.module.css';
 
 const AdminDashboard = () => {
   const { token, isLoggedIn, user: currentUser } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   
@@ -241,8 +243,11 @@ const AdminDashboard = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(announcement)
       });
-      alert('Announcement updated!');
-    } catch (e) { alert('Failed to save announcement'); }
+      showToast('Announcement updated successfully!', 'success');
+    } catch (e) { 
+      console.error(e);
+      showToast('Failed to save announcement', 'error');
+    }
     finally { setSavingAnnouncement(false); }
   };
 
@@ -256,7 +261,11 @@ const AdminDashboard = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ key: 'button_warnings', value: newWarnings })
       });
-    } catch (e) { alert('Failed to update button warnings'); }
+      showToast('Button warning saved!', 'success');
+    } catch (e) { 
+      console.error(e);
+      showToast('Failed to update button warnings', 'error');
+    }
     finally { setSavingSettings(false); }
   };
 
@@ -269,7 +278,11 @@ const AdminDashboard = () => {
         body: JSON.stringify({ key, value })
       });
       setGlobalSettings(prev => ({ ...prev, [key]: value }));
-    } catch (e) { alert('Failed to update setting'); }
+      showToast(`Setting ${key} updated!`, 'info');
+    } catch (e) { 
+      console.error(e);
+      showToast('Failed to update setting', 'error');
+    }
     finally { setSavingSettings(false); }
   };
 
