@@ -231,10 +231,14 @@ const WatchHistory = () => {
         </div>
       ) : (
         <div className={styles.grid}>
-          {processedData.filteredList.map((item) => (
+          {processedData.filteredList.map((item) => {
+            const progressPercent = item.duration ? Math.min(100, Math.max(0, (item.progress / item.duration) * 100)) : 0;
+            const playUrl = `/movie/${item.movie_id}?type=${item.movie_type}&play=true${item.season ? `&s=${item.season}&e=${item.episode}` : ''}`;
+            
+            return (
             <div key={`${item.movie_id}-${item.movie_type}-${item.season || 0}-${item.episode || 0}`} className={styles.card}>
               <div className={styles.cardLinkContainer}>
-                <Link to={`/movie/${item.movie_id}?type=${item.movie_type}`} className={styles.cardLink}>
+                <Link to={playUrl} className={styles.cardLink}>
                   <img src={item.poster} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" />
                   
                   <div className={styles.dateBadge} data-title={item.detailedTime}>
@@ -244,10 +248,19 @@ const WatchHistory = () => {
 
                   <div className={styles.cardOverlay}>
                     <span className={styles.cardTitle}>{item.title}</span>
-                    <span className={styles.cardMeta}>
-                      {item.year} · {item.movie_type === 'movie' ? 'Movie' : 'TV Show'}
-                      {item.season && ` · S${item.season}E${item.episode}`}
+                    <span className={styles.cardMeta} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>
+                        {item.year} · {item.movie_type === 'movie' ? 'Movie' : 'TV Show'}
+                        {item.season && ` · S${item.season}E${item.episode}`}
+                      </span>
+                      {progressPercent > 0 && <span style={{ color: '#e50914', fontSize: '10px', fontWeight: 'bold' }}>{Math.round(progressPercent)}%</span>}
                     </span>
+                    {/* Progress bar line */}
+                    {progressPercent > 0 && (
+                      <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.3)', marginTop: '6px', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ width: `${progressPercent}%`, height: '100%', background: '#e50914', transition: 'width 0.3s ease' }}></div>
+                      </div>
+                    )}
                   </div>
                   <div className={styles.watchedIndicator}></div>
                   <div className={styles.playOverlay}><Play size={32} fill="white" /></div>
@@ -264,7 +277,8 @@ const WatchHistory = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

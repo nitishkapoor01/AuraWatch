@@ -128,9 +128,9 @@ const Home = () => {
           paddingRight: layout === 'minimal' ? '120px' : undefined,
         }}
       >
+        <ContinueWatchingRow compact={layout === 'grid'} />
         <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} />
         <Row title="Trending Now" endpoint="trending" compact={layout === 'grid'} />
-        <ContinueWatchingRow compact={layout === 'grid'} />
         <Row title="Popular on Netflix" endpoint="continue-watching" compact={layout === 'grid'} />
         <Row title="Top Rated Classics" endpoint="top-rated" compact={layout === 'grid'} />
         <Row title="Action & Adventure" endpoint="action" compact={layout === 'grid'} />
