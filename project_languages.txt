@@ -1,38 +1,49 @@
 AuraWatch Project - Technical Architecture & Roadmap
 ==================================================
 
-1. Core Technologies
---------------------
-- JavaScript (JSX): React Frontend & Node.js Backend.
-- PostgreSQL: Database for Users, History, and Settings.
-- CSS Modules: Scoped premium styling (Glassmorphism & Neon Glow).
-- Playwright: High-speed scraper for movie link aggregation.
+1. Languages & Frameworks
+-------------------------
+- JavaScript (JSX): Used everywhere (Frontend, Backend, Scraper).
+- React.js: Frontend framework for building the UI.
+- Node.js & Express.js: Backend server logic and API routing.
+- PostgreSQL: Relational database for storing all user and platform data.
+- SQL: Used for writing custom queries (Analytics, Search, etc.).
+- CSS3 (Modules): Vanilla CSS with modern features like Variables, Gradients, and Glassmorphism.
+- HTML5: Semantic structure for SEO and accessibility.
 
-2. Database Logic (The "Brain")
+2. Libraries & Core Tools
+-------------------------
+- Vite: Lightning-fast build tool for the React frontend.
+- Playwright: Browser automation for high-speed movie link scraping.
+- Lucide React: Modern icon library used throughout the platform.
+- JWT (JSON Web Tokens): Secure authentication for user sessions.
+- Node-Postgres (pg): Database client for connecting Node.js to PostgreSQL.
+- Render: Cloud platform used for hosting the API and Database.
+
+3. Database Logic (The "Brain")
 -------------------------------
 - Sticky Watch History: 'is_completed' flag ensures re-watching doesn't reset progress.
 - Role-Based Access: Admin, Moderator, and User levels.
 - Dynamic Settings: JSON-based key-value storage for warnings, ads, and updates.
 
-3. Premium UI/UX System
+4. Premium UI/UX System
 -----------------------
-- Toast Engine: Global notification system with bounce animations and pulse glows.
+- Toast Engine: Global notification system with bounce animations and neon glows.
 - Warning Badges: Animated pulse dots on restricted buttons (Play/Download).
 - Responsive Design: Custom mobile-optimized layouts for Sidebar and Modals.
 
-4. Admin Control Center
+5. Admin Control Center
 -----------------------
 - Engagement Analytics: Differentiates between 'Total Clicks' and '90%+ Completed Watches'.
 - Button Warnings: Remote-control alerts for restricted actions.
 - Platform Updates: Real-time changelog manager visible in Help & Support.
 - Live Traffic: Real-time monitoring of active users and search trends.
 
-5. Deployment & Tools
----------------------
-- Backend: Hosted on Render (Node.js/Express).
-- Frontend: High-performance React (Vite).
-- Git: Version control for feature branching.
+6. Deployment & SEO
+-------------------
+- Git: Version control (GitHub).
 - SEO Engine: Dynamic meta tags for Movie/Series discovery.
+- Sitemap Generator: Automated XML sitemap for Search Console.
 
 ==================================================
-Last Updated: May 9, 2026 - Premium UI & Updates Overhaul
+Last Updated: May 9, 2026 - Complete Architecture Docs
