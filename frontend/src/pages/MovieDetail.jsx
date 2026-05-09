@@ -58,7 +58,7 @@ const MovieDetail = () => {
   const type = searchParams.get('type') || 'movie';
   const isTV = isTVType(type);
   const navigate = useNavigate();
-  const { isLoggedIn, token, user } = useAuth();
+  const { isLoggedIn, token, user: currentUser } = useAuth();
   const { showToast } = useToast();
 
   const [movie, setMovie] = useState(null);
