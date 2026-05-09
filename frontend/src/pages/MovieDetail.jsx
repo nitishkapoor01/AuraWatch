@@ -58,7 +58,7 @@ const MovieDetail = () => {
   const type = searchParams.get('type') || 'movie';
   const isTV = isTVType(type);
   const navigate = useNavigate();
-  const { isLoggedIn, token, user: currentUser } = useAuth();
+  const { isLoggedIn, token, user } = useAuth();
   const { showToast } = useToast();
 
   const [movie, setMovie] = useState(null);
@@ -686,7 +686,7 @@ const MovieDetail = () => {
               className={`${styles.playBtn} playBtn`} 
               onClick={() => {
                 if (buttonWarnings.play_movie) {
-                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  const hasBypass = user?.role === 'admin' || user?.role === 'moderator';
                   if (!hasBypass) {
                     showToast(buttonWarnings.play_movie, 'warning');
                     return;
@@ -710,7 +710,7 @@ const MovieDetail = () => {
               title={buttonWarnings.watch_trailer || ''}
               onClick={(e) => {
                 if (buttonWarnings.watch_trailer) {
-                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  const hasBypass = user?.role === 'admin' || user?.role === 'moderator';
                   if (!hasBypass) {
                     e.preventDefault();
                     showToast(buttonWarnings.watch_trailer, 'warning');
@@ -729,7 +729,7 @@ const MovieDetail = () => {
               className={`${styles.listBtn} ${isFavorite ? styles.listBtnActive : ''}`} 
               onClick={(e) => {
                 if (buttonWarnings.add_to_list) {
-                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  const hasBypass = user?.role === 'admin' || user?.role === 'moderator';
                   if (!hasBypass) {
                     e.preventDefault();
                     showToast(buttonWarnings.add_to_list, 'warning');
@@ -749,7 +749,7 @@ const MovieDetail = () => {
               className={`${styles.listBtn} downloadBtn`}
               onClick={(e) => {
                 if (buttonWarnings.download_movie) {
-                  const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
+                  const hasBypass = user?.role === 'admin' || user?.role === 'moderator';
                   if (!hasBypass) {
                     e.preventDefault();
                     showToast(buttonWarnings.download_movie, 'warning');
