@@ -27,7 +27,7 @@ const HelpModal = ({ isOpen, onClose }) => {
     try {
       setLoadingUpdates(true);
       const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api');
-      const res = await fetch(`${baseUrl}/admin/settings/platform_updates`);
+      const res = await fetch(`${baseUrl}/settings/platform_updates`);
       if (res.ok) {
         const data = await res.json();
         setPlatformUpdates(data.value || '');
