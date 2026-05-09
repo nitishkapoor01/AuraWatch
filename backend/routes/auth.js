@@ -472,7 +472,7 @@ router.get('/streak', authMiddleware, async (req, res) => {
     longestStreak = Math.max(longestStreak, currentStreak, 1);
 
     const totalWatchedResult = await db.query(
-      `SELECT COUNT(DISTINCT movie_id) as total FROM watch_history WHERE user_id = $1`,
+      `SELECT COUNT(DISTINCT movie_id) as total FROM watch_history WHERE user_id = $1 AND progress >= 90`,
       [req.user.id]
     );
     const totalWatched = parseInt(totalWatchedResult.rows[0].total || 0);
