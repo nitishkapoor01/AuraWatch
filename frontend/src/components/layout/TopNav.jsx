@@ -195,7 +195,7 @@ const TopNav = () => {
                 
                 {isDropdownOpen && (
                   <div className={styles.dropdownMenu}>
-                    {/* Streak Badge */}
+                    {/* Streak Badge — logged in */}
                     {isLoggedIn && streak.currentStreak > 0 && (
                       <div style={{
                         padding: '10px 16px',
@@ -212,6 +212,33 @@ const TopNav = () => {
                           </div>
                           <div style={{ color: '#aaa', fontSize: '11px' }}>
                             Best: {streak.longestStreak} days · {streak.totalDays} total days watched
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Streak Teaser — guests */}
+                    {!isLoggedIn && (
+                      <div
+                        onClick={() => { navigate('/login'); setIsDropdownOpen(false); }}
+                        style={{
+                          padding: '10px 16px',
+                          borderBottom: '1px solid rgba(255,255,255,0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          background: 'linear-gradient(90deg, rgba(229,9,20,0.08), transparent)',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s'
+                        }}
+                      >
+                        <span style={{ fontSize: '22px' }}>🔥</span>
+                        <div>
+                          <div style={{ color: 'white', fontWeight: 'bold', fontSize: '13px' }}>
+                            Start Your Streak!
+                          </div>
+                          <div style={{ color: '#e50914', fontSize: '11px', fontWeight: '600' }}>
+                            Login to track daily watching →
                           </div>
                         </div>
                       </div>
