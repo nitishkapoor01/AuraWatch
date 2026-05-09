@@ -10,6 +10,22 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, totalDays: 0 });
 
+  const refreshStreak = async (customToken) => {
+    const activeToken = customToken || token;
+    if (!activeToken) return;
+    try {
+      const res = await fetch(`${API_BASE}/auth/streak`, {
+        headers: { Authorization: `Bearer ${activeToken}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStreak(data);
+      }
+    } catch (err) {
+      console.error('[Auth] Failed to refresh streak:', err);
+    }
+  };
+
   // Restore session on app load
   useEffect(() => {
     const restoreSession = async () => {
@@ -30,9 +46,7 @@ export const AuthProvider = ({ children }) => {
             headers: { Authorization: `Bearer ${savedToken}` }
           }).catch(() => {});
           // Fetch streak in background
-          fetch(`${API_BASE}/auth/streak`, {
-            headers: { Authorization: `Bearer ${savedToken}` }
-          }).then(r => r.ok ? r.json() : null).then(d => { if (d) setStreak(d); }).catch(() => {});
+          refreshStreak(savedToken);
         } else {
           localStorage.removeItem('aurawatch_token');
           setToken(null);
@@ -52,12 +66,14 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
-    
-    localStorage.setItem('aurawatch_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-    return data;
+    if (res.ok) {
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem('aurawatch_token', data.token);
+      refreshStreak(data.token);
+    } else {
+      throw new Error(data.message);
+    }
   };
 
   const register = async (name, email, password, confirmPassword, securityQuestion, securityAnswer) => {
@@ -67,12 +83,15 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify({ name, email, password, confirmPassword, securityQuestion, securityAnswer })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
-    
-    localStorage.setItem('aurawatch_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-    return data;
+    if (res.ok) {
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem('aurawatch_token', data.token);
+      refreshStreak(data.token);
+      return data;
+    } else {
+      throw new Error(data.message);
+    }
   };
 
   const updateAvatar = async (avatarStr) => {
@@ -181,7 +200,8 @@ export const AuthProvider = ({ children }) => {
       uploadCustomAvatar,
       updateName,
       changePassword,
-      getSecurityQuestion
+      getSecurityQuestion,
+      refreshStreak
     }}>
       {children}
     </AuthContext.Provider>

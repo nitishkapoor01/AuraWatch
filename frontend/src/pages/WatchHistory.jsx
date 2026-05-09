@@ -80,7 +80,7 @@ const HistoryCard = ({ item, handleGetLink, handleRemove, handleMarkComplete }) 
 };
 
 const WatchHistory = () => {
-  const { isLoggedIn, token } = useAuth();
+  const { isLoggedIn, token, refreshStreak } = useAuth();
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,6 +116,8 @@ const WatchHistory = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setHistory(prev => prev.filter(f => !(f.movie_id === movieId && f.movie_type === movieType)));
+      // Refresh global stats
+      refreshStreak();
     } catch (err) {
       console.error('Failed to remove:', err);
     }
@@ -134,6 +136,8 @@ const WatchHistory = () => {
           ? { ...h, progress: h.duration || 3600, duration: h.duration || 3600 } 
           : h
         ));
+        // Refresh global stats
+        refreshStreak();
       }
     } catch (err) {
       console.error('Failed to mark complete:', err);
