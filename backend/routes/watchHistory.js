@@ -88,6 +88,29 @@ router.post('/cleanup', async (req, res) => {
 });
 
 
+// Mark as completed
+router.put('/:movieId/complete', async (req, res) => {
+  const { movieId } = req.params;
+  const { type = 'movie' } = req.query;
+
+  try {
+    // Set progress to match duration (or a large enough value if duration is 0)
+    await db.query(
+      `UPDATE watch_history 
+       SET progress = CASE WHEN duration > 0 THEN duration ELSE 3600 END,
+           duration = CASE WHEN duration > 0 THEN duration ELSE 3600 END,
+           last_watched = CURRENT_TIMESTAMP
+       WHERE user_id = $1 AND movie_id = $2 AND movie_type = $3`,
+      [req.user.id, parseInt(movieId), type]
+    );
+
+    res.json({ message: 'Marked as completed.' });
+  } catch (error) {
+    console.error('[WatchHistory] Complete error:', error);
+    res.status(500).json({ message: 'Failed to mark as completed.' });
+  }
+});
+
 // Delete from watch history
 router.delete('/:movieId', async (req, res) => {
   const { movieId } = req.params;

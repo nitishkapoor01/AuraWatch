@@ -446,6 +446,10 @@
   border-color: transparent;
 }
 
+.completeBtn:hover {
+  background: #2ecc71 !important;
+}
+
 
 /* Empty State */
 .emptyState {

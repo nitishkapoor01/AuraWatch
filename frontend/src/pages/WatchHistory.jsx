@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Clock, Play, Film, Tv, BarChart3, Calendar, Filter, ExternalLink } from 'lucide-react';
+import { Trash2, Clock, Play, Film, Tv, BarChart3, Calendar, Filter, ExternalLink, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from './WatchHistory.module.css';
 import SEO from '../components/SEO';
@@ -16,7 +16,7 @@ const FILTER_OPTIONS = [
   { key: 'older', label: 'Older' },
 ];
 
-const HistoryCard = ({ item, handleGetLink, handleRemove }) => {
+const HistoryCard = ({ item, handleGetLink, handleRemove, handleMarkComplete }) => {
   const progressPercent = item.duration ? Math.min(100, Math.max(0, (item.progress / item.duration) * 100)) : 0;
   const playUrl = `/movie/${item.movie_id}?type=${item.movie_type}&play=true${item.season ? `&s=${item.season}&e=${item.episode}` : ''}`;
 
@@ -62,6 +62,11 @@ const HistoryCard = ({ item, handleGetLink, handleRemove }) => {
         </Link>
         
         <div className={styles.cardActions}>
+          {!item.isDone && (
+            <button className={`${styles.actionBtn} ${styles.completeBtn}`} onClick={() => handleMarkComplete(item.movie_id, item.movie_type)} title="Mark as Completed">
+              <Check size={16} />
+            </button>
+          )}
           <button className={styles.actionBtn} onClick={() => handleGetLink(item)} title="Get Download Link">
             <ExternalLink size={16} />
           </button>
@@ -113,6 +118,25 @@ const WatchHistory = () => {
       setHistory(prev => prev.filter(f => !(f.movie_id === movieId && f.movie_type === movieType)));
     } catch (err) {
       console.error('Failed to remove:', err);
+    }
+  };
+
+  const handleMarkComplete = async (movieId, movieType) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/watch-history/${movieId}/complete?type=${movieType}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        // Update local state to reflect change immediately
+        setHistory(prev => prev.map(h => 
+          (h.movie_id === movieId && h.movie_type === movieType) 
+          ? { ...h, progress: h.duration || 3600, duration: h.duration || 3600 } 
+          : h
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to mark complete:', err);
     }
   };
 
@@ -298,7 +322,7 @@ const WatchHistory = () => {
                   <h2 className={styles.groupTitle}><Film size={20} /> Movies Completed</h2>
                   <div className={styles.grid}>
                     {processedData.filteredList.filter(i => i.movie_type === 'movie').map((item) => (
-                      <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} />
+                      <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} handleMarkComplete={handleMarkComplete} />
                     ))}
                   </div>
                 </div>
@@ -310,7 +334,7 @@ const WatchHistory = () => {
                   <h2 className={styles.groupTitle}><Tv size={20} /> Shows Completed</h2>
                   <div className={styles.grid}>
                     {processedData.filteredList.filter(i => i.movie_type !== 'movie').map((item) => (
-                      <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} />
+                      <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} handleMarkComplete={handleMarkComplete} />
                     ))}
                   </div>
                 </div>
@@ -319,7 +343,7 @@ const WatchHistory = () => {
           ) : (
             <div className={styles.grid}>
               {processedData.filteredList.map((item) => (
-                <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} />
+                <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} handleMarkComplete={handleMarkComplete} />
               ))}
             </div>
           )}
