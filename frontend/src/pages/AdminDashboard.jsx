@@ -4,7 +4,8 @@ import {
   Users, Trash2, ShieldAlert, Film, Clock, BarChart3, AlertCircle, 
   Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, 
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
-  Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle
+  Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
+  Download, List, Palette, Play
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -414,10 +415,13 @@ const AdminDashboard = () => {
           </div>
 
           <div className={styles.analyticsSection} style={{ marginTop: '40px' }}>
-            <div className={styles.sectionHeader}><h2>Feature Controls</h2></div>
+            <div className={styles.sectionHeader}><h2><Shield size={20} style={{marginRight: '10px'}}/> Feature Controls</h2></div>
             <div className={styles.settingsGrid}>
               <div className={styles.settingCard}>
-                <div className={styles.settingInfo}><h3>Skip Download Timer</h3><p>Users bypass the 30s wait when enabled.</p></div>
+                <div className={styles.settingInfo}>
+                  <h3><Zap size={18} color="#2ecc71" /> Skip Download Timer</h3>
+                  <p>Users bypass the 30s wait when enabled. Best for premium UX.</p>
+                </div>
                 <button 
                   className={`${styles.toggleBtn} ${globalSettings.skip_ads_timer ? styles.active : ''}`} 
                   onClick={() => handleUpdateSetting('skip_ads_timer', !globalSettings.skip_ads_timer)} 
@@ -428,36 +432,34 @@ const AdminDashboard = () => {
               </div>
             </div>
             
-            <div className={styles.sectionHeader} style={{ marginTop: '30px' }}><h2>Button Warnings & Tooltips</h2></div>
+            <div className={styles.sectionHeader} style={{ marginTop: '40px' }}><h2><BarChart3 size={20} style={{marginRight: '10px'}}/> Button Warnings & Tooltips</h2></div>
             <div className={styles.settingsGrid}>
               {[
-                { id: 'play_movie', label: 'Play Now (Movie Detail)' },
-                { id: 'download_movie', label: 'Download (Movie Detail)' },
-                { id: 'watch_trailer', label: 'Watch Trailer (Movie Detail)' },
-                { id: 'add_to_list', label: 'Add to List (Movie Detail)' },
-                { id: 'customize_ui', label: 'Customize UI (Top Nav)' }
+                { id: 'play_movie', label: 'Play Now Button', icon: <Play size={16} /> },
+                { id: 'download_movie', label: 'Download Button', icon: <Download size={16} /> },
+                { id: 'watch_trailer', label: 'Watch Trailer', icon: <Film size={16} /> },
+                { id: 'add_to_list', label: 'Add to List', icon: <List size={16} /> },
+                { id: 'customize_ui', label: 'Customize UI', icon: <Palette size={16} /> }
               ].map(btn => (
-                <div key={btn.id} className={styles.settingCard} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+                <div key={btn.id} className={styles.settingCard} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '20px' }}>
                   <div className={styles.settingInfo}>
-                    <h3>{btn.label}</h3>
-                    <p>Leave empty for no warning. Any text here will show as a badge/tooltip.</p>
+                    <h3>{btn.icon} {btn.label}</h3>
+                    <p>Enter warning text to show a badge/tooltip. Clear it to remove.</p>
                   </div>
-                  <div style={{ display: 'flex', width: '100%', gap: '10px' }}>
+                  <div style={{ display: 'flex', width: '100%', gap: '12px' }}>
                     <input 
                       type="text" 
-                      placeholder="e.g. Currently in development" 
+                      placeholder="e.g. Server maintenance tonight" 
                       className={styles.inputField} 
                       value={buttonWarnings[btn.id] || ''} 
                       onChange={e => setButtonWarnings({...buttonWarnings, [btn.id]: e.target.value})}
-                      style={{ flex: 1, margin: 0 }}
                     />
                     <button 
                       className={styles.primaryBtn} 
                       onClick={() => handleUpdateButtonWarnings(btn.id, buttonWarnings[btn.id])}
                       disabled={savingSettings || currentUser.role !== 'admin'}
-                      style={{ padding: '0 16px' }}
                     >
-                      Save
+                      <CheckCircle size={16} /> Save
                     </button>
                   </div>
                 </div>
