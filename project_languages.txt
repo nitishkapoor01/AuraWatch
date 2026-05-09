@@ -1,24 +1,38 @@
-AuraWatch Project - Technologies & Languages Used
+AuraWatch Project - Technical Architecture & Roadmap
 ==================================================
 
-1. Programming Languages
-------------------------
-- JavaScript (JS / JSX) : The core programming language used for both the Frontend, Backend, and Scrapper.
-- CSS : Used for styling the application (Vanilla CSS and CSS Modules).
-- HTML : Used for the structure of the web pages.
-- SQL : Used for interacting with the PostgreSQL database.
+1. Core Technologies
+--------------------
+- JavaScript (JSX): React Frontend & Node.js Backend.
+- PostgreSQL: Database for Users, History, and Settings.
+- CSS Modules: Scoped premium styling (Glassmorphism & Neon Glow).
+- Playwright: High-speed scraper for movie link aggregation.
 
-2. Frameworks & Libraries
--------------------------
-- React.js : Frontend UI library.
-- Node.js & Express.js : Backend server framework.
-- Playwright / Puppeteer : Browser automation tools used in the backend scraper for fetching download links.
-- pg (node-postgres) : PostgreSQL client for Node.js.
-- jsonwebtoken (JWT) : Used for authentication.
+2. Database Logic (The "Brain")
+-------------------------------
+- Sticky Watch History: 'is_completed' flag ensures re-watching doesn't reset progress.
+- Role-Based Access: Admin, Moderator, and User levels.
+- Dynamic Settings: JSON-based key-value storage for warnings, ads, and updates.
 
-3. Tools & Configurations
--------------------------
-- JSON : Used for configuration files (package.json, etc.).
-- Dockerfile : Used for containerizing the backend for deployment.
-- Git : Version control.
-- Vite : Build tool for the React frontend.
+3. Premium UI/UX System
+-----------------------
+- Toast Engine: Global notification system with bounce animations and pulse glows.
+- Warning Badges: Animated pulse dots on restricted buttons (Play/Download).
+- Responsive Design: Custom mobile-optimized layouts for Sidebar and Modals.
+
+4. Admin Control Center
+-----------------------
+- Engagement Analytics: Differentiates between 'Total Clicks' and '90%+ Completed Watches'.
+- Button Warnings: Remote-control alerts for restricted actions.
+- Platform Updates: Real-time changelog manager visible in Help & Support.
+- Live Traffic: Real-time monitoring of active users and search trends.
+
+5. Deployment & Tools
+---------------------
+- Backend: Hosted on Render (Node.js/Express).
+- Frontend: High-performance React (Vite).
+- Git: Version control for feature branching.
+- SEO Engine: Dynamic meta tags for Movie/Series discovery.
+
+==================================================
+Last Updated: May 9, 2026 - Premium UI & Updates Overhaul
