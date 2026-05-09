@@ -182,7 +182,7 @@ const WatchHistory = () => {
     const items = history.map(item => {
       const date = parseDate(item.last_watched);
       const dStr = date.toDateString();
-      const isDone = item.duration > 0 && item.progress >= (item.duration * 0.9);
+      const isDone = item.is_completed || (item.duration > 0 && item.progress >= (item.duration * 0.9));
       
       let category = 'older';
       if (dStr === todayStr) { category = 'today'; counts.today++; }

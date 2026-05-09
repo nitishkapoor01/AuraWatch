@@ -7,6 +7,11 @@ const router = express.Router();
 // All routes require authentication
 router.use(authMiddleware);
 
+// Migration to add is_completed column if not exists
+db.query('ALTER TABLE watch_history ADD COLUMN IF NOT EXISTS is_completed BOOLEAN DEFAULT FALSE').catch(err => {
+  console.error('[WatchHistory] Migration error:', err);
+});
+
 // Get user's watch history
 router.get('/', async (req, res) => {
   try {
@@ -35,13 +40,12 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ message: 'Movie ID and title are required.' });
   }
 
-  const hasRealProgress = progress !== null && progress !== undefined && progress > 0;
-  const hasRealDuration = duration !== null && duration !== undefined && duration > 0;
+  const isNowDone = duration > 0 && progress >= (duration * 0.9);
 
   try {
     await db.query(`
-      INSERT INTO watch_history (user_id, movie_id, movie_type, title, poster, backdrop, rating, year, progress, duration, season, episode, last_watched)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
+      INSERT INTO watch_history (user_id, movie_id, movie_type, title, poster, backdrop, rating, year, progress, duration, season, episode, last_watched, is_completed)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), $13)
       ON CONFLICT(user_id, movie_id, movie_type, season, episode) 
       DO UPDATE SET 
         progress = CASE WHEN $9 IS NOT NULL AND $9 > 0 THEN $9 ELSE watch_history.progress END,
@@ -49,7 +53,8 @@ router.post('/', async (req, res) => {
         last_watched = NOW(),
         title = EXCLUDED.title,
         poster = EXCLUDED.poster,
-        backdrop = EXCLUDED.backdrop
+        backdrop = EXCLUDED.backdrop,
+        is_completed = watch_history.is_completed OR $13
     `, [
       req.user.id,
       movieId,
@@ -59,15 +64,16 @@ router.post('/', async (req, res) => {
       backdrop || '',
       rating || '',
       year || '',
-      hasRealProgress ? progress : null,
-      hasRealDuration ? duration : null,
+      progress || 0,
+      duration || 0,
       season || null,
-      episode || null
+      episode || null,
+      isNowDone
     ]);
 
-    res.status(201).json({ message: 'Watch history updated!' });
+    res.json({ message: 'Watch history updated.' });
   } catch (error) {
-    console.error('[WatchHistory] Add/Update error:', error);
+    console.error('[WatchHistory] Post error:', error);
     res.status(500).json({ message: 'Failed to update watch history.' });
   }
 });
@@ -99,7 +105,8 @@ router.put('/:movieId/complete', async (req, res) => {
       `UPDATE watch_history 
        SET progress = CASE WHEN duration > 0 THEN duration ELSE 3600 END,
            duration = CASE WHEN duration > 0 THEN duration ELSE 3600 END,
-           last_watched = CURRENT_TIMESTAMP
+           last_watched = CURRENT_TIMESTAMP,
+           is_completed = TRUE
        WHERE user_id = $1 AND movie_id = $2 AND movie_type = $3`,
       [req.user.id, parseInt(movieId), type]
     );
