@@ -9,30 +9,11 @@ const ContinueWatchingRow = ({ compact = false }) => {
   const [loading, setLoading] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const rowRef = useRef(null);
-  const sentinelRef = useRef(null);
   const { isLoggedIn, token } = useAuth();
 
-  // Only start loading when row scrolls into viewport
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '2000px' } 
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible || !isLoggedIn) return;
+    if (!isLoggedIn) return;
     
     const fetchHistory = async () => {
       try {
@@ -52,7 +33,7 @@ const ContinueWatchingRow = ({ compact = false }) => {
       }
     };
     fetchHistory();
-  }, [isVisible, isLoggedIn, token]);
+  }, [isLoggedIn, token]);
 
   const checkScrollable = useCallback(() => {
     const el = rowRef.current;
@@ -84,7 +65,7 @@ const ContinueWatchingRow = ({ compact = false }) => {
 
   if (loading) {
     return (
-      <section className={styles.section} ref={sentinelRef}>
+      <section className={styles.section}>
         <div className={styles.sectionHeader}><div className="skeleton" style={{ width: '150px', height: '18px' }}></div></div>
         <div className={`${styles.movieGrid} movieGrid`}>
           {[...Array(6)].map((_, i) => <div key={i} className={`skeleton ${styles.cardContainer} cardContainer`}></div>)}
@@ -96,7 +77,7 @@ const ContinueWatchingRow = ({ compact = false }) => {
   if (!movies || movies.length === 0) return null;
 
   return (
-    <section className={styles.section} ref={sentinelRef}>
+    <section className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionTitle}>Continue Watching</h2>
       </div>
