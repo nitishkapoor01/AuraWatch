@@ -71,6 +71,7 @@ const MovieDetail = () => {
   const [playerEpisodeName, setPlayerEpisodeName] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showLoginTeaser, setShowLoginTeaser] = useState(false);
 
   // Download Modal State
   const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -434,7 +435,7 @@ const MovieDetail = () => {
 
   const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
-      navigate('/login');
+      setShowLoginTeaser(true);
       return;
     }
 
@@ -924,6 +925,51 @@ const MovieDetail = () => {
           </div>
         </div>
       )}
+      {/* Login Teaser Modal */}
+      {showLoginTeaser && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+          backdropFilter: 'blur(8px)'
+        }} onClick={() => setShowLoginTeaser(false)}>
+          <div style={{
+            background: 'linear-gradient(145deg, #1a1a24, #0f0f16)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '16px', padding: '40px', maxWidth: '400px', width: '100%',
+            textAlign: 'center', boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+            position: 'relative'
+          }} onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setShowLoginTeaser(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}
+            >
+              <X size={24} />
+            </button>
+            <div style={{ width: '64px', height: '64px', background: 'rgba(229,9,20,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <Plus size={32} color="#e50914" />
+            </div>
+            <h2 style={{ color: 'white', fontSize: '24px', fontWeight: 'bold', marginBottom: '12px' }}>Save to Your List</h2>
+            <p style={{ color: '#aaa', fontSize: '15px', lineHeight: '1.5', marginBottom: '30px' }}>
+              Create a free account to build your personal watchlist, track your watching history, and customize your AuraWatch experience.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button 
+                onClick={() => navigate('/login')}
+                style={{ background: '#e50914', color: 'white', padding: '14px', borderRadius: '8px', border: 'none', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+              >
+                Log In to Save
+              </button>
+              <button 
+                onClick={() => navigate('/login?tab=register')}
+                style={{ background: 'rgba(255,255,255,0.1)', color: 'white', padding: '14px', borderRadius: '8px', border: 'none', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' }}
+              >
+                Create an Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

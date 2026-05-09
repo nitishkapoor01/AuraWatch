@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import styles from '../pages/Home.module.css';
 
@@ -61,7 +61,60 @@ const ContinueWatchingRow = ({ compact = false }) => {
     el.scrollBy({ left: dir === 'right' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
   };
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) {
+    return (
+      <section className={styles.section} style={{ position: 'relative' }}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Continue Watching</h2>
+        </div>
+        
+        <div className={`${styles.movieGrid} movieGrid`} style={{ filter: 'blur(4px)', opacity: 0.5, pointerEvents: 'none' }}>
+          {[1, 2, 3, 4, 5].map((idx) => (
+            <div 
+              key={idx}
+              className={`${styles.cardContainer} cardContainer`}
+              style={{
+                flex: compact ? '0 0 calc(20% - 8px)' : undefined,
+                aspectRatio: compact ? '16 / 9' : '2 / 3',
+                height: compact ? 'auto' : undefined,
+                background: '#333'
+              }}
+            ></div>
+          ))}
+        </div>
+        
+        {/* Overlay CTA */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10,
+          background: 'rgba(0,0,0,0.4)',
+          borderRadius: '8px'
+        }}>
+          <Lock size={48} color="white" style={{ marginBottom: '16px', opacity: 0.8 }} />
+          <h3 style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }}>Login to Resume</h3>
+          <p style={{ color: '#ccc', fontSize: '14px', marginBottom: '20px', textAlign: 'center', maxWidth: '300px' }}>
+            Never lose your place. Save your progress and resume exactly where you left off.
+          </p>
+          <Link to="/login" style={{
+            background: '#e50914',
+            color: 'white',
+            padding: '10px 24px',
+            borderRadius: '4px',
+            fontWeight: 'bold',
+            textDecoration: 'none',
+            transition: 'background 0.3s'
+          }}>
+            Login / Sign Up
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   if (loading) {
     return (
