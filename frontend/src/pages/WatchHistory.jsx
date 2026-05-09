@@ -16,6 +16,64 @@ const FILTER_OPTIONS = [
   { key: 'older', label: 'Older' },
 ];
 
+const HistoryCard = ({ item, handleGetLink, handleRemove }) => {
+  const progressPercent = item.duration ? Math.min(100, Math.max(0, (item.progress / item.duration) * 100)) : 0;
+  const playUrl = `/movie/${item.movie_id}?type=${item.movie_type}&play=true${item.season ? `&s=${item.season}&e=${item.episode}` : ''}`;
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardLinkContainer}>
+        <Link to={playUrl} className={styles.cardLink}>
+          <img src={item.poster} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" />
+          
+          <div className={styles.dateBadge} data-title={item.detailedTime}>
+            <Clock size={11} />
+            <span>{item.label}</span>
+          </div>
+
+          {item.isDone && (
+            <div style={{
+              position: 'absolute', top: '10px', right: '10px',
+              background: '#2ecc71', color: 'white', padding: '2px 8px',
+              borderRadius: '4px', fontSize: '10px', fontWeight: 'bold',
+              zIndex: 10, boxShadow: '0 2px 5px rgba(0,0,0,0.5)'
+            }}>COMPLETED</div>
+          )}
+
+          <div className={styles.cardOverlay}>
+            <span className={styles.cardTitle}>{item.title}</span>
+            <span className={styles.cardMeta} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>
+                {item.year} · {item.movie_type === 'movie' ? 'Movie' : 'TV Show'}
+                {item.season && ` · S${item.season}E${item.episode}`}
+              </span>
+              {progressPercent > 0 && <span style={{ color: '#e50914', fontSize: '10px', fontWeight: 'bold' }}>{Math.round(progressPercent)}%</span>}
+            </span>
+          </div>
+
+          {progressPercent > 0 && (
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(0,0,0,0.5)', zIndex: 5 }}>
+              <div style={{ width: `${progressPercent}%`, height: '100%', background: '#e50914', transition: 'width 0.3s ease' }}></div>
+            </div>
+          )}
+
+          <div className={styles.watchedIndicator}></div>
+          <div className={styles.playOverlay}><Play size={32} fill="white" /></div>
+        </Link>
+        
+        <div className={styles.cardActions}>
+          <button className={styles.actionBtn} onClick={() => handleGetLink(item)} title="Get Download Link">
+            <ExternalLink size={16} />
+          </button>
+          <button className={styles.actionBtn} onClick={() => handleRemove(item.movie_id, item.movie_type)} title="Remove">
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const WatchHistory = () => {
   const { isLoggedIn, token } = useAuth();
   const navigate = useNavigate();
@@ -231,66 +289,40 @@ const WatchHistory = () => {
           <p>Try a different filter above.</p>
         </div>
       ) : (
-        <div className={styles.grid}>
-          {processedData.filteredList.map((item) => {
-            const progressPercent = item.duration ? Math.min(100, Math.max(0, (item.progress / item.duration) * 100)) : 0;
-            const playUrl = `/movie/${item.movie_id}?type=${item.movie_type}&play=true${item.season ? `&s=${item.season}&e=${item.episode}` : ''}`;
-            
-            return (
-            <div key={`${item.movie_id}-${item.movie_type}-${item.season || 0}-${item.episode || 0}`} className={styles.card}>
-              <div className={styles.cardLinkContainer}>
-                <Link to={playUrl} className={styles.cardLink}>
-                  <img src={item.poster} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" />
-                  
-                    <div className={styles.dateBadge} data-title={item.detailedTime}>
-                      <Clock size={11} />
-                      <span>{item.label}</span>
-                    </div>
-
-                    {item.isDone && (
-                      <div style={{
-                        position: 'absolute', top: '10px', right: '10px',
-                        background: '#2ecc71', color: 'white', padding: '2px 8px',
-                        borderRadius: '4px', fontSize: '10px', fontWeight: 'bold',
-                        zIndex: 10, boxShadow: '0 2px 5px rgba(0,0,0,0.5)'
-                      }}>COMPLETED</div>
-                    )}
-
-                  <div className={styles.cardOverlay}>
-                    <span className={styles.cardTitle}>{item.title}</span>
-                    <span className={styles.cardMeta} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>
-                        {item.year} · {item.movie_type === 'movie' ? 'Movie' : 'TV Show'}
-                        {item.season && ` · S${item.season}E${item.episode}`}
-                      </span>
-                      {progressPercent > 0 && <span style={{ color: '#e50914', fontSize: '10px', fontWeight: 'bold' }}>{Math.round(progressPercent)}%</span>}
-                    </span>
+        <div className={styles.gridContainer}>
+          {activeFilter === 'completed' ? (
+            <>
+              {/* Movies Group */}
+              {processedData.filteredList.filter(i => i.movie_type === 'movie').length > 0 && (
+                <div className={styles.groupSection}>
+                  <h2 className={styles.groupTitle}><Film size={20} /> Movies Completed</h2>
+                  <div className={styles.grid}>
+                    {processedData.filteredList.filter(i => i.movie_type === 'movie').map((item) => (
+                      <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} />
+                    ))}
                   </div>
-
-                  {/* Permanent Progress bar line at bottom */}
-                  {progressPercent > 0 && (
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(0,0,0,0.5)', zIndex: 5 }}>
-                      <div style={{ width: `${progressPercent}%`, height: '100%', background: '#e50914', transition: 'width 0.3s ease' }}></div>
-                    </div>
-                  )}
-
-                  <div className={styles.watchedIndicator}></div>
-                  <div className={styles.playOverlay}><Play size={32} fill="white" /></div>
-                </Link>
-                
-                {/* Action Buttons */}
-                <div className={styles.cardActions}>
-                  <button className={styles.actionBtn} onClick={() => handleGetLink(item)} title="Get Download Link">
-                    <ExternalLink size={16} />
-                  </button>
-                  <button className={styles.actionBtn} onClick={() => handleRemove(item.movie_id, item.movie_type)} title="Remove">
-                    <Trash2 size={16} />
-                  </button>
                 </div>
-              </div>
+              )}
+
+              {/* Series Group */}
+              {processedData.filteredList.filter(i => i.movie_type !== 'movie').length > 0 && (
+                <div className={styles.groupSection} style={{ marginTop: '40px' }}>
+                  <h2 className={styles.groupTitle}><Tv size={20} /> Shows Completed</h2>
+                  <div className={styles.grid}>
+                    {processedData.filteredList.filter(i => i.movie_type !== 'movie').map((item) => (
+                      <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className={styles.grid}>
+              {processedData.filteredList.map((item) => (
+                <HistoryCard key={`${item.movie_id}-${item.movie_type}`} item={item} handleGetLink={handleGetLink} handleRemove={handleRemove} />
+              ))}
             </div>
-            );
-          })}
+          )}
         </div>
       )}
     </div>

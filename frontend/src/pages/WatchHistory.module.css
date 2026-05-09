@@ -664,3 +664,28 @@
   }
 }
 
+.gridContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.groupSection {
+  width: 100%;
+}
+
+.groupTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.groupTitle svg {
+  color: var(--primary-color);
+}
