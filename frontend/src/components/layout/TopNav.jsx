@@ -100,8 +100,12 @@ const TopNav = () => {
   };
 
   const handleLogout = () => {
-    logout();
-    navigate('/login', { state: { message: 'Logged out successfully!' } });
+    showToast('Logging out securely...', 'info');
+    setTimeout(() => {
+      logout();
+      navigate('/');
+      setTimeout(() => showToast('Logged out successfully', 'success'), 100);
+    }, 600);
   };
 
   const isLoginPage = location.pathname === '/login';
