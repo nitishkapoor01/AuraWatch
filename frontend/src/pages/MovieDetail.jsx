@@ -393,19 +393,29 @@ const MovieDetail = () => {
           // Attempt to extract the correct progress for current item
           let currentProgress = null;
           
+          let historyList = [];
           if (Array.isArray(history)) {
-            // Find matching movie ID, and if it's TV, also match season & episode
-            currentProgress = history.find(h => {
-              const matchesId = String(h.tmdb_id) === String(id) || String(h.tmdb) === String(id);
-              if (!matchesId) return false;
-              if (isTV) {
-                return String(h.season) === String(playerSeason) && String(h.episode) === String(playerEpisode);
-              }
-              return true;
-            });
+            historyList = history;
           } else if (typeof history === 'object') {
-            currentProgress = history;
+            if (history.progress !== undefined && (history.tmdb || history.id || history.tmdb_id)) {
+              historyList = [history];
+            } else {
+              historyList = Object.values(history);
+            }
           }
+          
+          currentProgress = historyList.find(h => {
+            if (!h) return false;
+            const hId = String(h.tmdb_id || h.tmdb || h.tmdbId || h.id);
+            if (hId !== String(id)) return false;
+            
+            if (isTV) {
+              const hSeason = String(h.season || h.s);
+              const hEpisode = String(h.episode || h.e || h.ep);
+              return hSeason === String(playerSeason) && hEpisode === String(playerEpisode);
+            }
+            return true;
+          });
 
           if (currentProgress && currentProgress.progress) {
             // Update watch history silently with actual progress
@@ -429,7 +439,7 @@ const MovieDetail = () => {
         iframe.contentWindow.postMessage({
           type: "SCREENSCAPE_GET_WATCH_HISTORY_WITH_PROGRESS",
           requestId: "history-update"
-        }, "https://screenscape.me");
+        }, "*");
       }
     }, 15000);
 

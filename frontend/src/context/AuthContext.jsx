@@ -23,8 +23,12 @@ export const AuthProvider = ({ children }) => {
           const data = await res.json();
           setUser(data.user);
           setToken(savedToken);
+          // Silently clean up any bad progress data (10/100 defaults)
+          fetch(`${API_BASE}/watch-history/cleanup`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${savedToken}` }
+          }).catch(() => {});
         } else {
-          // Token expired or invalid
           localStorage.removeItem('aurawatch_token');
           setToken(null);
         }
