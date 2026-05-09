@@ -1,48 +1,58 @@
 .toastContainer {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10000;
+  top: 30px;
+  right: 30px;
+  z-index: 100000;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
   pointer-events: none;
 }
 
 .toast {
   pointer-events: auto;
-  min-width: 300px;
-  max-width: 450px;
-  padding: 16px;
-  border-radius: 12px;
+  min-width: 320px;
+  max-width: 480px;
+  padding: 18px 20px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(12px);
+  gap: 15px;
+  background: rgba(15, 15, 15, 0.75);
+  backdrop-filter: blur(25px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
   color: white;
-  animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: slideInBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+@keyframes slideInBounce {
+  from { transform: translateX(120%) scale(0.9); opacity: 0; }
+  to { transform: translateX(0) scale(1); opacity: 1; }
 }
 
+/* Warning State - High Visibility */
 .warning {
-  border-left: 4px solid #f39c12;
+  border-left: 5px solid #ff9f43;
+  box-shadow: 0 15px 45px rgba(255, 159, 67, 0.15), 0 0 20px rgba(255, 159, 67, 0.05);
+  animation: slideInBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), warningPulse 2s infinite;
+}
+
+@keyframes warningPulse {
+  0% { box-shadow: 0 15px 45px rgba(255, 159, 67, 0.15); }
+  50% { box-shadow: 0 15px 45px rgba(255, 159, 67, 0.25), 0 0 30px rgba(255, 159, 67, 0.1); }
+  100% { box-shadow: 0 15px 45px rgba(255, 159, 67, 0.15); }
 }
 
 .info {
-  border-left: 4px solid #3498db;
+  border-left: 5px solid #0071eb;
 }
 
 .success {
-  border-left: 4px solid #2ecc71;
+  border-left: 5px solid #2ecc71;
 }
 
 .icon {
@@ -50,11 +60,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.warning .icon { color: #f39c12; }
-.info .icon { color: #3498db; }
-.success .icon { color: #2ecc71; }
+.warning .icon { color: #ff9f43; background: rgba(255, 159, 67, 0.1); }
+.info .icon { color: #0071eb; background: rgba(0, 113, 235, 0.1); }
+.success .icon { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
 
 .content {
   flex: 1;
@@ -62,34 +76,38 @@
 
 .content p {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.4;
+  letter-spacing: 0.3px;
 }
 
 .closeBtn {
-  background: none;
+  background: rgba(255, 255, 255, 0.05);
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: all 0.2s;
 }
 
 .closeBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: white;
+  transform: rotate(90deg);
 }
 
 .progressBar {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 3px;
+  height: 4px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .progressBar::after {
@@ -103,11 +121,12 @@
   animation: progress 5s linear forwards;
 }
 
-.warning .progressBar::after { background: #f39c12; }
-.info .progressBar::after { background: #3498db; }
+.warning .progressBar::after { background: #ff9f43; }
+.info .progressBar::after { background: #0071eb; }
 .success .progressBar::after { background: #2ecc71; }
 
 @keyframes progress {
   from { width: 100%; }
   to { width: 0%; }
 }
+
