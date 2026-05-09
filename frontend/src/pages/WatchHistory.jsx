@@ -255,13 +255,15 @@ const WatchHistory = () => {
                       </span>
                       {progressPercent > 0 && <span style={{ color: '#e50914', fontSize: '10px', fontWeight: 'bold' }}>{Math.round(progressPercent)}%</span>}
                     </span>
-                    {/* Progress bar line */}
-                    {progressPercent > 0 && (
-                      <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.3)', marginTop: '6px', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ width: `${progressPercent}%`, height: '100%', background: '#e50914', transition: 'width 0.3s ease' }}></div>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Permanent Progress bar line at bottom */}
+                  {progressPercent > 0 && (
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(0,0,0,0.5)', zIndex: 5 }}>
+                      <div style={{ width: `${progressPercent}%`, height: '100%', background: '#e50914', transition: 'width 0.3s ease' }}></div>
+                    </div>
+                  )}
+
                   <div className={styles.watchedIndicator}></div>
                   <div className={styles.playOverlay}><Play size={32} fill="white" /></div>
                 </Link>

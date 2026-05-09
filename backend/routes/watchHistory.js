@@ -41,8 +41,8 @@ router.post('/', async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
       ON CONFLICT(user_id, movie_id, movie_type, season, episode) 
       DO UPDATE SET 
-        progress = EXCLUDED.progress,
-        duration = EXCLUDED.duration,
+        progress = COALESCE(EXCLUDED.progress, watch_history.progress),
+        duration = COALESCE(EXCLUDED.duration, watch_history.duration),
         last_watched = NOW(),
         title = EXCLUDED.title,
         poster = EXCLUDED.poster,
@@ -56,8 +56,8 @@ router.post('/', async (req, res) => {
       backdrop || '',
       rating || '',
       year || '',
-      progress || 0,
-      duration || 0,
+      progress !== undefined ? progress : null,
+      duration !== undefined ? duration : null,
       season || null,
       episode || null
     ]);

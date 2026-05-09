@@ -352,7 +352,7 @@ const MovieDetail = () => {
   };
 
   // Track watch history
-  const trackWatch = async (season = null, episode = null, progressVal = 10, durationVal = 100) => {
+  const trackWatch = async (season = null, episode = null, progressVal = null, durationVal = null) => {
     if (!isLoggedIn || !movie) return;
     try {
       await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/watch-history`, {
