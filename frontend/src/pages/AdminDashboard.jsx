@@ -40,7 +40,9 @@ const AdminDashboard = () => {
   
   // Control States
   const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' });
+  const [platformUpdates, setPlatformUpdates] = useState('');
   const [savingAnnouncement, setSavingAnnouncement] = useState(false);
+  const [savingUpdates, setSavingUpdates] = useState(false);
   const [globalSettings, setGlobalSettings] = useState({ skip_ads_timer: false });
   const [buttonWarnings, setButtonWarnings] = useState({});
   const [savingSettings, setSavingSettings] = useState(false);
@@ -84,6 +86,9 @@ const AdminDashboard = () => {
         setGlobalSettings(prev => ({ ...prev, ...settings }));
         if (settings.button_warnings) {
           setButtonWarnings(settings.button_warnings);
+        }
+        if (settings.platform_updates) {
+          setPlatformUpdates(settings.platform_updates);
         }
       }
       
@@ -272,6 +277,22 @@ const AdminDashboard = () => {
       showToast('Failed to update button warnings', 'error');
     }
     finally { setSavingSettings(false); }
+  };
+
+  const handleSaveUpdates = async () => {
+    try {
+      setSavingUpdates(true);
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/admin/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ key: 'platform_updates', value: platformUpdates })
+      });
+      showToast('Platform updates saved!', 'success');
+    } catch (e) { 
+      console.error(e);
+      showToast('Failed to save updates', 'error');
+    }
+    finally { setSavingUpdates(false); }
   };
 
   const handleUpdateSetting = async (key, value) => {
@@ -464,6 +485,31 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className={styles.sectionHeader} style={{ marginTop: '40px' }}><h2><MessageSquare size={20} style={{marginRight: '10px'}}/> Platform Updates Manager</h2></div>
+            <div className={styles.announcementPanel}>
+              <div className={styles.inputGroup}>
+                <label>Update Log (Markdown/Text)</label>
+                <textarea 
+                  className={styles.textArea} 
+                  rows={8} 
+                  placeholder="e.g. 
+- Fixed login bug
+- Added Dark Mode
+- Improved Search" 
+                  value={platformUpdates} 
+                  onChange={e => setPlatformUpdates(e.target.value)}
+                />
+              </div>
+              <button 
+                className={styles.primaryBtn} 
+                style={{ marginTop: '20px', width: '100%', justifyContent: 'center' }}
+                onClick={handleSaveUpdates}
+                disabled={savingUpdates || currentUser.role !== 'admin'}
+              >
+                {savingUpdates ? <Loader2 size={18} className={styles.spinner} /> : <CheckCircle size={18} />} Save Updates
+              </button>
             </div>
           </div>
         </div>

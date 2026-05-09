@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { X, PlayCircle, BookOpen, MessageSquare, Lightbulb, AlertTriangle, CheckCircle, ShieldAlert } from 'lucide-react';
+import { X, PlayCircle, BookOpen, MessageSquare, Lightbulb, AlertTriangle, CheckCircle, ShieldAlert, Info } from 'lucide-react';
 import styles from './HelpModal.module.css';
 
 const TABS = {
   HOW_TO_USE: 'how_to_use',
+  UPDATES: 'updates',
   PLAYER_GUIDE: 'player_guide',
   FEEDBACK: 'feedback',
   FEATURE_REQUEST: 'feature_request',
@@ -13,6 +14,27 @@ const TABS = {
 
 const HelpModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState(TABS.HOW_TO_USE);
+  const [platformUpdates, setPlatformUpdates] = useState('');
+  const [loadingUpdates, setLoadingUpdates] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      fetchUpdates();
+    }
+  }, [isOpen]);
+
+  const fetchUpdates = async () => {
+    try {
+      setLoadingUpdates(true);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/admin/settings/platform_updates`);
+      if (res.ok) {
+        const data = await res.json();
+        setPlatformUpdates(data.value || '');
+      }
+    } catch (e) { console.error('Failed to fetch updates', e); }
+    finally { setLoadingUpdates(false); }
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -257,6 +279,46 @@ const HelpModal = ({ isOpen, onClose }) => {
           </div>
         );
 
+      case TABS.UPDATES:
+        return (
+          <div className={styles.section}>
+            <h2 className={styles.contentTitle}>Platform Updates & Changelog</h2>
+            <p>Stay informed about the latest features, bug fixes, and improvements we're making to AuraWatch.</p>
+            
+            {loadingUpdates ? (
+              <div className={styles.loadingUpdates}>
+                <div className={styles.pulseDot} />
+                <span>Fetching latest updates...</span>
+              </div>
+            ) : (
+              <div className={styles.updatesContainer}>
+                {platformUpdates ? (
+                  <div className={styles.updatesText}>
+                    {platformUpdates.split('\n').map((line, index) => (
+                      <React.Fragment key={index}>
+                        {line.trim().startsWith('-') ? (
+                          <li className={styles.updateItem}>{line.replace('-', '').trim()}</li>
+                        ) : (
+                          <p className={styles.updatePara}>{line}</p>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.noUpdates}>
+                    <Info size={40} color="#333" />
+                    <p>No recent updates to show. We're working hard on something great!</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className={styles.noteBox} style={{marginTop: '30px'}}>
+              <p><strong>Dev Note:</strong> Most updates are pushed automatically. If you encounter any bugs, please report them using the <strong>Report Issue</strong> tab.</p>
+            </div>
+          </div>
+        );
+
       case TABS.DMCA:
         return (
           <div className={styles.section}>
@@ -292,6 +354,13 @@ const HelpModal = ({ isOpen, onClose }) => {
             onClick={() => handleTabChange(TABS.HOW_TO_USE)}
           >
             <BookOpen size={18} /> How to Use
+          </button>
+
+          <button 
+            className={`${styles.tabBtn} ${activeTab === TABS.UPDATES ? styles.active : ''}`}
+            onClick={() => handleTabChange(TABS.UPDATES)}
+          >
+            <Info size={18} /> Latest Updates
           </button>
           
           <button 
