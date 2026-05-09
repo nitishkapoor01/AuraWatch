@@ -179,8 +179,13 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
+  const deletePreset = (slotId) => {
+    const updatedPresets = { ...preferences.presets, [slotId]: null };
+    updatePreferences({ presets: updatedPresets });
+  };
+
   return (
-    <ThemeContext.Provider value={{ preferences, updatePreferences, defaultPreferences, savePreset, loadPreset }}>
+    <ThemeContext.Provider value={{ preferences, updatePreferences, defaultPreferences, savePreset, loadPreset, deletePreset }}>
       {children}
     </ThemeContext.Provider>
   );

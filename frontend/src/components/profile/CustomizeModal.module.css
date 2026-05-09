@@ -175,6 +175,22 @@
 .scrollArea::-webkit-scrollbar-track { background: transparent; }
 .scrollArea::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
+/* ---- PRESETS ---- */
+.presetRow {
+  background: rgba(255,255,255,0.05);
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.presetActions {
+  display: flex;
+  gap: 8px;
+}
+
 /* ---- SECTION GROUPS ---- */
 .settingGroup {
   display: flex;
@@ -658,6 +674,19 @@
 
   .themeGrid, .chipGrid, .cardStyleGrid, .btnStyleGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .presetRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .presetActions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+  }
+  .presetActions button {
+    justify-content: center;
   }
 
   .navItem.active::before { 

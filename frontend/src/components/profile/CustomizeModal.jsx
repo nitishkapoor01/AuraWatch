@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { X, Palette, Layout, Type, Settings2, Check, Info, MousePointer2, Sparkles, Save, Download } from 'lucide-react';
+import { X, Palette, Layout, Type, Settings2, Check, Info, MousePointer2, Sparkles, Save, Download, Trash2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -150,7 +150,7 @@ const CardStylePreview = ({ type }) => {
 
 // ---- MAIN COMPONENT ----
 const CustomizeModal = ({ isOpen, onClose }) => {
-  const { preferences, updatePreferences, defaultPreferences, savePreset, loadPreset } = useTheme();
+  const { preferences, updatePreferences, defaultPreferences, savePreset, loadPreset, deletePreset } = useTheme();
   const { isLoggedIn } = useAuth();
   const { showToast } = useToast();
   const [activeSection, setActiveSection] = useState('presets');
@@ -168,7 +168,8 @@ const CustomizeModal = ({ isOpen, onClose }) => {
   };
 
   const handleReset = () => {
-    updatePreferences(defaultPreferences);
+    updatePreferences({ ...defaultPreferences, presets: preferences.presets });
+    showToast('Reset to Netflix Classic', 'success');
   };
 
   return ReactDOM.createPortal(
@@ -218,7 +219,7 @@ const CustomizeModal = ({ isOpen, onClose }) => {
                 <p style={{ color: '#aaa', fontSize: '13px', marginBottom: '16px' }}>Save your current UI settings to a preset slot to easily load them later.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {[1, 2, 3].map(slot => (
-                    <div key={slot} style={{ background: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={slot} className={styles.presetRow}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: preferences.presets?.[`preset${slot}`] ? 'var(--primary-color)' : '#333', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }}>
                           {slot}
@@ -230,7 +231,7 @@ const CustomizeModal = ({ isOpen, onClose }) => {
                           </span>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div className={styles.presetActions}>
                         <button 
                           style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
                           onClick={() => {
@@ -250,6 +251,18 @@ const CustomizeModal = ({ isOpen, onClose }) => {
                         >
                           <Download size={14} /> Load
                         </button>
+                        {preferences.presets?.[`preset${slot}`] && (
+                          <button 
+                            style={{ padding: '6px 10px', background: 'rgba(229,9,20,0.15)', color: '#e50914', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            onClick={() => {
+                              deletePreset(`preset${slot}`);
+                              showToast(`Deleted Preset ${slot}`, 'info');
+                            }}
+                            title="Delete Preset"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
