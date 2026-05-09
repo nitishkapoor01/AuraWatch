@@ -134,6 +134,24 @@ const MovieDetail = () => {
     setPlayerEpisode(1);
   }, [id, type]);
 
+  // Auto-play from Continue Watching
+  useEffect(() => {
+    if (movie && !loading) {
+      const autoPlay = searchParams.get('play') === 'true';
+      if (autoPlay) {
+        const s = parseInt(searchParams.get('s')) || 1;
+        const e = parseInt(searchParams.get('e')) || 1;
+        
+        // Only override if valid season/episode for TV
+        if (isTVType(type)) {
+          setPlayerSeason(s);
+          setPlayerEpisode(e);
+        }
+        setShowPlayer(true);
+      }
+    }
+  }, [movie, loading, searchParams, type]);
+
   // Check if favorite
   useEffect(() => {
     if (!isLoggedIn || !id) return;
@@ -334,7 +352,7 @@ const MovieDetail = () => {
   };
 
   // Track watch history
-  const trackWatch = async (season = null, episode = null) => {
+  const trackWatch = async (season = null, episode = null, progressVal = 10, durationVal = 100) => {
     if (!isLoggedIn || !movie) return;
     try {
       await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/watch-history`, {
@@ -351,8 +369,8 @@ const MovieDetail = () => {
           backdrop: movie.backdrop,
           rating: movie.rating,
           year: movie.year,
-          progress: 10,
-          duration: 100,
+          progress: progressVal,
+          duration: durationVal,
           season,
           episode
         })
@@ -361,6 +379,65 @@ const MovieDetail = () => {
       console.error('Failed to track watch:', err);
     }
   };
+
+  // Screenscape Progress Tracking Integration
+  useEffect(() => {
+    if (!showPlayer) return;
+
+    let progressInterval;
+    
+    const handleMessage = (event) => {
+      if (event.data?.type === "SCREENSCAPE_WATCH_HISTORY_WITH_PROGRESS_RESPONSE") {
+        const history = event.data.watchHistory;
+        if (history) {
+          // Attempt to extract the correct progress for current item
+          let currentProgress = null;
+          
+          if (Array.isArray(history)) {
+            // Find matching movie ID, and if it's TV, also match season & episode
+            currentProgress = history.find(h => {
+              const matchesId = String(h.tmdb_id) === String(id) || String(h.tmdb) === String(id);
+              if (!matchesId) return false;
+              if (isTV) {
+                return String(h.season) === String(playerSeason) && String(h.episode) === String(playerEpisode);
+              }
+              return true;
+            });
+          } else if (typeof history === 'object') {
+            currentProgress = history;
+          }
+
+          if (currentProgress && currentProgress.progress) {
+            // Update watch history silently with actual progress
+            trackWatch(
+              playerSeason, 
+              playerEpisode, 
+              currentProgress.progress, 
+              currentProgress.duration || 100
+            );
+          }
+        }
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    // Poll for progress every 15 seconds
+    progressInterval = setInterval(() => {
+      const iframe = document.getElementById("screenscape-player");
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: "SCREENSCAPE_GET_WATCH_HISTORY_WITH_PROGRESS",
+          requestId: "history-update"
+        }, "https://screenscape.me");
+      }
+    }, 15000);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      clearInterval(progressInterval);
+    };
+  }, [showPlayer, id, playerSeason, playerEpisode]);
 
   const getPlayerUrl = () => {
     if (isTV) {
@@ -450,6 +527,7 @@ const MovieDetail = () => {
             {isTV ? `${movie?.title} • S${playerSeason} E${playerEpisode}${playerEpisodeName ? ` • ${playerEpisodeName}` : ''}` : movie?.title}
           </div>
           <iframe
+            id="screenscape-player"
             src={getPlayerUrl()}
             title={movie.title}
             className={styles.trailerIframe}

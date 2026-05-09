@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchWithCache } from '../utils/api';
 import styles from './Home.module.css';
 import Row from '../components/Row';
+import ContinueWatchingRow from '../components/ContinueWatchingRow';
 import SEO from '../components/SEO';
 import { useTheme } from '../context/ThemeContext';
 
@@ -129,6 +130,7 @@ const Home = () => {
       >
         <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} />
         <Row title="Trending Now" endpoint="trending" compact={layout === 'grid'} />
+        <ContinueWatchingRow compact={layout === 'grid'} />
         <Row title="Popular on Netflix" endpoint="continue-watching" compact={layout === 'grid'} />
         <Row title="Top Rated Classics" endpoint="top-rated" compact={layout === 'grid'} />
         <Row title="Action & Adventure" endpoint="action" compact={layout === 'grid'} />

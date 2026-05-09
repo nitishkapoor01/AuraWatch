@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { X, Palette, Layout, Type, Settings2, Check, Info, MousePointer2, Sparkles } from 'lucide-react';
+import { X, Palette, Layout, Type, Settings2, Check, Info, MousePointer2, Sparkles, Save, Download } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import styles from './CustomizeModal.module.css';
 
 // ---- DATA ----
@@ -106,6 +107,7 @@ const ACCENT_PRESETS = [
 ];
 
 const SIDEBAR_ITEMS = [
+  { id: 'presets', label: 'Presets', icon: Save },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'layout', label: 'Layout', icon: Layout },
   { id: 'cards', label: 'Cards', icon: Sparkles },
@@ -148,13 +150,15 @@ const CardStylePreview = ({ type }) => {
 
 // ---- MAIN COMPONENT ----
 const CustomizeModal = ({ isOpen, onClose }) => {
-  const { preferences, updatePreferences, defaultPreferences } = useTheme();
+  const { preferences, updatePreferences, defaultPreferences, savePreset, loadPreset } = useTheme();
   const { isLoggedIn } = useAuth();
-  const [activeSection, setActiveSection] = useState('appearance');
+  const { showToast } = useToast();
+  const [activeSection, setActiveSection] = useState('presets');
 
   if (!isOpen) return null;
 
   const sectionTitles = {
+    presets: 'Saved Presets',
     appearance: 'Appearance',
     layout: 'Layout',
     cards: 'Cards',
@@ -206,6 +210,52 @@ const CustomizeModal = ({ isOpen, onClose }) => {
           )}
 
           <div className={styles.scrollArea}>
+
+            {/* ===== PRESETS ===== */}
+            {activeSection === 'presets' && (
+              <div className={styles.settingGroup}>
+                <h4>Your Presets</h4>
+                <p style={{ color: '#aaa', fontSize: '13px', marginBottom: '16px' }}>Save your current UI settings to a preset slot to easily load them later.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {[1, 2, 3].map(slot => (
+                    <div key={slot} style={{ background: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: preferences.presets?.[`preset${slot}`] ? 'var(--primary-color)' : '#333', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold' }}>
+                          {slot}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontWeight: '600', color: 'white' }}>Preset {slot}</span>
+                          <span style={{ fontSize: '12px', color: '#888' }}>
+                            {preferences.presets?.[`preset${slot}`] ? 'Saved Settings' : 'Empty Slot'}
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
+                          onClick={() => {
+                            savePreset(`preset${slot}`);
+                            showToast(`Saved to Preset ${slot}`, 'success');
+                          }}
+                        >
+                          <Save size={14} /> Save
+                        </button>
+                        <button 
+                          style={{ padding: '6px 12px', background: preferences.presets?.[`preset${slot}`] ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)', color: preferences.presets?.[`preset${slot}`] ? 'white' : '#666', border: 'none', borderRadius: '4px', cursor: preferences.presets?.[`preset${slot}`] ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
+                          disabled={!preferences.presets?.[`preset${slot}`]}
+                          onClick={() => {
+                            loadPreset(`preset${slot}`);
+                            showToast(`Loaded Preset ${slot}`, 'success');
+                          }}
+                        >
+                          <Download size={14} /> Load
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ===== APPEARANCE ===== */}
             {activeSection === 'appearance' && (

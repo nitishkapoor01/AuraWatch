@@ -44,6 +44,13 @@ const defaultPreferences = {
   borderRadius: 12,
   shadowIntensity: 0.5,
   animations: true,
+
+  // === PRESETS ===
+  presets: {
+    preset1: null,
+    preset2: null,
+    preset3: null
+  }
 };
 
 export const ThemeProvider = ({ children }) => {
@@ -159,8 +166,21 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
+  const savePreset = (slotId) => {
+    const { presets, ...currentSettings } = preferences;
+    const updatedPresets = { ...(preferences.presets || defaultPreferences.presets), [slotId]: currentSettings };
+    updatePreferences({ presets: updatedPresets });
+  };
+
+  const loadPreset = (slotId) => {
+    const presetData = preferences.presets?.[slotId];
+    if (presetData) {
+      updatePreferences(presetData);
+    }
+  };
+
   return (
-    <ThemeContext.Provider value={{ preferences, updatePreferences, defaultPreferences }}>
+    <ThemeContext.Provider value={{ preferences, updatePreferences, defaultPreferences, savePreset, loadPreset }}>
       {children}
     </ThemeContext.Provider>
   );
