@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/
 
+# Dynamic sitemap — updated every 6 hours with top trending content
+Sitemap: https://aurawatch-1.onrender.com/sitemap.xml
 Sitemap: https://www.aurawatch.fun/sitemap-index.xml

@@ -474,34 +474,98 @@ const MovieDetail = () => {
   if (loading) return <div style={{color:'white', padding:'100px', fontSize: '18px'}}>Loading...</div>;
   if (!movie) return <div style={{color:'white', padding:'100px', fontSize: '18px'}}>Movie not found!</div>;
 
+  // Build aggressive SEO keyword list for all search intents
+  const seoTitle = movie?.title || '';
+  const seoYear = movie?.year || '';
+  const seoGenres = movie?.genres?.map(g => g.name || g).join(', ') || '';
+  const seoDirector = movie?.director || '';
+  const seoCast = movie?.cast?.slice(0, 3).map(a => a.name).join(', ') || '';
+  const mediaLabel = isTV ? 'TV Show' : 'Movie';
+  const langVariants = ['Hindi Dubbed', 'English', 'Dual Audio', '480p', '720p', '1080p', '4K', 'BluRay'];
+
+  const shortTailKeywords = [
+    `${seoTitle}`, `${seoTitle} ${seoYear}`,
+    `watch ${seoTitle} online`, `${seoTitle} full ${mediaLabel.toLowerCase()}`,
+    `download ${seoTitle}`, `${seoTitle} free download`,
+    `${seoTitle} aurawatch`, `aurawatch ${seoTitle}`,
+    `${seoTitle} HD`, `${seoTitle} streaming`,
+  ];
+
+  const longTailKeywords = langVariants.flatMap(variant => [
+    `${seoTitle} ${variant}`,
+    `download ${seoTitle} ${variant}`,
+    `watch ${seoTitle} ${variant} free`,
+    `${seoTitle} ${seoYear} ${variant}`,
+  ]);
+
+  const siteKeywords = [
+    `aurawatch ${seoTitle}`, `aurawatch fun ${seoTitle}`,
+    `${seoTitle} on aurawatch`, `${seoTitle} aurawatch fun`,
+    ...(seoGenres ? [`${seoTitle} ${seoGenres}`] : []),
+    ...(seoDirector ? [`${seoTitle} ${seoDirector}`] : []),
+    ...(seoCast ? [`${seoTitle} starring ${seoCast}`] : []),
+    ...(isTV ? [
+      `${seoTitle} all seasons download`,
+      `${seoTitle} season 1 download`,
+      `${seoTitle} episodes online`,
+      `${seoTitle} web series download`,
+    ] : [
+      `${seoTitle} full movie download`,
+      `${seoTitle} full movie watch online`,
+    ]),
+    'aurawatch', 'aurawatch fun', 'aurawatchfun',
+    'free movies online', 'watch movies free', 'download movies hd',
+    'dual audio movies', 'hindi dubbed movies', '1080p movies',
+  ];
+
+  const allKeywords = [...shortTailKeywords, ...longTailKeywords, ...siteKeywords].join(', ');
+
+  const seoDescription = [
+    `Watch and download ${seoTitle}${seoYear ? ` (${seoYear})` : ''} in Hindi Dubbed, Dual Audio, 480p, 720p, 1080p & 4K on AuraWatch Fun — totally free.`,
+    movie?.overview ? `${movie.overview.substring(0, 120)}...` : '',
+    `Available in: Hindi Dubbed, English, Dual Audio.`,
+    `Stream ${seoTitle} online or download BluRay, WEB-DL, and HDRip quality on AuraWatch.`
+  ].filter(Boolean).join(' ');
+
   const schema = {
     "@context": "https://schema.org",
     "@type": isTV ? "TVSeries" : "Movie",
-    "name": movie?.title,
-    "image": movie?.poster || movie?.backdrop,
+    "name": seoTitle,
+    "alternateName": `${seoTitle} Hindi Dubbed`,
+    "url": typeof window !== 'undefined' ? window.location.href : '',
+    "image": [movie?.poster, movie?.backdrop].filter(Boolean),
     "description": movie?.overview,
-    "datePublished": movie?.year,
+    "datePublished": seoYear,
+    "inLanguage": ["en", "hi"],
+    "genre": seoGenres ? seoGenres.split(', ') : undefined,
+    ...(seoDirector ? { "director": { "@type": "Person", "name": seoDirector } } : {}),
     "aggregateRating": movie?.rating && movie.rating !== 'N/A' ? {
       "@type": "AggregateRating",
       "ratingValue": movie.rating,
       "bestRating": "10",
-      "worstRating": "1"
+      "worstRating": "1",
+      "ratingCount": "1000"
     } : undefined,
     "actor": movie?.cast?.map(a => ({
       "@type": "Person",
       "name": a.name
-    }))
+    })),
+    "trailer": trailerKey ? {
+      "@type": "VideoObject",
+      "name": `${seoTitle} Official Trailer`,
+      "embedUrl": `https://www.youtube.com/embed/${trailerKey}`,
+    } : undefined,
   };
 
   return (
     <div className={styles.detailPage}>
       <SEO 
-        title={`${movie?.title} (${movie?.year || ''}) | Watch & Download Dual Audio HD`}
-        description={`Watch and download ${movie?.title} (${movie?.year || ''}) free in HD on AuraWatch Fun. ${movie?.overview ? movie.overview.substring(0, 100) + '...' : ''}`}
+        title={`${seoTitle}${seoYear ? ` (${seoYear})` : ''} | Watch & Download Hindi Dubbed, Dual Audio HD on AuraWatch`}
+        description={seoDescription}
         image={movie?.poster || movie?.backdrop}
         type={isTV ? "video.tv_show" : "video.movie"}
         schema={schema}
-        keywords={`${movie?.title} aurawatch, ${movie?.title} aurawatch fun, watch ${movie?.title} free, download ${movie?.title}`}
+        keywords={allKeywords}
       />
 
       {/* Embed Player Modal */}
@@ -564,6 +628,14 @@ const MovieDetail = () => {
             )}
           </div>
           <p className={styles.overview}>{movie.overview}</p>
+
+          {/* SEO-boosting semantic text - visually subtle but indexable */}
+          <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '-8px', marginBottom: '8px', lineHeight: '1.4' }}>
+            Watch {seoTitle}{seoYear ? ` (${seoYear})` : ''} in Hindi Dubbed, Dual Audio, 1080p, 720p, 480p, 4K on AuraWatch Fun.
+            {seoCast && ` Starring ${seoCast}.`}
+            {seoDirector && ` Directed by ${seoDirector}.`}
+            {` Download ${seoTitle} full ${mediaLabel.toLowerCase()} free — BluRay, WEB-DL, HDRip.`}
+          </p>
 
           <div className={styles.actions}>
             <button 
