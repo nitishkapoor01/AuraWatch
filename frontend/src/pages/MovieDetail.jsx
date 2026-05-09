@@ -683,7 +683,7 @@ const MovieDetail = () => {
 
           <div className={styles.actions}>
             <button 
-              className={`${styles.playBtnDetail} playBtnDetail`} 
+              className={`${styles.playBtn} playBtn`} 
               onClick={() => {
                 if (buttonWarnings.play_movie) {
                   const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
@@ -746,7 +746,7 @@ const MovieDetail = () => {
               {buttonWarnings.add_to_list && <span className={styles.warningBadge} style={{top: '-2px', right: '-2px'}} />}
             </button>
             <button 
-              className={`${styles.downloadBtnDetail} downloadBtnDetail`}
+              className={`${styles.downloadBtn} downloadBtn`}
               onClick={(e) => {
                 if (buttonWarnings.download_movie) {
                   const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
