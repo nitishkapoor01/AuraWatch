@@ -40,7 +40,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
   const [passError, setPassError] = useState('');
   const [passSuccess, setPassSuccess] = useState('');
 
-  const { user, updateAvatar, uploadCustomAvatar, updateName, changePassword, getSecurityQuestion } = useAuth();
+  const { user, updateAvatar, uploadCustomAvatar, updateName, changePassword, getSecurityQuestion, streak } = useAuth();
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -284,6 +284,36 @@ const ProfileModal = ({ isOpen, onClose }) => {
               </div>
             )}
             <p>{user.email}</p>
+          </div>
+        </div>
+
+        {/* Streak & Stats */}
+        <div style={{
+          display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap'
+        }}>
+          <div style={{
+            flex: 1, minWidth: '80px', background: 'rgba(229,9,20,0.1)', border: '1px solid rgba(229,9,20,0.3)',
+            borderRadius: '10px', padding: '12px', textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '22px' }}>🔥</div>
+            <div style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>{streak.currentStreak}</div>
+            <div style={{ color: '#aaa', fontSize: '11px' }}>Day Streak</div>
+          </div>
+          <div style={{
+            flex: 1, minWidth: '80px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '10px', padding: '12px', textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '22px' }}>🏆</div>
+            <div style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>{streak.longestStreak}</div>
+            <div style={{ color: '#aaa', fontSize: '11px' }}>Best Streak</div>
+          </div>
+          <div style={{
+            flex: 1, minWidth: '80px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '10px', padding: '12px', textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '22px' }}>📅</div>
+            <div style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>{streak.totalDays}</div>
+            <div style={{ color: '#aaa', fontSize: '11px' }}>Total Days</div>
           </div>
         </div>
 

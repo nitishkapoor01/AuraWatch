@@ -47,7 +47,7 @@ const TopNav = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn, user, logout, loading } = useAuth();
+  const { isLoggedIn, user, logout, loading, streak } = useAuth();
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -195,6 +195,27 @@ const TopNav = () => {
                 
                 {isDropdownOpen && (
                   <div className={styles.dropdownMenu}>
+                    {/* Streak Badge */}
+                    {isLoggedIn && streak.currentStreak > 0 && (
+                      <div style={{
+                        padding: '10px 16px',
+                        borderBottom: '1px solid rgba(255,255,255,0.08)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        background: 'linear-gradient(90deg, rgba(229,9,20,0.1), transparent)'
+                      }}>
+                        <span style={{ fontSize: '22px' }}>🔥</span>
+                        <div>
+                          <div style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
+                            {streak.currentStreak} Day Streak!
+                          </div>
+                          <div style={{ color: '#aaa', fontSize: '11px' }}>
+                            Best: {streak.longestStreak} days · {streak.totalDays} total days watched
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <button className={styles.dropdownItem} onClick={() => handleRestrictedAction(() => setIsProfileModalOpen(true))}>
                       <User size={16} /> Edit Profile
                       {!isLoggedIn && <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />}

@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('aurawatch_token'));
   const [loading, setLoading] = useState(true);
+  const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, totalDays: 0 });
 
   // Restore session on app load
   useEffect(() => {
@@ -28,6 +29,10 @@ export const AuthProvider = ({ children }) => {
             method: 'POST',
             headers: { Authorization: `Bearer ${savedToken}` }
           }).catch(() => {});
+          // Fetch streak in background
+          fetch(`${API_BASE}/auth/streak`, {
+            headers: { Authorization: `Bearer ${savedToken}` }
+          }).then(r => r.ok ? r.json() : null).then(d => { if (d) setStreak(d); }).catch(() => {});
         } else {
           localStorage.removeItem('aurawatch_token');
           setToken(null);
@@ -166,6 +171,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user,
       token,
+      streak,
       isLoggedIn: !!user,
       loading,
       login,

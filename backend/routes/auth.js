@@ -415,4 +415,73 @@ router.put('/preferences', authMiddleware, async (req, res) => {
   }
 });
 
+// Get Watch Streak
+router.get('/streak', authMiddleware, async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT date FROM user_activity WHERE user_id = $1 ORDER BY date DESC`,
+      [req.user.id]
+    );
+
+    const dates = result.rows.map(r => r.date.toISOString().split('T')[0]);
+    
+    if (dates.length === 0) {
+      return res.json({ currentStreak: 0, longestStreak: 0, totalDays: 0, lastActive: null });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+    // Calculate current streak
+    let currentStreak = 0;
+    let checkDate = dates[0] === today || dates[0] === yesterday ? dates[0] : null;
+    
+    if (checkDate) {
+      for (let i = 0; i < dates.length; i++) {
+        const expected = new Date(Date.now() - (i * 86400000));
+        if (checkDate === today) {
+          // Start from today
+          const exp = new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0];
+          if (dates[i] === exp) {
+            currentStreak++;
+          } else break;
+        } else {
+          // Start from yesterday
+          const exp = new Date(Date.now() - ((i + 1) * 86400000)).toISOString().split('T')[0];
+          if (dates[i] === exp) {
+            currentStreak++;
+          } else break;
+        }
+      }
+    }
+
+    // Calculate longest streak
+    let longestStreak = 0;
+    let tempStreak = 1;
+    for (let i = 1; i < dates.length; i++) {
+      const prev = new Date(dates[i - 1]);
+      const curr = new Date(dates[i]);
+      const diff = (prev - curr) / 86400000;
+      if (Math.round(diff) === 1) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else {
+        tempStreak = 1;
+      }
+    }
+    longestStreak = Math.max(longestStreak, currentStreak, 1);
+
+    res.json({
+      currentStreak,
+      longestStreak,
+      totalDays: dates.length,
+      lastActive: dates[0]
+    });
+  } catch (error) {
+    console.error('[Streak] Error:', error);
+    res.status(500).json({ message: 'Failed to get streak.' });
+  }
+});
+
 module.exports = router;
+
