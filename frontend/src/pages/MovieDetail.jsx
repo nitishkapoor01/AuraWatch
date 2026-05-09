@@ -746,7 +746,7 @@ const MovieDetail = () => {
               {buttonWarnings.add_to_list && <span className={styles.warningBadge} style={{top: '-2px', right: '-2px'}} />}
             </button>
             <button 
-              className={`${styles.downloadBtn} downloadBtn`}
+              className={`${styles.listBtn} downloadBtn`}
               onClick={(e) => {
                 if (buttonWarnings.download_movie) {
                   const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
