@@ -683,17 +683,15 @@ const MovieDetail = () => {
 
           <div className={styles.actions}>
             <button 
-              className={`${styles.playBtn} playBtn`} 
-              title={buttonWarnings.play_movie || ''}
-              onClick={(e) => {
+              className={`${styles.playBtnDetail} playBtnDetail`} 
+              onClick={() => {
                 if (buttonWarnings.play_movie) {
                   const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
                   if (!hasBypass) {
-                    e.preventDefault();
                     showToast(buttonWarnings.play_movie, 'warning');
                     return;
                   } else {
-                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.play_movie}`, 'info');
+                    showToast(`Admin Notice: ${buttonWarnings.play_movie}`, 'warning');
                   }
                 }
                 
@@ -705,7 +703,7 @@ const MovieDetail = () => {
               }}
             >
               <Play fill="black" size={22} /> Play Now
-              {buttonWarnings.play_movie && <AlertTriangle size={18} color="#e50914" style={{marginLeft: '6px'}} />}
+              {buttonWarnings.play_movie && <span className={styles.warningBadge} />}
             </button>
             <button 
               className={`${styles.trailerBtnDetail} trailerBtnDetail`} 
@@ -718,14 +716,14 @@ const MovieDetail = () => {
                     showToast(buttonWarnings.watch_trailer, 'warning');
                     return;
                   } else {
-                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.watch_trailer}`, 'info');
+                    showToast(`Admin Notice: ${buttonWarnings.watch_trailer}`, 'warning');
                   }
                 }
                 handleWatchTrailer();
               }}
             >
               Watch Trailer
-              {buttonWarnings.watch_trailer && <AlertTriangle size={18} color="#e50914" style={{marginLeft: '6px'}} />}
+              {buttonWarnings.watch_trailer && <span className={styles.warningBadge} />}
             </button>
             <button 
               className={`${styles.listBtn} ${isFavorite ? styles.listBtnActive : ''}`} 
@@ -737,7 +735,7 @@ const MovieDetail = () => {
                     showToast(buttonWarnings.add_to_list, 'warning');
                     return;
                   } else {
-                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.add_to_list}`, 'info');
+                    showToast(`Admin Notice: ${buttonWarnings.add_to_list}`, 'warning');
                   }
                 }
                 handleToggleFavorite();
@@ -745,10 +743,10 @@ const MovieDetail = () => {
               data-title={buttonWarnings.add_to_list || (isLoggedIn ? (isFavorite ? 'Remove from My List' : 'Add to My List') : 'Login to save')}
             >
               {isFavorite ? <Check size={22} /> : <Plus size={22} />}
-              {buttonWarnings.add_to_list && <AlertTriangle size={14} color="#e50914" style={{position: 'absolute', top: -5, right: -5}} />}
+              {buttonWarnings.add_to_list && <span className={styles.warningBadge} style={{top: '-2px', right: '-2px'}} />}
             </button>
             <button 
-              className={styles.listBtn} 
+              className={`${styles.downloadBtnDetail} downloadBtnDetail`}
               onClick={(e) => {
                 if (buttonWarnings.download_movie) {
                   const hasBypass = currentUser?.role === 'admin' || currentUser?.role === 'moderator';
@@ -757,7 +755,7 @@ const MovieDetail = () => {
                     showToast(buttonWarnings.download_movie, 'warning');
                     return;
                   } else {
-                    showToast(`${currentUser.role === 'admin' ? 'Admin' : 'Moderator'} Notice: ${buttonWarnings.download_movie}`, 'info');
+                    showToast(`Admin Notice: ${buttonWarnings.download_movie}`, 'warning');
                   }
                 }
                 handleDownload();
@@ -766,7 +764,7 @@ const MovieDetail = () => {
               disabled={isDownloading}
             >
               {isDownloading ? <Loader2 size={22} className={styles.spinner} /> : <Download size={22} />}
-              {buttonWarnings.download_movie && <AlertTriangle size={14} color="#e50914" style={{position: 'absolute', top: -5, right: -5}} />}
+              {buttonWarnings.download_movie && <span className={styles.warningBadge} />}
             </button>
           </div>
 
