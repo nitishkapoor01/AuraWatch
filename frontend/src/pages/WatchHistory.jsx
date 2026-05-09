@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Clock, Play, Film, Tv, BarChart3, Calendar, Filter, ExternalLink, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import styles from './WatchHistory.module.css';
 import SEO from '../components/SEO';
 
@@ -81,6 +82,7 @@ const HistoryCard = ({ item, handleGetLink, handleRemove, handleMarkComplete }) 
 
 const WatchHistory = () => {
   const { isLoggedIn, token, refreshStreak } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -118,8 +120,10 @@ const WatchHistory = () => {
       setHistory(prev => prev.filter(f => !(f.movie_id === movieId && f.movie_type === movieType)));
       // Refresh global stats
       refreshStreak();
+      showToast('Item removed from history', 'info');
     } catch (err) {
       console.error('Failed to remove:', err);
+      showToast('Failed to remove item', 'error');
     }
   };
 
@@ -133,14 +137,16 @@ const WatchHistory = () => {
         // Update local state to reflect change immediately
         setHistory(prev => prev.map(h => 
           (h.movie_id === movieId && h.movie_type === movieType) 
-          ? { ...h, progress: h.duration || 3600, duration: h.duration || 3600 } 
+          ? { ...h, progress: h.duration || 3600, duration: h.duration || 3600, is_completed: true } 
           : h
         ));
         // Refresh global stats
         refreshStreak();
+        showToast('Marked as completed!', 'success');
       }
     } catch (err) {
       console.error('Failed to mark complete:', err);
+      showToast('Failed to mark as completed', 'error');
     }
   };
 
