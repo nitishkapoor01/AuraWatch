@@ -315,6 +315,14 @@ const ProfileModal = ({ isOpen, onClose }) => {
             <div style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>{streak.totalDays}</div>
             <div style={{ color: '#aaa', fontSize: '11px' }}>Total Days</div>
           </div>
+          <div style={{
+            flex: 1, minWidth: '80px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '10px', padding: '12px', textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '22px' }}>🎬</div>
+            <div style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>{streak.totalWatched || 0}</div>
+            <div style={{ color: '#aaa', fontSize: '11px' }}>Watched</div>
+          </div>
         </div>
 
         {/* Change Password Section */}

@@ -72,6 +72,19 @@ const MovieDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showLoginTeaser, setShowLoginTeaser] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (showPlayer) {
+        setIsSticky(window.scrollY > 400);
+      } else {
+        setIsSticky(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showPlayer]);
 
   // Download Modal State
   const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -425,6 +438,37 @@ const MovieDetail = () => {
     };
   }, [showPlayer, id, playerSeason, playerEpisode]);
 
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't fire if typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'Escape') {
+        if (showPlayer) setShowPlayer(false);
+        if (showTrailer) setShowTrailer(false);
+      }
+      // N = Next Episode, P = Previous Episode (TV only)
+      if (isTV && showPlayer) {
+        if (e.key === 'n' || e.key === 'N') {
+          const nextEp = episodes?.find(ep => ep.number === playerEpisode + 1);
+          if (nextEp) {
+            handlePlayEpisode(playerSeason, playerEpisode + 1, nextEp.name || '');
+            showToast(`▶ Next: S${playerSeason} E${playerEpisode + 1}`, 'info');
+          }
+        }
+        if (e.key === 'p' || e.key === 'P') {
+          if (playerEpisode > 1) {
+            const prevEp = episodes?.find(ep => ep.number === playerEpisode - 1);
+            handlePlayEpisode(playerSeason, playerEpisode - 1, prevEp?.name || '');
+            showToast(`◀ Previous: S${playerSeason} E${playerEpisode - 1}`, 'info');
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showPlayer, showTrailer, isTV, playerSeason, playerEpisode, episodes]);
 
   const getPlayerUrl = () => {
     if (isTV) {
@@ -570,7 +614,7 @@ const MovieDetail = () => {
 
       {/* Embed Player Modal */}
       {showPlayer && (
-        <div className={styles.trailerModal}>
+        <div className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''}`}>
           <button className={styles.closeTrailerBtn} onClick={() => setShowPlayer(false)}>
             <X size={28} />
           </button>

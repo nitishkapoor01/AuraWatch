@@ -134,6 +134,22 @@ router.get('/trending', async (req, res) => {
   } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
+router.get('/trending-india', async (req, res) => {
+  try {
+    const urlBuilder = (page) => `${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&region=IN&with_origin_country=IN&sort_by=popularity.desc&page=${page}&with_release_type=3|2`;
+    res.json(await fetchMultiPages(urlBuilder, 'movie', 2));
+  } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+
+router.get('/new-this-week', async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const lastWeek = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+    const urlBuilder = (page) => `${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&primary_release_date.gte=${lastWeek}&primary_release_date.lte=${today}&sort_by=popularity.desc&page=${page}`;
+    res.json(await fetchMultiPages(urlBuilder, 'movie', 2));
+  } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+
 router.get('/search', async (req, res) => {
   const { query, visitorId } = req.query;
   try {

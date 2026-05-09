@@ -471,10 +471,17 @@ router.get('/streak', authMiddleware, async (req, res) => {
     }
     longestStreak = Math.max(longestStreak, currentStreak, 1);
 
+    const totalWatchedResult = await db.query(
+      `SELECT COUNT(DISTINCT movie_id) as total FROM watch_history WHERE user_id = $1`,
+      [req.user.id]
+    );
+    const totalWatched = parseInt(totalWatchedResult.rows[0].total || 0);
+
     res.json({
       currentStreak,
       longestStreak,
       totalDays: dates.length,
+      totalWatched,
       lastActive: dates[0]
     });
   } catch (error) {

@@ -129,8 +129,39 @@ const Home = () => {
         }}
       >
         <ContinueWatchingRow compact={layout === 'grid'} />
-        <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} />
         <Row title="Trending Now" endpoint="trending" compact={layout === 'grid'} />
+        <Row title="Top 10 in India Today" endpoint="trending-india" compact={layout === 'grid'} />
+        <Row title="New Releases This Week" endpoint="new-this-week" compact={layout === 'grid'} />
+
+        {/* Seasonal Banner */}
+        <div style={{
+          margin: '60px 4% 60px 0',
+          padding: '50px 40px',
+          borderRadius: '16px',
+          background: 'linear-gradient(135deg, rgba(229, 9, 20, 0.4) 0%, rgba(0,0,0,0.9) 100%)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          textAlign: 'left',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <span style={{ 
+              background: '#e50914', color: '#fff', padding: '4px 12px', 
+              borderRadius: '4px', fontSize: '12px', fontWeight: 'bold',
+              textTransform: 'uppercase', marginBottom: '16px', display: 'inline-block'
+            }}>Seasonal Special</span>
+            <h2 style={{ fontSize: '36px', color: '#fff', marginBottom: '12px', fontWeight: '900' }}>☀️ Summer Blockbusters 2026</h2>
+            <p style={{ color: '#ccc', fontSize: '18px', maxWidth: '600px', lineHeight: '1.6' }}>
+              The heat is on! Dive into our curated collection of the year's biggest Indian and global hits.
+            </p>
+          </div>
+          <div style={{ 
+            position: 'absolute', right: '-10%', top: '-20%', fontSize: '200px', 
+            opacity: 0.1, pointerEvents: 'none', transform: 'rotate(15deg)'
+          }}>🔥</div>
+        </div>
+
+        <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} />
         <Row title="Popular on Netflix" endpoint="continue-watching" compact={layout === 'grid'} />
         <Row title="Top Rated Classics" endpoint="top-rated" compact={layout === 'grid'} />
         <Row title="Action & Adventure" endpoint="action" compact={layout === 'grid'} />
