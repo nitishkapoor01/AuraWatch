@@ -7,6 +7,8 @@ import SEO from '../components/SEO';
 
 const FILTER_OPTIONS = [
   { key: 'all', label: 'All' },
+  { key: 'watching', label: 'In Progress' },
+  { key: 'completed', label: 'Completed' },
   { key: 'today', label: 'Today' },
   { key: 'yesterday', label: 'Yesterday' },
   { key: 'week', label: 'This Week' },
@@ -89,34 +91,29 @@ const WatchHistory = () => {
     yest.setDate(yest.getDate() - 1);
     const yestStr = yest.toDateString();
 
-    const counts = { all: history.length, today: 0, yesterday: 0, week: 0, month: 0, older: 0 };
+    const counts = { all: 0, watching: 0, completed: 0, today: 0, yesterday: 0, week: 0, month: 0, older: 0 };
     
     const items = history.map(item => {
       const date = parseDate(item.last_watched);
       const dStr = date.toDateString();
+      const isDone = item.progress >= 90;
       
       let category = 'older';
-      let label = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-      
-      if (dStr === todayStr) {
-        category = 'today';
-        label = 'Today';
-      } else if (dStr === yestStr) {
-        category = 'yesterday';
-        label = 'Yesterday';
-      } else {
-        const diffMs = now - date;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays < 7) category = 'week';
-        else if (diffDays < 30) category = 'month';
-      }
-      
-      counts[category]++;
-      
+      if (dStr === todayStr) { category = 'today'; counts.today++; }
+      else if (dStr === yestStr) { category = 'yesterday'; counts.yesterday++; }
+      else if (now - date < 7 * 86400000) { category = 'week'; counts.week++; }
+      else if (now - date < 30 * 86400000) { category = 'month'; counts.month++; }
+      else { counts.older++; }
+
+      if (isDone) counts.completed++;
+      else counts.watching++;
+      counts.all++;
+
       return {
         ...item,
+        isDone,
         category,
-        label,
+        label: dStr === todayStr ? 'Today' : dStr === yestStr ? 'Yesterday' : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
         detailedTime: date.toLocaleString(undefined, {
           weekday: 'short', month: 'short', day: 'numeric',
           hour: '2-digit', minute: '2-digit'
@@ -126,6 +123,10 @@ const WatchHistory = () => {
 
     const filtered = activeFilter === 'all' 
       ? items 
+      : activeFilter === 'completed'
+      ? items.filter(i => i.isDone)
+      : activeFilter === 'watching'
+      ? items.filter(i => !i.isDone)
       : items.filter(item => item.category === activeFilter);
 
     // Final deduplication for safety
@@ -241,10 +242,19 @@ const WatchHistory = () => {
                 <Link to={playUrl} className={styles.cardLink}>
                   <img src={item.poster} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" />
                   
-                  <div className={styles.dateBadge} data-title={item.detailedTime}>
-                    <Clock size={11} />
-                    <span>{item.label}</span>
-                  </div>
+                    <div className={styles.dateBadge} data-title={item.detailedTime}>
+                      <Clock size={11} />
+                      <span>{item.label}</span>
+                    </div>
+
+                    {item.isDone && (
+                      <div style={{
+                        position: 'absolute', top: '10px', right: '10px',
+                        background: '#2ecc71', color: 'white', padding: '2px 8px',
+                        borderRadius: '4px', fontSize: '10px', fontWeight: 'bold',
+                        zIndex: 10, boxShadow: '0 2px 5px rgba(0,0,0,0.5)'
+                      }}>COMPLETED</div>
+                    )}
 
                   <div className={styles.cardOverlay}>
                     <span className={styles.cardTitle}>{item.title}</span>
