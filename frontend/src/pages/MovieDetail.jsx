@@ -380,74 +380,50 @@ const MovieDetail = () => {
     }
   };
 
-  // Screenscape Progress Tracking Integration
+  // Self-contained elapsed-time progress tracker
   useEffect(() => {
-    if (!showPlayer) return;
+    if (!showPlayer || !isLoggedIn || !movie) return;
 
-    let progressInterval;
-    
-    const handleMessage = (event) => {
-      if (event.data?.type === "SCREENSCAPE_WATCH_HISTORY_WITH_PROGRESS_RESPONSE") {
-        const history = event.data.watchHistory;
-        if (history) {
-          // Attempt to extract the correct progress for current item
-          let currentProgress = null;
-          
-          let historyList = [];
-          if (Array.isArray(history)) {
-            historyList = history;
-          } else if (typeof history === 'object') {
-            if (history.progress !== undefined && (history.tmdb || history.id || history.tmdb_id)) {
-              historyList = [history];
-            } else {
-              historyList = Object.values(history);
-            }
-          }
-          
-          currentProgress = historyList.find(h => {
-            if (!h) return false;
-            const hId = String(h.tmdb_id || h.tmdb || h.tmdbId || h.id);
-            if (hId !== String(id)) return false;
-            
-            if (isTV) {
-              const hSeason = String(h.season || h.s);
-              const hEpisode = String(h.episode || h.e || h.ep);
-              return hSeason === String(playerSeason) && hEpisode === String(playerEpisode);
-            }
-            return true;
-          });
+    // Get estimated duration in seconds: movie.runtime is in minutes
+    // For TV: try to get current episode's runtime, fallback to 25 min
+    let estimatedDuration = 0;
+    if (isTV) {
+      const currentEp = episodes?.find(ep => ep.number === playerEpisode);
+      estimatedDuration = (currentEp?.runtime || 25) * 60; // minutes -> seconds
+    } else {
+      estimatedDuration = (movie.runtime || 120) * 60;
+    }
 
-          if (currentProgress && currentProgress.progress) {
-            // Update watch history silently with actual progress
-            trackWatch(
-              playerSeason, 
-              playerEpisode, 
-              currentProgress.progress, 
-              currentProgress.duration || 100
-            );
-          }
-        }
-      }
-    };
+    const watchStartTime = Date.now();
 
-    window.addEventListener("message", handleMessage);
+    // Save progress every 30 seconds
+    const progressInterval = setInterval(() => {
+      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
+      if (elapsedSeconds < 5) return; // Don't save if barely started
 
-    // Poll for progress every 15 seconds
-    progressInterval = setInterval(() => {
-      const iframe = document.getElementById("screenscape-player");
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({
-          type: "SCREENSCAPE_GET_WATCH_HISTORY_WITH_PROGRESS",
-          requestId: "history-update"
-        }, "*");
-      }
-    }, 15000);
+      trackWatch(
+        isTV ? playerSeason : null,
+        isTV ? playerEpisode : null,
+        elapsedSeconds,
+        estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60
+      );
+    }, 30000);
 
+    // Also save immediately when player closes
     return () => {
-      window.removeEventListener("message", handleMessage);
       clearInterval(progressInterval);
+      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
+      if (elapsedSeconds >= 5) {
+        trackWatch(
+          isTV ? playerSeason : null,
+          isTV ? playerEpisode : null,
+          elapsedSeconds,
+          estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60
+        );
+      }
     };
   }, [showPlayer, id, playerSeason, playerEpisode]);
+
 
   const getPlayerUrl = () => {
     if (isTV) {
