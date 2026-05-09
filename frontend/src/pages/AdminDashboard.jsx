@@ -261,7 +261,11 @@ const AdminDashboard = () => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ key: 'button_warnings', value: newWarnings })
       });
-      showToast('Button warning saved!', 'success');
+      if (value) {
+        showToast('Button warning saved!', 'success');
+      } else {
+        showToast('Warning removed!', 'info');
+      }
     } catch (e) { 
       console.error(e);
       showToast('Failed to update button warnings', 'error');
