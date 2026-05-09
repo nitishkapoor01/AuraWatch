@@ -13,10 +13,16 @@ router.get('/stats', isModerator, async (req, res) => {
   try {
     const totalUsers = (await db.query('SELECT COUNT(*) as count FROM users')).rows[0].count;
     const totalFavorites = (await db.query('SELECT COUNT(*) as count FROM favorites')).rows[0].count;
-    const totalWatches = (await db.query('SELECT COUNT(*) as count FROM watch_history')).rows[0].count;
+    
+    // Completed watches (90%+)
+    const totalWatches = (await db.query('SELECT COUNT(*) as count FROM watch_history WHERE progress >= (duration * 0.9) AND duration > 0')).rows[0].count;
+    
+    // Total click attempts
+    const totalAttempts = (await db.query('SELECT COUNT(*) as count FROM watch_history')).rows[0].count;
+    
     const totalProgressResult = await db.query('SELECT SUM(progress) as "totalProgress" FROM watch_history');
-    const totalProgressMinutes = totalProgressResult.rows[0].totalProgress || 0;
-    const totalWatchTimeHours = totalProgressMinutes / 60;
+    const totalProgressSeconds = totalProgressResult.rows[0].totalProgress || 0;
+    const totalWatchTimeHours = totalProgressSeconds / 3600; // progress is in seconds
 
     const dailyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date = CURRENT_DATE")).rows[0].count;
     const weeklyActive = (await db.query("SELECT COUNT(DISTINCT user_id) as count FROM user_activity WHERE date >= CURRENT_DATE - INTERVAL '7 days'")).rows[0].count;
@@ -36,6 +42,7 @@ router.get('/stats', isModerator, async (req, res) => {
       totalUsers: parseInt(totalUsers),
       totalFavorites: parseInt(totalFavorites),
       totalWatches: parseInt(totalWatches),
+      totalAttempts: parseInt(totalAttempts),
       totalWatchTimeHours: parseFloat(totalWatchTimeHours.toFixed(1)),
       dailyActive: parseInt(dailyActive),
       weeklyActive: parseInt(weeklyActive),

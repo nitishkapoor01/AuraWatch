@@ -343,8 +343,12 @@ const AdminDashboard = () => {
               <div className={styles.statInfo}><h3>{liveStats?.total || 0}</h3><p>Users Online Now</p></div>
             </div>
             <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}><History size={28} /></div>
-              <div className={styles.statInfo}><h3>{stats.totalWatches}</h3><p>Total Watches</p></div>
+              <div className={styles.statIcon} style={{ background: 'rgba(39, 174, 96, 0.15)', color: '#27ae60' }}><CheckCircle size={28} /></div>
+              <div className={styles.statInfo}><h3>{stats.totalWatches}</h3><p>Completed Watches</p></div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}><Activity size={28} /></div>
+              <div className={styles.statInfo}><h3>{stats.totalAttempts}</h3><p>Total Clicks</p></div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}><Clock size={28} /></div>
