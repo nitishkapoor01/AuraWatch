@@ -96,7 +96,7 @@ const WatchHistory = () => {
     const items = history.map(item => {
       const date = parseDate(item.last_watched);
       const dStr = date.toDateString();
-      const isDone = item.progress >= 90;
+      const isDone = item.duration > 0 && item.progress >= (item.duration * 0.9);
       
       let category = 'older';
       if (dStr === todayStr) { category = 'today'; counts.today++; }
@@ -171,7 +171,7 @@ const WatchHistory = () => {
         description="View your watch history on AuraWatch."
       />
       <h1 className={styles.pageTitle}>Watch History</h1>
-      <p className={styles.subtitle}>{history.filter(h => h.progress >= 90).length} titles completed in your journey</p>
+      <p className={styles.subtitle}>{history.filter(h => h.duration > 0 && h.progress >= (h.duration * 0.9)).length} titles completed in your journey</p>
 
       {/* Stats Dashboard */}
       {history.length > 0 && (
@@ -179,21 +179,21 @@ const WatchHistory = () => {
           <div className={styles.statCard}>
             <div className={styles.statIcon} style={{ background: 'rgba(229, 9, 20, 0.1)' }}><Film size={20} color="#e50914" /></div>
             <div className={styles.statInfo}>
-              <span className={styles.statValue}>{history.filter(h => h.movie_type === 'movie' && h.progress >= 90).length}</span>
+              <span className={styles.statValue}>{history.filter(h => h.movie_type === 'movie' && h.duration > 0 && h.progress >= (h.duration * 0.9)).length}</span>
               <span className={styles.statLabel}>Movies Done</span>
             </div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.1)' }}><Tv size={20} color="#0071eb" /></div>
             <div className={styles.statInfo}>
-              <span className={styles.statValue}>{history.filter(h => h.movie_type !== 'movie' && h.progress >= 90).length}</span>
+              <span className={styles.statValue}>{history.filter(h => h.movie_type !== 'movie' && h.duration > 0 && h.progress >= (h.duration * 0.9)).length}</span>
               <span className={styles.statLabel}>Shows Done</span>
             </div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.1)' }}><BarChart3 size={20} color="#2ecc71" /></div>
             <div className={styles.statInfo}>
-              <span className={styles.statValue}>{history.filter(h => h.progress >= 90).length}</span>
+              <span className={styles.statValue}>{history.filter(h => h.duration > 0 && h.progress >= (h.duration * 0.9)).length}</span>
               <span className={styles.statLabel}>Completed</span>
             </div>
           </div>
