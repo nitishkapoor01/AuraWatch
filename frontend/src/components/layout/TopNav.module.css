@@ -372,61 +372,41 @@
   margin-top: 4px;
 }
 
-/* 📱 MOBILE (≤768px) */
+/* ═══════════════════════════════════════════════
+   📱 MOBILE (≤768px) — Rewritten from scratch
+   Layout: [Logo AuraWatch]    [🔍][🎲][🔎][👤]
+   ═══════════════════════════════════════════════ */
 @media (max-width: 768px) {
+
+  /* ── Base bar ── */
   .topNav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    padding: 0 12px; /* Tight padding on both sides */
-    background: rgba(10, 10, 10, 0.95);
+    height: 56px;
+    padding: 0 14px;
+    background: rgba(10, 10, 10, 0.96);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0;
+    gap: 8px;
     z-index: 2000;
-    transition: all 0.3s ease;
-  }
-  
-  /* Hide branding when search is active */
-  .topNav.searchActive .branding {
-    display: none;
-  }
-  
-  .topNav.searchActive .navActions {
-    width: 100%;
   }
 
-  .topNav.searchActive .searchContainer {
-    max-width: 100%;
-    flex: 1;
-  }
-
-  .topNav.searchActive .searchBox {
-    flex: 1;
-  }
-
-  .topNav.searchActive .filterInline,
-  .topNav.searchActive .surpriseWrapper {
-    display: none;
-  }
-
+  /* ── Left: Branding ── */
   .branding {
     display: flex;
     align-items: center;
-    gap: 2px;
-    flex: 0 1 auto; /* Can shrink if needed, never grows */
-    min-width: 0;
-    overflow: hidden;
+    gap: 3px;
+    flex-shrink: 0;
     margin-left: 0;
   }
 
   .brandLogo {
-    height: 34px; /* Good size, won't dominate */
+    height: 36px;
     width: auto;
-    flex-shrink: 0;
   }
 
   .brandName {
@@ -439,8 +419,6 @@
     margin-top: 0;
     margin-left: -3px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .watchText {
@@ -448,56 +426,62 @@
     color: #fff;
   }
 
+  /* ── Right: All action buttons ── */
   .navActions {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-shrink: 0; /* Always stay visible, never compress */
-    justify-content: flex-end;
+    margin-left: auto;
+    padding-right: 0;
+    flex-shrink: 0;
   }
 
   .searchContainer {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-shrink: 0;
-    justify-content: flex-end;
+    width: auto;
   }
 
   .filterInline {
     flex-shrink: 0;
   }
 
-  /* Click-to-reveal on Mobile */
   .searchBox {
-    width: auto;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    transition: all 0.3s ease;
+    width: auto;
   }
 
+  /* ── Search: icon-only by default ── */
   .mobileSearchBtn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     padding: 0;
-    background-color: transparent;
+    background: transparent;
     border: none;
     color: #fff;
     cursor: pointer;
-  }
-  
-  .searchBox.expanded .mobileSearchBtn {
-    display: none;
+    flex-shrink: 0;
   }
 
-  /* Match the laptop dice button look */
+  .searchInput {
+    display: none;
+    width: 0;
+    opacity: 0;
+  }
+
+  .searchIcon {
+    display: none !important;
+  }
+
+  /* ── Surprise button ── */
   .surpriseBtn {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     background-color: rgba(var(--primary-color-rgb), 0.1);
     border: 1px solid rgba(var(--primary-color-rgb), 0.3);
@@ -508,58 +492,80 @@
   }
 
   .surpriseBtn svg {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
   }
 
-  .searchInput {
-    display: none; /* hidden by default on mobile */
-    opacity: 0;
-    width: 0;
-    height: 36px;
-    padding: 0;
-    font-size: 14px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 18px;
-    color: #fff;
-    transition: all 0.3s ease;
-  }
-
-  .searchBox.expanded .searchInput {
-    display: block;
-    opacity: 1;
-    width: 100%;
-    padding: 0 16px;
-  }
-
-  .searchIcon {
-    display: none !important; /* Always hidden on mobile */
-  }
-
+  /* ── Avatar ── */
   .avatarCircle {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
   }
 
   .userProfile {
     flex-shrink: 0;
   }
+
+  /* ═══════════════════════════════════════
+     Search EXPANDED state
+     Hides branding, shows full-width input
+     ═══════════════════════════════════════ */
+  .topNav.searchActive .branding {
+    display: none;
+  }
+
+  .topNav.searchActive .navActions {
+    width: 100%;
+    flex: 1;
+  }
+
+  .topNav.searchActive .searchContainer {
+    flex: 1;
+    width: 100%;
+  }
+
+  .topNav.searchActive .filterInline,
+  .topNav.searchActive .surpriseWrapper {
+    display: none;
+  }
+
+  .topNav.searchActive .searchBox {
+    flex: 1;
+  }
+
+  .topNav.searchActive .searchBox .mobileSearchBtn {
+    display: none;
+  }
+
+  .topNav.searchActive .searchBox .searchInput {
+    display: block;
+    opacity: 1;
+    width: 100%;
+    height: 36px;
+    padding: 0 14px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    color: #fff;
+  }
 }
 
-/* 📱 SMALL PHONE (≤480px) */
-@media (max-width: 480px) {
+/* ═══════════════════════════════════════
+   📱 SMALL PHONE (≤380px)
+   ═══════════════════════════════════════ */
+@media (max-width: 380px) {
   .topNav {
-    padding: 0 10px; /* Even tighter on very small screens */
+    padding: 0 10px;
   }
 
   .brandLogo {
-    height: 34px;
+    height: 32px;
   }
 
   .brandName {
-    font-size: 15px; /* Still bigger than before, readable */
+    font-size: 14px;
     letter-spacing: 1px;
   }
 
@@ -567,9 +573,11 @@
     gap: 4px;
   }
 
-  .searchInput {
-    font-size: 12px;
-    padding: 0 10px;
+  .mobileSearchBtn,
+  .surpriseBtn,
+  .avatarCircle {
+    width: 28px;
+    height: 28px;
   }
 }
 
