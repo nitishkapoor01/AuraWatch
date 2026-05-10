@@ -371,78 +371,92 @@
     min-height: 50px;
   }
 
+  .branding {
+    gap: 8px;
+  }
+
   .brandLogo {
-    height: 32px;
+    height: 28px;
   }
 
   .brandName {
     display: block;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    margin-left: 2px;
+    font-size: 16px;
+    font-weight: 800;
   }
 
   .watchText {
-    display: none; /* Only hide 'Watch' part to save space if needed, or keep both small */
+    display: inline;
   }
 
   .navActions {
-    gap: 8px;
+    gap: 12px;
     padding-right: 0;
-    flex: 1;
+    flex: 0; /* Don't grow by default */
   }
 
   .searchContainer {
-    flex: 1;
+    position: relative;
     width: auto;
-    gap: 4px;
-    padding: 0 4px;
-  }
-
-  /* Show FilterBar but make it more compact */
-  .filterInline {
-    display: block;
-    transform: scale(0.85);
-    margin-right: -8px;
-    margin-left: -4px;
-  }
-
-  /* Search expands on focus but logo stays */
-  .topNav:has(.searchInput:focus) .searchContainer {
-    width: 100%;
-    flex-grow: 1;
-    z-index: 100;
-  }
-
-  .topNav:has(.searchInput:focus) .navActions {
-    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
   }
 
   .searchInput {
-    padding: 6px 8px;
-    font-size: 11px;
-    width: 60px; /* Small width by default */
-    transition: width 0.3s ease;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    opacity: 0;
+    padding: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 20px;
+    z-index: 10;
   }
 
-  .searchInput:focus {
-    width: 140px; /* Expand on focus */
+  .topNav:has(.searchInput:focus) .searchInput {
+    position: fixed;
+    top: 8px;
+    left: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+    height: 40px;
+    opacity: 1;
+    padding: 0 40px;
+    pointer-events: auto;
+    transform: none;
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(var(--primary-color-rgb), 0.2);
+  }
+
+  .searchIcon {
+    cursor: pointer;
+    z-index: 11;
+  }
+
+  .topNav:has(.searchInput:focus) .searchIcon {
+    position: fixed;
+    left: 22px;
+    top: 20px;
+    color: var(--primary-color);
   }
 
   .surpriseBtn {
-    width: 30px;
-    height: 30px;
-    flex-shrink: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 36px;
+    height: 36px;
   }
 
-  .loginBtn {
-    padding: 5px 8px;
-    font-size: 11px;
-    gap: 3px;
+  /* Hide everything else when searching on mobile */
+  .topNav:has(.searchInput:focus) .branding,
+  .topNav:has(.searchInput:focus) .filterInline,
+  .topNav:has(.searchInput:focus) .surpriseWrapper,
+  .topNav:has(.searchInput:focus) .userProfile {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 
@@ -467,52 +481,23 @@
   }
 
   .navActions {
-    flex: 1;
-    gap: 5px;
-    padding-right: 0;
+    flex: 0;
+    gap: 8px;
   }
 
   .searchContainer {
-    flex: 1;
     width: auto;
-    min-width: 0;
-    gap: 5px;
-  }
-
-  .searchInput {
-    padding: 6px 8px;
-    font-size: 12px;
-    width: 100%;
-    min-width: 0;
   }
 
   .surpriseBtn {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-  }
-
-  .surpriseBtn svg {
-    width: 13px;
-    height: 13px;
-  }
-
-  .loginBtn span {
-    display: none;
-  }
-
-  .loginBtn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    justify-content: center;
-    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
   }
 
   .avatarCircle {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 }
 
