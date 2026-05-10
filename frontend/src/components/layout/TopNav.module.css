@@ -303,21 +303,35 @@
   }
 
   .brandLogo {
-    height: 30px;
+    height: 32px;
   }
 
   .brandName {
     display: block;
-    font-size: 16px;
+    font-size: 15px;
     letter-spacing: 1px;
     margin-left: -2px;
     margin-top: -2px;
   }
 
-  .searchContainer {
-    width: 140px;
+  .navActions {
+    gap: 8px;
+    padding-right: 0;
+    flex: 1;
   }
 
+  .searchContainer {
+    flex: 1;
+    width: auto;
+    gap: 6px;
+  }
+
+  /* Hide FilterBar on mobile — too cramped */
+  .filterInline {
+    display: none;
+  }
+
+  /* When focused: logo disappears, search expands */
   .topNav:has(.searchInput:focus) .branding {
     display: none;
   }
@@ -332,13 +346,15 @@
   }
 
   .searchInput {
-    padding: 8px 10px 8px 30px;
+    padding: 8px 10px 8px 10px;
     font-size: 13px;
+    width: 100%;
   }
 
-  .navActions {
-    gap: 8px;
-    padding-right: 0;
+  .surpriseBtn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
   }
 
   .loginBtn {
@@ -352,48 +368,52 @@
 @media (max-width: 480px) {
   .topNav {
     padding: 6px 10px;
-    gap: 6px;
-  }
-
-  .brandName {
-    font-size: 14px;
-    letter-spacing: 0.5px;
+    gap: 4px;
   }
 
   .brandLogo {
     height: 26px;
   }
 
+  .brandName {
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    margin-top: -6px;
+  }
+
   .navActions {
-    gap: 6px;
-    padding-right: 2px;
     flex: 1;
+    gap: 5px;
+    padding-right: 0;
   }
 
   .searchContainer {
-    width: auto;
     flex: 1;
-    gap: 6px;
+    width: auto;
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .searchInput {
+    padding: 6px 8px;
+    font-size: 12px;
+    width: 100%;
+    min-width: 0;
   }
 
   .surpriseBtn {
     width: 28px;
     height: 28px;
+    flex-shrink: 0;
   }
 
   .surpriseBtn svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .searchInput {
-    padding: 6px 8px 6px 24px;
-    font-size: 11px;
-    width: 100%;
+    width: 13px;
+    height: 13px;
   }
 
   .loginBtn span {
-    display: none; /* Show only icon on very small phones */
+    display: none;
   }
 
   .loginBtn {
@@ -401,6 +421,13 @@
     height: 30px;
     padding: 0;
     justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .avatarCircle {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
   }
 }
 
