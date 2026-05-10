@@ -387,7 +387,7 @@
     height: 56px;
     padding: 0 14px;
     background: rgba(10, 10, 10, 0.96);
-    backdrop-filter: blur(12px);
+    /* Removed backdrop-filter to prevent it from trapping position: fixed children */
     display: flex;
     align-items: center;
     justify-content: space-between;
