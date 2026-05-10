@@ -148,6 +148,16 @@ const MovieDetail = () => {
     setSelectedSeason(1);
   }, [id, type]);
 
+  // Set current viewing movie for live feed tracking
+  useEffect(() => {
+    if (movie && movie.title) {
+      sessionStorage.setItem('currentViewingMovie', movie.title);
+    }
+    return () => {
+      sessionStorage.removeItem('currentViewingMovie');
+    };
+  }, [movie]);
+
   // Auto-play from Continue Watching
   useEffect(() => {
     if (movie && !loading) {

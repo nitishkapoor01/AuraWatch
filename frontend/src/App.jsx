@@ -81,7 +81,11 @@ function App() {
     }
     if (path === '/') return 'Browsing Home';
     if (path.startsWith('/search')) return 'Searching';
-    if (path.startsWith('/movie/')) return 'Viewing Movie Details';
+    if (path.startsWith('/movie/')) {
+      const title = sessionStorage.getItem('currentViewingMovie');
+      if (title) return `Viewing: ${title}`;
+      return 'Viewing Movie Details';
+    }
     if (path.startsWith('/play/')) {
       const searchParams = new URLSearchParams(location.search);
       const title = searchParams.get('title');
