@@ -152,7 +152,10 @@ const GlobalPlayer = () => {
   return (
     <div 
       className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''}`}
-      style={isSticky ? { transform: `translate(${position.x}px, ${position.y}px)` } : {}}
+      style={isSticky ? { 
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        animation: (isDragging || position.x !== 0 || position.y !== 0) ? 'none' : undefined
+      } : {}}
       onMouseDown={handleMouseDown}
     >
       <button 
