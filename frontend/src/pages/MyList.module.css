@@ -21,22 +21,24 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .shareBtn {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--anim-speed, 0.3s);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
 .shareBtn:hover {
@@ -53,8 +55,8 @@
 @media (max-width: 768px) {
   .headerRow {
     flex-direction: row;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
   }
   
   .shareBtn span {
@@ -62,7 +64,11 @@
   }
   
   .shareBtn {
-    padding: 8px;
+    padding: 10px;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    justify-content: center;
   }
 }
 
@@ -77,6 +83,21 @@
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .sharedBadge span {
+    display: none;
+  }
+  
+  .sharedBadge {
+    padding: 8px;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    justify-content: center;
+  }
 }
 
 /* Promo Screen for Non-Logged-In Users */
@@ -429,8 +450,13 @@
   }
 
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 12px;
+  }
+  
+  .promoContent {
+    padding: 40px 24px;
+    margin: 0 16px;
   }
 }
 
