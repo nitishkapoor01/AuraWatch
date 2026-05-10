@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User, HelpCircle, Lock, Settings } from 'lucide-react';
+import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -110,6 +110,24 @@ const TopNav = () => {
 
   const isLoginPage = location.pathname === '/login';
 
+  const handleSurpriseMe = async () => {
+    try {
+      showToast('Finding a surprise for you...', 'info');
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/movies/trending`);
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const randomMovie = data[Math.floor(Math.random() * data.length)];
+        const type = randomMovie.type === 'Series' || randomMovie.type === 'tv' ? 'tv' : 'movie';
+        navigate(`/movie/${randomMovie.id}?type=${type}`);
+      } else {
+        showToast('Could not find a surprise right now.', 'error');
+      }
+    } catch (error) {
+      console.error("Error fetching surprise movie:", error);
+      showToast('Could not find a surprise right now.', 'error');
+    }
+  };
+
   const handleRestrictedAction = (action) => {
     setIsDropdownOpen(false);
     if (!isLoggedIn) {
@@ -135,6 +153,10 @@ const TopNav = () => {
           <div className={styles.filterInline}>
             <FilterBar onFilterChange={handleFilterChange} />
           </div>
+          
+          <button className={styles.surpriseBtn} onClick={handleSurpriseMe} title="Surprise Me!">
+            <Dices size={18} />
+          </button>
 
           <Search size={18} className={styles.searchIcon} />
           <input 

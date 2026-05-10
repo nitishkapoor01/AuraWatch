@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PictureInPicture } from 'lucide-react';
 import styles from './Player.module.css';
 
 const Player = () => {
   const [searchParams] = useSearchParams();
   const title = searchParams.get('title') || 'Video';
   const navigate = useNavigate();
+  const videoRef = useRef(null);
+
+  const handlePiP = async () => {
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else if (document.pictureInPictureEnabled && videoRef.current) {
+        await videoRef.current.requestPictureInPicture();
+      }
+    } catch (error) {
+      console.error('Failed to enter PiP:', error);
+    }
+  };
 
   return (
     <div className={styles.playerPage}>
@@ -17,6 +30,7 @@ const Player = () => {
           controls 
           autoPlay 
           src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          ref={videoRef}
         >
           Your browser does not support the video tag.
         </video>
@@ -26,6 +40,9 @@ const Player = () => {
             <ArrowLeft size={32} />
           </button>
           <span className={styles.title}>{title}</span>
+          <button className={styles.pipBtn} onClick={handlePiP} title="Picture in Picture">
+            <PictureInPicture size={24} />
+          </button>
         </div>
       </div>
     </div>
