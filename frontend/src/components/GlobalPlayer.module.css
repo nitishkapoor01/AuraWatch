@@ -165,47 +165,50 @@
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+  .trailerModal {
+    align-items: flex-end;
+  }
+
   .trailerIframe {
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 56px);
     border-radius: 0;
   }
 
   .closeTrailerBtn, .minimizeBtn, .rotateBtn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-width: 1.5px;
+    top: 12px;
   }
 
   .closeTrailerBtn svg, .minimizeBtn svg, .rotateBtn svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .closeTrailerBtn {
-    top: 16px;
-    right: 16px;
+    right: 12px;
   }
 
   .minimizeBtn {
-    top: 16px;
-    right: 60px; /* 16 + 36 + 8 */
+    right: 52px; /* 12 + 32 + 8 */
   }
 
   .rotateBtn {
-    top: 16px;
-    right: 104px; /* 60 + 36 + 8 */
+    right: 92px; /* 52 + 32 + 8 */
   }
 
   .playerEpLabel {
-    top: 16px;
-    left: 16px;
+    top: 14px;
+    left: 12px;
     font-size: 11px;
-    padding: 4px 10px;
-    max-width: 40vw;
+    padding: 6px 10px;
+    max-width: 50vw;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    background: transparent;
   }
 
   .stickyPlayer {
@@ -213,6 +216,11 @@
     right: 20px !important;
     width: 260px !important;
     height: 146px !important;
+    align-items: center;
+  }
+
+  .stickyPlayer .trailerIframe {
+    height: 100%;
   }
 }
 
