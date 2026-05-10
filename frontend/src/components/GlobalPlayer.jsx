@@ -1,0 +1,174 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { X } from 'lucide-react';
+import { usePlayer } from '../context/PlayerContext';
+import { useAuth } from '../context/AuthContext';
+import styles from './GlobalPlayer.module.css';
+
+const GlobalPlayer = () => {
+  const { playerState, closePlayer, setSticky } = usePlayer();
+  const { isOpen, isSticky, movieData } = playerState;
+  const location = useLocation();
+  const { isLoggedIn, token } = useAuth();
+
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0 });
+
+  // Watch route changes. If playing and we leave the movie page, force sticky
+  useEffect(() => {
+    if (isOpen && movieData) {
+      const isOnMoviePage = location.pathname.includes(`/movie/${movieData.id}`);
+      if (!isOnMoviePage && !isSticky) {
+        setSticky(true);
+      }
+    }
+  }, [location.pathname, isOpen, movieData, isSticky, setSticky]);
+
+  // Drag logic
+  const handleMouseDown = (e) => {
+    if (!isSticky) return;
+    setIsDragging(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initX: position.x,
+      initY: position.y
+    };
+    e.preventDefault(); // Prevent text selection
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      
+      const deltaX = e.clientX - dragRef.current.startX;
+      const deltaY = e.clientY - dragRef.current.startY;
+      
+      setPosition({
+        x: dragRef.current.initX + deltaX,
+        y: dragRef.current.initY + deltaY
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  // Reset position when not sticky
+  useEffect(() => {
+    if (!isSticky) {
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [isSticky]);
+
+  // Track progress globally
+  useEffect(() => {
+    if (!isOpen || !movieData || !isLoggedIn) return;
+
+    let estimatedDuration = (movieData.runtime || 120) * 60; // Approximate if not passed
+    const watchStartTime = Date.now();
+
+    const trackWatch = async (progressVal, durationVal) => {
+      try {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/watch-history`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            movieId: movieData.id,
+            movieType: movieData.type,
+            title: movieData.title,
+            poster: movieData.poster, // Pass these in openPlayer!
+            backdrop: movieData.backdrop,
+            rating: movieData.rating,
+            year: movieData.year,
+            progress: progressVal,
+            duration: durationVal,
+            season: movieData.season,
+            episode: movieData.episode
+          })
+        });
+      } catch (err) {
+        console.error('Failed to track watch globally:', err);
+      }
+    };
+
+    const progressInterval = setInterval(() => {
+      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
+      if (elapsedSeconds < 5) return;
+      trackWatch(elapsedSeconds, estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60);
+    }, 30000);
+
+    return () => {
+      clearInterval(progressInterval);
+      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
+      if (elapsedSeconds >= 5) {
+        trackWatch(elapsedSeconds, estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60);
+      }
+    };
+  }, [isOpen, movieData, isLoggedIn, token]);
+
+  if (!isOpen || !movieData) return null;
+
+  const getPlayerUrl = () => {
+    if (movieData.type === 'tv' || movieData.type === 'Series') {
+      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season}&e=${movieData.episode}`;
+    }
+    return `https://screenscape.me/embed?tmdb=${movieData.id}&type=movie`;
+  };
+
+  const isTV = movieData.type === 'tv' || movieData.type === 'Series';
+  const label = isTV 
+    ? `${movieData.title} • S${movieData.season} E${movieData.episode}${movieData.epName ? ` • ${movieData.epName}` : ''}`
+    : movieData.title;
+
+  return (
+    <div 
+      className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''}`}
+      style={isSticky ? { transform: `translate(${position.x}px, ${position.y}px)` } : {}}
+      onMouseDown={handleMouseDown}
+    >
+      <button 
+        className={styles.closeTrailerBtn} 
+        onClick={(e) => {
+          e.stopPropagation();
+          closePlayer();
+        }}
+      >
+        <X size={28} />
+      </button>
+      
+      <div className={styles.playerEpLabel}>
+        {label}
+      </div>
+      
+      {isSticky && <div className={styles.dragOverlay} style={{ display: isDragging ? 'block' : 'none' }}></div>}
+      
+      <iframe
+        id="screenscape-player"
+        src={getPlayerUrl()}
+        title={movieData.title}
+        className={styles.trailerIframe}
+        allow="autoplay; encrypted-media; fullscreen"
+        allowFullScreen
+        style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
+      ></iframe>
+    </div>
+  );
+};
+
+export default GlobalPlayer;

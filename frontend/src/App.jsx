@@ -14,6 +14,7 @@ import MyList from './pages/MyList';
 import WatchHistory from './pages/WatchHistory';
 import AdminDashboard from './pages/AdminDashboard';
 import BackgroundEffects from './components/BackgroundEffects';
+import GlobalPlayer from './components/GlobalPlayer';
 import './App.css';
 
 function App() {
@@ -111,6 +112,7 @@ function App() {
           </Routes>
         </main>
       </div>
+      <GlobalPlayer />
     </div>
   );
 }

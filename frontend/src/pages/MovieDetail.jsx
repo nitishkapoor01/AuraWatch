@@ -8,6 +8,7 @@ import { fetchWithCache } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useButtonWarnings } from '../hooks/useButtonWarnings';
 import { useToast } from '../context/ToastContext';
+import { usePlayer } from '../context/PlayerContext';
 
 const isTVType = (type) => type === 'tv' || type === 'series';
 
@@ -65,26 +66,25 @@ const MovieDetail = () => {
   const [loading, setLoading] = useState(true);
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState(null);
-  const [showPlayer, setShowPlayer] = useState(false);
-  const [playerSeason, setPlayerSeason] = useState(1);
-  const [playerEpisode, setPlayerEpisode] = useState(1);
-  const [playerEpisodeName, setPlayerEpisodeName] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showLoginTeaser, setShowLoginTeaser] = useState(false);
-  const [isSticky, setIsSticky] = useState(false);
+
+  const { playerState, openPlayer, setSticky } = usePlayer();
+  const { isOpen, movieData } = playerState;
+  
+  // Check if THIS movie is currently playing globally
+  const isThisMoviePlaying = isOpen && movieData && String(movieData.id) === String(id);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (showPlayer) {
-        setIsSticky(window.scrollY > 400);
-      } else {
-        setIsSticky(false);
+      if (isThisMoviePlaying) {
+        setSticky(window.scrollY > 400);
       }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [showPlayer]);
+  }, [isThisMoviePlaying, setSticky]);
 
   // Download Modal State
   const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -138,14 +138,12 @@ const MovieDetail = () => {
 
     fetchMovie();
     fetchGlobalSettings();
+    fetchGlobalSettings();
     setShowTrailer(false);
     setTrailerKey(null);
-    setShowPlayer(false);
     setSeasons([]);
     setEpisodes([]);
     setSelectedSeason(1);
-    setPlayerSeason(1);
-    setPlayerEpisode(1);
   }, [id, type]);
 
   // Auto-play from Continue Watching
@@ -156,15 +154,14 @@ const MovieDetail = () => {
         const s = parseInt(searchParams.get('s')) || 1;
         const e = parseInt(searchParams.get('e')) || 1;
         
-        // Only override if valid season/episode for TV
         if (isTVType(type)) {
-          setPlayerSeason(s);
-          setPlayerEpisode(e);
+          openPlayer({ id: movie.id, type, title: movie.title, season: s, episode: e });
+        } else {
+          openPlayer({ id: movie.id, type, title: movie.title });
         }
-        setShowPlayer(true);
       }
     }
-  }, [movie, loading, searchParams, type]);
+  }, [movie, loading, searchParams, type, openPlayer]);
 
   // Check if favorite
   useEffect(() => {
@@ -245,10 +242,14 @@ const MovieDetail = () => {
   };
 
   const handlePlayEpisode = (season, episode, epName = '') => {
-    setPlayerSeason(season);
-    setPlayerEpisode(episode);
-    setPlayerEpisodeName(epName);
-    setShowPlayer(true);
+    openPlayer({
+      id: movie.id,
+      type,
+      title: movie.title,
+      season,
+      episode,
+      epName
+    });
     trackWatch(season, episode);
   };
 
@@ -394,88 +395,41 @@ const MovieDetail = () => {
     }
   };
 
-  // Self-contained elapsed-time progress tracker
-  useEffect(() => {
-    if (!showPlayer || !isLoggedIn || !movie) return;
-
-    // Get estimated duration in seconds: movie.runtime is in minutes
-    // For TV: try to get current episode's runtime, fallback to 25 min
-    let estimatedDuration = 0;
-    if (isTV) {
-      const currentEp = episodes?.find(ep => ep.number === playerEpisode);
-      estimatedDuration = (currentEp?.runtime || 25) * 60; // minutes -> seconds
-    } else {
-      estimatedDuration = (movie.runtime || 120) * 60;
-    }
-
-    const watchStartTime = Date.now();
-
-    // Save progress every 30 seconds
-    const progressInterval = setInterval(() => {
-      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
-      if (elapsedSeconds < 5) return; // Don't save if barely started
-
-      trackWatch(
-        isTV ? playerSeason : null,
-        isTV ? playerEpisode : null,
-        elapsedSeconds,
-        estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60
-      );
-    }, 30000);
-
-    // Also save immediately when player closes
-    return () => {
-      clearInterval(progressInterval);
-      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
-      if (elapsedSeconds >= 5) {
-        trackWatch(
-          isTV ? playerSeason : null,
-          isTV ? playerEpisode : null,
-          elapsedSeconds,
-          estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60
-        );
-      }
-    };
-  }, [showPlayer, id, playerSeason, playerEpisode]);
+  // Self-contained elapsed-time progress tracker moved to GlobalPlayer
 
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't fire if typing in an input
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       if (e.key === 'Escape') {
-        if (showPlayer) setShowPlayer(false);
         if (showTrailer) setShowTrailer(false);
       }
+      
       // N = Next Episode, P = Previous Episode (TV only)
-      if (isTV && showPlayer) {
+      if (isTV && isThisMoviePlaying && movieData) {
+        const pSeason = movieData.season;
+        const pEpisode = movieData.episode;
+        
         if (e.key === 'n' || e.key === 'N') {
-          const nextEp = episodes?.find(ep => ep.number === playerEpisode + 1);
+          const nextEp = episodes?.find(ep => ep.number === pEpisode + 1);
           if (nextEp) {
-            handlePlayEpisode(playerSeason, playerEpisode + 1, nextEp.name || '');
-            showToast(`▶ Next: S${playerSeason} E${playerEpisode + 1}`, 'info');
+            handlePlayEpisode(pSeason, pEpisode + 1, nextEp.name || '');
+            showToast(`▶ Next: S${pSeason} E${pEpisode + 1}`, 'info');
           }
         }
         if (e.key === 'p' || e.key === 'P') {
-          if (playerEpisode > 1) {
-            const prevEp = episodes?.find(ep => ep.number === playerEpisode - 1);
-            handlePlayEpisode(playerSeason, playerEpisode - 1, prevEp?.name || '');
-            showToast(`◀ Previous: S${playerSeason} E${playerEpisode - 1}`, 'info');
+          if (pEpisode > 1) {
+            const prevEp = episodes?.find(ep => ep.number === pEpisode - 1);
+            handlePlayEpisode(pSeason, pEpisode - 1, prevEp?.name || '');
+            showToast(`◀ Previous: S${pSeason} E${pEpisode - 1}`, 'info');
           }
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showPlayer, showTrailer, isTV, playerSeason, playerEpisode, episodes]);
-
-  const getPlayerUrl = () => {
-    if (isTV) {
-      return `https://screenscape.me/embed?tmdb=${id}&type=tv&s=${playerSeason}&e=${playerEpisode}`;
-    }
-    return `https://screenscape.me/embed?tmdb=${id}&type=movie`;
-  };
+  }, [showTrailer, isTV, isThisMoviePlaying, movieData, episodes]);
 
   const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
@@ -612,25 +566,7 @@ const MovieDetail = () => {
         keywords={allKeywords}
       />
 
-      {/* Embed Player Modal */}
-      {showPlayer && (
-        <div className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''}`}>
-          <button className={styles.closeTrailerBtn} onClick={() => setShowPlayer(false)}>
-            <X size={28} />
-          </button>
-          <div className={styles.playerEpLabel}>
-            {isTV ? `${movie?.title} • S${playerSeason} E${playerEpisode}${playerEpisodeName ? ` • ${playerEpisodeName}` : ''}` : movie?.title}
-          </div>
-          <iframe
-            id="screenscape-player"
-            src={getPlayerUrl()}
-            title={movie.title}
-            className={styles.trailerIframe}
-            allow="autoplay; encrypted-media; fullscreen"
-            allowFullScreen
-          ></iframe>
-        </div>
-      )}
+      {/* Global Player Handles Embed Now */}
 
       {/* Trailer Modal */}
       {showTrailer && trailerKey && (

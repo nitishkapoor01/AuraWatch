@@ -1,0 +1,120 @@
+/* Fullscreen Trailer Modal */
+.trailerModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.trailerIframe {
+  width: 85vw;
+  height: 85vh;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0 60px rgba(0,0,0,0.9);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.closeTrailerBtn {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.4);
+  color: #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all var(--anim-speed, 0.3s);
+  z-index: 10000;
+}
+
+.closeTrailerBtn:hover {
+  background: var(--primary-color, #e50914);
+  border-color: var(--primary-color, #e50914);
+  transform: scale(1.1);
+}
+
+.playerEpLabel {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  z-index: 10000;
+}
+
+/* Sticky / PiP Mode */
+.stickyPlayer {
+  top: auto !important;
+  left: auto !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  width: 320px !important;
+  height: 180px !important;
+  background: transparent;
+  border: 2px solid rgba(229, 9, 20, 0.5) !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
+  animation: slideInFromRight 0.5s ease forwards;
+  cursor: grab;
+  /* Prevent background dimming */
+}
+
+.stickyPlayer:active {
+  cursor: grabbing;
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(100%) scale(0.8); opacity: 0; }
+  to { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+.stickyPlayer .playerEpLabel {
+  display: none;
+}
+
+.stickyPlayer .closeTrailerBtn {
+  width: 30px;
+  height: 30px;
+  top: -10px;
+  right: -10px;
+  font-size: 14px;
+  background: rgba(0,0,0,0.8);
+}
+
+.stickyPlayer .trailerIframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.dragOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  cursor: grab;
+}
+
+.dragOverlay:active {
+  cursor: grabbing;
+}

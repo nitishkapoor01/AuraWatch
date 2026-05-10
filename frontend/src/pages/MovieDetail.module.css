@@ -302,34 +302,6 @@
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stickyPlayer {
-  position: fixed !important;
-  bottom: 30px !important;
-  right: 30px !important;
-  width: 320px !important;
-  height: 180px !important;
-  z-index: 10001 !important;
-  border: 2px solid rgba(229, 9, 20, 0.5) !important;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
-  animation: slideInFromRight 0.5s ease forwards;
-}
-
-@keyframes slideInFromRight {
-  from { transform: translateX(100%) scale(0.8); opacity: 0; }
-  to { transform: translateX(0) scale(1); opacity: 1; }
-}
-
-.stickyPlayer .playerEpLabel {
-  display: none;
-}
-
-.stickyPlayer .closeTrailerBtn {
-  width: 30px;
-  height: 30px;
-  top: -10px;
-  right: -10px;
-  font-size: 14px;
-}
 
 .closeTrailerBtn {
   position: absolute;

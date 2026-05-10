@@ -8,6 +8,7 @@ import { ThemeProvider } from './context/ThemeContext.jsx'
 
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext.jsx'
+import { PlayerProvider } from './context/PlayerContext.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -15,9 +16,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <ThemeProvider>
           <ToastProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
+            <PlayerProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </PlayerProvider>
           </ToastProvider>
         </ThemeProvider>
       </AuthProvider>
