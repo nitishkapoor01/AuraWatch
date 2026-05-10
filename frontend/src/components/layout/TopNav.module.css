@@ -364,155 +364,127 @@
 /* 📱 MOBILE (≤768px) */
 @media (max-width: 768px) {
   .topNav {
+    position: fixed; /* Keep it locked at the top */
+    top: 0;
     left: 0;
     right: 0;
-    padding: 0 12px;
-    height: 56px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, transparent 100%);
+    height: 60px;
+    padding: 0 16px;
+    background: rgba(10, 10, 10, 0.9);
+    backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0;
+    z-index: 2000;
   }
 
   .branding {
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex: 0 0 auto;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .brandLogo {
-    height: 24px;
+    height: 30px;
     width: auto;
   }
 
   .brandName {
     display: block;
-    font-size: 15px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: #fff;
     white-space: nowrap;
   }
 
-  .watchText {
-    display: inline;
-  }
-
-  /* Branding stays on left */
   .navActions {
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex: 0 0 auto;
+    gap: 12px;
+    flex-shrink: 0;
   }
 
   .searchContainer {
     display: flex;
     align-items: center;
-    gap: 10px;
-    position: relative;
-    background: transparent;
-    border: none;
-    padding: 0;
+    gap: 12px;
   }
 
-  .searchInput {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    opacity: 0;
-    padding: 0;
-    pointer-events: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(20, 20, 20, 0.95);
-    border-radius: 20px;
-    z-index: 10;
-  }
-
-  .topNav:has(.searchInput:focus) .searchInput {
-    position: fixed;
-    top: 8px;
-    left: 10px;
-    right: 10px;
-    width: calc(100% - 20px);
-    height: 40px;
-    opacity: 1;
-    padding: 0 40px;
-    pointer-events: auto;
-    transform: none;
-    border: 1px solid var(--primary-color);
-    box-shadow: 0 0 20px rgba(var(--primary-color-rgb), 0.2);
-  }
-
-  .searchIcon {
-    cursor: pointer;
-    z-index: 11;
-    width: 32px;
-    height: 32px;
+  .searchIcon, .surpriseBtn, .avatarCircle {
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: none;
+    flex-shrink: 0;
   }
 
+  .searchInput {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #000;
+    border: none;
+    padding: 0 60px 0 20px;
+    font-size: 16px;
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+    transition: opacity 0.3s ease;
+  }
+
+  .topNav:has(.searchInput:focus) .searchInput {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Back icon for search - reusing search icon as a toggle */
   .topNav:has(.searchInput:focus) .searchIcon {
     position: fixed;
-    left: 22px;
-    top: 20px;
-    color: var(--primary-color);
+    right: 16px;
+    top: 13px;
+    z-index: 101;
+    background: var(--primary-color);
   }
 
-  .surpriseBtn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
+  .surpriseBtn svg, .searchIcon svg {
+    width: 18px;
+    height: 18px;
   }
 
-  .surpriseBtn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* Hide everything else when searching on mobile */
+  /* Hide other elements when search is active */
   .topNav:has(.searchInput:focus) .branding,
   .topNav:has(.searchInput:focus) .filterInline,
   .topNav:has(.searchInput:focus) .surpriseWrapper,
   .topNav:has(.searchInput:focus) .userProfile {
-    opacity: 0;
-    pointer-events: none;
+    visibility: hidden;
   }
+}
 }
 
 /* 📱 SMALL PHONE (≤480px) */
 @media (max-width: 480px) {
   .topNav {
-    padding: 0 10px;
-    height: 50px;
+    height: 54px;
+    padding: 0 12px;
   }
 
-  .navActions {
-    flex: 0;
-    gap: 8px;
+  .brandName {
+    font-size: 14px;
   }
 
-  .searchContainer {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .surpriseBtn, .avatarCircle, .searchIcon {
-    width: 28px;
-    height: 28px;
-  }
-
-  .searchIcon svg {
-    width: 14px;
-    height: 14px;
+  .searchIcon, .surpriseBtn, .avatarCircle {
+    width: 30px;
+    height: 30px;
   }
 }
 
