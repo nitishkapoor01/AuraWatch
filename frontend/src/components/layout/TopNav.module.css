@@ -376,7 +376,14 @@
   }
 
   .brandName {
-    display: none; /* Hide text on mobile to save space, logo is enough */
+    display: block;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin-left: 2px;
+  }
+
+  .watchText {
+    display: none; /* Only hide 'Watch' part to save space if needed, or keep both small */
   }
 
   .navActions {
@@ -388,7 +395,8 @@
   .searchContainer {
     flex: 1;
     width: auto;
-    gap: 6px;
+    gap: 4px;
+    padding: 0 4px;
   }
 
   /* Show FilterBar but make it more compact */
@@ -399,11 +407,7 @@
     margin-left: -4px;
   }
 
-  /* When focused: logo disappears, search expands */
-  .topNav:has(.searchInput:focus) .branding {
-    display: none;
-  }
-
+  /* Search expands on focus but logo stays */
   .topNav:has(.searchInput:focus) .searchContainer {
     width: 100%;
     flex-grow: 1;
@@ -415,10 +419,14 @@
   }
 
   .searchInput {
-    padding: 6px 8px 6px 8px;
-    font-size: 12px;
-    width: 100%;
-    height: 32px;
+    padding: 6px 8px;
+    font-size: 11px;
+    width: 60px; /* Small width by default */
+    transition: width 0.3s ease;
+  }
+
+  .searchInput:focus {
+    width: 140px; /* Expand on focus */
   }
 
   .surpriseBtn {
@@ -450,9 +458,12 @@
   }
 
   .brandName {
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    margin-top: -6px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .watchText {
+    display: none;
   }
 
   .navActions {
