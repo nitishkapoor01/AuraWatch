@@ -417,24 +417,30 @@
     display: flex;
     align-items: center;
     gap: 2px;
-    flex-shrink: 0;
+    flex: 0 1 auto; /* Can shrink if needed, never grows */
+    min-width: 0;
+    overflow: hidden;
     margin-left: 0;
   }
 
   .brandLogo {
-    height: 40px; /* Bigger logo on mobile */
+    height: 34px; /* Good size, won't dominate */
     width: auto;
+    flex-shrink: 0;
   }
 
   .brandName {
     display: block;
-    font-size: 19px; /* Bigger text on mobile */
+    font-size: 17px;
     font-weight: 900;
     letter-spacing: 1.5px;
     color: var(--primary-color);
     line-height: 1;
     margin-top: 0;
-    margin-left: -4px;
+    margin-left: -3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .watchText {
@@ -445,10 +451,9 @@
   .navActions {
     display: flex;
     align-items: center;
-    gap: 6px; /* Tight consistent spacing between icons */
-    flex-shrink: 0; /* Don't grow — stay as compact as content needs */
+    gap: 6px;
+    flex-shrink: 0; /* Always stay visible, never compress */
     justify-content: flex-end;
-    padding-right: 0; /* Hug the right edge */
   }
 
   .searchContainer {
