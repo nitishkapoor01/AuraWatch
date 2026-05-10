@@ -678,7 +678,9 @@ const MovieDetail = () => {
               }}
               data-title={buttonWarnings.add_to_list || (isLoggedIn ? (isFavorite ? 'Remove from My List' : 'Add to My List') : 'Login to save')}
             >
-              {isFavorite ? <Check size={22} /> : <Plus size={22} />}
+              <span className={isFavorite ? styles.iconActive : styles.iconInactive}>
+                {isFavorite ? <Check size={22} /> : <Plus size={22} />}
+              </span>
               {buttonWarnings.add_to_list && <span className={styles.warningBadge} style={{top: '-2px', right: '-2px'}} />}
             </button>
             <button 
