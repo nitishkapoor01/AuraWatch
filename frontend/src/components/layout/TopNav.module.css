@@ -234,6 +234,74 @@
   box-shadow: 0 0 15px rgba(var(--primary-color-rgb), 0.5);
 }
 
+/* Surprise picker popup */
+.surpriseWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.surprisePicker {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(12, 12, 18, 0.96);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(var(--primary-color-rgb), 0.2);
+  backdrop-filter: blur(20px);
+  z-index: 10000;
+  animation: popDown 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);    }
+}
+
+.surprisePickerTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.surpriseOptions {
+  display: flex;
+  gap: 8px;
+}
+
+.surpriseOption {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.surpriseOption:hover {
+  background: rgba(var(--primary-color-rgb), 0.15);
+  border-color: rgba(var(--primary-color-rgb), 0.4);
+  color: var(--primary-color);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(var(--primary-color-rgb), 0.2);
+}
+
 /* Search Suggestions Dropdown */
 .suggestionsContainer {
   position: absolute;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices } from 'lucide-react';
+import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -32,6 +32,8 @@ const TopNav = () => {
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showSurprisePicker, setShowSurprisePicker] = useState(false);
+  const surpriseRef = useRef(null);
   const dropdownRef = useRef(null);
   const buttonWarnings = useButtonWarnings();
   
@@ -39,6 +41,17 @@ const TopNav = () => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close surprise picker on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (surpriseRef.current && !surpriseRef.current.contains(e.target)) {
+        setShowSurprisePicker(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -110,21 +123,44 @@ const TopNav = () => {
 
   const isLoginPage = location.pathname === '/login';
 
-  const handleSurpriseMe = async () => {
+  const handleSurpriseMe = async (category) => {
+    setShowSurprisePicker(false);
+    const labels = { movie: '🎬 Movie', tv: '📺 Series', anime: '✨ Anime' };
+    showToast(`Finding a random ${labels[category] || 'title'} for you...`, 'info');
     try {
-      showToast('Finding a surprise for you...', 'info');
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/movies/trending`);
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        const randomMovie = data[Math.floor(Math.random() * data.length)];
-        const type = randomMovie.type === 'Series' || randomMovie.type === 'tv' ? 'tv' : 'movie';
-        navigate(`/movie/${randomMovie.id}?type=${type}`);
+      const base = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      let url = `${base}/movies/trending`;
+      if (category === 'anime') {
+        url = `${base}/movies/search?query=anime&type=tv`;
       } else {
-        showToast('Could not find a surprise right now.', 'error');
+        url = `${base}/movies/trending?type=${category}`;
       }
-    } catch (error) {
-      console.error("Error fetching surprise movie:", error);
-      showToast('Could not find a surprise right now.', 'error');
+      const res = await fetch(url);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : data.results || [];
+      
+      // For anime, filter for anime-style shows
+      let filtered = list;
+      if (category === 'anime') {
+        filtered = list.filter(m =>
+          m.title?.toLowerCase().includes('anime') ||
+          m.genre?.toLowerCase().includes('animation') ||
+          m.genre?.toLowerCase().includes('anime') ||
+          m.type?.toLowerCase() === 'tv'
+        );
+        if (filtered.length === 0) filtered = list; // fallback
+      }
+      
+      if (filtered.length > 0) {
+        const pick = filtered[Math.floor(Math.random() * filtered.length)];
+        const type = pick.type === 'Series' || pick.type === 'tv' ? 'tv' : 'movie';
+        navigate(`/movie/${pick.id}?type=${type}`);
+      } else {
+        showToast('Could not find a title right now. Try again!', 'warning');
+      }
+    } catch (err) {
+      console.error('Surprise Me error:', err);
+      showToast('Something went wrong. Try again!', 'warning');
     }
   };
 
@@ -154,9 +190,35 @@ const TopNav = () => {
             <FilterBar onFilterChange={handleFilterChange} />
           </div>
           
-          <button className={styles.surpriseBtn} onClick={handleSurpriseMe} title="Surprise Me!">
-            <Dices size={18} />
-          </button>
+          <div className={styles.surpriseWrapper} ref={surpriseRef}>
+            <button
+              className={styles.surpriseBtn}
+              onClick={() => setShowSurprisePicker(p => !p)}
+              title="Surprise Me!"
+            >
+              <Dices size={18} />
+            </button>
+
+            {showSurprisePicker && (
+              <div className={styles.surprisePicker}>
+                <p className={styles.surprisePickerTitle}>What are you in the mood for?</p>
+                <div className={styles.surpriseOptions}>
+                  <button className={styles.surpriseOption} onClick={() => handleSurpriseMe('movie')}>
+                    <Film size={22} />
+                    <span>Movie</span>
+                  </button>
+                  <button className={styles.surpriseOption} onClick={() => handleSurpriseMe('tv')}>
+                    <Tv size={22} />
+                    <span>Series</span>
+                  </button>
+                  <button className={styles.surpriseOption} onClick={() => handleSurpriseMe('anime')}>
+                    <Sparkles size={22} />
+                    <span>Anime</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <Search size={18} className={styles.searchIcon} />
           <input 
