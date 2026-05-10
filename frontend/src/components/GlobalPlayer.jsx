@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,11 +9,12 @@ const GlobalPlayer = () => {
   const { playerState, closePlayer, setSticky } = usePlayer();
   const { isOpen, isSticky, movieData } = playerState;
   const location = useLocation();
+  const navigate = useNavigate();
   const { isLoggedIn, token } = useAuth();
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0 });
+  const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
   // Watch route changes. If playing and we leave the movie page, force sticky
   useEffect(() => {
@@ -33,7 +34,8 @@ const GlobalPlayer = () => {
       startX: e.clientX,
       startY: e.clientY,
       initX: position.x,
-      initY: position.y
+      initY: position.y,
+      dragged: false
     };
     e.preventDefault(); // Prevent text selection
   };
@@ -45,6 +47,10 @@ const GlobalPlayer = () => {
       const deltaX = e.clientX - dragRef.current.startX;
       const deltaY = e.clientY - dragRef.current.startY;
       
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        dragRef.current.dragged = true;
+      }
+      
       setPosition({
         x: dragRef.current.initX + deltaX,
         y: dragRef.current.initY + deltaY
@@ -52,7 +58,14 @@ const GlobalPlayer = () => {
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
+      if (isDragging) {
+        if (!dragRef.current.dragged) {
+          // It was a click, not a drag. Expand!
+          setSticky(false);
+          navigate(`/movie/${movieData.id}?type=${movieData.type}`);
+        }
+        setIsDragging(false);
+      }
     };
 
     if (isDragging) {
@@ -156,7 +169,7 @@ const GlobalPlayer = () => {
         {label}
       </div>
       
-      {isSticky && <div className={styles.dragOverlay} style={{ display: isDragging ? 'block' : 'none' }}></div>}
+      {isSticky && <div className={styles.dragOverlay}></div>}
       
       <iframe
         id="screenscape-player"
@@ -165,7 +178,7 @@ const GlobalPlayer = () => {
         className={styles.trailerIframe}
         allow="autoplay; encrypted-media; fullscreen"
         allowFullScreen
-        style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
+        style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
       ></iframe>
     </div>
   );
