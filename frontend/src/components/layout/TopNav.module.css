@@ -407,8 +407,10 @@
   }
 
   .searchContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     position: relative;
-    width: auto;
     background: transparent;
     border: none;
     padding: 0;
@@ -447,6 +449,14 @@
   .searchIcon {
     cursor: pointer;
     z-index: 11;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .topNav:has(.searchInput:focus) .searchIcon {
@@ -484,17 +494,25 @@
     height: 50px;
   }
 
-  .brandName {
-    font-size: 14px;
-  }
-
   .navActions {
-    gap: 4px;
+    flex: 0;
+    gap: 8px;
   }
 
-  .surpriseBtn, .avatarCircle {
-    width: 30px;
-    height: 30px;
+  .searchContainer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .surpriseBtn, .avatarCircle, .searchIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .searchIcon svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
