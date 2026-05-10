@@ -368,8 +368,8 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 56px;
-    padding: 0 10px;
+    height: 64px; /* Increased height for better alignment */
+    padding: 0 16px;
     background: rgba(10, 10, 10, 0.95);
     display: flex;
     align-items: center;
@@ -386,16 +386,18 @@
   }
 
   .brandLogo {
-    height: 24px;
+    height: 28px;
     width: auto;
   }
 
   .brandName {
     display: block;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 900;
     letter-spacing: 1px;
     color: var(--primary-color);
+    line-height: 1;
+    margin-top: 2px; /* Slight offset for visual centering with logo */
   }
 
   .watchText {
@@ -425,17 +427,20 @@
 
   /* Match the laptop dice button look */
   .surpriseBtn {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     background-color: rgba(var(--primary-color-rgb), 0.1);
     border: 1px solid rgba(var(--primary-color-rgb), 0.3);
     color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .surpriseBtn svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
   }
 
   .searchInput {
@@ -444,13 +449,14 @@
     pointer-events: auto;
     position: static;
     width: 100%;
-    height: 32px;
-    padding: 0 10px;
-    font-size: 11px;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    border-radius: 18px;
     color: #fff;
+    margin-top: 0;
   }
 
   .searchIcon {
@@ -458,9 +464,9 @@
   }
 
   .avatarCircle {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 
   .userProfile {
