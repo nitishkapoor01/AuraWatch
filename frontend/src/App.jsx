@@ -70,7 +70,16 @@ function App() {
 
     // Send every 30 seconds
     const interval = setInterval(sendHeartbeat, 30000);
-    return () => clearInterval(interval);
+
+    const handleMovieLoaded = () => {
+      sendHeartbeat();
+    };
+    window.addEventListener('movieLoaded', handleMovieLoaded);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('movieLoaded', handleMovieLoaded);
+    };
   }, [isLoggedIn, user, location.pathname, location.search, playerState?.isOpen, playerState?.movieData]);
 
   const getActionFromPath = (path) => {

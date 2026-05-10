@@ -152,6 +152,7 @@ const MovieDetail = () => {
   useEffect(() => {
     if (movie && movie.title) {
       sessionStorage.setItem('currentViewingMovie', movie.title);
+      window.dispatchEvent(new Event('movieLoaded'));
     }
     return () => {
       sessionStorage.removeItem('currentViewingMovie');
