@@ -143,12 +143,12 @@
   }
 
   .filterToggle {
-    padding: 4px;
+    padding: 2px;
   }
 
   .filterToggle svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 }
 

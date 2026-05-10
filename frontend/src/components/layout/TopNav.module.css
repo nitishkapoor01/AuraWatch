@@ -366,9 +366,10 @@
   .topNav {
     left: 0;
     padding: 6px 12px;
-    gap: 6px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, transparent 100%);
+    gap: 10px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, transparent 100%);
     min-height: 50px;
+    justify-content: space-between;
   }
 
   .branding {
@@ -389,10 +390,18 @@
     display: inline;
   }
 
+  /* Branding stays on left */
+  .branding {
+    flex-shrink: 0;
+    max-width: 50%;
+  }
+
   .navActions {
-    gap: 12px;
+    gap: 8px; /* Tight gap for actions */
     padding-right: 0;
-    flex: 0; /* Don't grow by default */
+    flex: 0;
+    display: flex;
+    align-items: center;
   }
 
   .searchContainer {
@@ -446,8 +455,14 @@
   }
 
   .surpriseBtn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  .surpriseBtn svg {
+    width: 16px;
+    height: 16px;
   }
 
   /* Hide everything else when searching on mobile */
