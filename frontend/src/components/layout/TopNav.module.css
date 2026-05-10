@@ -365,9 +365,10 @@
 @media (max-width: 768px) {
   .topNav {
     left: 0;
-    padding: 8px 12px;
-    gap: 8px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
+    padding: 6px 12px;
+    gap: 6px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, transparent 100%);
+    min-height: 50px;
   }
 
   .brandLogo {
@@ -375,11 +376,7 @@
   }
 
   .brandName {
-    display: block;
-    font-size: 15px;
-    letter-spacing: 1px;
-    margin-left: -2px;
-    margin-top: -2px;
+    display: none; /* Hide text on mobile to save space, logo is enough */
   }
 
   .navActions {
@@ -394,9 +391,12 @@
     gap: 6px;
   }
 
-  /* Hide FilterBar on mobile — too cramped */
+  /* Show FilterBar but make it more compact */
   .filterInline {
-    display: none;
+    display: block;
+    transform: scale(0.85);
+    margin-right: -8px;
+    margin-left: -4px;
   }
 
   /* When focused: logo disappears, search expands */
@@ -407,6 +407,7 @@
   .topNav:has(.searchInput:focus) .searchContainer {
     width: 100%;
     flex-grow: 1;
+    z-index: 100;
   }
 
   .topNav:has(.searchInput:focus) .navActions {
@@ -414,21 +415,26 @@
   }
 
   .searchInput {
-    padding: 8px 10px 8px 10px;
-    font-size: 13px;
+    padding: 6px 8px 6px 8px;
+    font-size: 12px;
     width: 100%;
+    height: 32px;
   }
 
   .surpriseBtn {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .loginBtn {
-    padding: 6px 10px;
-    font-size: 12px;
-    gap: 4px;
+    padding: 5px 8px;
+    font-size: 11px;
+    gap: 3px;
   }
 }
 
@@ -440,7 +446,7 @@
   }
 
   .brandLogo {
-    height: 26px;
+    height: 24px;
   }
 
   .brandName {
