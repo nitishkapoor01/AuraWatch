@@ -379,12 +379,13 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 64px; /* Increased height for better alignment */
-    padding: 0 16px;
+    height: 60px;
+    padding: 0 12px; /* Tight padding on both sides */
     background: rgba(10, 10, 10, 0.95);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0;
     z-index: 2000;
     transition: all 0.3s ease;
   }
@@ -415,24 +416,25 @@
   .branding {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     flex-shrink: 0;
     margin-left: 0;
   }
 
   .brandLogo {
-    height: 28px;
+    height: 40px; /* Bigger logo on mobile */
     width: auto;
   }
 
   .brandName {
     display: block;
-    font-size: 16px;
+    font-size: 19px; /* Bigger text on mobile */
     font-weight: 900;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     color: var(--primary-color);
     line-height: 1;
-    margin-top: 2px; /* Slight offset for visual centering with logo */
+    margin-top: 0;
+    margin-left: -4px;
   }
 
   .watchText {
@@ -443,17 +445,17 @@
   .navActions {
     display: flex;
     align-items: center;
-    gap: 8px; /* consistent spacing */
-    flex: 1;
+    gap: 6px; /* Tight consistent spacing between icons */
+    flex-shrink: 0; /* Don't grow — stay as compact as content needs */
     justify-content: flex-end;
+    padding-right: 0; /* Hug the right edge */
   }
 
   .searchContainer {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex: 1;
-    max-width: auto; /* Let it grow naturally */
+    gap: 6px;
+    flex-shrink: 0;
     justify-content: flex-end;
   }
 
@@ -543,17 +545,26 @@
 
 /* 📱 SMALL PHONE (≤480px) */
 @media (max-width: 480px) {
-  .brandName {
-    font-size: 12px;
+  .topNav {
+    padding: 0 10px; /* Even tighter on very small screens */
   }
 
-  .searchContainer {
-    max-width: 130px;
+  .brandLogo {
+    height: 34px;
+  }
+
+  .brandName {
+    font-size: 15px; /* Still bigger than before, readable */
+    letter-spacing: 1px;
+  }
+
+  .navActions {
+    gap: 4px;
   }
 
   .searchInput {
-    font-size: 10px;
-    padding: 0 8px;
+    font-size: 12px;
+    padding: 0 10px;
   }
 }
 
