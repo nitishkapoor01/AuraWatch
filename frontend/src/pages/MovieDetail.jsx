@@ -1033,8 +1033,6 @@ const MovieDetail = () => {
         </div>
       )}
 
-    </div>
-
       {/* Report Modal — pre-opens on Report Issue tab with movie name prefilled */}
       <HelpModal
         isOpen={showReportModal}
@@ -1042,6 +1040,7 @@ const MovieDetail = () => {
         initialTab="report_issue"
         prefillDescription={`Issue with: ${movie?.title || ''} (${type === 'tv' ? 'Series' : 'Movie'})\n\nDescribe the problem:`}
       />
+    </div>
   );
 };
 
