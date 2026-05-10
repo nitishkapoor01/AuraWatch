@@ -27,25 +27,34 @@ const GlobalPlayer = () => {
   }, [location.pathname, isOpen, movieData, isSticky, setSticky]);
 
   // Drag logic
-  const handleMouseDown = (e) => {
+  const handleStart = (clientX, clientY) => {
     if (!isSticky) return;
     setIsDragging(true);
     dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
+      startX: clientX,
+      startY: clientY,
       initX: position.x,
       initY: position.y,
       dragged: false
     };
-    e.preventDefault(); // Prevent text selection
+  };
+
+  const handleMouseDown = (e) => {
+    handleStart(e.clientX, e.clientY);
+    e.preventDefault(); 
+  };
+
+  const handleTouchStart = (e) => {
+    handleStart(e.touches[0].clientX, e.touches[0].clientY);
+    // Do not prevent default here so that tapping to expand still works on mobile
   };
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMove = (clientX, clientY) => {
       if (!isDragging) return;
       
-      const deltaX = e.clientX - dragRef.current.startX;
-      const deltaY = e.clientY - dragRef.current.startY;
+      const deltaX = clientX - dragRef.current.startX;
+      const deltaY = clientY - dragRef.current.startY;
       
       if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
         dragRef.current.dragged = true;
@@ -55,6 +64,15 @@ const GlobalPlayer = () => {
         x: dragRef.current.initX + deltaX,
         y: dragRef.current.initY + deltaY
       });
+    };
+
+    const handleMouseMove = (e) => handleMove(e.clientX, e.clientY);
+    
+    const handleTouchMove = (e) => {
+      if (isDragging && dragRef.current.dragged) {
+        e.preventDefault(); // Prevent page scrolling while dragging player
+      }
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
     };
 
     const handleMouseUp = () => {
@@ -71,13 +89,17 @@ const GlobalPlayer = () => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleMouseUp);
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleMouseUp);
     };
-  }, [isDragging]);
+  }, [isDragging, movieData, navigate, setSticky]);
 
   // Reset position when not sticky
   useEffect(() => {
@@ -157,10 +179,12 @@ const GlobalPlayer = () => {
         animation: (isDragging || position.x !== 0 || position.y !== 0) ? 'none' : undefined
       } : {}}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
     >
       <button 
         className={styles.closeTrailerBtn} 
         onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           closePlayer();
@@ -173,6 +197,7 @@ const GlobalPlayer = () => {
         <button 
           className={styles.minimizeBtn} 
           onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             setSticky(true);
