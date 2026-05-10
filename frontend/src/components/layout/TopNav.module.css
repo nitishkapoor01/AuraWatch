@@ -364,13 +364,32 @@
     height: 26px;
   }
 
+  .navActions {
+    gap: 6px;
+    padding-right: 2px;
+    flex: 1;
+  }
+
   .searchContainer {
-    width: 110px;
+    width: auto;
+    flex: 1;
+    gap: 6px;
+  }
+
+  .surpriseBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .surpriseBtn svg {
+    width: 14px;
+    height: 14px;
   }
 
   .searchInput {
-    padding: 7px 8px 7px 28px;
-    font-size: 12px;
+    padding: 6px 8px 6px 24px;
+    font-size: 11px;
+    width: 100%;
   }
 
   .loginBtn span {
@@ -378,8 +397,8 @@
   }
 
   .loginBtn {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     justify-content: center;
   }
