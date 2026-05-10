@@ -264,6 +264,18 @@
   animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.reportBtn {
+  border-color: rgba(255, 80, 80, 0.4);
+  color: rgba(255, 120, 120, 0.85);
+}
+
+.reportBtn:hover {
+  background-color: rgba(255, 50, 50, 0.15) !important;
+  border-color: rgba(255, 80, 80, 0.8) !important;
+  color: #ff6060 !important;
+  box-shadow: 0 0 14px rgba(255, 60, 60, 0.3) !important;
+}
+
 @keyframes popIn {
   0% { transform: scale(1); }
   50% { transform: scale(1.15); box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }

@@ -12,8 +12,8 @@ const TABS = {
   DMCA: 'dmca'
 };
 
-const HelpModal = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState(TABS.HOW_TO_USE);
+const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || TABS.HOW_TO_USE);
   const [platformUpdates, setPlatformUpdates] = useState('');
   const [loadingUpdates, setLoadingUpdates] = useState(false);
 
@@ -41,7 +41,15 @@ const HelpModal = ({ isOpen, onClose }) => {
   // Form states
   const [feedback, setFeedback] = useState({ name: '', message: '' });
   const [feature, setFeature] = useState({ title: '', description: '' });
-  const [report, setReport] = useState({ type: 'video_not_playing', description: '' });
+  const [report, setReport] = useState({ type: 'video_not_playing', description: prefillDescription || '' });
+
+  // Sync initialTab and prefillDescription when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialTab) setActiveTab(initialTab);
+      if (prefillDescription) setReport(r => ({ ...r, description: prefillDescription }));
+    }
+  }, [isOpen, initialTab, prefillDescription]);
 
   if (!isOpen) return null;
 

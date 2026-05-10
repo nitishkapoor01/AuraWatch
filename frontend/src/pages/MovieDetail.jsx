@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle } from 'lucide-react';
+import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle, Flag } from 'lucide-react';
 import styles from './MovieDetail.module.css';
 import Row from '../components/Row';
 import SEO from '../components/SEO';
@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { useButtonWarnings } from '../hooks/useButtonWarnings';
 import { useToast } from '../context/ToastContext';
 import { usePlayer } from '../context/PlayerContext';
+import HelpModal from '../components/profile/HelpModal';
 
 const isTVType = (type) => type === 'tv' || type === 'series';
 
@@ -72,6 +73,7 @@ const MovieDetail = () => {
 
   const { playerState, openPlayer, setSticky } = usePlayer();
   const { isOpen, movieData } = playerState;
+  const [showReportModal, setShowReportModal] = useState(false);
   
   // Check if THIS movie is currently playing globally
   const isThisMoviePlaying = isOpen && movieData && String(movieData.id) === String(id);
@@ -704,6 +706,15 @@ const MovieDetail = () => {
               {isDownloading ? <Loader2 size={22} className={styles.spinner} /> : <Download size={22} />}
               {buttonWarnings.download_movie && <span className={styles.warningBadge} />}
             </button>
+
+            {/* Report Issue Button */}
+            <button
+              className={`${styles.listBtn} ${styles.reportBtn}`}
+              onClick={() => setShowReportModal(true)}
+              data-title="Report an Issue"
+            >
+              <Flag size={20} />
+            </button>
           </div>
 
           {/* TV: Season + Episode Dropdowns */}
@@ -1023,6 +1034,14 @@ const MovieDetail = () => {
       )}
 
     </div>
+
+      {/* Report Modal — pre-opens on Report Issue tab with movie name prefilled */}
+      <HelpModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        initialTab="report_issue"
+        prefillDescription={`Issue with: ${movie?.title || ''} (${type === 'tv' ? 'Series' : 'Movie'})\n\nDescribe the problem:`}
+      />
   );
 };
 
