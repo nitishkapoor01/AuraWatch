@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Minimize2, Maximize } from 'lucide-react';
+import { X, Minimize2, RotateCw } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './GlobalPlayer.module.css';
@@ -14,6 +14,7 @@ const GlobalPlayer = () => {
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [isRotated, setIsRotated] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
   // Watch route changes. If playing and we leave the movie page, force sticky
@@ -163,40 +164,16 @@ const GlobalPlayer = () => {
 
   const handleRotate = async (e) => {
     e.stopPropagation();
+    setIsRotated(prev => !prev);
+    
     try {
       if (!document.fullscreenElement) {
         const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-          await elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { /* Safari */
-          await elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { /* IE11 */
-          await elem.msRequestFullscreen();
-        }
-        
-        // Attempt to lock to landscape
-        if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
-          try {
-            await window.screen.orientation.lock('landscape');
-          } catch (e) { console.warn("Orientation lock not supported/allowed", e); }
-        }
-      } else {
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) { /* Safari */
-          await document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) { /* IE11 */
-          await document.msExitFullscreen();
-        }
-        
-        if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
-          try {
-            window.screen.orientation.unlock();
-          } catch (e) {}
-        }
+        if (elem.requestFullscreen) await elem.requestFullscreen();
+        else if (elem.webkitRequestFullscreen) await elem.webkitRequestFullscreen();
       }
     } catch (err) {
-      console.warn("Fullscreen/Rotation API not supported or denied", err);
+      // Ignore fullscreen errors, CSS rotation handles it
     }
   };
 
@@ -216,7 +193,7 @@ const GlobalPlayer = () => {
 
   return (
     <div 
-      className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''}`}
+      className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''} ${isRotated && !isSticky ? styles.rotatedContainer : ''}`}
       style={isSticky ? { 
         transform: `translate(${position.x}px, ${position.y}px)`,
         animation: (isDragging || position.x !== 0 || position.y !== 0) ? 'none' : undefined
@@ -251,9 +228,9 @@ const GlobalPlayer = () => {
           <button 
             className={styles.rotateBtn} 
             onClick={handleRotate}
-            title="Rotate/Fullscreen"
+            title="Rotate Screen"
           >
-            <Maximize size={24} />
+            <RotateCw size={24} />
           </button>
         </>
       )}

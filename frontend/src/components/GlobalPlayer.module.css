@@ -163,6 +163,25 @@
   cursor: grabbing;
 }
 
+/* CSS Rotation for Mobile */
+.rotatedContainer {
+  transform: rotate(90deg) !important;
+  transform-origin: center center !important;
+  width: 100vh !important;
+  height: 100vw !important;
+  position: fixed !important;
+  top: calc((100vh - 100vw) / 2) !important;
+  left: calc((100vw - 100vh) / 2) !important;
+  display: flex !important;
+  align-items: flex-end !important;
+}
+
+.rotatedContainer .trailerIframe {
+  width: 100vh !important;
+  height: calc(100vw - 56px) !important;
+  border-radius: 0 !important;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .trailerModal {
