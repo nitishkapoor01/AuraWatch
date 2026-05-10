@@ -41,10 +41,29 @@
   z-index: 10000;
 }
 
-.closeTrailerBtn:hover {
+.closeTrailerBtn:hover, .minimizeBtn:hover {
   background: var(--primary-color, #e50914);
   border-color: var(--primary-color, #e50914);
   transform: scale(1.1);
+}
+
+.minimizeBtn {
+  position: absolute;
+  top: 20px;
+  right: 84px; /* 24px + 50px + 10px spacing */
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.4);
+  color: #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all var(--anim-speed, 0.3s);
+  z-index: 10000;
 }
 
 .playerEpLabel {

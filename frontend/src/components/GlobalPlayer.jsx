@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, Minimize2 } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './GlobalPlayer.module.css';
@@ -157,6 +157,7 @@ const GlobalPlayer = () => {
     >
       <button 
         className={styles.closeTrailerBtn} 
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           closePlayer();
@@ -164,6 +165,20 @@ const GlobalPlayer = () => {
       >
         <X size={28} />
       </button>
+
+      {!isSticky && (
+        <button 
+          className={styles.minimizeBtn} 
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSticky(true);
+          }}
+          title="Picture-in-Picture"
+        >
+          <Minimize2 size={24} />
+        </button>
+      )}
       
       <div className={styles.playerEpLabel}>
         {label}
