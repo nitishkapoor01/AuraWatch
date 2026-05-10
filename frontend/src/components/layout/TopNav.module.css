@@ -107,7 +107,7 @@
 }
 
 .dropdownItem:last-child:hover {
-  background: rgba(229, 9, 20, 0.1);
+  background: rgba(var(--primary-color-rgb), 0.1);
   color: var(--primary-color);
 }
 
@@ -142,7 +142,7 @@
   height: 60px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.3));
+  filter: drop-shadow(0 0 10px rgba(var(--primary-color-rgb), 0.3));
 }
 
 .brandName {
@@ -188,7 +188,7 @@
 .searchInput:focus {
   border-color: var(--accent-primary);
   background-color: rgba(0, 0, 0, 0.8);
-  box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.1);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
 }
 
 .searchIcon {
@@ -219,9 +219,9 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: rgba(229, 9, 20, 0.2);
+  background-color: rgba(var(--primary-color-rgb), 0.2);
   color: var(--primary-color, #e50914);
-  border: 1px solid rgba(229, 9, 20, 0.5);
+  border: 1px solid rgba(var(--primary-color-rgb), 0.5);
   cursor: pointer;
   transition: all var(--anim-speed, 0.3s);
   flex-shrink: 0;
@@ -231,7 +231,7 @@
   background-color: var(--primary-color, #e50914);
   color: white;
   transform: scale(1.1) rotate(15deg);
-  box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+  box-shadow: 0 0 15px rgba(var(--primary-color-rgb), 0.5);
 }
 
 /* Search Suggestions Dropdown */

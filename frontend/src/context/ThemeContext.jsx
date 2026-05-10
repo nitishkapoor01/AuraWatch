@@ -57,6 +57,20 @@ export const ThemeProvider = ({ children }) => {
   const { isLoggedIn, user, token } = useAuth();
   const [preferences, setPreferences] = useState(defaultPreferences);
 
+  // Helper: convert hex color to "r, g, b" string for use in rgba()
+  const hexToRgb = (hex) => {
+    try {
+      const clean = hex.replace('#', '');
+      const r = parseInt(clean.substring(0, 2), 16);
+      const g = parseInt(clean.substring(2, 4), 16);
+      const b = parseInt(clean.substring(4, 6), 16);
+      if (isNaN(r) || isNaN(g) || isNaN(b)) return '229, 9, 20';
+      return `${r}, ${g}, ${b}`;
+    } catch {
+      return '229, 9, 20';
+    }
+  };
+
   // Load preferences on mount or user change
   useEffect(() => {
     const loadPreferences = async () => {
@@ -95,6 +109,7 @@ export const ThemeProvider = ({ children }) => {
     
     // === CSS Variables ===
     root.style.setProperty('--primary-color', preferences.accentColor);
+    root.style.setProperty('--primary-color-rgb', hexToRgb(preferences.accentColor));
     root.style.setProperty('--bg-blur', `${preferences.blurIntensity}px`);
     root.style.setProperty('--panel-bg-alpha', preferences.transparency);
     root.style.setProperty('--font-family-base', preferences.fontFamily);

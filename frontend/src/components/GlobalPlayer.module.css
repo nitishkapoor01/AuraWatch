@@ -89,7 +89,7 @@
   width: 320px !important;
   height: 180px !important;
   background: transparent;
-  border: 2px solid rgba(229, 9, 20, 0.5) !important;
+  border: 2px solid rgba(var(--primary-color-rgb), 0.5) !important;
   box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
   animation: slideInFromRight 0.5s ease forwards;
   cursor: grab;

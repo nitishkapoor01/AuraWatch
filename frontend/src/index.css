@@ -7,6 +7,7 @@
 :root {
   /* ThemeContext variables (overridden via JS) */
   --primary-color: #e50914;
+  --primary-color-rgb: 229, 9, 20; /* Updated dynamically by ThemeContext */
   --bg-blur: 10px;
   --panel-bg-alpha: 0.8;
   --font-family-base: 'Inter', sans-serif;
@@ -34,7 +35,7 @@ body.theme-classic {
   --glass-bg: rgba(0, 0, 0, 0);
   --btn-bg: #e50914;
   --btn-text: #ffffff;
-  --shadow-color: rgba(229, 9, 20, 0.2);
+  --shadow-color: rgba(var(--primary-color-rgb), 0.2);
   --anim-speed: 0.15s;
   background: #000000 !important;
   color: #ffffff !important;
@@ -224,7 +225,7 @@ body.hover-scale .cardContainer:hover {
 
 body.hover-glow .cardContainer:hover {
   transform: scale(1.03);
-  box-shadow: 0 0 25px var(--primary-color), 0 0 50px rgba(229, 9, 20, 0.15) !important;
+  box-shadow: 0 0 25px var(--primary-color), 0 0 50px rgba(var(--primary-color-rgb), 0.15) !important;
   z-index: 100;
 }
 
@@ -341,7 +342,7 @@ body.btn-ghost .playBtn {
   backdrop-filter: blur(10px);
 }
 body.btn-ghost .primaryBtn {
-  background: rgba(229, 9, 20, 0.15) !important;
+  background: rgba(var(--primary-color-rgb), 0.15) !important;
   color: var(--primary-color) !important;
 }
 
@@ -380,7 +381,7 @@ body.scrollbar-default ::-webkit-scrollbar { width: 8px; }
    ============================================= */
 body.glow-on .playBtn,
 body.glow-on .primaryBtn {
-  box-shadow: 0 0 20px var(--primary-color), 0 0 40px rgba(229, 9, 20, 0.2);
+  box-shadow: 0 0 20px var(--primary-color), 0 0 40px rgba(var(--primary-color-rgb), 0.2);
 }
 
 body.glow-on .navItem.active::before {
