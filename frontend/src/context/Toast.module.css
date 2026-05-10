@@ -131,3 +131,37 @@
   to { width: 0%; }
 }
 
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+  .toastContainer {
+    top: 15px;
+    right: 15px;
+    left: 15px; /* Center container on mobile */
+    gap: 10px;
+  }
+
+  .toast {
+    min-width: auto;
+    width: 100%;
+    max-width: none;
+    padding: 12px 14px;
+    border-radius: 12px;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .content p {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .closeBtn {
+    padding: 4px;
+  }
+}
+
