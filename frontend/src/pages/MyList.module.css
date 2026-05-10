@@ -409,7 +409,7 @@
 /* 📱 MOBILE (≤768px) */
 @media (max-width: 768px) {
   .myListPage {
-    padding: 40px 16px 90px 16px;
+    padding: 90px 16px 90px 16px;
   }
 
   .pageTitle {
@@ -463,7 +463,7 @@
 /* 📱 SMALL PHONE (≤480px) */
 @media (max-width: 480px) {
   .myListPage {
-    padding: 32px 12px 90px 12px;
+    padding: 85px 12px 90px 12px;
   }
 
   .pageTitle {
