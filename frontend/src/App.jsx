@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { usePlayer } from './context/PlayerContext';
 import Sidebar from './components/layout/Sidebar';
 import TopNav from './components/layout/TopNav';
 import AnnouncementBanner from './components/layout/AnnouncementBanner';
@@ -20,6 +21,7 @@ import './App.css';
 
 function App() {
   const { isLoggedIn, user } = useAuth();
+  const { playerState } = usePlayer();
   const [announcement, setAnnouncement] = useState(null);
   const location = useLocation();
 
@@ -69,13 +71,23 @@ function App() {
     // Send every 30 seconds
     const interval = setInterval(sendHeartbeat, 30000);
     return () => clearInterval(interval);
-  }, [isLoggedIn, user, location.pathname, location.search]);
+  }, [isLoggedIn, user, location.pathname, location.search, playerState?.isOpen, playerState?.movieData]);
 
   const getActionFromPath = (path) => {
+    if (playerState?.isOpen && playerState?.movieData) {
+      const title = playerState.movieData.title;
+      const type = playerState.movieData.type === 'tv' || playerState.movieData.type === 'Series' ? 'TV' : 'Movie';
+      return `Watching: ${title} (${type})`;
+    }
     if (path === '/') return 'Browsing Home';
     if (path.startsWith('/search')) return 'Searching';
     if (path.startsWith('/movie/')) return 'Viewing Movie Details';
-    if (path.startsWith('/play/')) return 'Watching Video';
+    if (path.startsWith('/play/')) {
+      const searchParams = new URLSearchParams(location.search);
+      const title = searchParams.get('title');
+      if (title) return `Watching: ${title}`;
+      return 'Watching Video';
+    }
     if (path.startsWith('/tv')) return 'Browsing TV Shows';
     if (path.startsWith('/movies')) return 'Browsing Movies';
     if (path.startsWith('/login')) return 'At Login Page';
