@@ -41,51 +41,7 @@
   z-index: 10000;
 }
 
-.closeTrailerBtn:hover, .minimizeBtn:hover {
-  background: var(--primary-color, #e50914);
-  border-color: var(--primary-color, #e50914);
-  transform: scale(1.1);
-}
-
-.minimizeBtn {
-  position: absolute;
-  top: 20px;
-  right: 84px; /* 24px + 50px + 10px spacing */
-  background: rgba(255,255,255,0.15);
-  border: 2px solid rgba(255,255,255,0.4);
-  color: #fff;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  transition: all var(--anim-speed, 0.3s);
-  z-index: 10000;
-}
-
-.rotateBtn {
-  position: absolute;
-  top: 20px;
-  right: 144px; /* 84px + 50px + 10px spacing */
-  background: rgba(255,255,255,0.15);
-  border: 2px solid rgba(255,255,255,0.4);
-  color: #fff;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  transition: all var(--anim-speed, 0.3s);
-  z-index: 10000;
-}
-
-.rotateBtn:hover {
+.closeTrailerBtn:hover {
   background: var(--primary-color, #e50914);
   border-color: var(--primary-color, #e50914);
   transform: scale(1.1);
@@ -163,25 +119,6 @@
   cursor: grabbing;
 }
 
-/* CSS Rotation for Mobile */
-.rotatedContainer {
-  transform: rotate(90deg) !important;
-  transform-origin: center center !important;
-  width: 100vh !important;
-  height: 100vw !important;
-  position: fixed !important;
-  top: calc((100vh - 100vw) / 2) !important;
-  left: calc((100vw - 100vh) / 2) !important;
-  display: flex !important;
-  align-items: flex-end !important;
-}
-
-.rotatedContainer .trailerIframe {
-  width: 100vh !important;
-  height: calc(100vw - 56px) !important;
-  border-radius: 0 !important;
-}
-
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .trailerModal {
@@ -194,14 +131,14 @@
     border-radius: 0;
   }
 
-  .closeTrailerBtn, .minimizeBtn, .rotateBtn {
+  .closeTrailerBtn {
     width: 32px;
     height: 32px;
     border-width: 1.5px;
     top: 12px;
   }
 
-  .closeTrailerBtn svg, .minimizeBtn svg, .rotateBtn svg {
+  .closeTrailerBtn svg {
     width: 16px;
     height: 16px;
   }
@@ -210,13 +147,7 @@
     right: 12px;
   }
 
-  .minimizeBtn {
-    right: 52px; /* 12 + 32 + 8 */
-  }
 
-  .rotateBtn {
-    right: 92px; /* 52 + 32 + 8 */
-  }
 
   .playerEpLabel {
     top: 14px;

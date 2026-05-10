@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Minimize2, RotateCw } from 'lucide-react';
+import { X } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './GlobalPlayer.module.css';
@@ -14,7 +14,6 @@ const GlobalPlayer = () => {
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [isRotated, setIsRotated] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
   // Watch route changes. If playing and we leave the movie page, force sticky
@@ -162,21 +161,6 @@ const GlobalPlayer = () => {
     };
   }, [isOpen, movieData, isLoggedIn, token]);
 
-  const handleRotate = async (e) => {
-    e.stopPropagation();
-    setIsRotated(prev => !prev);
-    
-    try {
-      if (!document.fullscreenElement) {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) await elem.requestFullscreen();
-        else if (elem.webkitRequestFullscreen) await elem.webkitRequestFullscreen();
-      }
-    } catch (err) {
-      // Ignore fullscreen errors, CSS rotation handles it
-    }
-  };
-
   if (!isOpen || !movieData) return null;
 
   const getPlayerUrl = () => {
@@ -193,7 +177,7 @@ const GlobalPlayer = () => {
 
   return (
     <div 
-      className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''} ${isRotated && !isSticky ? styles.rotatedContainer : ''}`}
+      className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''}`}
       style={isSticky ? { 
         transform: `translate(${position.x}px, ${position.y}px)`,
         animation: (isDragging || position.x !== 0 || position.y !== 0) ? 'none' : undefined
@@ -212,29 +196,6 @@ const GlobalPlayer = () => {
         <X size={28} />
       </button>
 
-      {!isSticky && (
-        <>
-          <button 
-            className={styles.minimizeBtn} 
-            onClick={(e) => {
-              e.stopPropagation();
-              setSticky(true);
-            }}
-            title="Picture-in-Picture"
-          >
-            <Minimize2 size={24} />
-          </button>
-          
-          <button 
-            className={styles.rotateBtn} 
-            onClick={handleRotate}
-            title="Rotate Screen"
-          >
-            <RotateCw size={24} />
-          </button>
-        </>
-      )}
-      
       <div className={styles.playerEpLabel}>
         {label}
       </div>
