@@ -27,8 +27,14 @@ const GlobalPlayer = () => {
   }, [location.pathname, isOpen, movieData, isSticky, setSticky]);
 
   // Drag logic
-  const handleStart = (clientX, clientY) => {
+  const handleStart = (e, clientX, clientY) => {
+    // Ignore clicks on buttons
+    if (e.target.closest('button')) return;
+    
     if (!isSticky) return;
+    
+    if (e.type === 'mousedown') e.preventDefault();
+    
     setIsDragging(true);
     dragRef.current = {
       startX: clientX,
@@ -40,13 +46,11 @@ const GlobalPlayer = () => {
   };
 
   const handleMouseDown = (e) => {
-    handleStart(e.clientX, e.clientY);
-    e.preventDefault(); 
+    handleStart(e, e.clientX, e.clientY);
   };
 
   const handleTouchStart = (e) => {
-    handleStart(e.touches[0].clientX, e.touches[0].clientY);
-    // Do not prevent default here so that tapping to expand still works on mobile
+    handleStart(e, e.touches[0].clientX, e.touches[0].clientY);
   };
 
   useEffect(() => {
@@ -183,12 +187,11 @@ const GlobalPlayer = () => {
     >
       <button 
         className={styles.closeTrailerBtn} 
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           closePlayer();
         }}
+        title="Close Player"
       >
         <X size={28} />
       </button>
@@ -196,8 +199,6 @@ const GlobalPlayer = () => {
       {!isSticky && (
         <button 
           className={styles.minimizeBtn} 
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             setSticky(true);
