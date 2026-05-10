@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Minimize2 } from 'lucide-react';
+import { X, Minimize2, Maximize } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './GlobalPlayer.module.css';
@@ -161,6 +161,45 @@ const GlobalPlayer = () => {
     };
   }, [isOpen, movieData, isLoggedIn, token]);
 
+  const handleRotate = async (e) => {
+    e.stopPropagation();
+    try {
+      if (!document.fullscreenElement) {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+          await elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+          await elem.msRequestFullscreen();
+        }
+        
+        // Attempt to lock to landscape
+        if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+          try {
+            await window.screen.orientation.lock('landscape');
+          } catch (e) { console.warn("Orientation lock not supported/allowed", e); }
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { /* Safari */
+          await document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE11 */
+          await document.msExitFullscreen();
+        }
+        
+        if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+          try {
+            window.screen.orientation.unlock();
+          } catch (e) {}
+        }
+      }
+    } catch (err) {
+      console.warn("Fullscreen/Rotation API not supported or denied", err);
+    }
+  };
+
   if (!isOpen || !movieData) return null;
 
   const getPlayerUrl = () => {
@@ -197,16 +236,26 @@ const GlobalPlayer = () => {
       </button>
 
       {!isSticky && (
-        <button 
-          className={styles.minimizeBtn} 
-          onClick={(e) => {
-            e.stopPropagation();
-            setSticky(true);
-          }}
-          title="Picture-in-Picture"
-        >
-          <Minimize2 size={24} />
-        </button>
+        <>
+          <button 
+            className={styles.minimizeBtn} 
+            onClick={(e) => {
+              e.stopPropagation();
+              setSticky(true);
+            }}
+            title="Picture-in-Picture"
+          >
+            <Minimize2 size={24} />
+          </button>
+          
+          <button 
+            className={styles.rotateBtn} 
+            onClick={handleRotate}
+            title="Rotate/Fullscreen"
+          >
+            <Maximize size={24} />
+          </button>
+        </>
       )}
       
       <div className={styles.playerEpLabel}>
