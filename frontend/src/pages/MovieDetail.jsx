@@ -635,7 +635,7 @@ const MovieDetail = () => {
                   const ep = episodes.find(e => e.number === selectedEpisode);
                   handlePlayEpisode(selectedSeason, selectedEpisode, ep?.name || '');
                 }
-                else { setShowPlayer(true); trackWatch(); }
+                else { openPlayer({ id: movie.id, type, title: movie.title, poster: movie.poster, backdrop: movie.backdrop, rating: movie.rating, year: movie.year, runtime: movie.runtime }); }
               }}
             >
               <Play fill="black" size={22} /> Play Now
