@@ -149,14 +149,16 @@
 
   .navItem {
     width: auto;
-    padding: 10px;
+    padding: 6px 0;
     flex: 1;
     height: 100%;
     justify-content: center;
+    align-items: center;
     color: #fff;
-    opacity: 0.5;
+    opacity: 0.6;
     flex-direction: column;
     gap: 4px;
+    transition: all 0.2s ease;
   }
 
   /* Active bottom tab */
@@ -165,16 +167,34 @@
     opacity: 1;
   }
 
-  /* Disable hover pop & text tooltip on mobile */
+  /* Disable aggressive hover pop on mobile */
   .navItem:hover {
-    transform: scale(1.08);
+    transform: scale(1.05);
     color: #fff;
     opacity: 1;
   }
 
-  /* Hide tooltip labels on mobile */
+  /* Show labels underneath icons on mobile */
   .navItem span {
-    display: none;
+    display: block;
+    position: static;
+    transform: none;
+    opacity: 0.8;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 500;
+    pointer-events: auto;
+    color: inherit;
+  }
+
+  .navItem:hover span, .navItem.active span {
+    opacity: 1;
+    transform: none;
+    font-weight: 700;
   }
 
   /* Active indicator becomes a top line */
@@ -198,11 +218,11 @@
 /* 📱 SMALL PHONE (≤480px) */
 @media (max-width: 480px) {
   .sidebar {
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
-  .navItem {
-    padding: 8px 4px;
+  .navItem span {
+    font-size: 10px;
   }
 }
 
