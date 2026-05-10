@@ -365,25 +365,33 @@
 @media (max-width: 768px) {
   .topNav {
     left: 0;
-    padding: 6px 12px;
-    gap: 10px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, transparent 100%);
-    min-height: 50px;
+    right: 0;
+    padding: 0 12px;
+    height: 56px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, transparent 100%);
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 0;
   }
 
   .branding {
-    gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
   }
 
   .brandLogo {
-    height: 28px;
+    height: 24px;
+    width: auto;
   }
 
   .brandName {
     display: block;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
+    white-space: nowrap;
   }
 
   .watchText {
@@ -391,17 +399,11 @@
   }
 
   /* Branding stays on left */
-  .branding {
-    flex-shrink: 0;
-    max-width: 50%;
-  }
-
   .navActions {
-    gap: 8px; /* Tight gap for actions */
-    padding-right: 0;
-    flex: 0;
     display: flex;
     align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
   }
 
   .searchContainer {
@@ -478,41 +480,21 @@
 /* 📱 SMALL PHONE (≤480px) */
 @media (max-width: 480px) {
   .topNav {
-    padding: 6px 10px;
-    gap: 4px;
-  }
-
-  .brandLogo {
-    height: 24px;
+    padding: 0 10px;
+    height: 50px;
   }
 
   .brandName {
-    font-size: 12px;
-    letter-spacing: 0;
-  }
-
-  .watchText {
-    display: none;
+    font-size: 14px;
   }
 
   .navActions {
-    flex: 0;
-    gap: 8px;
+    gap: 4px;
   }
 
-  .searchContainer {
-    width: auto;
-  }
-
-  .surpriseBtn {
-    width: 32px;
-    height: 32px;
-  }
-
-  .avatarCircle {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
+  .surpriseBtn, .avatarCircle {
+    width: 30px;
+    height: 30px;
   }
 }
 
