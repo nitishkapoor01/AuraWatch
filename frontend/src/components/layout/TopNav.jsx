@@ -126,33 +126,23 @@ const TopNav = () => {
   const handleSurpriseMe = async (category) => {
     setShowSurprisePicker(false);
     const labels = { movie: '🎬 Movie', tv: '📺 Series', anime: '✨ Anime' };
-    showToast(`Finding a random ${labels[category] || 'title'} for you...`, 'info');
+    showToast(`Finding a random ${labels[category]} for you...`, 'info');
     try {
       const base = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
-      let url = `${base}/movies/trending`;
-      if (category === 'anime') {
-        url = `${base}/movies/search?query=anime&type=tv`;
-      } else {
-        url = `${base}/movies/trending?type=${category}`;
+      const randomPage = Math.floor(Math.random() * 5) + 1;
+      let url;
+      if (category === 'movie') {
+        url = `${base}/movies/discover?type=movie&page=${randomPage}`;
+      } else if (category === 'tv') {
+        url = `${base}/movies/discover?type=tv&page=${randomPage}`;
+      } else if (category === 'anime') {
+        url = `${base}/movies/discover?type=tv&lang=anime&page=${randomPage}`;
       }
       const res = await fetch(url);
       const data = await res.json();
-      const list = Array.isArray(data) ? data : data.results || [];
-      
-      // For anime, filter for anime-style shows
-      let filtered = list;
-      if (category === 'anime') {
-        filtered = list.filter(m =>
-          m.title?.toLowerCase().includes('anime') ||
-          m.genre?.toLowerCase().includes('animation') ||
-          m.genre?.toLowerCase().includes('anime') ||
-          m.type?.toLowerCase() === 'tv'
-        );
-        if (filtered.length === 0) filtered = list; // fallback
-      }
-      
-      if (filtered.length > 0) {
-        const pick = filtered[Math.floor(Math.random() * filtered.length)];
+      const list = Array.isArray(data) ? data : [];
+      if (list.length > 0) {
+        const pick = list[Math.floor(Math.random() * list.length)];
         const type = pick.type === 'Series' || pick.type === 'tv' ? 'tv' : 'movie';
         navigate(`/movie/${pick.id}?type=${type}`);
       } else {
