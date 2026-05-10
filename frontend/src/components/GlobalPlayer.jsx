@@ -208,7 +208,7 @@ const GlobalPlayer = () => {
         title={movieData.title}
         className={styles.trailerIframe}
         allow="autoplay; encrypted-media; fullscreen"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen allow-pointer-lock allow-downloads"
+        referrerPolicy="no-referrer"
         allowFullScreen
         style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
       ></iframe>
