@@ -169,6 +169,17 @@
   transition: all var(--anim-speed, 0.3s);
 }
 
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.mobileSearchBtn {
+  display: none;
+}
+
 .filterInline {
   flex-shrink: 0;
 }
@@ -375,6 +386,30 @@
     align-items: center;
     justify-content: space-between;
     z-index: 2000;
+    transition: all 0.3s ease;
+  }
+  
+  /* Hide branding when search is active */
+  .topNav.searchActive .branding {
+    display: none;
+  }
+  
+  .topNav.searchActive .navActions {
+    width: 100%;
+  }
+
+  .topNav.searchActive .searchContainer {
+    max-width: 100%;
+    flex: 1;
+  }
+
+  .topNav.searchActive .searchBox {
+    flex: 1;
+  }
+
+  .topNav.searchActive .filterInline,
+  .topNav.searchActive .surpriseWrapper {
+    display: none;
   }
 
   .branding {
@@ -408,7 +443,7 @@
   .navActions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px; /* consistent spacing */
     flex: 1;
     justify-content: flex-end;
   }
@@ -416,13 +451,40 @@
   .searchContainer {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex: 1;
-    max-width: 180px; /* Limit width on mobile */
+    max-width: auto; /* Let it grow naturally */
+    justify-content: flex-end;
   }
 
   .filterInline {
     flex-shrink: 0;
+  }
+
+  /* Click-to-reveal on Mobile */
+  .searchBox {
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    transition: all 0.3s ease;
+  }
+
+  .mobileSearchBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .searchBox.expanded .mobileSearchBtn {
+    display: none;
   }
 
   /* Match the laptop dice button look */
@@ -444,23 +506,28 @@
   }
 
   .searchInput {
-    display: block;
-    opacity: 1;
-    pointer-events: auto;
-    position: static;
-    width: 100%;
+    display: none; /* hidden by default on mobile */
+    opacity: 0;
+    width: 0;
     height: 36px;
-    padding: 0 12px;
-    font-size: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 18px;
     color: #fff;
-    margin-top: 0;
+    transition: all 0.3s ease;
+  }
+
+  .searchBox.expanded .searchInput {
+    display: block;
+    opacity: 1;
+    width: 100%;
+    padding: 0 16px;
   }
 
   .searchIcon {
-    display: none !important; /* Remove the extra icon as requested */
+    display: none !important; /* Always hidden on mobile */
   }
 
   .avatarCircle {

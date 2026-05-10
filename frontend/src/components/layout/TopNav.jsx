@@ -33,8 +33,10 @@ const TopNav = () => {
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showSurprisePicker, setShowSurprisePicker] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const surpriseRef = useRef(null);
   const dropdownRef = useRef(null);
+  const searchBoxRef = useRef(null);
   const buttonWarnings = useButtonWarnings();
   
   useEffect(() => {
@@ -52,6 +54,17 @@ const TopNav = () => {
     const handleClickOutside = (e) => {
       if (surpriseRef.current && !surpriseRef.current.contains(e.target)) {
         setShowSurprisePicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close mobile search on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
+        setIsMobileSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -164,7 +177,7 @@ const TopNav = () => {
   };
 
   return (
-    <header className={`${styles.topNav} topNav`}>
+    <header className={`${styles.topNav} topNav ${isMobileSearchOpen ? styles.searchActive : ''}`}>
       {!isLoginPage && (
         <Link to="/" className={styles.branding} style={{ textDecoration: 'none' }}>
           <img src="/AuraMovie_logo.png.png" alt="Logo" className={styles.brandLogo} />
@@ -210,17 +223,25 @@ const TopNav = () => {
             )}
           </div>
 
-          <Search size={18} className={styles.searchIcon} />
-          <input 
-            type="text" 
-            placeholder="Search movies, shows..." 
-            className={styles.searchInput}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            onKeyDown={handleKeyDown}
-          />
+          <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`} ref={searchBoxRef}>
+            <button 
+              className={styles.mobileSearchBtn} 
+              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+            >
+              <Search size={18} />
+            </button>
+            <Search size={18} className={styles.searchIcon} />
+            <input 
+              type="text" 
+              placeholder="Search movies, shows..." 
+              className={styles.searchInput}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => { setIsFocused(true); setIsMobileSearchOpen(true); }}
+              onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
           
           {isFocused && suggestions.length > 0 && (
             <div className={styles.suggestionsContainer}>
