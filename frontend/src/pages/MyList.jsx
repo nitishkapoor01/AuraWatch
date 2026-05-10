@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Film, Heart, BookmarkPlus, Sparkles } from 'lucide-react';
+import { Trash2, Film, Heart, BookmarkPlus, Sparkles, Share2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import styles from './MyList.module.css';
 import SEO from '../components/SEO';
 
 const MyList = () => {
-  const { isLoggedIn, token } = useAuth();
+  const { isLoggedIn, token, user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,6 +96,19 @@ const MyList = () => {
     }
   };
 
+  const handleShare = () => {
+    if (!user?.id) return;
+    const shareUrl = `${window.location.origin}/shared-list/${user.id}`;
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        showToast('Share link copied to clipboard! Anyone with this link can view your list.', 'info');
+      })
+      .catch(err => {
+        console.error('Failed to copy share link:', err);
+        showToast('Failed to copy link. Please try again.', 'warning');
+      });
+  };
+
   if (loading) {
     return (
       <div className={styles.myListPage}>
@@ -113,8 +128,18 @@ const MyList = () => {
         title="My List - AuraWatch"
         description="Your personal watchlist on AuraWatch. Save and organize your favorite movies and TV shows."
       />
-      <h1 className={styles.pageTitle}>My List</h1>
-      <p className={styles.subtitle}>{favorites.length} title{favorites.length !== 1 ? 's' : ''} saved</p>
+      <div className={styles.headerRow}>
+        <div>
+          <h1 className={styles.pageTitle}>My List</h1>
+          <p className={styles.subtitle}>{favorites.length} title{favorites.length !== 1 ? 's' : ''} saved</p>
+        </div>
+        {favorites.length > 0 && (
+          <button className={styles.shareBtn} onClick={handleShare} title="Share My List">
+            <Share2 size={20} />
+            <span>Share List</span>
+          </button>
+        )}
+      </div>
 
       {favorites.length === 0 ? (
         <div className={styles.emptyState}>

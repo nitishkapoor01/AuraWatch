@@ -4,6 +4,32 @@ const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Get shared list (Public - No Auth Required)
+router.get('/shared/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    // Get the user's name
+    const userRes = await db.query('SELECT name FROM users WHERE id = $1', [userId]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found or list is private.' });
+    }
+    
+    // Get their favorites
+    const favorites = await db.query(
+      'SELECT * FROM favorites WHERE user_id = $1 ORDER BY added_at DESC',
+      [userId]
+    );
+    
+    res.json({ 
+      userName: userRes.rows[0].name, 
+      favorites: favorites.rows 
+    });
+  } catch (error) {
+    console.error('[Favorites] Get shared list error:', error);
+    res.status(500).json({ message: 'Failed to fetch shared list.' });
+  }
+});
+
 // All routes require authentication
 router.use(authMiddleware);
 

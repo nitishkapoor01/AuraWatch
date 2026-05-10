@@ -11,6 +11,7 @@ import Player from './pages/Player';
 import Category from './pages/Category';
 import Login from './pages/Login';
 import MyList from './pages/MyList';
+import SharedList from './pages/SharedList';
 import WatchHistory from './pages/WatchHistory';
 import AdminDashboard from './pages/AdminDashboard';
 import BackgroundEffects from './components/BackgroundEffects';
@@ -101,6 +102,7 @@ function App() {
             <Route path="/play/:id" element={<Player />} />
             <Route path="/login" element={<Login />} />
             <Route path="/list" element={<MyList />} />
+            <Route path="/shared-list/:userId" element={<SharedList />} />
             <Route path="/history" element={<WatchHistory />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={

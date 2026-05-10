@@ -17,6 +17,68 @@
   margin-bottom: 32px;
 }
 
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.shareBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--anim-speed, 0.3s);
+}
+
+.shareBtn:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+}
+
+.shareBtn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .headerRow {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .shareBtn span {
+    display: none;
+  }
+  
+  .shareBtn {
+    padding: 8px;
+  }
+}
+
+.sharedBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(var(--primary-color-rgb), 0.1);
+  border: 1px solid rgba(var(--primary-color-rgb), 0.2);
+  color: var(--primary-color);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* Promo Screen for Non-Logged-In Users */
 .promoScreen {
   position: relative;
