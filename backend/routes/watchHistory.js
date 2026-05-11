@@ -52,8 +52,8 @@ router.post('/', async (req, res) => {
         duration = CASE WHEN $10 IS NOT NULL AND $10 > 0 THEN $10 ELSE watch_history.duration END,
         last_watched = NOW(),
         title = EXCLUDED.title,
-        poster = EXCLUDED.poster,
-        backdrop = EXCLUDED.backdrop,
+        poster = CASE WHEN EXCLUDED.poster <> '' THEN EXCLUDED.poster ELSE watch_history.poster END,
+        backdrop = CASE WHEN EXCLUDED.backdrop <> '' THEN EXCLUDED.backdrop ELSE watch_history.backdrop END,
         is_completed = watch_history.is_completed OR $13
     `, [
       req.user.id,

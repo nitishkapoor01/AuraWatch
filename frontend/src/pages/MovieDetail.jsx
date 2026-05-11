@@ -284,6 +284,8 @@ const MovieDetail = () => {
       id: movie.id,
       type,
       title: movie.title,
+      poster: movie.poster,
+      backdrop: movie.backdrop,
       season,
       episode,
       epName
