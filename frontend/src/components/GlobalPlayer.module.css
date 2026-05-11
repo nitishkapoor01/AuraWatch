@@ -74,6 +74,7 @@
   box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
   animation: slideInFromRight 0.5s ease forwards;
   cursor: grab;
+  touch-action: none;
   /* Prevent background dimming */
 }
 
@@ -132,19 +133,18 @@
   }
 
   .closeTrailerBtn {
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
     border-width: 1.5px;
     top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.5);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
   }
 
   .closeTrailerBtn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .closeTrailerBtn {
-    right: 12px;
+    width: 20px;
+    height: 20px;
   }
 
 
