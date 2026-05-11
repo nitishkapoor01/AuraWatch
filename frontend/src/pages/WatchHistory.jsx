@@ -18,6 +18,15 @@ const FILTER_OPTIONS = [
 ];
 
 const HistoryCard = ({ item, handleGetLink, handleRemove, handleMarkComplete }) => {
+  const handleImageError = (e) => {
+    const currentSrc = e.target.src;
+    if (currentSrc.includes('image.tmdb.org')) {
+      e.target.src = currentSrc.replace('image.tmdb.org', 'www.themoviedb.org');
+    } else {
+      e.target.src = 'https://picsum.photos/id/10/300/450'; 
+    }
+  };
+
   const progressPercent = item.duration ? Math.min(100, Math.max(0, (item.progress / item.duration) * 100)) : 0;
   const playUrl = `/movie/${item.movie_id}?type=${item.movie_type}&play=true${item.season ? `&s=${item.season}&e=${item.episode}` : ''}`;
 
@@ -25,7 +34,7 @@ const HistoryCard = ({ item, handleGetLink, handleRemove, handleMarkComplete }) 
     <div className={styles.card}>
       <div className={styles.cardLinkContainer}>
         <Link to={playUrl} className={styles.cardLink}>
-          <img src={item.poster} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" />
+          <img src={item.poster} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" onError={handleImageError} />
           
           <div className={styles.dateBadge} data-title={item.detailedTime}>
             <Clock size={11} />
