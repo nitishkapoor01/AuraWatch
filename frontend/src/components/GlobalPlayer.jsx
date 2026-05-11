@@ -188,17 +188,6 @@ const GlobalPlayer = () => {
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
-      <button 
-        className={styles.closeTrailerBtn} 
-        onClick={(e) => {
-          e.stopPropagation();
-          closePlayer();
-        }}
-        title="Close Player"
-      >
-        <X size={28} />
-      </button>
-
       <div className={styles.playerEpLabel}>
         {label}
       </div>
@@ -215,6 +204,19 @@ const GlobalPlayer = () => {
         allowFullScreen
         style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
       ></iframe>
+
+      <button 
+        className={styles.closeTrailerBtn} 
+        onClick={(e) => {
+          e.stopPropagation();
+          closePlayer();
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        title="Close Player"
+      >
+        <X size={28} />
+      </button>
     </div>
   );
 };
