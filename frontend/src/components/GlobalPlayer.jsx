@@ -164,8 +164,11 @@ const GlobalPlayer = () => {
   if (!isOpen || !movieData) return null;
 
   const getPlayerUrl = () => {
-    if (movieData.type === 'tv' || movieData.type === 'Series') {
-      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season}&e=${movieData.episode}`;
+    const type = (movieData.type || '').toLowerCase();
+    const isTV = type === 'tv' || type === 'series';
+    
+    if (isTV) {
+      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season || 1}&e=${movieData.episode || 1}`;
     }
     return `https://screenscape.me/embed?tmdb=${movieData.id}&type=movie`;
   };
