@@ -164,11 +164,8 @@ const GlobalPlayer = () => {
   if (!isOpen || !movieData) return null;
 
   const getPlayerUrl = () => {
-    const type = (movieData.type || '').toLowerCase();
-    const isTV = type === 'tv' || type === 'series';
-    
-    if (isTV) {
-      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season || 1}&e=${movieData.episode || 1}`;
+    if (movieData.type === 'tv' || movieData.type === 'Series') {
+      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season}&e=${movieData.episode}`;
     }
     return `https://screenscape.me/embed?tmdb=${movieData.id}&type=movie`;
   };
@@ -188,6 +185,17 @@ const GlobalPlayer = () => {
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
+      <button 
+        className={styles.closeTrailerBtn} 
+        onClick={(e) => {
+          e.stopPropagation();
+          closePlayer();
+        }}
+        title="Close Player"
+      >
+        <X size={28} />
+      </button>
+
       <div className={styles.playerEpLabel}>
         {label}
       </div>
@@ -204,19 +212,6 @@ const GlobalPlayer = () => {
         allowFullScreen
         style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
       ></iframe>
-
-      <button 
-        className={styles.closeTrailerBtn} 
-        onClick={(e) => {
-          e.stopPropagation();
-          closePlayer();
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-        title="Close Player"
-      >
-        <X size={28} />
-      </button>
     </div>
   );
 };

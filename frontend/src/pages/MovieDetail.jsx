@@ -101,17 +101,6 @@ const MovieDetail = () => {
   const buttonWarnings = useButtonWarnings();
   const [globalSkipAds, setGlobalSkipAds] = useState(false);
 
-  const handleImageError = (e, isPoster = true) => {
-    const currentSrc = e.target.src;
-    if (currentSrc.includes('image.tmdb.org')) {
-      e.target.src = currentSrc.replace('image.tmdb.org', 'www.themoviedb.org');
-    } else {
-      e.target.src = isPoster 
-        ? 'https://picsum.photos/id/10/300/450' 
-        : 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop';
-    }
-  };
-
   // TV Specific
   const [seasons, setSeasons] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
@@ -610,25 +599,13 @@ const MovieDetail = () => {
 
       {/* Backdrop */}
       <div className={styles.backdropContainer}>
-        <img 
-          src={movie.backdrop} 
-          alt={movie.title} 
-          className={styles.backdrop} 
-          referrerPolicy="no-referrer" 
-          onError={(e) => handleImageError(e, false)}
-        />
+        <img src={movie.backdrop} alt={movie.title} className={styles.backdrop} referrerPolicy="no-referrer" />
         <div className={styles.overlay}></div>
       </div>
 
       {/* Main Info */}
       <div className={`${styles.content} content`}>
-        <img 
-          src={movie.poster} 
-          alt={movie.title} 
-          className={styles.poster} 
-          referrerPolicy="no-referrer" 
-          onError={(e) => handleImageError(e, true)}
-        />
+        <img src={movie.poster} alt={movie.title} className={styles.poster} referrerPolicy="no-referrer" />
         <div className={styles.info}>
           <h1 className={styles.title}>{movie.title}</h1>
           <div className={styles.meta}>
