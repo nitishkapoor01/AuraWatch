@@ -170,18 +170,32 @@ const MovieDetail = () => {
     };
   }, [movie]);
 
+  const hasAutoPlayed = React.useRef(false);
+
   // Auto-play from Continue Watching
   useEffect(() => {
-    if (movie && !loading) {
+    if (movie && !loading && !hasAutoPlayed.current) {
       const autoPlay = searchParams.get('play') === 'true';
       if (autoPlay) {
+        hasAutoPlayed.current = true;
         const s = parseInt(searchParams.get('s')) || 1;
         const e = parseInt(searchParams.get('e')) || 1;
         
+        const playerPayload = { 
+          id: movie.id, 
+          type, 
+          title: movie.title, 
+          poster: movie.poster, 
+          backdrop: movie.backdrop, 
+          rating: movie.rating, 
+          year: movie.year,
+          runtime: movie.runtime
+        };
+
         if (isTVType(type)) {
-          openPlayer({ id: movie.id, type, title: movie.title, season: s, episode: e });
+          openPlayer({ ...playerPayload, season: s, episode: e });
         } else {
-          openPlayer({ id: movie.id, type, title: movie.title });
+          openPlayer(playerPayload);
         }
       }
     }
