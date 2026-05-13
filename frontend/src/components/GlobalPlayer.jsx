@@ -131,7 +131,7 @@ const GlobalPlayer = () => {
             movieId: movieData.id,
             movieType: movieData.type,
             title: movieData.title,
-            poster: movieData.poster, // Pass these in openPlayer!
+            poster: movieData.poster,
             backdrop: movieData.backdrop,
             rating: movieData.rating,
             year: movieData.year,
@@ -146,18 +146,56 @@ const GlobalPlayer = () => {
       }
     };
 
-    const progressInterval = setInterval(() => {
-      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
-      if (elapsedSeconds < 5) return;
-      trackWatch(elapsedSeconds, estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60);
-    }, 30000);
-
-    return () => {
-      clearInterval(progressInterval);
-      const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
-      if (elapsedSeconds >= 5) {
-        trackWatch(elapsedSeconds, estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60);
+    // Fetch existing progress so we can preserve it if higher
+    let savedProgress = 0;
+    const fetchExisting = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+        const res = await fetch(`${API_BASE}/watch-history`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const existing = data.find(h =>
+            h.movie_id == movieData.id &&
+            h.movie_type == movieData.type &&
+            (movieData.season ? h.season == movieData.season && h.episode == movieData.episode : true)
+          );
+          if (existing) {
+            savedProgress = existing.progress || 0;
+            if (existing.duration > 0) estimatedDuration = existing.duration;
+          }
+        }
+      } catch (err) {
+        // ignore — we'll just use 0
       }
+    };
+
+    // Kick off fetch, then start interval
+    fetchExisting().then(() => {
+      const progressInterval = setInterval(() => {
+        const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
+        if (elapsedSeconds < 5) return;
+        // Send the HIGHER of saved progress or current elapsed to avoid regressing completed items
+        const reportedProgress = Math.max(savedProgress, elapsedSeconds);
+        trackWatch(reportedProgress, estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60);
+      }, 30000);
+
+      // Store interval id in closure for cleanup
+      return () => {
+        clearInterval(progressInterval);
+        const elapsedSeconds = Math.floor((Date.now() - watchStartTime) / 1000);
+        if (elapsedSeconds >= 5) {
+          const reportedProgress = Math.max(savedProgress, elapsedSeconds);
+          trackWatch(reportedProgress, estimatedDuration > 0 ? estimatedDuration : elapsedSeconds + 60);
+        }
+      };
+    });
+
+    // Fallback cleanup in case fetchExisting is still pending
+    return () => {
+      // The inner cleanup from fetchExisting().then() handles intervals.
+      // This outer return ensures no leak if component unmounts before promise resolves.
     };
   }, [isOpen, movieData, isLoggedIn, token]);
 

@@ -48,7 +48,12 @@ router.post('/', async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), $13)
       ON CONFLICT(user_id, movie_id, movie_type, season, episode) 
       DO UPDATE SET 
-        progress = CASE WHEN $9 IS NOT NULL AND $9 > 0 THEN $9 ELSE watch_history.progress END,
+        progress = CASE 
+          WHEN watch_history.is_completed = TRUE AND ($9 IS NULL OR $9 < watch_history.progress)
+            THEN watch_history.progress
+          WHEN $9 IS NOT NULL AND $9 > 0 THEN $9 
+          ELSE watch_history.progress 
+        END,
         duration = CASE WHEN $10 IS NOT NULL AND $10 > 0 THEN $10 ELSE watch_history.duration END,
         last_watched = NOW(),
         title = EXCLUDED.title,
