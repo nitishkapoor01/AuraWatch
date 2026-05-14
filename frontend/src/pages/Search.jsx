@@ -67,7 +67,12 @@ const Search = () => {
       ) : results.length > 0 ? (
         <div className={styles.grid}>
           {results.map((movie, idx) => (
-            <Link to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`} key={`${movie.id}-${idx}`} className={homeStyles.cardContainer} style={{flex: 'none', width: '100%'}}>
+            <Link 
+              to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`} 
+              key={`${movie.id}-${idx}`} 
+              className={homeStyles.cardContainer} 
+              style={{flex: 'none', width: '100%', display: 'block', touchAction: 'manipulation'}}
+            >
               <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
             </Link>
           ))}

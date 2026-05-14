@@ -11,7 +11,11 @@ import { useToast } from '../context/ToastContext';
 import { usePlayer } from '../context/PlayerContext';
 import HelpModal from '../components/profile/HelpModal';
 
-const isTVType = (type) => type === 'tv' || type === 'series';
+const isTVType = (t) => {
+  if (!t) return false;
+  const type = t.toLowerCase();
+  return type === 'tv' || type === 'series' || type === 'tv series';
+};
 
 const extractLanguage = (name) => {
   if (!name) return 'English';

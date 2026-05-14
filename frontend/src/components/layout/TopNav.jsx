@@ -238,7 +238,7 @@ const TopNav = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => { setIsFocused(true); setIsMobileSearchOpen(true); }}
-              onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+              onBlur={() => setTimeout(() => setIsFocused(false), 400)}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -250,6 +250,12 @@ const TopNav = () => {
                   to={`/movie/${item.id}?type=${item.type.toLowerCase()}`}
                   key={item.id} 
                   className={styles.suggestionItem}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setIsFocused(false);
+                    setIsMobileSearchOpen(false);
+                    setQuery('');
+                  }}
                 >
                   <img src={item.poster} alt={item.title} className={styles.suggestionImage} />
                   <div className={styles.suggestionInfo}>
