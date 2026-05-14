@@ -36,7 +36,7 @@ const TopNav = () => {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const surpriseRef = useRef(null);
   const dropdownRef = useRef(null);
-  const searchBoxRef = useRef(null);
+  const searchContainerRef = useRef(null);
   const buttonWarnings = useButtonWarnings();
   
   useEffect(() => {
@@ -63,12 +63,17 @@ const TopNav = () => {
   // Close mobile search on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
         setIsMobileSearchOpen(false);
+        setIsFocused(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
   
   const navigate = useNavigate();
@@ -188,7 +193,7 @@ const TopNav = () => {
       )}
 
       <div className={styles.navActions}>
-        <div className={styles.searchContainer}>
+        <div className={styles.searchContainer} ref={searchContainerRef}>
           <div className={styles.filterInline}>
             <FilterBar onFilterChange={handleFilterChange} />
           </div>
@@ -223,7 +228,7 @@ const TopNav = () => {
             )}
           </div>
 
-          <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`} ref={searchBoxRef}>
+          <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`}>
             <button 
               className={styles.mobileSearchBtn} 
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
@@ -246,16 +251,17 @@ const TopNav = () => {
           {isFocused && suggestions.length > 0 && (
             <div className={styles.suggestionsContainer}>
               {suggestions.map(item => (
-                <Link 
-                  to={`/movie/${item.id}?type=${item.type.toLowerCase()}`}
-                  key={item.id} 
-                  className={styles.suggestionItem}
+                <div 
+                  key={item.id}
                   onMouseDown={(e) => e.preventDefault()}
+                  onTouchStart={(e) => e.preventDefault()}
                   onClick={() => {
+                    navigate(`/movie/${item.id}?type=${item.type.toLowerCase()}`);
                     setIsFocused(false);
                     setIsMobileSearchOpen(false);
                     setQuery('');
                   }}
+                  className={styles.suggestionItem}
                 >
                   <img src={item.poster} alt={item.title} className={styles.suggestionImage} />
                   <div className={styles.suggestionInfo}>
@@ -264,7 +270,7 @@ const TopNav = () => {
                       {item.year} • {item.type} • ★ {item.rating}
                     </span>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
