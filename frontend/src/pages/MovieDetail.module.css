@@ -276,6 +276,18 @@
   box-shadow: 0 0 14px rgba(255, 60, 60, 0.3) !important;
 }
 
+.shareBtn {
+  border-color: rgba(0, 191, 255, 0.4);
+  color: rgba(135, 206, 250, 0.85);
+}
+
+.shareBtn:hover {
+  background-color: rgba(0, 191, 255, 0.15) !important;
+  border-color: rgba(0, 191, 255, 0.8) !important;
+  color: #00bfff !important;
+  box-shadow: 0 0 14px rgba(0, 191, 255, 0.3) !important;
+}
+
 @keyframes popIn {
   0% { transform: scale(1); }
   50% { transform: scale(1.15); box-shadow: 0 0 25px rgba(255, 255, 255, 0.8); }

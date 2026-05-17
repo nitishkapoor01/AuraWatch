@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle, Flag } from 'lucide-react';
+import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle, Flag, Share2 } from 'lucide-react';
 import styles from './MovieDetail.module.css';
 import Row from '../components/Row';
 import SEO from '../components/SEO';
@@ -513,6 +513,39 @@ const MovieDetail = () => {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: movie?.title || 'AuraWatch',
+      text: `Watch ${movie?.title} on AuraWatch!`,
+      url: window.location.href,
+    };
+
+    const copyToClipboard = () => {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => {
+          showToast('Link copied to clipboard!', 'success');
+        })
+        .catch((err) => {
+          console.error('Failed to copy link: ', err);
+          showToast('Failed to copy link', 'error');
+        });
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        showToast('Shared successfully!', 'success');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error sharing:', err);
+          copyToClipboard();
+        }
+      }
+    } else {
+      copyToClipboard();
+    }
+  };
+
   if (loading) return <div style={{color:'white', padding:'100px', fontSize: '18px'}}>Loading...</div>;
   if (!movie) return <div style={{color:'white', padding:'100px', fontSize: '18px'}}>Movie not found!</div>;
 
@@ -759,6 +792,15 @@ const MovieDetail = () => {
             >
               {isDownloading ? <Loader2 size={22} className={styles.spinner} /> : <Download size={22} />}
               {buttonWarnings.download_movie && <span className={styles.warningBadge} />}
+            </button>
+
+            {/* Share Button */}
+            <button 
+              className={`${styles.listBtn} ${styles.shareBtn}`}
+              onClick={handleShare}
+              data-title={isTV ? "Share Series" : "Share Movie"}
+            >
+              <Share2 size={22} />
             </button>
 
             {/* Report Issue Button */}
