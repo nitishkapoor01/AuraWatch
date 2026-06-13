@@ -205,6 +205,10 @@ router.get('/horror', async (req, res) => {
 router.get('/genre/:id', async (req, res) => {
   try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/movie?api_key=${getApiKey()}&with_genres=${req.params.id}&page=${req.query.page || 1}`, 'movie')); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
+router.get('/k-drama', async (req, res) => {
+  try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/tv?api_key=${getApiKey()}&with_original_language=ko&sort_by=popularity.desc&page=${req.query.page || 1}`, 'tv')); } catch (e) { res.status(500).json({ message: 'Error' }); }
+});
+
 
 // --- DETAILS & TV ENDPOINTS ---
 router.get('/:id/videos', async (req, res) => {

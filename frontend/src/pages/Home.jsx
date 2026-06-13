@@ -133,10 +133,9 @@ const Home = () => {
         <Row title="Top 10 in India Today" endpoint="trending-india" compact={layout === 'grid'} />
         <Row title="New Releases This Week" endpoint="new-this-week" compact={layout === 'grid'} />
 
-
-
-        <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} />
-        <Row title="Popular on Netflix" endpoint="continue-watching" compact={layout === 'grid'} />
+        <Row title="AuraWatch Originals" endpoint="originals" compact={layout === 'grid'} />
+        <Row title="Popular K-Dramas" endpoint="k-drama" compact={layout === 'grid'} />
+        <Row title="Popular on AuraWatch" endpoint="continue-watching" compact={layout === 'grid'} />
         <Row title="Top Rated Classics" endpoint="top-rated" compact={layout === 'grid'} />
         <Row title="Action & Adventure" endpoint="action" compact={layout === 'grid'} />
         <Row title="Sci-Fi & Fantasy" endpoint="genre/878" compact={layout === 'grid'} />
