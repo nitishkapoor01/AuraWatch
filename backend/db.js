@@ -98,6 +98,24 @@ const initDB = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS ai_search_cache (
+        id SERIAL PRIMARY KEY,
+        query TEXT UNIQUE NOT NULL,
+        results JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS liked_searches (
+        id SERIAL PRIMARY KEY,
+        query TEXT NOT NULL,
+        visitor_id TEXT,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_liked_searches_user_query ON liked_searches (user_id, query) WHERE user_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_liked_searches_visitor_query ON liked_searches (visitor_id, query) WHERE visitor_id IS NOT NULL AND user_id IS NULL;
+
       CREATE TABLE IF NOT EXISTS login_logs (
         id SERIAL PRIMARY KEY,
         name TEXT,
@@ -155,6 +173,15 @@ const initDB = async () => {
         END IF;
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='ui_preferences') THEN
           ALTER TABLE users ADD COLUMN ui_preferences JSONB DEFAULT '{}';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='search_logs' AND COLUMN_NAME='user_id') THEN
+          ALTER TABLE search_logs ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='search_logs' AND COLUMN_NAME='success') THEN
+          ALTER TABLE search_logs ADD COLUMN success BOOLEAN DEFAULT TRUE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='search_logs' AND COLUMN_NAME='has_results') THEN
+          ALTER TABLE search_logs ADD COLUMN has_results BOOLEAN DEFAULT TRUE;
         END IF;
       END $$;
 

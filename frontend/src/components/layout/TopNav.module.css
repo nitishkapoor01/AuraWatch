@@ -186,7 +186,7 @@
 
 .searchInput {
   width: 100%;
-  padding: 10px 16px 10px 10px;
+  padding: 10px 45px 10px 10px; /* Right padding to make room for AI button */
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background-color: transparent;
@@ -200,6 +200,54 @@
   border-color: var(--accent-primary);
   background-color: rgba(0, 0, 0, 0.8);
   box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.aiMode .searchInput {
+  border-color: rgba(192,132,252,0.6);
+  background: rgba(192,132,252,0.05);
+}
+
+.aiMode .searchInput:focus {
+  border-color: #c084fc;
+  box-shadow: 0 0 10px rgba(192,132,252,0.3);
+  background: rgba(192,132,252,0.1);
+}
+
+.aiToggleBtn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.aiToggleBtn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.aiToggleBtnActive {
+  opacity: 1;
+  filter: none;
+  background: rgba(192, 132, 252, 0.2);
+  text-shadow: 0 0 10px rgba(192, 132, 252, 0.8);
+}
+
+.aiToggleBtnActive:hover {
+  background: rgba(192, 132, 252, 0.3);
 }
 
 .searchIcon {
@@ -545,12 +593,20 @@
     opacity: 1;
     width: 100%;
     height: 36px;
-    padding: 0 14px;
+    padding: 0 40px 0 14px; /* Right padding for AI button */
     font-size: 14px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 18px;
     color: #fff;
+  }
+
+  .aiToggleBtn {
+    display: none;
+  }
+
+  .topNav.searchActive .searchBox .aiToggleBtn {
+    display: flex;
   }
 }
 
@@ -603,7 +659,7 @@
   }
 
   .searchInput {
-    padding: 14px 20px 14px 48px;
+    padding: 14px 50px 14px 20px; /* 50px right padding for AI button */
     font-size: 16px;
     border-radius: 28px;
   }
@@ -622,6 +678,106 @@
     width: 40px;
     height: 40px;
     font-size: 17px;
+  }
+}
+
+/* ─── Search History Dropdown inside TopNav ─── */
+.dropdownSection {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdownSection:last-child {
+  border-bottom: none;
+}
+
+.dropdownSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 1px;
+}
+
+.dropdownHistoryItem {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.dropdownHistoryItem:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+
+.itemIcon {
+  color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.dropdownHistoryItem:hover .itemIcon {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.historyText {
+  font-size: 13.5px;
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownItemActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dropdownHistoryItem:hover .dropdownItemActions {
+  opacity: 1;
+}
+
+.dropdownActionBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
+.dropdownActionBtn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.1);
+}
+
+.dropdownActionBtn.liked {
+  color: #e50914;
+}
+
+.dropdownActionBtn.liked:hover {
+  background: rgba(229, 9, 20, 0.1);
+}
+
+@media (max-width: 768px) {
+  .dropdownItemActions {
+    opacity: 1;
   }
 }
 

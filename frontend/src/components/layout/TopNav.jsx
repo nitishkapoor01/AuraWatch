@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles } from 'lucide-react';
+import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles, Clock, Heart, Trash2, X } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -25,6 +25,7 @@ const AVATARS = [
 
 const TopNav = () => {
   const [query, setQuery] = useState('');
+  const [isAiSearch, setIsAiSearch] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -78,8 +79,85 @@ const TopNav = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn, user, logout, loading, streak } = useAuth();
+  const { isLoggedIn, token, user, logout, loading, streak } = useAuth();
   const { showToast } = useToast();
+
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [likedSearches, setLikedSearches] = useState([]);
+
+  const fetchHistory = async () => {
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      
+      const recentRes = await fetch(`${API_BASE}/movies/recent-searches?visitorId=${visitorId}`, { headers });
+      if (recentRes.ok) {
+        const recentData = await recentRes.json();
+        setRecentSearches(recentData);
+      }
+
+      const likedRes = await fetch(`${API_BASE}/movies/liked-searches?visitorId=${visitorId}`, { headers });
+      if (likedRes.ok) {
+        const likedData = await likedRes.json();
+        setLikedSearches(likedData);
+      }
+    } catch (err) {
+      console.error('Failed to fetch TopNav search history:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      fetchHistory();
+    }
+  }, [isFocused, isLoggedIn, token]);
+
+  const handleLikeSearch = async (e, q, isAlreadyLiked) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+      
+      const endpoint = `${API_BASE}/movies/like-search`;
+      const method = isAlreadyLiked ? 'DELETE' : 'POST';
+      await fetch(endpoint, {
+        method,
+        headers,
+        body: JSON.stringify({ query: q, visitorId })
+      });
+      fetchHistory();
+    } catch (err) {
+      console.error('Failed to toggle like in TopNav:', err);
+    }
+  };
+
+  const handleDeleteRecentSearch = async (e, q) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+      
+      await fetch(`${API_BASE}/movies/recent-searches`, {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ query: q, visitorId })
+      });
+      fetchHistory();
+    } catch (err) {
+      console.error('Failed to delete history in TopNav:', err);
+    }
+  };
 
   useEffect(() => {
     if (location.pathname === '/') {
@@ -91,21 +169,22 @@ const TopNav = () => {
     if (query.trim().length > 1) {
       const fetchSearch = async () => {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/movies/search?query=${query}`);
+          const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
+          const res = await fetch(`${API_BASE}/movies/suggestions?query=${encodeURIComponent(query)}`);
           const data = await res.json();
           if (Array.isArray(data)) {
-            setSuggestions(data.slice(0, 5));
+            setSuggestions(data.slice(0, 6));
           } else {
             setSuggestions([]);
           }
         } catch (error) {
-          console.error("Error fetching search results:", error);
+          console.error("Error fetching suggestions:", error);
         }
       };
       
       const timerId = setTimeout(() => {
         fetchSearch();
-      }, 300);
+      }, 200); // 200ms debounce — pehle se thoda fast
       
       return () => clearTimeout(timerId);
     } else {
@@ -116,7 +195,13 @@ const TopNav = () => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && query.trim()) {
       setIsFocused(false);
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      setSuggestions([]);
+      setIsMobileSearchOpen(false);
+      if (isAiSearch) {
+        navigate(`/search?q=${encodeURIComponent(query)}&ai=1`);
+      } else {
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      }
     }
   };
 
@@ -228,7 +313,7 @@ const TopNav = () => {
             )}
           </div>
 
-          <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`}>
+          <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''} ${isAiSearch ? styles.aiMode : ''}`}>
             <button 
               className={styles.mobileSearchBtn} 
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
@@ -238,7 +323,7 @@ const TopNav = () => {
             <Search size={18} className={styles.searchIcon} />
             <input 
               type="text" 
-              placeholder="Search movies, shows..." 
+              placeholder={isAiSearch ? '🪄 Describe what you want to watch...' : 'Search movies, shows...'} 
               className={styles.searchInput}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -246,6 +331,13 @@ const TopNav = () => {
               onBlur={() => setTimeout(() => setIsFocused(false), 400)}
               onKeyDown={handleKeyDown}
             />
+            <button
+              className={`${styles.aiToggleBtn} ${isAiSearch ? styles.aiToggleBtnActive : ''}`}
+              onClick={() => setIsAiSearch(p => !p)}
+              title={isAiSearch ? 'AI Search ON — Click to switch to Normal' : 'Click to enable AI Smart Search'}
+            >
+              🪄
+            </button>
           </div>
           
           {isFocused && suggestions.length > 0 && (
@@ -272,6 +364,93 @@ const TopNav = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          
+          {isFocused && !query.trim() && (recentSearches.length > 0 || likedSearches.length > 0) && (
+            <div className={styles.suggestionsContainer}>
+              {likedSearches.length > 0 && (
+                <div className={styles.dropdownSection}>
+                  <div className={styles.dropdownSectionHeader}>
+                    <Heart size={11} fill="#e50914" color="#e50914" />
+                    <span>Liked Searches</span>
+                  </div>
+                  {likedSearches.slice(0, 5).map((item, idx) => (
+                    <div
+                      key={`liked-${idx}`}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setIsFocused(false);
+                        setIsMobileSearchOpen(false);
+                        setQuery('');
+                        if (isAiSearch) {
+                          navigate(`/search?q=${encodeURIComponent(item.query)}&ai=1`);
+                        } else {
+                          navigate(`/search?q=${encodeURIComponent(item.query)}`);
+                        }
+                      }}
+                      className={styles.dropdownHistoryItem}
+                    >
+                      <Clock size={12} className={styles.itemIcon} />
+                      <span className={styles.historyText}>{item.query}</span>
+                      <button
+                        className={`${styles.dropdownActionBtn} ${styles.liked}`}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={(e) => handleLikeSearch(e, item.query, true)}
+                      >
+                        <Heart size={11} fill="#e50914" color="#e50914" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {recentSearches.length > 0 && (
+                <div className={styles.dropdownSection}>
+                  <div className={styles.dropdownSectionHeader}>
+                    <Clock size={11} />
+                    <span>Recent Searches</span>
+                  </div>
+                  {recentSearches.slice(0, 5).map((item, idx) => (
+                    <div
+                      key={`recent-${idx}`}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setIsFocused(false);
+                        setIsMobileSearchOpen(false);
+                        setQuery('');
+                        if (isAiSearch) {
+                          navigate(`/search?q=${encodeURIComponent(item.query)}&ai=1`);
+                        } else {
+                          navigate(`/search?q=${encodeURIComponent(item.query)}`);
+                        }
+                      }}
+                      className={styles.dropdownHistoryItem}
+                    >
+                      <Clock size={12} className={styles.itemIcon} />
+                      <span className={styles.historyText}>{item.query}</span>
+                      <div className={styles.dropdownItemActions}>
+                        <button
+                          className={`${styles.dropdownActionBtn} ${item.is_liked ? styles.liked : ''}`}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={(e) => handleLikeSearch(e, item.query, item.is_liked)}
+                        >
+                          <Heart size={11} fill={item.is_liked ? '#e50914' : 'none'} color={item.is_liked ? '#e50914' : '#aaa'} />
+                        </button>
+                        <button
+                          className={styles.dropdownActionBtn}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={(e) => handleDeleteRecentSearch(e, item.query)}
+                        >
+                          <X size={11} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

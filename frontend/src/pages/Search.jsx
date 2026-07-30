@@ -1,84 +1,480 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { Clock, Heart, Trash2, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import styles from './Search.module.css';
 import homeStyles from './Home.module.css';
 import SEO from '../components/SEO';
 
+const AI_EXAMPLES = [
+  "movie where a man is trapped inside a simulation",
+  "funny movie about friends going on a road trip",
+  "thriller where a detective chases a serial killer",
+  "animated movie about a robot falling in love",
+  "movie where hackers steal money from a bank",
+  "superhero movie with a villain who wants to save the world",
+];
+
 const Search = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get('q') || '';
   const filterType = searchParams.get('type') || 'Movie';
   const filterGenre = searchParams.get('genre') || 'all';
   const filterLang = searchParams.get('lang') || 'all';
+  const isAiParam = searchParams.get('ai') === '1';
   
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isAiMode, setIsAiMode] = useState(isAiParam);
+  const [aiQuery, setAiQuery] = useState(isAiParam ? query : '');
+  const [aiSearched, setAiSearched] = useState(false);
+  const aiInputRef = useRef(null);
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+  const { isLoggedIn, token } = useAuth();
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [likedSearches, setLikedSearches] = useState([]);
+
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
+
+  const fetchHistory = async () => {
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const recentRes = await fetch(`${API_BASE}/movies/recent-searches?visitorId=${visitorId}`, { headers });
+      if (recentRes.ok) {
+        const recentData = await recentRes.json();
+        setRecentSearches(recentData);
+      }
+      
+      const likedRes = await fetch(`${API_BASE}/movies/liked-searches?visitorId=${visitorId}`, { headers });
+      if (likedRes.ok) {
+        const likedData = await likedRes.json();
+        setLikedSearches(likedData);
+      }
+    } catch (err) {
+      console.error('Failed to fetch search history:', err);
+    }
+  };
 
   useEffect(() => {
+    fetchHistory();
+  }, [query, isLoggedIn, token]);
+
+  const handleLikeSearch = async (e, q, isAlreadyLiked) => {
+    e.stopPropagation();
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+      
+      const endpoint = `${API_BASE}/movies/like-search`;
+      const method = isAlreadyLiked ? 'DELETE' : 'POST';
+      const res = await fetch(endpoint, {
+        method,
+        headers,
+        body: JSON.stringify({ query: q, visitorId })
+      });
+      
+      if (res.ok) {
+        fetchHistory();
+      }
+    } catch (err) {
+      console.error('Failed to toggle like on search:', err);
+    }
+  };
+
+  const handleDeleteRecentSearch = async (e, q) => {
+    e.stopPropagation();
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+      
+      const res = await fetch(`${API_BASE}/movies/recent-searches`, {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ query: q, visitorId })
+      });
+      
+      if (res.ok) {
+        fetchHistory();
+      }
+    } catch (err) {
+      console.error('Failed to delete recent search:', err);
+    }
+  };
+
+  const handleClearHistory = async () => {
+    if (!window.confirm('Are you sure you want to clear your entire search history?')) return;
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      };
+      
+      const res = await fetch(`${API_BASE}/movies/recent-searches/clear`, {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ visitorId })
+      });
+      
+      if (res.ok) {
+        fetchHistory();
+      }
+    } catch (err) {
+      console.error('Failed to clear search history:', err);
+    }
+  };
+
+  const handleSearchClick = (q) => {
+    if (isAiMode) {
+      setAiQuery(q);
+      handleAiSearch(q);
+    } else {
+      navigate(`/search?q=${encodeURIComponent(q)}`);
+    }
+  };
+
+  // Normal search
+  useEffect(() => {
+    if (isAiMode) return; // AI mode has its own logic
     const fetchResults = async () => {
       setLoading(true);
       try {
         const visitorId = localStorage.getItem('trackingVisitorId') || '';
-        
-        let endpoint = '';
-        if (query.trim()) {
-          // If keyword exists, use search
-          endpoint = `${API_BASE}/movies/search?query=${query}&visitorId=${visitorId}`;
-        } else {
-          // If no keyword, use discover with filters
-          endpoint = `${API_BASE}/movies/discover?type=${filterType}&genre=${filterGenre}&lang=${filterLang}`;
-        }
-
+        let endpoint = query.trim()
+          ? `${API_BASE}/movies/search?query=${encodeURIComponent(query)}&visitorId=${visitorId}`
+          : `${API_BASE}/movies/discover?type=${filterType}&genre=${filterGenre}&lang=${filterLang}`;
         const res = await fetch(endpoint);
         const data = await res.json();
         setResults(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error("Error searching:", error);
         setResults([]);
       }
       setLoading(false);
     };
-
     fetchResults();
-  }, [query, filterType, filterGenre, filterLang]);
+  }, [query, filterType, filterGenre, filterLang, isAiMode]);
+
+  // When switching to AI mode, focus the input
+  useEffect(() => {
+    if (isAiMode && aiInputRef.current) {
+      aiInputRef.current.focus();
+    }
+    if (!isAiMode) {
+      setAiSearched(false);
+      setAiQuery('');
+    }
+  }, [isAiMode]);
+
+  const handleAiSearch = async (overrideQuery = aiQuery) => {
+    // If called from onClick, overrideQuery is a MouseEvent, so fallback to aiQuery
+    const queryToUse = typeof overrideQuery === 'string' ? overrideQuery : aiQuery;
+    if (!queryToUse.trim()) return;
+    setLoading(true);
+    setAiSearched(true);
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const res = await fetch(`${API_BASE}/movies/ai-search?query=${encodeURIComponent(queryToUse)}&visitorId=${visitorId}`);
+      const data = await res.json();
+      setResults(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setResults([]);
+    }
+    setLoading(false);
+  };
+
+  // Trigger search on mount if ai=1 and query exists
+  useEffect(() => {
+    if (isAiParam && query) {
+      handleAiSearch(query);
+    }
+  }, [searchParams]);
+
+  const handleAiKeyDown = (e) => {
+    if (e.key === 'Enter') handleAiSearch(aiQuery);
+  };
+
+  const handleExampleClick = (example) => {
+    setAiQuery(example);
+    // Directly pass the example string to bypass state update delays
+    handleAiSearch(example);
+  };
 
   return (
     <div className={styles.searchPage}>
       <SEO 
         title={query ? `Search results for "${query}"` : `Explore ${filterType === 'Movie' ? 'Movies' : 'TV Series'}`}
-        description={`Find and download the best ${filterType === 'Movie' ? 'movies' : 'TV shows'} matching your search on AuraWatch.`}
+        description={`Find the best movies and TV shows on AuraWatch.`}
       />
-      <div className={styles.searchHeader}>
-        {query ? (
-          <h1 className={styles.searchTitle}>
-            Results for <span className={styles.query}>"{query}"</span>
-          </h1>
-        ) : (
-          <h1 className={styles.searchTitle}>
-            Exploring <span className={styles.query}>{filterType === 'Movie' ? 'Movies' : 'TV Series'}</span>
-          </h1>
-        )}
+
+      {/* Mode Toggle Bar */}
+      <div className={styles.modeBar}>
+        <button
+          className={`${styles.modeBtn} ${!isAiMode ? styles.modeBtnActive : ''}`}
+          onClick={() => setIsAiMode(false)}
+        >
+          🔍 Normal Search
+        </button>
+        <button
+          className={`${styles.modeBtn} ${isAiMode ? styles.modeBtnAiActive : ''}`}
+          onClick={() => setIsAiMode(true)}
+        >
+          🪄 AI Smart Search
+        </button>
       </div>
 
-      {loading ? (
-        <div style={{color: 'white'}}>Searching...</div>
-      ) : results.length > 0 ? (
-        <div className={styles.grid}>
-          {results.map((movie, idx) => (
-            <Link 
-              to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`} 
-              key={`${movie.id}-${idx}`} 
-              className={homeStyles.cardContainer} 
-              style={{flex: 'none', width: '100%', display: 'block', touchAction: 'manipulation'}}
-            >
-              <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
-            </Link>
-          ))}
+      {/* AI Mode Panel */}
+      {isAiMode ? (
+        <div className={styles.aiPanelWrapper}>
+          {/* Decorative Background Glows */}
+          <div className={styles.aiGlow1}></div>
+          <div className={styles.aiGlow2}></div>
+          
+          <div className={styles.aiPanel}>
+            <div className={styles.aiHeader}>
+              <div className={styles.aiIconWrapper}>
+                <span className={styles.sparkleIcon}>✨</span>
+              </div>
+              <h1 className={styles.aiTitle}>AI Smart Search</h1>
+              <p className={styles.aiSubtitle}>
+                Can't remember the exact name? Just <strong>describe the plot</strong> and let AI find it for you!
+              </p>
+            </div>
+
+            <div className={styles.aiInputContainer}>
+              <div className={styles.aiInputWrapper}>
+                <span className={styles.aiInputIcon}>🪄</span>
+                <input
+                  ref={aiInputRef}
+                  type="text"
+                  className={styles.aiInput}
+                  placeholder='Try: "movie where a boy discovers he is a wizard"'
+                  value={aiQuery}
+                  onChange={(e) => setAiQuery(e.target.value)}
+                  onKeyDown={handleAiKeyDown}
+                />
+              </div>
+              <button
+                className={`${styles.aiSearchBtn} ${loading ? styles.aiSearchBtnLoading : ''}`}
+                onClick={handleAiSearch}
+                disabled={loading || !aiQuery.trim()}
+              >
+                {loading ? (
+                  <span className={styles.btnContent}>
+                    <div className={styles.miniSpinner}></div>
+                    Thinking
+                  </span>
+                ) : (
+                  <span className={styles.btnContent}>Search ✨</span>
+                )}
+              </button>
+            </div>
+
+          {/* History Dashboard inside AI Panel */}
+          {!aiSearched && (recentSearches.length > 0 || likedSearches.length > 0) && (
+            <div className={`${styles.historyDashboard} ${styles.aiHistoryDashboard}`}>
+              {recentSearches.length > 0 && (
+                <div className={styles.historySection}>
+                  <div className={styles.sectionHeader}>
+                    <h2 className={styles.aiHistoryTitle}><Clock size={15} style={{ marginRight: '6px' }} /> Recent AI Searches</h2>
+                    <button className={styles.clearBtn} onClick={handleClearHistory}>
+                      <Trash2 size={13} style={{ marginRight: '4px' }} /> Clear
+                    </button>
+                  </div>
+                  <div className={styles.chipList}>
+                    {recentSearches.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className={`${styles.searchChip} ${styles.aiSearchChip}`}
+                        onClick={() => handleSearchClick(item.query)}
+                      >
+                        <span className={styles.chipText}>{item.query}</span>
+                        <div className={styles.chipActions}>
+                          <button
+                            className={`${styles.actionBtn} ${item.is_liked ? styles.liked : ''}`}
+                            onClick={(e) => handleLikeSearch(e, item.query, item.is_liked)}
+                          >
+                            <Heart size={12} fill={item.is_liked ? '#ec4899' : 'none'} color={item.is_liked ? '#ec4899' : '#aaa'} />
+                          </button>
+                          <button
+                            className={styles.actionBtn}
+                            onClick={(e) => handleDeleteRecentSearch(e, item.query)}
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Example prompts */}
+          {!aiSearched && (
+            <div className={styles.examplesSection}>
+              <p className={styles.examplesLabel}>Try these:</p>
+              <div className={styles.exampleChips}>
+                {AI_EXAMPLES.map((ex, i) => (
+                  <button key={i} className={styles.exampleChip} onClick={() => handleExampleClick(ex)}>
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* AI Results */}
+          <div className={styles.aiResultsSection}>
+            {loading ? (
+              <div className={styles.aiThinkingPremium}>
+                <div className={styles.aiScanner}></div>
+                <div className={styles.aiSpinnerPremium}></div>
+                <span>Scanning the multiverse for your movie...</span>
+              </div>
+            ) : aiSearched && results.length > 0 ? (
+              <div className={styles.aiResultsFadeIn}>
+                <div className={styles.aiResultHeader}>
+                  <span className={styles.aiResultIcon}>🎯</span>
+                  <p className={styles.aiResultLabel}>
+                    AI found these matches for: <em>"{aiQuery}"</em>
+                  </p>
+                </div>
+                <div className={styles.grid}>
+                  {results.map((movie, idx) => (
+                    <Link
+                      to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`}
+                      key={`${movie.id}-${idx}`}
+                      className={homeStyles.cardContainer}
+                      style={{ flex: 'none', width: '100%', display: 'block', touchAction: 'manipulation' }}
+                    >
+                      <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : aiSearched && !loading ? (
+              <div className={styles.noResultsPremium}>
+                <div className={styles.noResultsIcon}>🛸</div>
+                <h3>Lost in Space</h3>
+                <p>No results found. Try a different description!</p>
+              </div>
+            ) : null}
+          </div>
+        </div>
         </div>
       ) : (
-        query && <div className={styles.noResults}>No results found for "{query}". Try a different keyword.</div>
+        /* Normal Search Results */
+        <>
+          <div className={styles.searchHeader}>
+            {query ? (
+              <h1 className={styles.searchTitle}>
+                Results for <span className={styles.query}>"{query}"</span>
+              </h1>
+            ) : (
+              <h1 className={styles.searchTitle}>
+                Exploring <span className={styles.query}>{filterType === 'Movie' ? 'Movies' : 'TV Series'}</span>
+              </h1>
+            )}
+          </div>
+
+          {/* History & Liked Searches Dashboard */}
+          {!query && (recentSearches.length > 0 || likedSearches.length > 0) && (
+            <div className={styles.historyDashboard}>
+              {recentSearches.length > 0 && (
+                <div className={styles.historySection}>
+                  <div className={styles.sectionHeader}>
+                    <h2><Clock size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Recent Searches</h2>
+                    <button className={styles.clearBtn} onClick={handleClearHistory}>
+                      <Trash2 size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Clear History
+                    </button>
+                  </div>
+                  <div className={styles.chipList}>
+                    {recentSearches.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className={styles.searchChip}
+                        onClick={() => handleSearchClick(item.query)}
+                      >
+                        <span className={styles.chipText}>{item.query}</span>
+                        <div className={styles.chipActions}>
+                          <button
+                            className={`${styles.actionBtn} ${item.is_liked ? styles.liked : ''}`}
+                            onClick={(e) => handleLikeSearch(e, item.query, item.is_liked)}
+                            title={item.is_liked ? 'Unlike search' : 'Like search'}
+                          >
+                            <Heart size={13} fill={item.is_liked ? '#e50914' : 'none'} color={item.is_liked ? '#e50914' : '#aaa'} />
+                          </button>
+                          <button
+                            className={styles.actionBtn}
+                            onClick={(e) => handleDeleteRecentSearch(e, item.query)}
+                            title="Remove from history"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {likedSearches.length > 0 && (
+                <div className={styles.historySection}>
+                  <div className={styles.sectionHeader}>
+                    <h2><Heart size={16} fill="#e50914" color="#e50914" style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Liked Searches</h2>
+                  </div>
+                  <div className={styles.chipList}>
+                    {likedSearches.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className={`${styles.searchChip} ${styles.likedChip}`}
+                        onClick={() => handleSearchClick(item.query)}
+                      >
+                        <span className={styles.chipText}>{item.query}</span>
+                        <button
+                          className={`${styles.actionBtn} ${styles.liked}`}
+                          onClick={(e) => handleLikeSearch(e, item.query, true)}
+                          title="Unlike search"
+                        >
+                          <Heart size={13} fill="#e50914" color="#e50914" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {loading ? (
+            <div style={{ color: 'white', textAlign: 'center', marginTop: '40px', fontSize: '18px' }}>Searching...</div>
+          ) : results.length > 0 ? (
+            <div className={styles.grid}>
+              {results.map((movie, idx) => (
+                <Link
+                  to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`}
+                  key={`${movie.id}-${idx}`}
+                  className={homeStyles.cardContainer}
+                  style={{ flex: 'none', width: '100%', display: 'block', touchAction: 'manipulation' }}
+                >
+                  <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
+                </Link>
+              ))}
+            </div>
+          ) : (
+            query && <div className={styles.noResults}>No results found for "{query}". Try a different keyword.</div>
+          )}
+        </>
       )}
     </div>
   );

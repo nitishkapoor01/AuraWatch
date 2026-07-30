@@ -156,7 +156,7 @@ router.post('/movie', async (req, res) => {
         // ── STEP 4: Log Search ──────────────────────────────────────────
         try {
             await db.query(
-                "INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)",
+                "INSERT INTO search_logs (query, success, visitor_id) VALUES ($1, $2, $3)",
                 [title.trim().toLowerCase(), true, visitorId || null]
             );
         } catch (logError) {

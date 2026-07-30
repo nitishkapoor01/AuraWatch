@@ -20,6 +20,24 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // { id, email, name }
+  } catch (error) {
+    // Ignore invalid/expired tokens for optional endpoints
+  }
+  next();
+};
+
 const isAdmin = async (req, res, next) => {
   const db = require('../db');
   try {
@@ -50,4 +68,4 @@ const isModerator = async (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, isAdmin, isModerator };
+module.exports = { authMiddleware, isAdmin, isModerator, optionalAuth };

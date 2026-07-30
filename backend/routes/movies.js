@@ -1,6 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const Groq = require('groq-sdk');
+const { optionalAuth } = require('../middleware/auth');
+
+const GROQ_API_KEYS = Object.keys(process.env)
+  .filter(key => key.startsWith('GROQ_API_KEY_'))
+  .map(key => process.env[key])
+  .filter(Boolean);
+
+if (GROQ_API_KEYS.length === 0 && process.env.GROQ_API_KEY) {
+  GROQ_API_KEYS.push(process.env.GROQ_API_KEY);
+}
+
+let currentGroqIndex = 0;
+
+const getGroqClient = () => {
+  if (GROQ_API_KEYS.length === 0) return null;
+  const key = GROQ_API_KEYS[currentGroqIndex];
+  currentGroqIndex = (currentGroqIndex + 1) % GROQ_API_KEYS.length;
+  return new Groq({ apiKey: key });
+};
 
 const API_KEYS = Object.keys(process.env)
   .filter(key => key.startsWith('TMDB_API_KEY_'))
@@ -150,20 +170,123 @@ router.get('/new-this-week', async (req, res) => {
   } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
-router.get('/search', async (req, res) => {
+// Fast suggestions endpoint — sirf 1 page, navbar ke liye
+router.get('/suggestions', async (req, res) => {
+  const { query } = req.query;
+  if (!query || !query.trim()) return res.json([]);
+  try {
+    const url = `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}&page=1`;
+    const data = await fetchAndFormat(url, null);
+    res.json(Array.isArray(data) ? data.slice(0, 6) : []);
+  } catch (e) { res.status(500).json([]); }
+});
+
+router.get('/search', optionalAuth, async (req, res) => {
   const { query, visitorId } = req.query;
+  const userId = req.user ? req.user.id : null;
   try {
     let data = [];
     if (query && query.trim()) {
       const urlBuilder = (page) => `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}&page=${page}`;
       data = await fetchMultiPages(urlBuilder, null, 4);
-      try { await db.query("INSERT INTO search_logs (query, has_results, visitor_id) VALUES ($1, $2, $3)", [query.trim().toLowerCase(), data.length > 0, visitorId || null]); } catch (l) {}
+      try {
+        await db.query(
+          "INSERT INTO search_logs (query, success, has_results, visitor_id, user_id) VALUES ($1, $2, $3, $4, $5)",
+          [query.trim().toLowerCase(), data.length > 0, data.length > 0, visitorId || null, userId]
+        );
+      } catch (l) {
+        console.error('[Search Logging Failed]:', l);
+      }
     } else {
       const urlBuilder = (page) => `${TMDB_BASE_URL}/trending/all/day?api_key=${getApiKey()}&page=${page}`;
       data = await fetchMultiPages(urlBuilder, null, 4);
     }
     res.json(data);
   } catch (error) { res.status(500).json({ message: 'Error' }); }
+});
+
+router.get('/ai-search', optionalAuth, async (req, res) => {
+  const { query, visitorId } = req.query;
+  const userId = req.user ? req.user.id : null;
+  if (!query || !query.trim()) return res.json([]);
+
+  const cleanQuery = query.trim().toLowerCase();
+  
+  try {
+    const cacheResult = await db.query("SELECT results FROM ai_search_cache WHERE query = $1", [cleanQuery]);
+    if (cacheResult.rows.length > 0) {
+      try {
+        await db.query(
+          "INSERT INTO search_logs (query, success, has_results, visitor_id, user_id) VALUES ($1, $2, $3, $4, $5)",
+          ['[AI Cache] ' + cleanQuery, true, true, visitorId || null, userId]
+        );
+      } catch (l) {}
+      return res.json(cacheResult.rows[0].results);
+    }
+
+    const groq = getGroqClient();
+    if (!groq) throw new Error("No Groq API keys available");
+
+    const prompt = `You are a movie and TV show search assistant. The user is looking for a movie or TV series based on this description: "${query}".
+Return a JSON array of up to 6 exact titles (strings) that match this description. Focus on the most popular and relevant ones.
+Format must be exactly like this: ["Title 1", "Title 2", "Title 3"]
+Return ONLY the JSON array. Do not include markdown code blocks, do not say "Here is the list". Just the raw JSON array.`;
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.1-8b-instant',
+      temperature: 0.2,
+    });
+
+    const aiResponse = chatCompletion.choices[0]?.message?.content || '[]';
+    const titles = JSON.parse(aiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
+
+    if (!Array.isArray(titles) || titles.length === 0) {
+      throw new Error("No valid titles returned by AI");
+    }
+
+    // Parallel TMDB calls for all titles at once - much faster!
+    const searchPromises = titles.map(title => 
+      fetchAndFormat(
+        `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(title)}&page=1`,
+        null
+      ).catch(() => null)
+    );
+    const searchResults = await Promise.all(searchPromises);
+
+    let data = [];
+    for (const result of searchResults) {
+      if (Array.isArray(result) && result.length > 0) {
+        data.push(result[0]);
+      } else if (result && result.id) {
+        data.push(result);
+      }
+    }
+
+    const unique = Array.from(new Map(data.map(item => [item.id, item])).values());
+
+    if (unique.length > 0) {
+      try {
+        await db.query("INSERT INTO ai_search_cache (query, results) VALUES ($1, $2) ON CONFLICT (query) DO NOTHING", [cleanQuery, JSON.stringify(unique)]);
+        await db.query(
+          "INSERT INTO search_logs (query, success, has_results, visitor_id, user_id) VALUES ($1, $2, $3, $4, $5)",
+          ['[AI Groq] ' + cleanQuery, true, true, visitorId || null, userId]
+        );
+      } catch (err) {}
+    }
+
+    res.json(unique);
+
+  } catch (error) {
+    console.error("[AI Search Error]:", error);
+    try {
+      const urlBuilder = (page) => `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}&page=${page}`;
+      const fallbackData = await fetchMultiPages(urlBuilder, null, 4);
+      res.json(fallbackData);
+    } catch (fallbackError) {
+      res.status(500).json({ message: 'Error' });
+    }
+  }
 });
 
 router.get('/discover', async (req, res) => {
@@ -209,6 +332,183 @@ router.get('/k-drama', async (req, res) => {
   try { res.json(await fetchAndFormat(`${TMDB_BASE_URL}/discover/tv?api_key=${getApiKey()}&with_original_language=ko&sort_by=popularity.desc&page=${req.query.page || 1}`, 'tv')); } catch (e) { res.status(500).json({ message: 'Error' }); }
 });
 
+// --- SEARCH HISTORY & LIKED SEARCHES ENDPOINTS ---
+// IMPORTANT: These must be defined BEFORE the /:id catch-all route
+
+router.get('/recent-searches', optionalAuth, async (req, res) => {
+  const visitorId = req.query.visitorId || null;
+  const userId = req.user ? req.user.id : null;
+
+  if (!visitorId && !userId) {
+    return res.json([]);
+  }
+
+  try {
+    const result = await db.query(
+      `SELECT query, MAX(created_at) as last_searched
+       FROM search_logs
+       WHERE visitor_id = $1 OR (user_id = $2 AND user_id IS NOT NULL)
+       GROUP BY query
+       ORDER BY last_searched DESC`,
+      [visitorId, userId]
+    );
+
+    const likedRes = await db.query(
+      `SELECT query FROM liked_searches
+       WHERE visitor_id = $1 OR (user_id = $2 AND user_id IS NOT NULL)`,
+      [visitorId, userId]
+    );
+    const likedQueries = new Set(likedRes.rows.map(r => r.query.toLowerCase().trim()));
+
+    const recentMap = new Map();
+    for (const row of result.rows) {
+      const cleanQ = row.query.replace(/^\[AI (Cache|Groq|Search Error|Groq Error)\]\s*/i, '').trim();
+      if (cleanQ && !recentMap.has(cleanQ)) {
+        recentMap.set(cleanQ, row.last_searched);
+      }
+    }
+
+    const recentSearches = Array.from(recentMap.entries()).map(([query, last_searched]) => ({
+      query,
+      last_searched,
+      is_liked: likedQueries.has(query.toLowerCase().trim())
+    })).slice(0, 10);
+
+    res.json(recentSearches);
+  } catch (error) {
+    console.error('[Get Recent Searches Error]:', error);
+    res.status(500).json({ error: 'Failed to fetch recent searches' });
+  }
+});
+
+router.get('/liked-searches', optionalAuth, async (req, res) => {
+  const visitorId = req.query.visitorId || null;
+  const userId = req.user ? req.user.id : null;
+
+  if (!visitorId && !userId) {
+    return res.json([]);
+  }
+
+  try {
+    const result = await db.query(
+      `SELECT DISTINCT query, created_at
+       FROM liked_searches
+       WHERE visitor_id = $1 OR (user_id = $2 AND user_id IS NOT NULL)
+       ORDER BY created_at DESC`,
+      [visitorId, userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('[Get Liked Searches Error]:', error);
+    res.status(500).json({ error: 'Failed to fetch liked searches' });
+  }
+});
+
+router.post('/like-search', optionalAuth, async (req, res) => {
+  const { query, visitorId } = req.body;
+  const userId = req.user ? req.user.id : null;
+
+  if (!query || !query.trim()) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+  const cleanQ = query.trim().toLowerCase();
+
+  try {
+    const checkRes = await db.query(
+      'SELECT id FROM liked_searches WHERE LOWER(query) = $1 AND (visitor_id = $2 OR (user_id = $3 AND user_id IS NOT NULL))',
+      [cleanQ, visitorId || null, userId]
+    );
+
+    if (checkRes.rows.length === 0) {
+      await db.query(
+        'INSERT INTO liked_searches (query, visitor_id, user_id) VALUES ($1, $2, $3)',
+        [query.trim(), visitorId || null, userId]
+      );
+    } else if (userId) {
+      await db.query(
+        'UPDATE liked_searches SET user_id = $1 WHERE LOWER(query) = $2 AND (visitor_id = $3 OR user_id = $1)',
+        [userId, cleanQ, visitorId || null]
+      );
+    }
+
+    res.status(201).json({ success: true, message: 'Search liked!' });
+  } catch (error) {
+    console.error('[Like Search Error]:', error);
+    res.status(500).json({ error: 'Failed to like search' });
+  }
+});
+
+router.delete('/like-search', optionalAuth, async (req, res) => {
+  const { query, visitorId } = req.body;
+  const userId = req.user ? req.user.id : null;
+  const queryToUse = query || req.query.query;
+  const visitorIdToUse = visitorId || req.query.visitorId;
+
+  if (!queryToUse || !queryToUse.trim()) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+  const cleanQ = queryToUse.trim().toLowerCase();
+
+  try {
+    await db.query(
+      'DELETE FROM liked_searches WHERE LOWER(query) = $1 AND (visitor_id = $2 OR (user_id = $3 AND user_id IS NOT NULL))',
+      [cleanQ, visitorIdToUse || null, userId]
+    );
+    res.json({ success: true, message: 'Search unliked' });
+  } catch (error) {
+    console.error('[Unlike Search Error]:', error);
+    res.status(500).json({ error: 'Failed to unlike search' });
+  }
+});
+
+router.delete('/recent-searches/clear', optionalAuth, async (req, res) => {
+  const visitorId = req.body.visitorId || req.query.visitorId;
+  const userId = req.user ? req.user.id : null;
+
+  if (!visitorId && !userId) {
+    return res.status(400).json({ error: 'VisitorId or Auth Token is required' });
+  }
+
+  try {
+    await db.query(
+      'DELETE FROM search_logs WHERE visitor_id = $1 OR (user_id = $2 AND user_id IS NOT NULL)',
+      [visitorId || null, userId]
+    );
+    res.json({ success: true, message: 'Search history cleared' });
+  } catch (error) {
+    console.error('[Clear Recent Searches Error]:', error);
+    res.status(500).json({ error: 'Failed to clear search history' });
+  }
+});
+
+router.delete('/recent-searches', optionalAuth, async (req, res) => {
+  const { query, visitorId } = req.body;
+  const userId = req.user ? req.user.id : null;
+  const queryToUse = query || req.query.query;
+  const visitorIdToUse = visitorId || req.query.visitorId;
+
+  if (!queryToUse || !queryToUse.trim()) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+  const cleanQ = queryToUse.trim().toLowerCase();
+
+  try {
+    await db.query(
+      `DELETE FROM search_logs
+       WHERE (LOWER(query) = $1
+              OR LOWER(query) = '[ai cache] ' || $1
+              OR LOWER(query) = '[ai groq] ' || $1
+              OR LOWER(query) = '[ai search error] ' || $1
+              OR LOWER(query) = '[ai groq error] ' || $1)
+       AND (visitor_id = $2 OR (user_id = $3 AND user_id IS NOT NULL))`,
+      [cleanQ, visitorIdToUse || null, userId]
+    );
+    res.json({ success: true, message: 'Recent search deleted' });
+  } catch (error) {
+    console.error('[Delete Recent Search Error]:', error);
+    res.status(500).json({ error: 'Failed to delete recent search' });
+  }
+});
 
 // --- DETAILS & TV ENDPOINTS ---
 router.get('/:id/videos', async (req, res) => {
