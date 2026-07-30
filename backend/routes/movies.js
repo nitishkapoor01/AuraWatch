@@ -1,26 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const Groq = require('groq-sdk');
 const { optionalAuth } = require('../middleware/auth');
-
-const GROQ_API_KEYS = Object.keys(process.env)
-  .filter(key => key.startsWith('GROQ_API_KEY_'))
-  .map(key => process.env[key])
-  .filter(Boolean);
-
-if (GROQ_API_KEYS.length === 0 && process.env.GROQ_API_KEY) {
-  GROQ_API_KEYS.push(process.env.GROQ_API_KEY);
-}
-
-let currentGroqIndex = 0;
-
-const getGroqClient = () => {
-  if (GROQ_API_KEYS.length === 0) return null;
-  const key = GROQ_API_KEYS[currentGroqIndex];
-  currentGroqIndex = (currentGroqIndex + 1) % GROQ_API_KEYS.length;
-  return new Groq({ apiKey: key });
-};
 
 const API_KEYS = Object.keys(process.env)
   .filter(key => key.startsWith('TMDB_API_KEY_'))
@@ -205,89 +186,6 @@ router.get('/search', optionalAuth, async (req, res) => {
   } catch (error) { res.status(500).json({ message: 'Error' }); }
 });
 
-router.get('/ai-search', optionalAuth, async (req, res) => {
-  const { query, visitorId } = req.query;
-  const userId = req.user ? req.user.id : null;
-  if (!query || !query.trim()) return res.json([]);
-
-  const cleanQuery = query.trim().toLowerCase();
-  
-  try {
-    const cacheResult = await db.query("SELECT results FROM ai_search_cache WHERE query = $1", [cleanQuery]);
-    if (cacheResult.rows.length > 0) {
-      try {
-        await db.query(
-          "INSERT INTO search_logs (query, success, has_results, visitor_id, user_id) VALUES ($1, $2, $3, $4, $5)",
-          ['[AI Cache] ' + cleanQuery, true, true, visitorId || null, userId]
-        );
-      } catch (l) {}
-      return res.json(cacheResult.rows[0].results);
-    }
-
-    const groq = getGroqClient();
-    if (!groq) throw new Error("No Groq API keys available");
-
-    const prompt = `You are a movie and TV show search assistant. The user is looking for a movie or TV series based on this description: "${query}".
-Return a JSON array of up to 6 exact titles (strings) that match this description. Focus on the most popular and relevant ones.
-Format must be exactly like this: ["Title 1", "Title 2", "Title 3"]
-Return ONLY the JSON array. Do not include markdown code blocks, do not say "Here is the list". Just the raw JSON array.`;
-
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [{ role: 'user', content: prompt }],
-      model: 'llama-3.1-8b-instant',
-      temperature: 0.2,
-    });
-
-    const aiResponse = chatCompletion.choices[0]?.message?.content || '[]';
-    const titles = JSON.parse(aiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
-
-    if (!Array.isArray(titles) || titles.length === 0) {
-      throw new Error("No valid titles returned by AI");
-    }
-
-    // Parallel TMDB calls for all titles at once - much faster!
-    const searchPromises = titles.map(title => 
-      fetchAndFormat(
-        `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(title)}&page=1`,
-        null
-      ).catch(() => null)
-    );
-    const searchResults = await Promise.all(searchPromises);
-
-    let data = [];
-    for (const result of searchResults) {
-      if (Array.isArray(result) && result.length > 0) {
-        data.push(result[0]);
-      } else if (result && result.id) {
-        data.push(result);
-      }
-    }
-
-    const unique = Array.from(new Map(data.map(item => [item.id, item])).values());
-
-    if (unique.length > 0) {
-      try {
-        await db.query("INSERT INTO ai_search_cache (query, results) VALUES ($1, $2) ON CONFLICT (query) DO NOTHING", [cleanQuery, JSON.stringify(unique)]);
-        await db.query(
-          "INSERT INTO search_logs (query, success, has_results, visitor_id, user_id) VALUES ($1, $2, $3, $4, $5)",
-          ['[AI Groq] ' + cleanQuery, true, true, visitorId || null, userId]
-        );
-      } catch (err) {}
-    }
-
-    res.json(unique);
-
-  } catch (error) {
-    console.error("[AI Search Error]:", error);
-    try {
-      const urlBuilder = (page) => `${TMDB_BASE_URL}/search/multi?api_key=${getApiKey()}&query=${encodeURIComponent(query)}&page=${page}`;
-      const fallbackData = await fetchMultiPages(urlBuilder, null, 4);
-      res.json(fallbackData);
-    } catch (fallbackError) {
-      res.status(500).json({ message: 'Error' });
-    }
-  }
-});
 
 router.get('/discover', async (req, res) => {
   const { type, genre, lang } = req.query;
