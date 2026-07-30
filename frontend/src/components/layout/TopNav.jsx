@@ -161,8 +161,12 @@ const TopNav = () => {
   useEffect(() => {
     if (location.pathname === '/') {
       setQuery('');
+    } else if (location.pathname === '/search') {
+      const params = new URLSearchParams(location.search);
+      const urlQuery = params.get('q') || '';
+      setQuery(urlQuery);
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     if (query.trim().length > 1) {
@@ -371,12 +375,7 @@ const TopNav = () => {
                       onClick={() => {
                         setIsFocused(false);
                         setIsMobileSearchOpen(false);
-                        setQuery('');
-                        if (isAiSearch) {
-                          navigate(`/search?q=${encodeURIComponent(item.query)}&ai=1`);
-                        } else {
-                          navigate(`/search?q=${encodeURIComponent(item.query)}`);
-                        }
+                        navigate(`/search?q=${encodeURIComponent(item.query)}`);
                       }}
                       className={styles.dropdownHistoryItem}
                     >
@@ -408,12 +407,7 @@ const TopNav = () => {
                       onClick={() => {
                         setIsFocused(false);
                         setIsMobileSearchOpen(false);
-                        setQuery('');
-                        if (isAiSearch) {
-                          navigate(`/search?q=${encodeURIComponent(item.query)}&ai=1`);
-                        } else {
-                          navigate(`/search?q=${encodeURIComponent(item.query)}`);
-                        }
+                        navigate(`/search?q=${encodeURIComponent(item.query)}`);
                       }}
                       className={styles.dropdownHistoryItem}
                     >
