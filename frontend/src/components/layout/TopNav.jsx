@@ -25,7 +25,6 @@ const AVATARS = [
 
 const TopNav = () => {
   const [query, setQuery] = useState('');
-  const [isAiSearch, setIsAiSearch] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -197,11 +196,7 @@ const TopNav = () => {
       setIsFocused(false);
       setSuggestions([]);
       setIsMobileSearchOpen(false);
-      if (isAiSearch) {
-        navigate(`/search?q=${encodeURIComponent(query)}&ai=1`);
-      } else {
-        navigate(`/search?q=${encodeURIComponent(query)}`);
-      }
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
@@ -313,7 +308,7 @@ const TopNav = () => {
             )}
           </div>
 
-          <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''} ${isAiSearch ? styles.aiMode : ''}`}>
+          <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`}>
             <button 
               className={styles.mobileSearchBtn} 
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
@@ -323,7 +318,7 @@ const TopNav = () => {
             <Search size={18} className={styles.searchIcon} />
             <input 
               type="text" 
-              placeholder={isAiSearch ? '🪄 Describe what you want to watch...' : 'Search movies, shows...'} 
+              placeholder="Search movies, shows..." 
               className={styles.searchInput}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -331,13 +326,6 @@ const TopNav = () => {
               onBlur={() => setTimeout(() => setIsFocused(false), 400)}
               onKeyDown={handleKeyDown}
             />
-            <button
-              className={`${styles.aiToggleBtn} ${isAiSearch ? styles.aiToggleBtnActive : ''}`}
-              onClick={() => setIsAiSearch(p => !p)}
-              title={isAiSearch ? 'AI Search ON — Click to switch to Normal' : 'Click to enable AI Smart Search'}
-            >
-              🪄
-            </button>
           </div>
           
           {isFocused && suggestions.length > 0 && (
