@@ -16,6 +16,51 @@ const GlobalPlayer = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
+  const [isInactive, setIsInactive] = useState(false);
+  const inactivityTimeoutRef = useRef(null);
+
+  // Mouse cursor and controls auto-hide after 3 seconds of inactivity
+  useEffect(() => {
+    if (!isOpen || isSticky) {
+      setIsInactive(false);
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current);
+      }
+      return;
+    }
+
+    const resetInactivityTimer = () => {
+      setIsInactive(false);
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current);
+      }
+      inactivityTimeoutRef.current = setTimeout(() => {
+        setIsInactive(true);
+      }, 3000);
+    };
+
+    resetInactivityTimer();
+
+    const handleActivity = () => {
+      resetInactivityTimer();
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('mousedown', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('touchstart', handleActivity);
+
+    return () => {
+      if (inactivityTimeoutRef.current) {
+        clearTimeout(inactivityTimeoutRef.current);
+      }
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('mousedown', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+    };
+  }, [isOpen, isSticky]);
+
   // Watch route changes. If playing and we leave the movie page, force sticky
   useEffect(() => {
     if (isOpen && movieData) {
@@ -218,13 +263,16 @@ const GlobalPlayer = () => {
 
   return (
     <div 
-      className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''}`}
+      className={`${styles.trailerModal} ${isSticky ? styles.stickyPlayer : ''} ${(!isSticky && isInactive) ? styles.hideCursor : ''}`}
       style={isSticky ? { 
         transform: `translate(${position.x}px, ${position.y}px)`,
         animation: (isDragging || position.x !== 0 || position.y !== 0) ? 'none' : undefined
       } : {}}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
+      onMouseMove={() => {
+        if (isInactive) setIsInactive(false);
+      }}
     >
       <button 
         className={styles.closeTrailerBtn} 
@@ -242,6 +290,14 @@ const GlobalPlayer = () => {
       </div>
       
       {isSticky && <div className={styles.dragOverlay}></div>}
+
+      {!isSticky && isInactive && (
+        <div 
+          className={styles.inactivityOverlay}
+          onMouseMove={() => setIsInactive(false)}
+          onClick={() => setIsInactive(false)}
+        />
+      )}
       
       <iframe
         id="screenscape-player"

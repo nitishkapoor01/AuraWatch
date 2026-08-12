@@ -71,6 +71,41 @@ const MovieDetail = () => {
   const [loading, setLoading] = useState(true);
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState(null);
+  const [trailerInactive, setTrailerInactive] = useState(false);
+  const trailerTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    if (!showTrailer) {
+      setTrailerInactive(false);
+      if (trailerTimeoutRef.current) clearTimeout(trailerTimeoutRef.current);
+      return;
+    }
+
+    const resetTimer = () => {
+      setTrailerInactive(false);
+      if (trailerTimeoutRef.current) clearTimeout(trailerTimeoutRef.current);
+      trailerTimeoutRef.current = setTimeout(() => {
+        setTrailerInactive(true);
+      }, 3000);
+    };
+
+    resetTimer();
+
+    const handleActivity = () => resetTimer();
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('mousedown', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('touchstart', handleActivity);
+
+    return () => {
+      if (trailerTimeoutRef.current) clearTimeout(trailerTimeoutRef.current);
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('mousedown', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+    };
+  }, [showTrailer]);
+
   const [isFavorite, setIsFavorite] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showLoginTeaser, setShowLoginTeaser] = useState(false);
@@ -647,10 +682,24 @@ const MovieDetail = () => {
 
       {/* Trailer Modal */}
       {showTrailer && trailerKey && (
-        <div className={styles.trailerModal}>
+        <div 
+          className={`${styles.trailerModal} ${trailerInactive ? styles.hideCursor : ''}`}
+          onMouseMove={() => {
+            if (trailerInactive) setTrailerInactive(false);
+          }}
+        >
           <button className={styles.closeTrailerBtn} onClick={() => setShowTrailer(false)}>
             <X size={28} />
           </button>
+
+          {trailerInactive && (
+            <div 
+              className={styles.inactivityOverlay}
+              onMouseMove={() => setTrailerInactive(false)}
+              onClick={() => setTrailerInactive(false)}
+            />
+          )}
+
           <iframe
             src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&modestbranding=1&rel=0`}
             title="Trailer"
