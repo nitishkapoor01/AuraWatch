@@ -270,9 +270,6 @@ const GlobalPlayer = () => {
       } : {}}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
-      onMouseMove={() => {
-        if (isInactive) setIsInactive(false);
-      }}
     >
       <button 
         className={styles.closeTrailerBtn} 
@@ -290,14 +287,6 @@ const GlobalPlayer = () => {
       </div>
       
       {isSticky && <div className={styles.dragOverlay}></div>}
-
-      {!isSticky && isInactive && (
-        <div 
-          className={styles.inactivityOverlay}
-          onMouseMove={() => setIsInactive(false)}
-          onClick={() => setIsInactive(false)}
-        />
-      )}
       
       <iframe
         id="screenscape-player"
