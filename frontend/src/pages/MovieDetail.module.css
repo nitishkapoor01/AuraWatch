@@ -374,30 +374,8 @@
   justify-content: center;
   cursor: pointer;
   font-size: 20px;
-  transition: all var(--anim-speed, 0.3s), opacity 0.3s ease;
+  transition: all var(--anim-speed, 0.3s);
   z-index: 10000;
-}
-
-/* Inactivity Auto-Hide */
-.hideCursor,
-.hideCursor * {
-  cursor: none !important;
-}
-
-.hideCursor .closeTrailerBtn {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.inactivityOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9998;
-  background: transparent;
-  cursor: none !important;
 }
 
 .closeTrailerBtn:hover {
