@@ -684,10 +684,21 @@ const MovieDetail = () => {
       {showTrailer && trailerKey && (
         <div 
           className={`${styles.trailerModal} ${trailerInactive ? styles.hideCursor : ''}`}
+          onMouseMove={() => {
+            if (trailerInactive) setTrailerInactive(false);
+          }}
         >
           <button className={styles.closeTrailerBtn} onClick={() => setShowTrailer(false)}>
             <X size={28} />
           </button>
+
+          {trailerInactive && (
+            <div 
+              className={styles.inactivityOverlay}
+              onMouseMove={() => setTrailerInactive(false)}
+              onClick={() => setTrailerInactive(false)}
+            />
+          )}
 
           <iframe
             src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&modestbranding=1&rel=0`}
