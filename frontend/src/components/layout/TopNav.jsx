@@ -10,6 +10,7 @@ import CustomizeModal from '../profile/CustomizeModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 import { useButtonWarnings } from '../../hooks/useButtonWarnings';
+import SuggestionAd from '../ads/SuggestionAd';
 
 const AVATARS = [
   { id: 'red', color: '#e50914' },
@@ -357,27 +358,29 @@ const TopNav = () => {
           
           {isFocused && suggestions.length > 0 && (
             <div className={styles.suggestionsContainer}>
-              {suggestions.map(item => (
-                <div 
-                  key={item.id}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onTouchStart={(e) => e.preventDefault()}
-                  onClick={() => {
-                    navigate(`/movie/${item.id}?type=${item.type.toLowerCase()}`);
-                    setIsFocused(false);
-                    setIsMobileSearchOpen(false);
-                    setQuery('');
-                  }}
-                  className={styles.suggestionItem}
-                >
-                  <img src={item.poster} alt={item.title} className={styles.suggestionImage} />
-                  <div className={styles.suggestionInfo}>
-                    <span className={styles.suggestionTitle}>{item.title}</span>
-                    <span className={styles.suggestionMeta}>
-                      {item.year} • {item.type} • ★ {item.rating}
-                    </span>
+              {suggestions.map((item, idx) => (
+                <React.Fragment key={item.id}>
+                  <div 
+                    onMouseDown={(e) => e.preventDefault()}
+                    onTouchStart={(e) => e.preventDefault()}
+                    onClick={() => {
+                      navigate(`/movie/${item.id}?type=${item.type.toLowerCase()}`);
+                      setIsFocused(false);
+                      setIsMobileSearchOpen(false);
+                      setQuery('');
+                    }}
+                    className={styles.suggestionItem}
+                  >
+                    <img src={item.poster} alt={item.title} className={styles.suggestionImage} />
+                    <div className={styles.suggestionInfo}>
+                      <span className={styles.suggestionTitle}>{item.title}</span>
+                      <span className={styles.suggestionMeta}>
+                        {item.year} • {item.type} • ★ {item.rating}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                  {idx === 2 && <SuggestionAd />}
+                </React.Fragment>
               ))}
             </div>
           )}

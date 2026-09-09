@@ -1,21 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import styles from './AdCard.module.css';
+import styles from './SuggestionAd.module.css';
 
-const DEFAULT_CONFIG = {
-  enabled: true,
-  format: 'iframe',
-  key: '8e9991a7d4aa3fef2ca28a617f3c1844',
-  script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
-  width: 300,
-  height: 250
-};
-
-const AdCard = () => {
+const SuggestionAd = () => {
   const { user } = useAuth();
-  const [adConfig, setAdConfig] = useState(DEFAULT_CONFIG);
-  const [scale, setScale] = useState(0.6);
-  const cardRef = useRef(null);
+  const [adConfig, setAdConfig] = useState({
+    enabled: true,
+    key: '8e9991a7d4aa3fef2ca28a617f3c1844',
+    script_url: 'https://heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+    width: 300,
+    height: 250
+  });
   const impressionLoggedRef = useRef(false);
 
   const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
@@ -25,7 +20,7 @@ const AdCard = () => {
     const fetchConfig = async () => {
       try {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 
-          (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+          (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
         const res = await fetch(`${baseUrl}/ads/config`);
         if (res.ok && isMounted) {
@@ -45,27 +40,6 @@ const AdCard = () => {
     return () => { isMounted = false; };
   }, []);
 
-  // Compute responsive scale factor to fit 300px ad inside card width
-  useEffect(() => {
-    if (!cardRef.current) return;
-
-    const updateScale = () => {
-      if (cardRef.current) {
-        const cardWidth = cardRef.current.offsetWidth;
-        if (cardWidth > 0) {
-          // Keep a small margin
-          const newScale = Math.min(1, Math.max(0.45, (cardWidth - 10) / 300));
-          setScale(newScale);
-        }
-      }
-    };
-
-    updateScale();
-    const ro = new ResizeObserver(updateScale);
-    ro.observe(cardRef.current);
-    return () => ro.disconnect();
-  }, [adConfig]);
-
   const logImpression = async () => {
     if (impressionLoggedRef.current) return;
     impressionLoggedRef.current = true;
@@ -75,7 +49,7 @@ const AdCard = () => {
       const sessionId = sessionStorage.getItem('trackingSessionId') || '';
       const deviceType = window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop';
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 
-        (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+        (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
       await fetch(`${baseUrl}/ads/impression`, {
         method: 'POST',
@@ -90,7 +64,7 @@ const AdCard = () => {
     } catch (_) {}
   };
 
-  // Strictly hide ads from all administrators
+  // Strictly hide from admins and when disabled
   if (isAdmin || !adConfig || !adConfig.enabled) {
     return null;
   }
@@ -133,20 +107,19 @@ const AdCard = () => {
   `;
 
   return (
-    <div ref={cardRef} className={styles.adCard}>
-      <span className={styles.badge}>Ad</span>
-      <div className={styles.frameWrapper}>
-        <div style={{
-          transform: `scale(${scale})`,
-          transformOrigin: 'center center',
-          width: '300px',
-          height: '250px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+    <div 
+      className={styles.suggestionAdItem} 
+      onMouseDown={(e) => e.preventDefault()}
+      onTouchStart={(e) => e.preventDefault()}
+    >
+      <div className={styles.adMeta}>
+        <span className={styles.adBadge}>Ad</span>
+        <span className={styles.adLabel}>Sponsored Recommendation</span>
+      </div>
+      <div className={styles.frameContainer}>
+        <div className={styles.scaler}>
           <iframe
-            title="In-Feed Ad"
+            title="Search Suggestion Ad"
             srcDoc={iframeDoc}
             width="300"
             height="250"
@@ -161,4 +134,4 @@ const AdCard = () => {
   );
 };
 
-export default AdCard;
+export default SuggestionAd;

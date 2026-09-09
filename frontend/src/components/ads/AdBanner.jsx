@@ -86,7 +86,8 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
     }
   };
 
-  if (skipAds || !adConfig || !adConfig.enabled) {
+  // Strictly hide ads from all administrators
+  if (isAdmin || skipAds || !adConfig || !adConfig.enabled) {
     return null;
   }
 
