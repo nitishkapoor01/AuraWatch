@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { X, PlayCircle, BookOpen, MessageSquare, Lightbulb, AlertTriangle, CheckCircle, ShieldAlert, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  X, PlayCircle, BookOpen, MessageSquare, Lightbulb, AlertTriangle, 
+  CheckCircle, ShieldAlert, Info, Clock, CheckCircle2, ShieldCheck, 
+  Send, PlusCircle, RefreshCw, User
+} from 'lucide-react';
 import styles from './HelpModal.module.css';
 
 const TABS = {
+  MY_TICKETS: 'my_tickets',
   HOW_TO_USE: 'how_to_use',
   UPDATES: 'updates',
   PLAYER_GUIDE: 'player_guide',
@@ -12,16 +17,19 @@ const TABS = {
   DMCA: 'dmca'
 };
 
-const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
-  const [activeTab, setActiveTab] = useState(initialTab || TABS.HOW_TO_USE);
+const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription, onRepliesRead }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || TABS.MY_TICKETS);
   const [platformUpdates, setPlatformUpdates] = useState('');
   const [loadingUpdates, setLoadingUpdates] = useState(false);
+  const [myTickets, setMyTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
-  React.useEffect(() => {
-    if (isOpen) {
-      fetchUpdates();
-    }
-  }, [isOpen]);
+  // Form states
+  const [feedback, setFeedback] = useState({ name: '', message: '' });
+  const [feature, setFeature] = useState({ title: '', description: '' });
+  const [report, setReport] = useState({ type: 'video_not_playing', description: prefillDescription || '' });
 
   const fetchUpdates = async () => {
     try {
@@ -32,24 +40,66 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
         const data = await res.json();
         setPlatformUpdates(data.value || '');
       }
-    } catch (e) { console.error('Failed to fetch updates', e); }
-    finally { setLoadingUpdates(false); }
+    } catch (e) { 
+      console.error('Failed to fetch updates', e); 
+    } finally { 
+      setLoadingUpdates(false); 
+    }
   };
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
 
-  // Form states
-  const [feedback, setFeedback] = useState({ name: '', message: '' });
-  const [feature, setFeature] = useState({ title: '', description: '' });
-  const [report, setReport] = useState({ type: 'video_not_playing', description: prefillDescription || '' });
+  const fetchMyTickets = async () => {
+    try {
+      setLoadingTickets(true);
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api');
+      
+      const res = await fetch(`${baseUrl}/support/my-tickets?visitorId=${encodeURIComponent(visitorId)}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setMyTickets(data);
+
+        // Mark any unread replies as read
+        const unread = data.filter(t => t.admin_reply && !t.is_read);
+        if (unread.length > 0) {
+          for (const t of unread) {
+            await fetch(`${baseUrl}/support/${t.id}/mark-read`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+              },
+              body: JSON.stringify({ visitorId })
+            });
+          }
+          if (onRepliesRead) {
+            onRepliesRead();
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching my tickets:', err);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
 
   // Sync initialTab and prefillDescription when modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       if (initialTab) setActiveTab(initialTab);
       if (prefillDescription) setReport(r => ({ ...r, description: prefillDescription }));
+      fetchMyTickets();
+      fetchUpdates();
     }
   }, [isOpen, initialTab, prefillDescription]);
+
+  useEffect(() => {
+    if (isOpen && activeTab === TABS.MY_TICKETS) {
+      fetchMyTickets();
+    }
+  }, [activeTab, isOpen]);
 
   if (!isOpen) return null;
 
@@ -58,20 +108,26 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
     setIsSubmitting(true);
     setSuccessMessage('');
 
-    let payload = {};
+    const visitorId = localStorage.getItem('trackingVisitorId') || '';
+    let payload = { visitorId };
+
     if (formType === 'feedback') {
-      payload = { ticketType: 'feedback', name: feedback.name, message: feedback.message };
+      payload = { ...payload, ticketType: 'feedback', name: feedback.name, message: feedback.message };
     } else if (formType === 'feature') {
-      payload = { ticketType: 'feature_request', title: feature.title, description: feature.description };
+      payload = { ...payload, ticketType: 'feature_request', title: feature.title, description: feature.description };
     } else if (formType === 'report') {
-      payload = { ticketType: 'report_issue', issueType: report.type, description: report.description };
+      payload = { ...payload, ticketType: 'report_issue', issueType: report.type, description: report.description };
     }
 
     try {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://aurawatch-1.onrender.com/api');
+      const token = localStorage.getItem('token');
       const response = await fetch(`${baseUrl}/support`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(payload)
       });
 
@@ -79,15 +135,21 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
         throw new Error('Failed to submit');
       }
 
-      setSuccessMessage('Successfully submitted! Thank you.');
+      setSuccessMessage('Successfully submitted! Check "Support Chat & Replies" for status and official responses.');
       
       // Reset form based on type
       if (formType === 'feedback') setFeedback({ name: '', message: '' });
       if (formType === 'feature') setFeature({ title: '', description: '' });
       if (formType === 'report') setReport({ type: 'video_not_playing', description: '' });
 
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
+      // Refresh ticket list
+      fetchMyTickets();
+
+      // Automatically navigate to tickets chat view after 1.5 seconds
+      setTimeout(() => {
+        setSuccessMessage('');
+        setActiveTab(TABS.MY_TICKETS);
+      }, 1500);
     } catch (error) {
       console.error('Error submitting form:', error);
       alert('Failed to submit your request. Please try again later.');
@@ -103,6 +165,135 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case TABS.MY_TICKETS:
+        return (
+          <div className={styles.section}>
+            <div className={styles.chatHeaderBar}>
+              <div>
+                <h2 className={styles.contentTitle} style={{ margin: 0 }}>Support Inbox & Chat</h2>
+                <p style={{ color: '#888', fontSize: '13px', margin: '4px 0 0 0' }}>
+                  Permanent record of your inquiries, bug reports, and official AuraWatch responses.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button 
+                  className={styles.newTicketBtn} 
+                  onClick={fetchMyTickets}
+                  title="Refresh tickets"
+                  style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#ccc' }}
+                >
+                  <RefreshCw size={14} className={loadingTickets ? styles.pulseDot : ''} />
+                </button>
+                <button 
+                  className={styles.newTicketBtn} 
+                  onClick={() => handleTabChange(TABS.REPORT_ISSUE)}
+                >
+                  <PlusCircle size={15} /> New Report / Message
+                </button>
+              </div>
+            </div>
+
+            {loadingTickets && myTickets.length === 0 ? (
+              <div className={styles.loadingUpdates}>
+                <div className={styles.pulseDot} />
+                <span>Loading your messages & replies...</span>
+              </div>
+            ) : myTickets.length === 0 ? (
+              <div className={styles.emptyInbox}>
+                <MessageSquare size={44} color="#444" />
+                <p>No messages or reports yet. If you have an issue with video playback or want to request a feature, submit a ticket anytime.</p>
+                <button className={styles.newTicketBtn} onClick={() => handleTabChange(TABS.REPORT_ISSUE)}>
+                  <PlusCircle size={15} /> Submit an Issue or Feedback
+                </button>
+              </div>
+            ) : (
+              <div className={styles.threadsContainer}>
+                {myTickets.map(ticket => {
+                  const isResolved = ticket.status === 'resolved';
+                  const badgeClass = ticket.ticket_type === 'feedback' 
+                    ? styles.badgeFeedback 
+                    : ticket.ticket_type === 'feature_request' 
+                    ? styles.badgeFeature 
+                    : styles.badgeReport;
+
+                  return (
+                    <div key={ticket.id} className={styles.threadCard}>
+                      <div className={styles.threadHeader}>
+                        <div className={styles.threadTags}>
+                          <span className={`${styles.typeBadge} ${badgeClass}`}>
+                            {ticket.ticket_type.replace('_', ' ')}
+                          </span>
+                          <span className={`${styles.statusChip} ${isResolved ? styles.statusResolved : styles.statusOpen}`}>
+                            {isResolved ? <CheckCircle2 size={12} /> : <Clock size={12} />}
+                            {isResolved ? 'RESOLVED' : 'IN REVIEW'}
+                          </span>
+                        </div>
+                        <span className={styles.threadDate}>
+                          {new Date(ticket.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
+                      </div>
+
+                      <div className={styles.chatMessages}>
+                        {/* USER MESSAGE BUBBLE */}
+                        <div className={styles.userBubbleWrapper}>
+                          <div className={styles.userBubble}>
+                            {ticket.title && (
+                              <div className={styles.bubbleTitle}>{ticket.title}</div>
+                            )}
+                            {ticket.issue_type && (
+                              <div className={styles.bubbleTitle} style={{ color: '#ff7675' }}>
+                                Issue: {ticket.issue_type.replace(/_/g, ' ')}
+                              </div>
+                            )}
+                            <div>{ticket.description || ticket.message}</div>
+                          </div>
+                          <div className={styles.userBubbleMeta}>
+                            <User size={12} />
+                            <span>You ({ticket.name || 'Visitor'})</span>
+                          </div>
+                        </div>
+
+                        {/* OFFICIAL SUPPORT REPLY BUBBLE */}
+                        {ticket.admin_reply ? (
+                          <div className={styles.supportBubbleWrapper}>
+                            <div className={styles.supportBubble}>
+                              <div className={styles.officialHeader}>
+                                <div className={styles.officialAvatar}>A</div>
+                                <span className={styles.officialName}>
+                                  AuraWatch Official Support
+                                  <span className={styles.verifiedBadge} title="Verified AuraWatch Team">
+                                    <ShieldCheck size={15} />
+                                  </span>
+                                </span>
+                              </div>
+                              <div className={styles.supportText}>
+                                {ticket.admin_reply}
+                              </div>
+                            </div>
+                            <div className={styles.supportBubbleMeta}>
+                              <Clock size={12} />
+                              <span>
+                                {ticket.replied_at ? new Date(ticket.replied_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'Official Team'}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={styles.pendingNotice}>
+                            <Clock size={16} />
+                            <span>
+                              Ticket received. AuraWatch Support team is reviewing your report. Our official reply will appear here permanently.
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+
       case TABS.HOW_TO_USE:
         return (
           <div className={styles.section}>
@@ -157,43 +348,22 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
               <li><strong>Slow internet?</strong> Select 360p or 480p to prevent buffering.</li>
               <li><strong>Fast internet?</strong> Enjoy crisp 720p or 1080p HD quality.</li>
             </ul>
-
-            <h3>D. Language Selection</h3>
-            <p>Many videos support multiple audio tracks (e.g., Hindi, English).</p>
-            <ul>
-              <li>Select your preferred language from the available options.</li>
-              <li><em>Note: Language availability may depend on the selected server.</em></li>
-            </ul>
-
-            <h3>E. Download System (Important)</h3>
-            <p>There are TWO ways to download content to watch offline:</p>
-            <ul>
-              <li><strong>1. Player Download:</strong> Use the download button directly <em>inside</em> the video player. This will download the exact version (server, quality, language) currently playing.</li>
-              <li><strong>2. External Download:</strong> Use the separate download buttons located <em>outside/below</em> the player. This lets you choose the exact quality and server before starting the download.</li>
-            </ul>
-
-            <h3>F. Troubleshooting</h3>
-            <ul>
-              <li><strong>Video not playing?</strong> Switch to a different server.</li>
-              <li><strong>Constant buffering?</strong> Lower the video quality.</li>
-              <li><strong>No audio?</strong> Check your device volume or try switching servers.</li>
-            </ul>
           </div>
         );
 
       case TABS.FEEDBACK:
         return (
           <div className={styles.section}>
-            <h2 className={styles.contentTitle}>Share Your Feedback</h2>
-            <p>We'd love to hear what you think about AuraWatch! Your feedback helps us improve.</p>
+            <h2 className={styles.contentTitle}>Feedback & Suggestions</h2>
+            <p>We value your thoughts! Tell us what you like or what we can improve on AuraWatch.</p>
             
             <form className={styles.form} onSubmit={(e) => handleSubmit(e, 'feedback')}>
               <div className={styles.formGroup}>
-                <label>Name (Optional)</label>
+                <label>Your Name (Optional)</label>
                 <input 
                   type="text" 
                   className={styles.input} 
-                  placeholder="How should we call you?" 
+                  placeholder="Anonymous or your username"
                   value={feedback.name}
                   onChange={(e) => setFeedback({...feedback, name: e.target.value})}
                 />
@@ -202,7 +372,7 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
                 <label>Message *</label>
                 <textarea 
                   className={styles.textarea} 
-                  placeholder="Tell us what you love or what could be better..." 
+                  placeholder="Share your experience, thoughts, or suggestions..." 
                   required
                   value={feedback.message}
                   onChange={(e) => setFeedback({...feedback, message: e.target.value})}
@@ -219,7 +389,7 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
         return (
           <div className={styles.section}>
             <h2 className={styles.contentTitle}>Request a Feature</h2>
-            <p>Have a great idea for a new feature? Let us know!</p>
+            <p>Have a great idea for AuraWatch? Let our development team know.</p>
             
             <form className={styles.form} onSubmit={(e) => handleSubmit(e, 'feature')}>
               <div className={styles.formGroup}>
@@ -227,7 +397,7 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
                 <input 
                   type="text" 
                   className={styles.input} 
-                  placeholder="E.g., Watch Party mode" 
+                  placeholder="e.g. Watch Together, Custom Subtitles..." 
                   required
                   value={feature.title}
                   onChange={(e) => setFeature({...feature, title: e.target.value})}
@@ -237,14 +407,14 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
                 <label>Description *</label>
                 <textarea 
                   className={styles.textarea} 
-                  placeholder="Describe how the feature would work and why it would be useful..." 
+                  placeholder="Explain why this feature would be useful and how you envision it working." 
                   required
                   value={feature.description}
                   onChange={(e) => setFeature({...feature, description: e.target.value})}
                 ></textarea>
               </div>
               <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                {isSubmitting ? 'Submitting...' : 'Submit Feature Request'}
               </button>
             </form>
           </div>
@@ -260,7 +430,7 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
               <div className={styles.formGroup}>
                 <label>Issue Type *</label>
                 <select 
-                  className={styles.select}
+                  className={styles.select} 
                   value={report.type}
                   onChange={(e) => setReport({...report, type: e.target.value})}
                 >
@@ -347,6 +517,8 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
     }
   };
 
+  const unreadCount = myTickets.filter(t => t.admin_reply && !t.is_read).length;
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -357,6 +529,19 @@ const HelpModal = ({ isOpen, onClose, initialTab, prefillDescription }) => {
         <div className={styles.sidebar}>
           <h2 className={styles.sidebarTitle}>Help & Support</h2>
           
+          <button 
+            className={`${styles.tabBtn} ${activeTab === TABS.MY_TICKETS ? styles.active : ''}`}
+            onClick={() => handleTabChange(TABS.MY_TICKETS)}
+            style={{ 
+              background: activeTab === TABS.MY_TICKETS ? 'rgba(229, 9, 20, 0.15)' : 'transparent',
+              color: activeTab === TABS.MY_TICKETS ? '#fff' : '#aaa'
+            }}
+          >
+            <MessageSquare size={18} color={activeTab === TABS.MY_TICKETS ? '#e50914' : '#aaa'} /> 
+            <span>Support & Chat</span>
+            {unreadCount > 0 && <span className={styles.tabBadge}>{unreadCount}</span>}
+          </button>
+
           <button 
             className={`${styles.tabBtn} ${activeTab === TABS.HOW_TO_USE ? styles.active : ''}`}
             onClick={() => handleTabChange(TABS.HOW_TO_USE)}

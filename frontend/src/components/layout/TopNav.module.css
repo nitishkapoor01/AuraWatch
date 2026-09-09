@@ -59,6 +59,38 @@
   border-color: white;
 }
 
+.avatarNotificationDot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background-color: #e50914;
+  border: 2px solid #141414;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulseAvatarDot 2s infinite ease-in-out;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.9);
+}
+
+@keyframes pulseAvatarDot {
+  0% { transform: scale(0.9); box-shadow: 0 0 4px rgba(229, 9, 20, 0.6); }
+  50% { transform: scale(1.25); box-shadow: 0 0 10px rgba(229, 9, 20, 1); }
+  100% { transform: scale(0.9); box-shadow: 0 0 4px rgba(229, 9, 20, 0.6); }
+}
+
+.unreadDropdownBadge {
+  margin-left: auto;
+  background: #e50914;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.5);
+}
+
 .profileDropdownContainer {
   position: relative;
 }

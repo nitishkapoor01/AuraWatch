@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles, Clock, Heart, Trash2, X } from 'lucide-react';
+import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles, Clock, Heart, Trash2, X, MessageSquare, AlertTriangle } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -10,7 +10,6 @@ import CustomizeModal from '../profile/CustomizeModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 import { useButtonWarnings } from '../../hooks/useButtonWarnings';
-import { AlertTriangle } from 'lucide-react';
 
 const AVATARS = [
   { id: 'red', color: '#e50914' },
@@ -29,6 +28,8 @@ const TopNav = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpInitialTab, setHelpInitialTab] = useState('how_to_use');
+  const [unreadReplyCount, setUnreadReplyCount] = useState(0);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -105,6 +106,28 @@ const TopNav = () => {
       console.error('Failed to fetch TopNav search history:', err);
     }
   };
+
+  const fetchUnreadReplyCount = async () => {
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      
+      const res = await fetch(`${API_BASE}/support/unread-count?visitorId=${encodeURIComponent(visitorId)}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadReplyCount(data.unreadCount || 0);
+      }
+    } catch (err) {
+      // silently ignore network errors for background poll
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadReplyCount();
+    const interval = setInterval(fetchUnreadReplyCount, 30000);
+    return () => clearInterval(interval);
+  }, [token, isLoggedIn]);
 
   useEffect(() => {
     if (isFocused) {
@@ -460,6 +483,7 @@ const TopNav = () => {
                     {isLoggedIn ? (user?.name?.charAt(0).toUpperCase() || 'U') : <User size={20} color="#ccc" />}
                   </div>
                 )}
+                {unreadReplyCount > 0 && <span className={styles.avatarNotificationDot} />}
                 
                 {isDropdownOpen && (
                   <div className={styles.dropdownMenu}>
@@ -535,8 +559,21 @@ const TopNav = () => {
                       <Settings size={16} /> Customize UI
                       {buttonWarnings.customize_ui && <AlertTriangle size={14} color="#f39c12" style={{ marginLeft: 'auto' }} />}
                     </button>
-                    <button className={styles.dropdownItem} onClick={() => { setIsHelpModalOpen(true); setIsDropdownOpen(false); }}>
-                      <HelpCircle size={16} /> Help & Support
+                    <button 
+                      className={styles.dropdownItem} 
+                      onClick={() => { 
+                        setHelpInitialTab('my_tickets'); 
+                        setIsHelpModalOpen(true); 
+                        setIsDropdownOpen(false); 
+                      }}
+                    >
+                      <MessageSquare size={16} /> Support & Messages
+                      {unreadReplyCount > 0 && (
+                        <span className={styles.unreadDropdownBadge}>{unreadReplyCount}</span>
+                      )}
+                    </button>
+                    <button className={styles.dropdownItem} onClick={() => { setHelpInitialTab('how_to_use'); setIsHelpModalOpen(true); setIsDropdownOpen(false); }}>
+                      <HelpCircle size={16} /> Help & Guide
                     </button>
                     
                     {isLoggedIn ? (
@@ -564,7 +601,9 @@ const TopNav = () => {
       
       <HelpModal 
         isOpen={isHelpModalOpen} 
-        onClose={() => setIsHelpModalOpen(false)} 
+        onClose={() => { setIsHelpModalOpen(false); fetchUnreadReplyCount(); }} 
+        initialTab={helpInitialTab}
+        onRepliesRead={fetchUnreadReplyCount}
       />
       
       <LoginPromptModal

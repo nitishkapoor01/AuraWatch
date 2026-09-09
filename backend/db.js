@@ -183,7 +183,28 @@ const initDB = async () => {
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='search_logs' AND COLUMN_NAME='has_results') THEN
           ALTER TABLE search_logs ADD COLUMN has_results BOOLEAN DEFAULT TRUE;
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='support_tickets' AND COLUMN_NAME='user_id') THEN
+          ALTER TABLE support_tickets ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE SET NULL;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='support_tickets' AND COLUMN_NAME='visitor_id') THEN
+          ALTER TABLE support_tickets ADD COLUMN visitor_id TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='support_tickets' AND COLUMN_NAME='admin_reply') THEN
+          ALTER TABLE support_tickets ADD COLUMN admin_reply TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='support_tickets' AND COLUMN_NAME='replied_at') THEN
+          ALTER TABLE support_tickets ADD COLUMN replied_at TIMESTAMP;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='support_tickets' AND COLUMN_NAME='replied_by') THEN
+          ALTER TABLE support_tickets ADD COLUMN replied_by INTEGER REFERENCES users(id) ON DELETE SET NULL;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='support_tickets' AND COLUMN_NAME='is_read') THEN
+          ALTER TABLE support_tickets ADD COLUMN is_read BOOLEAN DEFAULT FALSE;
+        END IF;
       END $$;
+
+      CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
+      CREATE INDEX IF NOT EXISTS idx_support_tickets_visitor ON support_tickets(visitor_id);
 
       CREATE TABLE IF NOT EXISTS ad_impressions (
         id SERIAL PRIMARY KEY,

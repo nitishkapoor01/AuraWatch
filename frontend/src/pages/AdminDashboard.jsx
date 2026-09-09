@@ -37,6 +37,10 @@ const AdminDashboard = () => {
   // Support States
   const [supportTickets, setSupportTickets] = useState([]);
   const [resolvingTicket, setResolvingTicket] = useState(false);
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [selectedTicketForReply, setSelectedTicketForReply] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
   
   // Control States
   const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' });
@@ -395,6 +399,38 @@ const AdminDashboard = () => {
       }
     } catch (e) { alert('Failed to update ticket'); }
     finally { setResolvingTicket(false); }
+  };
+
+  const handleSendReply = async () => {
+    if (!selectedTicketForReply || !replyText.trim()) {
+      showToast('Please enter a reply message', 'warning');
+      return;
+    }
+    try {
+      setSendingReply(true);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/support/${selectedTicketForReply.id}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ admin_reply: replyText.trim() })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setSupportTickets(supportTickets.map(t => t.id === updated.id ? updated : t));
+        showToast('Reply sent as AuraWatch Official Support!', 'success');
+        setReplyModalOpen(false);
+        setSelectedTicketForReply(null);
+        setReplyText('');
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        showToast(errData.msg || 'Failed to send reply', 'error');
+      }
+    } catch (e) {
+      console.error('Failed to send reply', e);
+      showToast('Error sending reply', 'error');
+    } finally {
+      setSendingReply(false);
+    }
   };
 
   if (loading) return <div className={styles.adminPage}><div className={styles.loader}></div></div>;
@@ -874,11 +910,19 @@ const AdminDashboard = () => {
             <div className={styles.tableContainer}>
               <table className={styles.usersTable}>
                 <thead>
-                  <tr><th>Type</th><th>From</th><th>Details</th><th>Date</th><th>Status</th><th>Action</th></tr>
+                  <tr>
+                    <th>Type</th>
+                    <th>From</th>
+                    <th>Details</th>
+                    <th>Official Reply</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {supportTickets.map(ticket => (
-                    <tr key={ticket.id} style={{ opacity: ticket.status === 'resolved' ? 0.6 : 1 }}>
+                    <tr key={ticket.id} style={{ opacity: ticket.status === 'resolved' ? 0.75 : 1 }}>
                       <td>
                         <span className={styles.roleBadge} style={{ 
                           background: ticket.ticket_type === 'feedback' ? 'rgba(0, 113, 235, 0.1)' : ticket.ticket_type === 'feature_request' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(229, 9, 20, 0.1)', 
@@ -890,15 +934,33 @@ const AdminDashboard = () => {
                       </td>
                       <td>
                         <div className={styles.userName}>{ticket.name}</div>
+                        {ticket.user_id && <span style={{ fontSize: '11px', color: '#888' }}>User #{ticket.user_id}</span>}
+                        {ticket.visitor_id && !ticket.user_id && <span style={{ fontSize: '11px', color: '#666' }}>Guest</span>}
                       </td>
-                      <td style={{ maxWidth: '300px' }}>
+                      <td style={{ maxWidth: '240px' }}>
                         {ticket.ticket_type === 'feature_request' && <strong>{ticket.title}<br/></strong>}
                         {ticket.ticket_type === 'report_issue' && <strong>Issue: {ticket.issue_type?.replace(/_/g, ' ')}<br/></strong>}
                         <div style={{ fontSize: '12px', color: '#aaa', whiteSpace: 'pre-wrap' }}>
                           {ticket.message || ticket.description}
                         </div>
                       </td>
-                      <td style={{ fontSize: '12px' }}>{new Date(ticket.created_at).toLocaleString()}</td>
+                      <td style={{ maxWidth: '240px' }}>
+                        {ticket.admin_reply ? (
+                          <div style={{ fontSize: '12px', color: '#eaeaea' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#00d2ff', fontSize: '11px', fontWeight: 600, marginBottom: '2px' }}>
+                              <ShieldCheck size={12} /> Official Reply:
+                            </div>
+                            <span style={{ color: '#ccc', fontStyle: 'italic' }}>
+                              "{ticket.admin_reply.length > 70 ? ticket.admin_reply.slice(0, 70) + '...' : ticket.admin_reply}"
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '12px', color: '#777', fontStyle: 'italic' }}>
+                            Pending response
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ fontSize: '12px' }}>{new Date(ticket.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</td>
                       <td>
                         <span style={{ 
                           color: ticket.status === 'resolved' ? '#2ecc71' : '#f39c12',
@@ -909,19 +971,33 @@ const AdminDashboard = () => {
                         </span>
                       </td>
                       <td>
-                        <button 
-                          className={ticket.status === 'resolved' ? styles.banBtn : styles.unbanBtn}
-                          onClick={() => handleResolveTicket(ticket.id, ticket.status)}
-                          disabled={resolvingTicket || currentUser.role !== 'admin'}
-                          title={ticket.status === 'resolved' ? "Reopen" : "Mark Resolved"}
-                        >
-                          {ticket.status === 'resolved' ? <HelpCircle size={16} /> : <CheckCircle size={16} />}
-                        </button>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <button 
+                            className={styles.replyActionBtn}
+                            onClick={() => {
+                              setSelectedTicketForReply(ticket);
+                              setReplyText(ticket.admin_reply || '');
+                              setReplyModalOpen(true);
+                            }}
+                            title="Reply to user as AuraWatch Official Support"
+                          >
+                            <MessageSquare size={13} />
+                            {ticket.admin_reply ? 'Edit' : 'Reply'}
+                          </button>
+                          <button 
+                            className={ticket.status === 'resolved' ? styles.banBtn : styles.unbanBtn}
+                            onClick={() => handleResolveTicket(ticket.id, ticket.status)}
+                            disabled={resolvingTicket || currentUser.role !== 'admin'}
+                            title={ticket.status === 'resolved' ? "Reopen" : "Mark Resolved"}
+                          >
+                            {ticket.status === 'resolved' ? <HelpCircle size={15} /> : <CheckCircle size={15} />}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                   {supportTickets.length === 0 && (
-                    <tr><td colSpan="6" className={styles.emptyTable}>No support tickets found.</td></tr>
+                    <tr><td colSpan="7" className={styles.emptyTable}>No support tickets found.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -1312,6 +1388,86 @@ const AdminDashboard = () => {
             <div className={styles.modalActions}>
               <button className={styles.cancelBtn} onClick={() => setIsPermissionModalOpen(false)}>Cancel</button>
               <button className={styles.saveBtn} onClick={handleUpdatePermissions}>Save Permissions</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUPPORT REPLY MODAL */}
+      {replyModalOpen && selectedTicketForReply && (
+        <div className={styles.replyModalOverlay} onClick={() => setReplyModalOpen(false)}>
+          <div className={styles.replyModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShieldCheck size={22} color="#e50914" />
+                <h3 style={{ margin: 0, color: '#fff', fontSize: '18px' }}>Reply as AuraWatch Official Support</h3>
+              </div>
+              <button className={styles.closeBtn} onClick={() => setReplyModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <p style={{ color: '#888', fontSize: '13px', margin: 0 }}>
+              Your response will appear permanently in the user's Support Inbox under <strong>AuraWatch Official Support</strong> with a verified badge.
+            </p>
+
+            <div className={styles.replyUserBox}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#e50914' }}>
+                  {selectedTicketForReply.ticket_type?.toUpperCase().replace('_', ' ')}
+                </span>
+                <span style={{ fontSize: '11px', color: '#777' }}>
+                  From: {selectedTicketForReply.name || 'Anonymous'}
+                </span>
+              </div>
+              {selectedTicketForReply.title && (
+                <div style={{ fontWeight: 600, color: '#fff', fontSize: '13px', marginBottom: '4px' }}>
+                  {selectedTicketForReply.title}
+                </div>
+              )}
+              {selectedTicketForReply.issue_type && (
+                <div style={{ color: '#f87171', fontSize: '12px', marginBottom: '4px' }}>
+                  Issue: {selectedTicketForReply.issue_type.replace(/_/g, ' ')}
+                </div>
+              )}
+              <div style={{ fontSize: '13px', color: '#ccc', whiteSpace: 'pre-wrap' }}>
+                {selectedTicketForReply.description || selectedTicketForReply.message}
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#aaa', marginBottom: '8px', textTransform: 'uppercase' }}>
+                Official Reply Message
+              </label>
+              <textarea 
+                className={styles.replyTextarea}
+                placeholder="Type official response here (e.g. Hi, thank you for bringing this to our attention. We have updated the server source for this movie. Enjoy streaming!)..."
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+              />
+            </div>
+
+            <div className={styles.replyModalActions}>
+              <button 
+                className={styles.cancelBtn} 
+                onClick={() => setReplyModalOpen(false)}
+                disabled={sendingReply}
+              >
+                Cancel
+              </button>
+              <button 
+                className={styles.primaryBtn} 
+                onClick={handleSendReply}
+                disabled={sendingReply || !replyText.trim()}
+              >
+                {sendingReply ? (
+                  <>
+                    <Loader2 size={16} className={styles.spinner} /> Sending...
+                  </>
+                ) : (
+                  'Send as Official Support'
+                )}
+              </button>
             </div>
           </div>
         </div>
