@@ -201,7 +201,7 @@ const initDB = async () => {
       INSERT INTO settings (key, value)
       VALUES (
         'ads_config',
-        '{"enabled":true,"download_modal":{"enabled":true,"timer_seconds":30,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":300,"height":250},"movie_detail":{"enabled":true,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":728,"height":90},"social_bar":{"enabled":false,"script_url":""}}'
+        '{"enabled":true,"download_modal":{"enabled":true,"timer_seconds":30,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":300,"height":250},"movie_detail":{"enabled":true,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":728,"height":90},"social_bar":{"enabled":true,"script_url":"https://pl31260175.profitableratecpmnetwork.com/b4/2e/27/b42e272664d703c5177e5d684f92dc85.js"}}'
       )
       ON CONFLICT (key) DO NOTHING;
 

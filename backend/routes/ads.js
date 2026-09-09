@@ -81,8 +81,8 @@ router.get('/config', async (req, res) => {
         height: 90
       },
       social_bar: {
-        enabled: false,
-        script_url: ''
+        enabled: true,
+        script_url: 'https://pl31260175.profitableratecpmnetwork.com/b4/2e/27/b42e272664d703c5177e5d684f92dc85.js'
       }
     };
 
