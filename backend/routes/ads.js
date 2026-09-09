@@ -21,7 +21,7 @@ router.post('/impression', async (req, res) => {
   try {
     const { slot, visitorId, sessionId, deviceType } = req.body;
 
-    const allowedSlots = ['download_modal', 'movie_detail', 'social_bar'];
+    const allowedSlots = ['download_modal', 'movie_detail', 'social_bar', 'search_grid'];
     if (!slot || !allowedSlots.includes(slot)) {
       return res.status(400).json({ error: 'Invalid ad slot' });
     }
@@ -80,9 +80,17 @@ router.get('/config', async (req, res) => {
         width: 728,
         height: 90
       },
-      social_bar: {
+      search_grid: {
         enabled: true,
-        script_url: 'https://pl31260175.profitableratecpmnetwork.com/b4/2e/27/b42e272664d703c5177e5d684f92dc85.js'
+        format: 'iframe',
+        key: '8e9991a7d4aa3fef2ca28a617f3c1844',
+        script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+        width: 300,
+        height: 250
+      },
+      social_bar: {
+        enabled: false,
+        script_url: ''
       }
     };
 

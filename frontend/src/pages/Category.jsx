@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styles from './Search.module.css'; // Reusing search grid styles
 import homeStyles from './Home.module.css';
 import SEO from '../components/SEO';
+import AdCard from '../components/ads/AdCard';
 
 const Category = ({ type, title }) => {
   const [results, setResults] = useState([]);
@@ -53,14 +54,16 @@ const Category = ({ type, title }) => {
       ) : (
         <div className={styles.grid}>
           {results.map((movie, idx) => (
-            <Link 
-              to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`} 
-              key={`${movie.id}-${idx}`} 
-              className={homeStyles.cardContainer} 
-              style={{flex: 'none', width: '100%'}}
-            >
-              <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
-            </Link>
+            <React.Fragment key={`${movie.id}-${idx}`}>
+              <Link 
+                to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`} 
+                className={homeStyles.cardContainer} 
+                style={{flex: 'none', width: '100%'}}
+              >
+                <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
+              </Link>
+              {(idx + 1) % 8 === 0 && <AdCard key={`ad-cat-${idx}`} />}
+            </React.Fragment>
           ))}
         </div>
       )}

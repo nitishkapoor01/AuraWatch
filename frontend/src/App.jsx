@@ -17,7 +17,6 @@ import WatchHistory from './pages/WatchHistory';
 import AdminDashboard from './pages/AdminDashboard';
 import BackgroundEffects from './components/BackgroundEffects';
 import GlobalPlayer from './components/GlobalPlayer';
-import SocialBarAd from './components/ads/SocialBarAd';
 import './App.css';
 
 function App() {
@@ -141,7 +140,6 @@ function App() {
         </main>
       </div>
       <GlobalPlayer />
-      <SocialBarAd />
     </div>
   );
 }

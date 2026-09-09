@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import styles from './Search.module.css';
 import homeStyles from './Home.module.css';
 import SEO from '../components/SEO';
+import AdCard from '../components/ads/AdCard';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -237,14 +238,16 @@ const Search = () => {
       ) : results.length > 0 ? (
         <div className={styles.grid}>
           {results.map((movie, idx) => (
-            <Link
-              to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`}
-              key={`${movie.id}-${idx}`}
-              className={homeStyles.cardContainer}
-              style={{ flex: 'none', width: '100%', display: 'block', touchAction: 'manipulation' }}
-            >
-              <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
-            </Link>
+            <React.Fragment key={`${movie.id}-${idx}`}>
+              <Link
+                to={`/movie/${movie.id}?type=${movie.type.toLowerCase()}`}
+                className={homeStyles.cardContainer}
+                style={{ flex: 'none', width: '100%', display: 'block', touchAction: 'manipulation' }}
+              >
+                <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
+              </Link>
+              {(idx + 1) % 8 === 0 && <AdCard key={`ad-grid-${idx}`} />}
+            </React.Fragment>
           ))}
         </div>
       ) : (

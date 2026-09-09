@@ -69,6 +69,14 @@ const AdminDashboard = () => {
       width: 728,
       height: 90
     },
+    search_grid: {
+      enabled: true,
+      format: 'iframe',
+      key: '8e9991a7d4aa3fef2ca28a617f3c1844',
+      script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+      width: 300,
+      height: 250
+    },
     social_bar: {
       enabled: false,
       script_url: ''
@@ -1015,7 +1023,7 @@ const AdminDashboard = () => {
                   {[
                     { id: 'download_modal', label: 'Download Modal (300x250)' },
                     { id: 'movie_detail', label: 'Movie Detail Banner (728x90)' },
-                    { id: 'social_bar', label: 'Social Bar (Floating Widget)' }
+                    { id: 'search_grid', label: 'Search & Category In-Feed Cards' }
                   ].map(slotItem => {
                     const found = adStats?.slotBreakdown?.find(s => s.slot === slotItem.id);
                     const impressions = found ? found.impressions : 0;
@@ -1206,21 +1214,21 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* SLOT 3: SOCIAL BAR */}
+              {/* SLOT 3: SEARCH & CATEGORY IN-FEED CARDS */}
               <div className={styles.adSlotCard}>
                 <div className={styles.adSlotHeader}>
                   <div className={styles.adSlotTitle}>
-                    <MessageSquare size={20} color="#2ecc71" />
+                    <LayoutDashboard size={20} color="#2ecc71" />
                     <div>
-                      <h3>Social Bar (Non-intrusive)</h3>
-                      <span style={{ fontSize: '12px', color: '#888' }}>Floating Push / Widget Format</span>
+                      <h3>Search & Category In-Feed Cards</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>Native 2:3 Movie Card Format</span>
                     </div>
                   </div>
                   <button 
-                    className={`${styles.toggleBtn} ${adsConfig.social_bar?.enabled ? styles.active : ''}`}
+                    className={`${styles.toggleBtn} ${adsConfig.search_grid?.enabled ? styles.active : ''}`}
                     onClick={() => setAdsConfig(prev => ({
                       ...prev,
-                      social_bar: { ...prev.social_bar, enabled: !prev.social_bar?.enabled }
+                      search_grid: { ...prev.search_grid, enabled: !prev.search_grid?.enabled }
                     }))}
                   >
                     <div className={styles.toggleThumb}></div>
@@ -1228,23 +1236,37 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className={styles.adFieldGroup}>
-                  <label>Adsterra Social Bar Script URL</label>
+                  <label>Adsterra Unit Key</label>
                   <input 
                     type="text" 
                     className={styles.adInput}
-                    value={adsConfig.social_bar?.script_url || ''} 
+                    value={adsConfig.search_grid?.key || ''} 
                     onChange={e => setAdsConfig(prev => ({
                       ...prev,
-                      social_bar: { ...prev.social_bar, script_url: e.target.value.trim() }
+                      search_grid: { ...prev.search_grid, key: e.target.value.trim() }
                     }))}
-                    placeholder="//pl12345678.highratecpm.com/.../invoke.js"
+                    placeholder="e.g. 8e9991a7d4aa3fef2ca28a617f3c1844"
                   />
                 </div>
 
                 <div className={styles.adFieldGroup}>
-                  <label>About Social Bar</label>
+                  <label>Script Invoke URL</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.search_grid?.script_url || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      search_grid: { ...prev.search_grid, script_url: e.target.value.trim() }
+                    }))}
+                    placeholder="//heavenlysuspicious.com/.../invoke.js"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Placement Notes</label>
                   <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
-                    High-converting widget that appears in the lower corner. It does NOT open new browser tabs or popunders. Paste your Adsterra Social Bar script URL and enable it.
+                    Appears naturally as a sponsored movie card inside Search results and Category explore grids after every 8th movie card. Zero interruption, 100% clean UX.
                   </p>
                 </div>
               </div>
