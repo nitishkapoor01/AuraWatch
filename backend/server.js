@@ -11,6 +11,7 @@ const settingsRoutes = require('./routes/settings');
 const downloadsRoutes = require('./routes/downloads');
 const sitemapRoutes = require('./routes/sitemap');
 const supportRoutes = require('./routes/support');
+const adsRoutes = require('./routes/ads');
 const securityMiddleware = require('./middleware/security');
 
 // Initialize database
@@ -40,6 +41,7 @@ app.use('/api/tracking', trackingRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/downloads', downloadsRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/ads', adsRoutes);
 app.use('/api', sitemapRoutes); // Keep for backwards compatibility if needed
 app.use('/', sitemapRoutes);    // Mount at root for Search Console (/sitemap.xml)
 

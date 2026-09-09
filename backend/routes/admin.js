@@ -218,4 +218,85 @@ router.delete('/security/block-ip/:ip', isAdmin, async (req, res) => {
   res.json({ message: 'IP unblocked' });
 });
 
+// --- ADS & MONETIZATION MANAGEMENT ---
+
+// Get Ad Impressions & Performance Stats
+router.get('/ads/stats', isModerator, async (req, res) => {
+  try {
+    const todayResult = await db.query("SELECT COUNT(*) as count FROM ad_impressions WHERE created_at >= CURRENT_DATE");
+    const totalResult = await db.query("SELECT COUNT(*) as count FROM ad_impressions");
+    const uniqueViewersToday = await db.query("SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id)) as count FROM ad_impressions WHERE created_at >= CURRENT_DATE");
+    const uniqueViewersTotal = await db.query("SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id)) as count FROM ad_impressions");
+
+    const slotBreakdown = await db.query(`
+      SELECT 
+        slot, 
+        COUNT(*) as impressions,
+        COUNT(DISTINCT COALESCE(visitor_id, session_id)) as unique_visitors
+      FROM ad_impressions 
+      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY slot
+      ORDER BY impressions DESC
+    `);
+
+    const dailyTrend = await db.query(`
+      SELECT 
+        TO_CHAR(created_at, 'YYYY-MM-DD') as date_str, 
+        COUNT(*) as count 
+      FROM ad_impressions 
+      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY date_str 
+      ORDER BY date_str ASC
+    `);
+
+    // Get current ads_config
+    const configRow = await db.query("SELECT value FROM settings WHERE key = 'ads_config'");
+    let config = null;
+    if (configRow.rows[0]?.value) {
+      try { config = JSON.parse(configRow.rows[0].value); } catch (_) { config = configRow.rows[0].value; }
+    }
+
+    res.json({
+      todayImpressions: parseInt(todayResult.rows[0].count) || 0,
+      totalImpressions: parseInt(totalResult.rows[0].count) || 0,
+      uniqueViewersToday: parseInt(uniqueViewersToday.rows[0].count) || 0,
+      uniqueViewersTotal: parseInt(uniqueViewersTotal.rows[0].count) || 0,
+      slotBreakdown: slotBreakdown.rows.map(r => ({
+        slot: r.slot,
+        impressions: parseInt(r.impressions) || 0,
+        unique_visitors: parseInt(r.unique_visitors) || 0
+      })),
+      dailyTrend: dailyTrend.rows.map(r => ({
+        date: r.date_str,
+        count: parseInt(r.count) || 0
+      })),
+      config
+    });
+  } catch (error) {
+    console.error('Failed to fetch ad statistics:', error);
+    res.status(500).json({ message: 'Failed to fetch ad statistics.' });
+  }
+});
+
+// Update Ad Configurations
+router.post('/ads/config', isAdmin, async (req, res) => {
+  try {
+    const { config } = req.body;
+    if (!config || typeof config !== 'object') {
+      return res.status(400).json({ message: 'Invalid configuration data' });
+    }
+
+    await db.query(`
+      INSERT INTO settings (key, value)
+      VALUES ('ads_config', $1)
+      ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value
+    `, [JSON.stringify(config)]);
+
+    res.json({ success: true, message: 'Ads configuration saved successfully.' });
+  } catch (error) {
+    console.error('Failed to update ads config:', error);
+    res.status(500).json({ message: 'Failed to save ads configuration.' });
+  }
+});
+
 module.exports = router;

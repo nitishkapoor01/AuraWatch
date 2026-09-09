@@ -10,6 +10,7 @@ import { useButtonWarnings } from '../hooks/useButtonWarnings';
 import { useToast } from '../context/ToastContext';
 import { usePlayer } from '../context/PlayerContext';
 import HelpModal from '../components/profile/HelpModal';
+import AdBanner from '../components/ads/AdBanner';
 
 const isTVType = (t) => {
   if (!t) return false;
@@ -32,31 +33,6 @@ const extractLanguage = (name) => {
 };
 
 
-
-const BannerAd = () => {
-  const bannerRef = React.useRef(null);
-
-  useEffect(() => {
-    if (bannerRef.current && !bannerRef.current.firstChild) {
-      const conf = document.createElement('script');
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = "//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js";
-      conf.type = 'text/javascript';
-      conf.innerHTML = `atOptions = {
-        'key' : '8e9991a7d4aa3fef2ca28a617f3c1844',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };`;
-      bannerRef.current.append(conf);
-      bannerRef.current.append(script);
-    }
-  }, []);
-
-  return <div ref={bannerRef} style={{ width: '300px', height: '250px', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}></div>;
-};
 
 const MovieDetail = () => {
   const { id } = useParams();
@@ -104,6 +80,7 @@ const MovieDetail = () => {
   
   const buttonWarnings = useButtonWarnings();
   const [globalSkipAds, setGlobalSkipAds] = useState(false);
+  const [adTimerDuration, setAdTimerDuration] = useState(30);
 
   const handleImageError = (e, isPoster = true) => {
     const currentSrc = e.target.src;
@@ -119,23 +96,19 @@ const MovieDetail = () => {
   // TV Specific
   const [seasons, setSeasons] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(1);
-  const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [episodes, setEpisodes] = useState([]);
+  const [selectedEpisode, setSelectedEpisode] = useState(1);
 
   useEffect(() => {
     const fetchMovie = async () => {
       setLoading(true);
       try {
-        const onRevalidate = (data) => {
-          if (data && data.id) setMovie(data);
-          else setMovie(null);
-          setLoading(false);
-        };
-        const data = await fetchWithCache(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/movies/${id}?type=${type}`, onRevalidate);
-        if (data && data.id) setMovie(data);
-        else setMovie(null);
-      } catch (error) {
-        console.error('Error fetching details:', error);
+        const data = await fetchWithCache(
+          `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/movies/${id}?type=${type}`
+        );
+        setMovie(data);
+      } catch (err) {
+        console.error('Failed to load movie details', err);
         setMovie(null);
       }
       setLoading(false);
@@ -143,10 +116,20 @@ const MovieDetail = () => {
 
     const fetchGlobalSettings = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/settings/skip_ads_timer`);
-        if (res.ok) {
-          const data = await res.json();
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+        const [skipRes, adsRes] = await Promise.all([
+          fetch(`${baseUrl}/settings/skip_ads_timer`),
+          fetch(`${baseUrl}/ads/config`)
+        ]);
+        if (skipRes.ok) {
+          const data = await skipRes.json();
           setGlobalSkipAds(data.value === 'true' || data.value === true);
+        }
+        if (adsRes.ok) {
+          const adsData = await adsRes.json();
+          if (adsData.config?.download_modal?.timer_seconds) {
+            setAdTimerDuration(Number(adsData.config.download_modal.timer_seconds));
+          }
         }
       } catch (e) {
         console.error('Failed to fetch global settings', e);
@@ -154,7 +137,6 @@ const MovieDetail = () => {
     };
 
     fetchMovie();
-    fetchGlobalSettings();
     fetchGlobalSettings();
     setShowTrailer(false);
     setTrailerKey(null);
@@ -318,7 +300,7 @@ const MovieDetail = () => {
     const isAdmin = user?.role === 'admin';
     const shouldSkipTimer = isAdmin || globalSkipAds;
     setDownloadStep('ad');
-    setAdTimer(shouldSkipTimer ? 0 : 30);
+    setAdTimer(shouldSkipTimer ? 0 : adTimerDuration);
     setParsedDownloads({});
     setDownloadErrorMsg('');
     
@@ -933,6 +915,9 @@ const MovieDetail = () => {
         </div>
       )}
 
+      {/* In-Content Banner Ad */}
+      <AdBanner slot="movie_detail" />
+
       {/* More Like This */}
       <div className={`${styles.recommendations} recommendations`}>
         <Row title="More Like This" endpoint={`${id}/similar?type=${type}`} />
@@ -958,7 +943,7 @@ const MovieDetail = () => {
                   <>
                     {/* ADVERTISEMENT SCRIPT */}
                     <div className={styles.adPlaceholder} style={{ padding: 0, background: 'transparent', border: 'none' }}>
-                      <BannerAd />
+                      <AdBanner slot="download_modal" />
                     </div>
                     
                     <div className={styles.timerBox}>

@@ -1553,3 +1553,189 @@
 .toggleBtn.active .toggleThumb {
   transform: translateX(28px);
 }
+
+/* ============================================================
+   ADS & MONETIZATION PANEL STYLES
+   ============================================================ */
+.adsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.adSlotCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.adSlotCard:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.adSlotHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.adSlotTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adSlotTitle h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.adSlotBadge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #aaa;
+}
+
+.adSlotBadge.active {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.adFieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adFieldGroup label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.adInput {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: monospace;
+  transition: border-color 0.2s;
+}
+
+.adInput:focus {
+  outline: none;
+  border-color: #e50914;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sliderInput {
+  flex: 1;
+  accent-color: #e50914;
+  cursor: pointer;
+}
+
+.sliderValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2ecc71;
+  min-width: 60px;
+  text-align: right;
+}
+
+.trendChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  height: 180px;
+  padding: 20px 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 16px;
+}
+
+.trendBarCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.trendBar {
+  width: 100%;
+  max-width: 42px;
+  background: linear-gradient(180deg, #e50914, #8b0000);
+  border-radius: 6px 6px 0 0;
+  min-height: 4px;
+  transition: height 0.4s ease;
+  position: relative;
+}
+
+.trendBarVal {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 600;
+}
+
+.trendBarDate {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.slotProgressRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.slotProgressHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #ccc;
+  font-weight: 600;
+}
+
+.slotProgressBar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.slotProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #e50914, #ff5e62);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}

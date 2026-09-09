@@ -1,0 +1,154 @@
+import React, { useEffect, useState, useRef } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import styles from './AdBanner.module.css';
+
+const DEFAULT_CONFIGS = {
+  download_modal: {
+    enabled: true,
+    width: 300,
+    height: 250,
+    key: '8e9991a7d4aa3fef2ca28a617f3c1844',
+    script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js'
+  },
+  movie_detail: {
+    enabled: true,
+    width: 728,
+    height: 90,
+    key: '8e9991a7d4aa3fef2ca28a617f3c1844',
+    script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js'
+  }
+};
+
+const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
+  const { user } = useAuth();
+  const [adConfig, setAdConfig] = useState(customConfig || DEFAULT_CONFIGS[slot]);
+  const [skipAds, setSkipAds] = useState(false);
+  const impressionLoggedRef = useRef(false);
+
+  // Check if admin bypass applies
+  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchAdConfig = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+          (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+        
+        const res = await fetch(`${baseUrl}/ads/config`);
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          if (data.skipAdsTimer && slot === 'download_modal') {
+            setSkipAds(true);
+          }
+          if (data.config) {
+            if (!data.config.enabled) {
+              setAdConfig(null); // All ads disabled globally
+            } else if (data.config[slot]) {
+              setAdConfig(data.config[slot]);
+            }
+          }
+        }
+      } catch (e) {
+        // Fallback to default config on network error
+      }
+    };
+
+    if (!customConfig) {
+      fetchAdConfig();
+    }
+    return () => { isMounted = false; };
+  }, [slot, customConfig]);
+
+  const logImpression = async () => {
+    if (impressionLoggedRef.current) return;
+    impressionLoggedRef.current = true;
+
+    try {
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const sessionId = sessionStorage.getItem('trackingSessionId') || '';
+      const deviceType = window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+        (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+
+      await fetch(`${baseUrl}/ads/impression`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slot,
+          visitorId,
+          sessionId,
+          deviceType
+        })
+      });
+    } catch (_) {
+      // Non-blocking
+    }
+  };
+
+  if (isAdmin || skipAds || !adConfig || !adConfig.enabled) {
+    return null;
+  }
+
+  // Adjust dimensions for mobile responsiveness if leaderboard
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isLeaderboard = adConfig.width === 728;
+  const renderWidth = (isMobile && isLeaderboard) ? 300 : adConfig.width;
+  const renderHeight = (isMobile && isLeaderboard) ? 250 : adConfig.height;
+  const renderKey = (isMobile && isLeaderboard) ? '8e9991a7d4aa3fef2ca28a617f3c1844' : adConfig.key;
+
+  // Build clean HTML doc for iframe isolation
+  const iframeDoc = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            background: transparent; 
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: ${renderWidth}px; 
+            height: ${renderHeight}px; 
+          }
+        </style>
+      </head>
+      <body>
+        <script type="text/javascript">
+          atOptions = {
+            'key' : '${renderKey}',
+            'format' : 'iframe',
+            'height' : ${renderHeight},
+            'width' : ${renderWidth},
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="${adConfig.script_url}"></script>
+      </body>
+    </html>
+  `;
+
+  return (
+    <div 
+      className={`${styles.adContainer} ${slot === 'download_modal' ? styles.downloadModalAd : styles.movieDetailAd}`}
+      style={{ width: `${renderWidth}px` }}
+    >
+      <div className={styles.adBadge}>Sponsored</div>
+      <iframe
+        title={`Ad-${slot}`}
+        srcDoc={iframeDoc}
+        width={renderWidth}
+        height={renderHeight}
+        className={styles.adFrame}
+        scrolling="no"
+        frameBorder="0"
+        onLoad={logImpression}
+      />
+    </div>
+  );
+};
+
+export default AdBanner;

@@ -5,7 +5,7 @@ import {
   Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, 
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
-  Download, List, Palette, Play, Loader2
+  Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -47,6 +47,34 @@ const AdminDashboard = () => {
   const [buttonWarnings, setButtonWarnings] = useState({});
   const [savingSettings, setSavingSettings] = useState(false);
   const [newBlockIp, setNewBlockIp] = useState({ ip: '', reason: '' });
+
+  // Ads & Monetization States
+  const [adStats, setAdStats] = useState(null);
+  const [adsConfig, setAdsConfig] = useState({
+    enabled: true,
+    download_modal: {
+      enabled: true,
+      timer_seconds: 30,
+      format: 'iframe',
+      key: '8e9991a7d4aa3fef2ca28a617f3c1844',
+      script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+      width: 300,
+      height: 250
+    },
+    movie_detail: {
+      enabled: true,
+      format: 'iframe',
+      key: '8e9991a7d4aa3fef2ca28a617f3c1844',
+      script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+      width: 728,
+      height: 90
+    },
+    social_bar: {
+      enabled: false,
+      script_url: ''
+    }
+  });
+  const [savingAdsConfig, setSavingAdsConfig] = useState(false);
 
   const fetchLiveStats = async () => {
     try {
@@ -124,6 +152,15 @@ const AdminDashboard = () => {
     } else if (tab === 'support') {
       const supportRes = await fetch(`${baseUrl}/support`, { headers });
       if (supportRes.ok) setSupportTickets(await supportRes.json());
+    } else if (tab === 'ads') {
+      const adsRes = await fetch(`${baseUrl}/admin/ads/stats`, { headers });
+      if (adsRes.ok) {
+        const data = await adsRes.json();
+        setAdStats(data);
+        if (data.config) {
+          setAdsConfig(prev => ({ ...prev, ...data.config }));
+        }
+      }
     }
   };
 
@@ -312,6 +349,29 @@ const AdminDashboard = () => {
     finally { setSavingSettings(false); }
   };
 
+  const handleSaveAdsConfig = async () => {
+    try {
+      setSavingAdsConfig(true);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/admin/ads/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ config: adsConfig })
+      });
+      if (res.ok) {
+        showToast('Ads configuration saved successfully!', 'success');
+        fetchTabSpecificData('ads');
+      } else {
+        showToast('Failed to save ads config', 'error');
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Error saving ads configuration', 'error');
+    } finally {
+      setSavingAdsConfig(false);
+    }
+  };
+
   const handleResolveTicket = async (id, currentStatus) => {
     try {
       setResolvingTicket(true);
@@ -366,6 +426,9 @@ const AdminDashboard = () => {
         </button>
         <button className={`${styles.tabBtn} ${activeTab === 'live' ? styles.activeTab : ''}`} onClick={() => setActiveTab('live')}>
           <Zap size={18} /> Live Feed
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'ads' ? styles.activeTab : ''}`} onClick={() => setActiveTab('ads')}>
+          <DollarSign size={18} /> Ads & Monetization
         </button>
       </div>
 
@@ -854,6 +917,337 @@ const AdminDashboard = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADS & MONETIZATION TAB */}
+      {activeTab === 'ads' && (
+        <div className={styles.tabContent}>
+          {/* KPI CARDS */}
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(229, 9, 20, 0.15)', color: '#e50914' }}>
+                <Eye size={28} />
+              </div>
+              <div className={styles.statInfo}>
+                <h3>{adStats?.todayImpressions?.toLocaleString() || 0}</h3>
+                <p>Today's Ad Impressions</p>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}>
+                <TrendingUp size={28} />
+              </div>
+              <div className={styles.statInfo}>
+                <h3>{adStats?.totalImpressions?.toLocaleString() || 0}</h3>
+                <p>Total Ad Impressions</p>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}>
+                <Users size={28} />
+              </div>
+              <div className={styles.statInfo}>
+                <h3>{adStats?.uniqueViewersToday?.toLocaleString() || 0}</h3>
+                <p>Unique Viewers Today</p>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}>
+                <Activity size={28} />
+              </div>
+              <div className={styles.statInfo}>
+                <h3>{adStats?.uniqueViewersTotal?.toLocaleString() || 0}</h3>
+                <p>All-Time Unique Viewers</p>
+              </div>
+            </div>
+          </div>
+
+          {/* PERFORMANCE & TRENDS */}
+          <div className={styles.analyticsSection} style={{ marginTop: '30px' }}>
+            <div className={styles.sectionHeader}>
+              <h2><BarChart3 size={20} style={{ marginRight: '10px' }} /> 7-Day Performance & Slot Breakdown</h2>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px', marginTop: '20px' }}>
+              {/* Daily Trend Chart */}
+              <div className={styles.settingCard} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                <div className={styles.settingInfo}>
+                  <h3>Impressions Trend (Last 7 Days)</h3>
+                  <p>Daily volume of ads rendered to visitors</p>
+                </div>
+                {adStats?.dailyTrend && adStats.dailyTrend.length > 0 ? (
+                  <div className={styles.trendChart}>
+                    {(() => {
+                      const maxCount = Math.max(...adStats.dailyTrend.map(d => d.count), 1);
+                      return adStats.dailyTrend.map((d, i) => {
+                        const heightPct = Math.max((d.count / maxCount) * 100, 5);
+                        const label = d.date.split('-').slice(1).join('/');
+                        return (
+                          <div key={i} className={styles.trendBarCol}>
+                            <span className={styles.trendBarVal}>{d.count}</span>
+                            <div className={styles.trendBar} style={{ height: `${heightPct}%` }}></div>
+                            <span className={styles.trendBarDate}>{label}</span>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                ) : (
+                  <div style={{ padding: '40px', textAlign: 'center', color: '#777' }}>
+                    No impressions recorded in the last 7 days yet.
+                  </div>
+                )}
+              </div>
+
+              {/* Slot Breakdown */}
+              <div className={styles.settingCard} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                <div className={styles.settingInfo}>
+                  <h3>Impressions by Ad Slot</h3>
+                  <p>Performance comparison across active placements</p>
+                </div>
+                <div style={{ marginTop: '20px' }}>
+                  {[
+                    { id: 'download_modal', label: 'Download Modal (300x250)' },
+                    { id: 'movie_detail', label: 'Movie Detail Banner (728x90)' },
+                    { id: 'social_bar', label: 'Social Bar (Floating Widget)' }
+                  ].map(slotItem => {
+                    const found = adStats?.slotBreakdown?.find(s => s.slot === slotItem.id);
+                    const impressions = found ? found.impressions : 0;
+                    const visitors = found ? found.unique_visitors : 0;
+                    const total = adStats?.totalImpressions || 1;
+                    const pct = Math.min(Math.round((impressions / total) * 100), 100);
+
+                    return (
+                      <div key={slotItem.id} className={styles.slotProgressRow}>
+                        <div className={styles.slotProgressHeader}>
+                          <span>{slotItem.label}</span>
+                          <span><strong>{impressions.toLocaleString()}</strong> views ({visitors} unique)</span>
+                        </div>
+                        <div className={styles.slotProgressBar}>
+                          <div className={styles.slotProgressFill} style={{ width: `${pct}%` }}></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ADSTERRA CONFIGURATION & CONTROLS */}
+          <div className={styles.analyticsSection} style={{ marginTop: '40px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              <div className={styles.sectionHeader} style={{ margin: 0 }}>
+                <h2><ShieldCheck size={20} style={{ marginRight: '10px' }} /> Adsterra Units & Placement Controls</h2>
+                <p style={{ color: '#888', fontSize: '14px', marginTop: '4px' }}>
+                  Enable or disable individual ad formats, customize Adsterra script keys, and adjust countdown timer.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: adsConfig.enabled ? '#2ecc71' : '#e50914' }}>
+                    Master Ads: {adsConfig.enabled ? 'ENABLED' : 'DISABLED'}
+                  </span>
+                  <button 
+                    className={`${styles.toggleBtn} ${adsConfig.enabled ? styles.active : ''}`}
+                    onClick={() => setAdsConfig(prev => ({ ...prev, enabled: !prev.enabled }))}
+                  >
+                    <div className={styles.toggleThumb}></div>
+                  </button>
+                </div>
+
+                <button 
+                  className={styles.primaryBtn} 
+                  onClick={handleSaveAdsConfig}
+                  disabled={savingAdsConfig || currentUser.role !== 'admin'}
+                >
+                  {savingAdsConfig ? (
+                    <>
+                      <Loader2 size={16} className={styles.spinner} /> SAVING...
+                    </>
+                  ) : (
+                    'SAVE AD CONFIGURATION'
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.adsGrid}>
+              {/* SLOT 1: DOWNLOAD MODAL */}
+              <div className={styles.adSlotCard}>
+                <div className={styles.adSlotHeader}>
+                  <div className={styles.adSlotTitle}>
+                    <Download size={20} color="#e50914" />
+                    <div>
+                      <h3>Download Modal Banner</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>300x250 Rectangle Ad</span>
+                    </div>
+                  </div>
+                  <button 
+                    className={`${styles.toggleBtn} ${adsConfig.download_modal?.enabled ? styles.active : ''}`}
+                    onClick={() => setAdsConfig(prev => ({
+                      ...prev,
+                      download_modal: { ...prev.download_modal, enabled: !prev.download_modal?.enabled }
+                    }))}
+                  >
+                    <div className={styles.toggleThumb}></div>
+                  </button>
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Adsterra Unit Key</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.download_modal?.key || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      download_modal: { ...prev.download_modal, key: e.target.value.trim() }
+                    }))}
+                    placeholder="e.g. 8e9991a7d4aa3fef2ca28a617f3c1844"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Script Invoke URL</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.download_modal?.script_url || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      download_modal: { ...prev.download_modal, script_url: e.target.value.trim() }
+                    }))}
+                    placeholder="//heavenlysuspicious.com/.../invoke.js"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Download Wait Timer: {adsConfig.download_modal?.timer_seconds || 30}s</label>
+                  <div className={styles.sliderRow}>
+                    <input 
+                      type="range" 
+                      min="5" 
+                      max="60" 
+                      step="5"
+                      className={styles.sliderInput}
+                      value={adsConfig.download_modal?.timer_seconds || 30}
+                      onChange={e => setAdsConfig(prev => ({
+                        ...prev,
+                        download_modal: { ...prev.download_modal, timer_seconds: Number(e.target.value) }
+                      }))}
+                    />
+                    <span className={styles.sliderValue}>{adsConfig.download_modal?.timer_seconds || 30} sec</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SLOT 2: MOVIE DETAIL BANNER */}
+              <div className={styles.adSlotCard}>
+                <div className={styles.adSlotHeader}>
+                  <div className={styles.adSlotTitle}>
+                    <Film size={20} color="#0071eb" />
+                    <div>
+                      <h3>Movie Detail Banner</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>728x90 Leaderboard / Responsive</span>
+                    </div>
+                  </div>
+                  <button 
+                    className={`${styles.toggleBtn} ${adsConfig.movie_detail?.enabled ? styles.active : ''}`}
+                    onClick={() => setAdsConfig(prev => ({
+                      ...prev,
+                      movie_detail: { ...prev.movie_detail, enabled: !prev.movie_detail?.enabled }
+                    }))}
+                  >
+                    <div className={styles.toggleThumb}></div>
+                  </button>
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Adsterra Unit Key</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.movie_detail?.key || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      movie_detail: { ...prev.movie_detail, key: e.target.value.trim() }
+                    }))}
+                    placeholder="e.g. 8e9991a7d4aa3fef2ca28a617f3c1844"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Script Invoke URL</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.movie_detail?.script_url || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      movie_detail: { ...prev.movie_detail, script_url: e.target.value.trim() }
+                    }))}
+                    placeholder="//heavenlysuspicious.com/.../invoke.js"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Placement Notes</label>
+                  <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
+                    Appears cleanly above the "More Like This" recommendation section. Automatically adjusts on mobile view.
+                  </p>
+                </div>
+              </div>
+
+              {/* SLOT 3: SOCIAL BAR */}
+              <div className={styles.adSlotCard}>
+                <div className={styles.adSlotHeader}>
+                  <div className={styles.adSlotTitle}>
+                    <MessageSquare size={20} color="#2ecc71" />
+                    <div>
+                      <h3>Social Bar (Non-intrusive)</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>Floating Push / Widget Format</span>
+                    </div>
+                  </div>
+                  <button 
+                    className={`${styles.toggleBtn} ${adsConfig.social_bar?.enabled ? styles.active : ''}`}
+                    onClick={() => setAdsConfig(prev => ({
+                      ...prev,
+                      social_bar: { ...prev.social_bar, enabled: !prev.social_bar?.enabled }
+                    }))}
+                  >
+                    <div className={styles.toggleThumb}></div>
+                  </button>
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Adsterra Social Bar Script URL</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.social_bar?.script_url || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      social_bar: { ...prev.social_bar, script_url: e.target.value.trim() }
+                    }))}
+                    placeholder="//pl12345678.highratecpm.com/.../invoke.js"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>About Social Bar</label>
+                  <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
+                    High-converting widget that appears in the lower corner. It does NOT open new browser tabs or popunders. Paste your Adsterra Social Bar script URL and enable it.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

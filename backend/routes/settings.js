@@ -7,7 +7,7 @@ router.get('/:key', async (req, res) => {
   const { key } = req.params;
   
   // Only allow certain keys to be read publicly
-  const publicKeys = ['skip_ads_timer', 'announcement', 'button_warnings', 'platform_updates'];
+  const publicKeys = ['skip_ads_timer', 'announcement', 'button_warnings', 'platform_updates', 'ads_config'];
   if (!publicKeys.includes(key)) {
     return res.status(403).json({ message: 'This setting is not public.' });
   }

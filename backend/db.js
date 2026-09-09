@@ -185,6 +185,26 @@ const initDB = async () => {
         END IF;
       END $$;
 
+      CREATE TABLE IF NOT EXISTS ad_impressions (
+        id SERIAL PRIMARY KEY,
+        slot TEXT NOT NULL,
+        visitor_id TEXT,
+        session_id TEXT,
+        device_type TEXT DEFAULT 'desktop',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_ad_impressions_slot_date ON ad_impressions(slot, created_at);
+      CREATE INDEX IF NOT EXISTS idx_ad_impressions_date ON ad_impressions(created_at);
+
+      -- Seed default ads_config if it does not exist
+      INSERT INTO settings (key, value)
+      VALUES (
+        'ads_config',
+        '{"enabled":true,"download_modal":{"enabled":true,"timer_seconds":30,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":300,"height":250},"movie_detail":{"enabled":true,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":728,"height":90},"social_bar":{"enabled":false,"script_url":""}}'
+      )
+      ON CONFLICT (key) DO NOTHING;
+
       CREATE INDEX IF NOT EXISTS idx_download_cache_key ON download_cache(cache_key);
     `);
     console.log('[DB] PostgreSQL database initialized');
