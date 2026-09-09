@@ -246,7 +246,9 @@ const Search = () => {
               >
                 <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
               </Link>
-              {(idx + 1) % 8 === 0 && <AdCard key={`ad-grid-${idx}`} />}
+              {(idx === 3 || (idx > 3 && (idx - 3) % 8 === 0) || (results.length < 4 && idx === results.length - 1)) && (
+                <AdCard key={`ad-grid-${idx}`} />
+              )}
             </React.Fragment>
           ))}
         </div>

@@ -90,9 +90,13 @@ const AdCard = () => {
     } catch (_) {}
   };
 
-  if (isAdmin || !adConfig || !adConfig.enabled) {
+  if (!adConfig || !adConfig.enabled) {
     return null;
   }
+
+  const scriptSrc = (adConfig.script_url || '').startsWith('//') 
+    ? `https:${adConfig.script_url}` 
+    : (adConfig.script_url || 'https://heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js');
 
   const iframeDoc = `
     <!DOCTYPE html>
@@ -115,14 +119,14 @@ const AdCard = () => {
       <body>
         <script type="text/javascript">
           atOptions = {
-            'key' : '${adConfig.key}',
+            'key' : '${adConfig.key || '8e9991a7d4aa3fef2ca28a617f3c1844'}',
             'format' : 'iframe',
             'height' : 250,
             'width' : 300,
             'params' : {}
           };
         </script>
-        <script type="text/javascript" src="${adConfig.script_url}"></script>
+        <script type="text/javascript" src="${scriptSrc}"></script>
       </body>
     </html>
   `;

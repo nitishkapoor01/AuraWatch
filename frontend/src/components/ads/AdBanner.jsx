@@ -86,7 +86,7 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
     }
   };
 
-  if (isAdmin || skipAds || !adConfig || !adConfig.enabled) {
+  if (skipAds || !adConfig || !adConfig.enabled) {
     return null;
   }
 
@@ -96,6 +96,10 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
   const renderWidth = (isMobile && isLeaderboard) ? 300 : adConfig.width;
   const renderHeight = (isMobile && isLeaderboard) ? 250 : adConfig.height;
   const renderKey = (isMobile && isLeaderboard) ? '8e9991a7d4aa3fef2ca28a617f3c1844' : adConfig.key;
+
+  const scriptSrc = (adConfig.script_url || '').startsWith('//') 
+    ? `https:${adConfig.script_url}` 
+    : (adConfig.script_url || 'https://heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js');
 
   // Build clean HTML doc for iframe isolation
   const iframeDoc = `
@@ -126,7 +130,7 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
             'params' : {}
           };
         </script>
-        <script type="text/javascript" src="${adConfig.script_url}"></script>
+        <script type="text/javascript" src="${scriptSrc}"></script>
       </body>
     </html>
   `;

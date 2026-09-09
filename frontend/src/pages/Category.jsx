@@ -62,7 +62,9 @@ const Category = ({ type, title }) => {
               >
                 <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
               </Link>
-              {(idx + 1) % 8 === 0 && <AdCard key={`ad-cat-${idx}`} />}
+              {(idx === 3 || (idx > 3 && (idx - 3) % 8 === 0)) && (
+                <AdCard key={`ad-cat-${idx}`} />
+              )}
             </React.Fragment>
           ))}
         </div>
