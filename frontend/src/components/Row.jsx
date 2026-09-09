@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchWithCache } from '../utils/api';
 import styles from '../pages/Home.module.css';
+import AdCard from './ads/AdCard';
 
 const Row = ({ title, endpoint, compact = false }) => {
   const [movies, setMovies] = useState([]);
@@ -134,21 +135,33 @@ const Row = ({ title, endpoint, compact = false }) => {
 
         <div className={`${styles.movieGrid} movieGrid`} ref={rowRef}>
           {movies.map((movie, idx) => (
-            <Link 
-              to={`/movie/${movie.id}?type=${movie.type ? movie.type.toLowerCase() : 'movie'}`}
-              key={`${movie.id}-${idx}`} 
-              className={`${styles.cardContainer} cardContainer`}
-              style={{
-                flex: compact ? '0 0 calc(20% - 8px)' : undefined,
-                aspectRatio: compact ? '16 / 9' : '2 / 3',
-                height: compact ? 'auto' : undefined
-              }}
-            >
-              <img src={movie.poster} alt={movie.title} className={styles.cardImage} loading="lazy" referrerPolicy="no-referrer" />
-              <div className={styles.cardOverlay}>
-                <span className={styles.cardTitle}>{movie.title}</span>
-              </div>
-            </Link>
+            <React.Fragment key={`${movie.id}-${idx}`}>
+              <Link 
+                to={`/movie/${movie.id}?type=${movie.type ? movie.type.toLowerCase() : 'movie'}`}
+                className={`${styles.cardContainer} cardContainer`}
+                style={{
+                  flex: compact ? '0 0 calc(20% - 8px)' : undefined,
+                  aspectRatio: compact ? '16 / 9' : '2 / 3',
+                  height: compact ? 'auto' : undefined
+                }}
+              >
+                <img src={movie.poster} alt={movie.title} className={styles.cardImage} loading="lazy" referrerPolicy="no-referrer" />
+                <div className={styles.cardOverlay}>
+                  <span className={styles.cardTitle}>{movie.title}</span>
+                </div>
+              </Link>
+              {!compact && (idx === 3 || (idx > 3 && (idx - 3) % 8 === 0)) && (
+                <div 
+                  className={`${styles.cardContainer} cardContainer`}
+                  style={{
+                    aspectRatio: '2 / 3',
+                    minWidth: '150px'
+                  }}
+                >
+                  <AdCard />
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
 
