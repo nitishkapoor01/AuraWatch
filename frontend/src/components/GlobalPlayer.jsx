@@ -16,16 +16,51 @@ const GlobalPlayer = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
-  const [selectedServer, setSelectedServer] = useState(() => {
-    return localStorage.getItem('aurawatch_player_server') || 'filmu';
-  });
+  // Helper to determine preferred server based on recency and watch frequency
+  const getPreferredServer = () => {
+    try {
+      const recent = localStorage.getItem('aurawatch_preferred_server') || localStorage.getItem('aurawatch_player_server');
+      if (recent === 'screenscape' || recent === 'filmu') {
+        return recent;
+      }
+      const usageRaw = localStorage.getItem('aurawatch_server_usage');
+      if (usageRaw) {
+        const usage = JSON.parse(usageRaw);
+        if ((usage.filmu || 0) > (usage.screenscape || 0)) {
+          return 'filmu';
+        }
+      }
+    } catch (e) {}
+    // Default priority is Player 1 (ScreenScape)
+    return 'screenscape';
+  };
+
+  const [selectedServer, setSelectedServer] = useState(getPreferredServer);
   const [isSwitching, setIsSwitching] = useState(false);
+
+  // Sync preferred server whenever player opens or new movie loads
+  useEffect(() => {
+    if (isOpen && movieData) {
+      setSelectedServer(getPreferredServer());
+    }
+  }, [isOpen, movieData?.id, movieData?.season, movieData?.episode]);
 
   const handleServerChange = (serverId) => {
     if (serverId === selectedServer) return;
     setIsSwitching(true);
     setSelectedServer(serverId);
-    localStorage.setItem('aurawatch_player_server', serverId);
+    try {
+      // Save as most recent
+      localStorage.setItem('aurawatch_preferred_server', serverId);
+      localStorage.setItem('aurawatch_player_server', serverId);
+      
+      // Update usage frequency counter
+      const usageRaw = localStorage.getItem('aurawatch_server_usage');
+      const usage = usageRaw ? JSON.parse(usageRaw) : { screenscape: 0, filmu: 0 };
+      usage[serverId] = (usage[serverId] || 0) + 1;
+      localStorage.setItem('aurawatch_server_usage', JSON.stringify(usage));
+    } catch (e) {}
+
     setTimeout(() => {
       setIsSwitching(false);
     }, 400);
@@ -221,21 +256,22 @@ const GlobalPlayer = () => {
     const isTV = type === 'tv' || type === 'series';
     const isAnime = type === 'anime' || (movieData.genres && movieData.genres.some(g => g.name?.toLowerCase().includes('animation')));
 
-    if (selectedServer === 'filmu') {
-      if (isAnime && movieData.season && movieData.episode) {
-        return `https://embed.filmu.in/anime/${movieData.id}/${movieData.season}/${movieData.episode}`;
-      }
+    // Player 1: ScreenScape
+    if (selectedServer === 'screenscape') {
       if (isTV) {
-        return `https://embed.filmu.in/tv/${movieData.id}/${movieData.season || 1}/${movieData.episode || 1}`;
+        return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season || 1}&e=${movieData.episode || 1}`;
       }
-      return `https://embed.filmu.in/movie/${movieData.id}`;
+      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=movie`;
     }
 
-    // Default / Screenscape
-    if (isTV) {
-      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season || 1}&e=${movieData.episode || 1}`;
+    // Player 2: Filmu
+    if (isAnime && movieData.season && movieData.episode) {
+      return `https://embed.filmu.in/anime/${movieData.id}/${movieData.season}/${movieData.episode}`;
     }
-    return `https://screenscape.me/embed?tmdb=${movieData.id}&type=movie`;
+    if (isTV) {
+      return `https://embed.filmu.in/tv/${movieData.id}/${movieData.season || 1}/${movieData.episode || 1}`;
+    }
+    return `https://embed.filmu.in/movie/${movieData.id}`;
   };
 
   const isTV = movieData.type === 'tv' || movieData.type === 'Series';
@@ -281,10 +317,10 @@ const GlobalPlayer = () => {
         <div className={styles.playerSwitchDeck}>
           <button
             type="button"
-            className={`${styles.streamOptionBtn} ${selectedServer === 'filmu' ? styles.activeOption : ''}`}
+            className={`${styles.streamOptionBtn} ${selectedServer === 'screenscape' ? styles.activeOption : ''}`}
             onClick={(e) => {
               e.stopPropagation();
-              handleServerChange('filmu');
+              handleServerChange('screenscape');
             }}
             title="Player 1"
           >
@@ -298,10 +334,10 @@ const GlobalPlayer = () => {
 
           <button
             type="button"
-            className={`${styles.streamOptionBtn} ${selectedServer === 'screenscape' ? styles.activeOption : ''}`}
+            className={`${styles.streamOptionBtn} ${selectedServer === 'filmu' ? styles.activeOption : ''}`}
             onClick={(e) => {
               e.stopPropagation();
-              handleServerChange('screenscape');
+              handleServerChange('filmu');
             }}
             title="Player 2"
           >
@@ -321,7 +357,7 @@ const GlobalPlayer = () => {
         {isSwitching && (
           <div className={styles.switchOverlay}>
             <div className={styles.switchSpinner}></div>
-            <span>Connecting to {selectedServer === 'filmu' ? 'Player 1' : 'Player 2'}...</span>
+            <span>Connecting to {selectedServer === 'screenscape' ? 'Player 1' : 'Player 2'}...</span>
           </div>
         )}
         <iframe
