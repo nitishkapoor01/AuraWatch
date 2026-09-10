@@ -66,25 +66,28 @@ router.get('/config', async (req, res) => {
       download_modal: {
         enabled: true,
         timer_seconds: 30,
-        format: 'iframe',
-        key: '8e9991a7d4aa3fef2ca28a617f3c1844',
-        script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+        format: 'native',
+        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
+        key: 'ccd684eb4f620dcc7303d2fce2577bae',
+        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
         width: 300,
         height: 250
       },
       movie_detail: {
         enabled: true,
-        format: 'iframe',
-        key: '8e9991a7d4aa3fef2ca28a617f3c1844',
-        script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+        format: 'native',
+        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
+        key: 'ccd684eb4f620dcc7303d2fce2577bae',
+        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
         width: 728,
-        height: 90
+        height: 180
       },
       search_grid: {
         enabled: true,
-        format: 'iframe',
-        key: '8e9991a7d4aa3fef2ca28a617f3c1844',
-        script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js',
+        format: 'native',
+        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
+        key: 'ccd684eb4f620dcc7303d2fce2577bae',
+        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
         width: 300,
         height: 250
       },

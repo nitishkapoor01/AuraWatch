@@ -5,17 +5,21 @@ import styles from './AdBanner.module.css';
 const DEFAULT_CONFIGS = {
   download_modal: {
     enabled: true,
+    format: 'native',
+    container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 300,
     height: 250,
-    key: '8e9991a7d4aa3fef2ca28a617f3c1844',
-    script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js'
+    key: 'ccd684eb4f620dcc7303d2fce2577bae',
+    script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
   },
   movie_detail: {
     enabled: true,
+    format: 'native',
+    container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 728,
-    height: 90,
-    key: '8e9991a7d4aa3fef2ca28a617f3c1844',
-    script_url: '//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js'
+    height: 180,
+    key: 'ccd684eb4f620dcc7303d2fce2577bae',
+    script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
   }
 };
 
@@ -98,12 +102,46 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
   const renderHeight = (isMobile && isLeaderboard) ? 250 : adConfig.height;
   const renderKey = (isMobile && isLeaderboard) ? '8e9991a7d4aa3fef2ca28a617f3c1844' : adConfig.key;
 
+  const isNative = adConfig.format === 'native' || !!adConfig.container_id;
+  const containerId = adConfig.container_id || 'container-ccd684eb4f620dcc7303d2fce2577bae';
   const scriptSrc = (adConfig.script_url || '').startsWith('//') 
     ? `https:${adConfig.script_url}` 
-    : (adConfig.script_url || 'https://heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js');
+    : (adConfig.script_url || 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js');
 
   // Build clean HTML doc for iframe isolation
-  const iframeDoc = `
+  const iframeDoc = isNative ? `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            background: transparent; 
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%; 
+            height: 100%; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          }
+          #${containerId} {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+        </style>
+      </head>
+      <body>
+        <div id="${containerId}"></div>
+        <script async="async" data-cfasync="false" src="${scriptSrc}"></script>
+      </body>
+    </html>
+  ` : `
     <!DOCTYPE html>
     <html>
       <head>
