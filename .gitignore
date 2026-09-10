@@ -38,3 +38,8 @@ graphify-out/
 # Build
 dist/
 build/
+
+# Scratch & temporary
+scratch/
+backend/scratch/
+

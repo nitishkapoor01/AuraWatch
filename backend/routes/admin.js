@@ -112,11 +112,114 @@ router.get('/announcement', isModerator, async (req, res) => {
   }
 });
 
+const { getCountryFlag, getCountryName } = require('../utils/geo');
+
 // GET Visitors, Most Watched, Login Logs
 router.get('/visitors', isModerator, async (req, res) => {
   const result = await db.query('SELECT * FROM unique_visitors ORDER BY last_seen DESC LIMIT 5000');
-  res.json(result.rows);
+  const enriched = result.rows.map(row => ({
+    ...row,
+    flag: getCountryFlag(row.country_code),
+    country_name: (row.country_name && row.country_name !== 'Unknown') ? row.country_name : getCountryName(row.country_code)
+  }));
+  res.json(enriched);
 });
+
+// GET Audience Countries Analytics
+router.get('/analytics/countries', isModerator, async (req, res) => {
+  try {
+    const period = req.query.period || 'all_time';
+    let queryText = '';
+    let params = [];
+
+    if (period === 'today') {
+      queryText = `
+        SELECT 
+          COALESCE(NULLIF(pv.country_code, 'XX'), NULLIF(uv.country_code, 'XX'), 'XX') as country_code,
+          COALESCE(NULLIF(pv.country_name, 'Unknown'), NULLIF(uv.country_name, 'Unknown'), 'Unknown') as country_name,
+          COUNT(DISTINCT pv.session_id) as count
+        FROM platform_visits pv
+        LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
+        WHERE pv.date = CURRENT_DATE
+        GROUP BY 1, 2
+        ORDER BY count DESC
+      `;
+    } else if (period === 'weekly') {
+      queryText = `
+        SELECT 
+          COALESCE(NULLIF(pv.country_code, 'XX'), NULLIF(uv.country_code, 'XX'), 'XX') as country_code,
+          COALESCE(NULLIF(pv.country_name, 'Unknown'), NULLIF(uv.country_name, 'Unknown'), 'Unknown') as country_name,
+          COUNT(DISTINCT pv.session_id) as count
+        FROM platform_visits pv
+        LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
+        WHERE pv.date >= CURRENT_DATE - INTERVAL '7 days'
+        GROUP BY 1, 2
+        ORDER BY count DESC
+      `;
+    } else if (period === 'monthly') {
+      queryText = `
+        SELECT 
+          COALESCE(NULLIF(pv.country_code, 'XX'), NULLIF(uv.country_code, 'XX'), 'XX') as country_code,
+          COALESCE(NULLIF(pv.country_name, 'Unknown'), NULLIF(uv.country_name, 'Unknown'), 'Unknown') as country_name,
+          COUNT(DISTINCT pv.session_id) as count
+        FROM platform_visits pv
+        LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
+        WHERE pv.date >= CURRENT_DATE - INTERVAL '30 days'
+        GROUP BY 1, 2
+        ORDER BY count DESC
+      `;
+    } else {
+      // all_time - aggregate from unique_visitors
+      queryText = `
+        SELECT 
+          COALESCE(NULLIF(country_code, ''), 'XX') as country_code,
+          COALESCE(NULLIF(country_name, ''), 'Unknown') as country_name,
+          COUNT(*) as count
+        FROM unique_visitors
+        GROUP BY 1, 2
+        ORDER BY count DESC
+      `;
+    }
+
+    const result = await db.query(queryText, params);
+    const rawRows = result.rows;
+
+    let totalCount = 0;
+    rawRows.forEach(r => { totalCount += parseInt(r.count, 10); });
+
+    const countries = rawRows.map(row => {
+      const code = (row.country_code || 'XX').toUpperCase();
+      const count = parseInt(row.count, 10);
+      const percentage = totalCount > 0 ? parseFloat(((count / totalCount) * 100).toFixed(1)) : 0;
+      const countryName = (row.country_name && row.country_name !== 'Unknown') 
+        ? row.country_name 
+        : getCountryName(code);
+
+      return {
+        countryCode: code,
+        countryName,
+        flag: getCountryFlag(code),
+        count,
+        percentage
+      };
+    });
+
+    const knownCountries = countries.filter(c => c.countryCode !== 'XX');
+    const topCountry = knownCountries.length > 0 ? knownCountries[0] : (countries[0] || null);
+
+    res.json({
+      period,
+      totalTracked: totalCount,
+      totalCountries: knownCountries.length,
+      topCountry,
+      countries
+    });
+  } catch (error) {
+    console.error('[ADMIN] Failed to fetch country analytics:', error);
+    res.status(500).json({ message: 'Failed to fetch country statistics.' });
+  }
+});
+
 router.get('/analytics/most-watched', isModerator, async (req, res) => {
   const result = await db.query('SELECT title, movie_type, COUNT(*) as watches FROM watch_history GROUP BY title, movie_type ORDER BY watches DESC LIMIT 10');
   res.json(result.rows);

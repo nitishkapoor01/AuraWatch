@@ -51,7 +51,8 @@ function App() {
             userId: user ? user.id : null,
             name: user ? user.name : null,
             path: location.pathname + location.search,
-            action: getActionFromPath(location.pathname)
+            action: getActionFromPath(location.pathname),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
           })
         });
         if (res.ok) {

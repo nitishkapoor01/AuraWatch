@@ -201,10 +201,24 @@ const initDB = async () => {
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='support_tickets' AND COLUMN_NAME='is_read') THEN
           ALTER TABLE support_tickets ADD COLUMN is_read BOOLEAN DEFAULT FALSE;
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='unique_visitors' AND COLUMN_NAME='country_code') THEN
+          ALTER TABLE unique_visitors ADD COLUMN country_code TEXT DEFAULT 'XX';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='unique_visitors' AND COLUMN_NAME='country_name') THEN
+          ALTER TABLE unique_visitors ADD COLUMN country_name TEXT DEFAULT 'Unknown';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='platform_visits' AND COLUMN_NAME='country_code') THEN
+          ALTER TABLE platform_visits ADD COLUMN country_code TEXT DEFAULT 'XX';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='platform_visits' AND COLUMN_NAME='country_name') THEN
+          ALTER TABLE platform_visits ADD COLUMN country_name TEXT DEFAULT 'Unknown';
+        END IF;
       END $$;
 
       CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
       CREATE INDEX IF NOT EXISTS idx_support_tickets_visitor ON support_tickets(visitor_id);
+      CREATE INDEX IF NOT EXISTS idx_unique_visitors_country ON unique_visitors(country_code);
+      CREATE INDEX IF NOT EXISTS idx_platform_visits_country ON platform_visits(country_code);
 
       CREATE TABLE IF NOT EXISTS ad_impressions (
         id SERIAL PRIMARY KEY,

@@ -5,7 +5,7 @@ import {
   Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, 
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
-  Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp
+  Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -22,6 +22,11 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Audience Country Analytics States
+  const [countryStats, setCountryStats] = useState({ countries: [], totalTracked: 0, totalCountries: 0, topCountry: null, period: 'all_time' });
+  const [countryPeriod, setCountryPeriod] = useState('all_time');
+  const [loadingCountries, setLoadingCountries] = useState(false);
   
   // Live Feed & Security States
   const [liveStats, setLiveStats] = useState(null);
@@ -136,8 +141,28 @@ const AdminDashboard = () => {
         const announcementData = await announcementRes.json();
         if (announcementData) setAnnouncement(announcementData);
       }
+      
+      // Preload audience countries for summary
+      fetchCountryAnalytics('all_time');
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
+  };
+
+  const fetchCountryAnalytics = async (period = countryPeriod) => {
+    try {
+      setLoadingCountries(true);
+      const headers = { Authorization: `Bearer ${token}` };
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/admin/analytics/countries?period=${period}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setCountryStats(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch country analytics', e);
+    } finally {
+      setLoadingCountries(false);
+    }
   };
 
   const fetchTabSpecificData = async (tab) => {
@@ -158,6 +183,7 @@ const AdminDashboard = () => {
       ]);
       if (searchRes.ok) setSearchLogs(await searchRes.json());
       if (watchedRes.ok) setMostWatched(await watchedRes.json());
+      fetchCountryAnalytics(countryPeriod);
     } else if (tab === 'users') {
       const visitorsRes = await fetch(`${baseUrl}/admin/visitors`, { headers });
       if (visitorsRes.ok) setVisitors(await visitorsRes.json());
@@ -703,7 +729,7 @@ const AdminDashboard = () => {
             <div className={styles.tableContainer}>
               <table className={styles.usersTable}>
                 <thead>
-                  <tr><th>Guest ID</th><th>Last Action</th><th>Current Path</th><th>Last Seen</th></tr>
+                  <tr><th>Guest ID</th><th>Country</th><th>Last Action</th><th>Current Path</th><th>Last Seen</th></tr>
                 </thead>
                 <tbody>
                   {(liveStats?.sessions.filter(s => s.isGuest) || []).map(guest => (
@@ -720,6 +746,11 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td>
+                        <span className={styles.countryTag}>
+                          {guest.flag || '🌐'} {guest.countryName || 'Unknown'}
+                        </span>
+                      </td>
+                      <td>
                         <span className={styles.actionBadge} style={{ fontSize: '10px' }}>{guest.action || 'Browsing'}</span>
                       </td>
                       <td style={{ fontSize: '11px', color: '#888' }}>{guest.path}</td>
@@ -727,7 +758,7 @@ const AdminDashboard = () => {
                     </tr>
                   ))}
                   {(!liveStats || liveStats.sessions.filter(s => s.isGuest).length === 0) && (
-                    <tr><td colSpan="4" className={styles.emptyTable}>No guests active right now.</td></tr>
+                    <tr><td colSpan="5" className={styles.emptyTable}>No guests active right now.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -744,7 +775,7 @@ const AdminDashboard = () => {
             <div className={styles.tableContainer}>
               <table className={styles.usersTable}>
                 <thead>
-                  <tr><th>Visitor</th><th>Status</th><th>Last IP</th><th>First Seen</th><th>Last Active</th></tr>
+                  <tr><th>Visitor</th><th>Country</th><th>Status</th><th>Last IP</th><th>First Seen</th><th>Last Active</th></tr>
                 </thead>
                 <tbody>
                   {visitors.map(v => (
@@ -761,6 +792,11 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td>
+                        <span className={styles.countryTag}>
+                          {v.flag || '🌐'} {v.country_name || 'Unknown'}
+                        </span>
+                      </td>
+                      <td>
                         <span className={`${styles.roleBadge} ${v.is_registered ? styles.roleAdmin : styles.roleUser}`} style={{ background: v.is_registered ? 'rgba(46, 204, 113, 0.1)' : 'rgba(255,255,255,0.05)', color: v.is_registered ? '#2ecc71' : '#777', borderColor: 'transparent' }}>
                           {v.is_registered ? 'REGISTERED' : 'GUEST'}
                         </span>
@@ -770,7 +806,7 @@ const AdminDashboard = () => {
                       <td style={{ fontSize: '12px' }}>{new Date(v.last_seen).toLocaleString()}</td>
                     </tr>
                   ))}
-                  {visitors.length === 0 && <tr><td colSpan="5" className={styles.emptyTable}>No historical records found.</td></tr>}
+                  {visitors.length === 0 && <tr><td colSpan="6" className={styles.emptyTable}>No historical records found.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -870,19 +906,144 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* AUDIENCE BY COUNTRY (GEOGRAPHIC DISTRIBUTION) */}
+          <div className={styles.analyticsSection} style={{ marginTop: '30px' }}>
+            <div className={styles.countryHeader}>
+              <div className={styles.countryTitleGroup}>
+                <div className={styles.sectionIconBadge}>
+                  <Globe size={22} />
+                </div>
+                <div>
+                  <h2>Audience by Country (Geographic Distribution)</h2>
+                  <p>Observability of where your platform traffic and viewers originate from</p>
+                </div>
+              </div>
+              <div className={styles.timeframeFilter}>
+                {[
+                  { id: 'today', label: 'Today' },
+                  { id: 'weekly', label: 'Last 7 Days' },
+                  { id: 'monthly', label: 'Last 30 Days' },
+                  { id: 'all_time', label: 'All Time' }
+                ].map(tf => (
+                  <button
+                    key={tf.id}
+                    className={`${styles.timeframeBtn} ${countryPeriod === tf.id ? styles.timeframeBtnActive : ''}`}
+                    onClick={() => {
+                      setCountryPeriod(tf.id);
+                      fetchCountryAnalytics(tf.id);
+                    }}
+                  >
+                    {tf.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Stat Highlights */}
+            <div className={styles.countryHighlights}>
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Top Audience Country</div>
+                <div className={styles.highlightVal}>
+                  {countryStats.topCountry ? (
+                    <>
+                      <span className={styles.highlightFlag}>{countryStats.topCountry.flag}</span>
+                      <span>{countryStats.topCountry.countryName}</span>
+                      <span className={styles.highlightPercent}>({countryStats.topCountry.percentage}%)</span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: '14px', color: '#666' }}>No data yet</span>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Countries Reached</div>
+                <div className={styles.highlightVal}>
+                  <Globe size={20} color="#0071eb" style={{ marginRight: '4px' }} />
+                  {countryStats.totalCountries || 0} Countries
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Tracked Audience Count</div>
+                <div className={styles.highlightVal}>
+                  <Users size={20} color="#2ecc71" style={{ marginRight: '4px' }} />
+                  {(countryStats.totalTracked || 0).toLocaleString()} Visitors
+                </div>
+              </div>
+            </div>
+
+            {/* Country Breakdown List */}
+            <div className={styles.countryListContainer}>
+              {loadingCountries ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '10px', color: '#888' }}>
+                  <Loader2 size={20} className={styles.spinner} /> Loading country statistics...
+                </div>
+              ) : countryStats.countries.length === 0 ? (
+                <div className={styles.emptyTable}>No geographic visitor data recorded for this timeframe yet.</div>
+              ) : (
+                <div className={styles.countryGridList}>
+                  {countryStats.countries.map((c, idx) => (
+                    <div key={idx} className={styles.countryItemCard}>
+                      <div className={styles.countryCardTop}>
+                        <div className={styles.countryIdentity}>
+                          <span className={styles.countryFlagIcon}>{c.flag}</span>
+                          <div className={styles.countryNameBlock}>
+                            <span className={styles.countryPrimaryName}>{c.countryName}</span>
+                            <span className={styles.countryIsoBadge}>{c.countryCode}</span>
+                          </div>
+                        </div>
+                        <div className={styles.countryNumbers}>
+                          <span className={styles.countryCountText}>{c.count.toLocaleString()} visits / viewers</span>
+                          <span className={styles.countryPercentBadge}>{c.percentage}%</span>
+                        </div>
+                      </div>
+                      <div className={styles.countryProgressBarBg}>
+                        <div 
+                          className={styles.countryProgressBarFill} 
+                          style={{ width: `${Math.max(c.percentage, 1.5)}%` }} 
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
       {/* LIVE FEED TAB */}
       {activeTab === 'live' && liveStats && (
         <div className={styles.tabContent}>
+          {liveStats.liveCountries && liveStats.liveCountries.length > 0 && (
+            <div className={styles.liveCountryPills}>
+              <span className={styles.liveCountryLabel}>
+                <Globe size={15} /> Active Now by Country:
+              </span>
+              {liveStats.liveCountries.map((lc, idx) => (
+                <span key={idx} className={styles.liveCountryPill}>
+                  <span>{lc.flag}</span>
+                  <span>{lc.name}</span>
+                  <strong>{lc.count}</strong>
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className={styles.liveFeedList}>
             {liveStats.sessions.map(session => (
               <div key={session.id} className={styles.feedItem}>
                 <div className={styles.feedUser}>
                   <div className={styles.feedAvatar} style={{background: session.isGuest ? '#333' : '#e50914'}}></div>
                   <div className={styles.feedInfo}>
-                    <h4>{session.isGuest ? `Guest #${session.id.substring(0, 4)}` : (session.name || `User #${session.userId}`)}</h4>
+                    <h4>
+                      {session.isGuest ? `Guest #${session.id.substring(0, 4)}` : (session.name || `User #${session.userId}`)}
+                      <span className={styles.userCountryTag} title={session.countryName}>
+                        {session.flag || '🌐'} {session.countryName || 'Unknown'}
+                      </span>
+                    </h4>
                     <p>{session.path}</p>
                   </div>
                 </div>
