@@ -813,3 +813,58 @@
   }
 }
 
+.hubHeaderBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(229, 9, 20, 0.12);
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  color: #ff4d58;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.hubHeaderBtn:hover {
+  background: #e50914;
+  color: #fff;
+  border-color: #e50914;
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .hubBtnLabel {
+    display: none;
+  }
+  .hubHeaderBtn {
+    padding: 6px 9px;
+  }
+}
+
+.hubBlinkDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff2a38;
+  box-shadow: 0 0 10px #ff2a38, 0 0 4px #ff2a38;
+  flex-shrink: 0;
+  animation: hubBlinkPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes hubBlinkPulse {
+  0% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(0.65);
+  }
+}
+
+

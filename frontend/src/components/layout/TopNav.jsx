@@ -11,6 +11,7 @@ import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 import { useButtonWarnings } from '../../hooks/useButtonWarnings';
 import SuggestionAd from '../ads/SuggestionAd';
+import { getApiBaseUrl } from '../../utils/apiBase';
 
 const AVATARS = [
   { id: 'red', color: '#e50914' },
@@ -36,10 +37,46 @@ const TopNav = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showSurprisePicker, setShowSurprisePicker] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [hasUnreadHub, setHasUnreadHub] = useState(false);
   const surpriseRef = useRef(null);
   const dropdownRef = useRef(null);
   const searchContainerRef = useRef(null);
   const buttonWarnings = useButtonWarnings();
+
+  // Check unread admin hub post for blinking red dot
+  useEffect(() => {
+    const checkUnreadHub = async () => {
+      try {
+        const API_BASE = getApiBaseUrl();
+        const res = await fetch(`${API_BASE}/hub/unread-status`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.latest_admin_post_at) {
+            const adminTime = new Date(data.latest_admin_post_at).getTime();
+            const lastSeen = localStorage.getItem('aura_hub_last_seen');
+            if (!lastSeen || adminTime > parseInt(lastSeen, 10)) {
+              setHasUnreadHub(true);
+              return;
+            }
+          }
+        }
+        setHasUnreadHub(false);
+      } catch (e) {
+        // silently ignore
+      }
+    };
+
+    checkUnreadHub();
+    const interval = setInterval(checkUnreadHub, 30000);
+
+    const onSeen = () => setHasUnreadHub(false);
+    window.addEventListener('aura_hub_seen', onSeen);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('aura_hub_seen', onSeen);
+    };
+  }, []);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -335,6 +372,16 @@ const TopNav = () => {
               </div>
             )}
           </div>
+
+          <Link
+            to="/hub"
+            className={styles.hubHeaderBtn}
+            title="Aura Hub - Community Feed"
+          >
+            <Sparkles size={15} />
+            <span className={styles.hubBtnLabel}>Aura Hub</span>
+            {hasUnreadHub && <span className={styles.hubBlinkDot} />}
+          </Link>
 
           <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`}>
             <button 

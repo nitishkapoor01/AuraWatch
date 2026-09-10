@@ -42,4 +42,5 @@ build/
 # Scratch & temporary
 scratch/
 backend/scratch/
+TODAY_WORK_SUMMARY*
 

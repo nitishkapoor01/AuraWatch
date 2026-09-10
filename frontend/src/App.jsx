@@ -15,6 +15,7 @@ import MyList from './pages/MyList';
 import SharedList from './pages/SharedList';
 import WatchHistory from './pages/WatchHistory';
 import AdminDashboard from './pages/AdminDashboard';
+import AuraHub from './pages/AuraHub';
 import BackgroundEffects from './components/BackgroundEffects';
 import GlobalPlayer from './components/GlobalPlayer';
 import './App.css';
@@ -108,6 +109,7 @@ function App() {
     if (path.startsWith('/list')) return 'Viewing My List';
     if (path.startsWith('/history')) return 'Viewing Watch History';
     if (path.startsWith('/admin')) return 'In Admin Dashboard';
+    if (path.startsWith('/hub')) return 'In Aura Hub';
     return 'Browsing Site';
   };
 
@@ -131,6 +133,7 @@ function App() {
             <Route path="/shared-list/:userId" element={<SharedList />} />
             <Route path="/history" element={<WatchHistory />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/hub" element={<AuraHub />} />
             <Route path="*" element={
               <div style={{color:'white', padding:'100px', textAlign:'center'}}>
                 <h2>Page Not Found</h2>

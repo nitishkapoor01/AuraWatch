@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aurawatch_fallback_secret_key_2026';
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,14 +13,20 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // { id, email, name }
+    const db = require('../db');
+    const uRes = await db.query('SELECT role, is_super_admin FROM users WHERE id = $1', [decoded.id]);
+    req.user = {
+      ...decoded,
+      role: uRes.rows[0]?.role || 'user',
+      is_super_admin: uRes.rows[0]?.is_super_admin || false
+    };
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Invalid or expired token. Please login again.' });
   }
 };
 
-const optionalAuth = (req, res, next) => {
+const optionalAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -31,7 +37,13 @@ const optionalAuth = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // { id, email, name }
+    const db = require('../db');
+    const uRes = await db.query('SELECT role, is_super_admin FROM users WHERE id = $1', [decoded.id]);
+    req.user = {
+      ...decoded,
+      role: uRes.rows[0]?.role || 'user',
+      is_super_admin: uRes.rows[0]?.is_super_admin || false
+    };
   } catch (error) {
     // Ignore invalid/expired tokens for optional endpoints
   }

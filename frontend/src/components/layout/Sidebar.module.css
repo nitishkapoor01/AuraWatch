@@ -64,8 +64,42 @@
   border-radius: 0 4px 4px 0;
 }
 
+.iconWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hubBlinkDot {
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff2a38;
+  box-shadow: 0 0 10px #ff2a38, 0 0 4px #ff2a38;
+  pointer-events: none;
+  z-index: 10;
+  display: block !important;
+  animation: hubBlinkPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes hubBlinkPulse {
+  0% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 0.25;
+    transform: scale(0.6);
+  }
+}
+
 /* Floating text next to the icon */
-.navItem span {
+.navItem .navLabel,
+.navItem > span:not(.hubBlinkDot) {
   font-size: 15px;
   font-weight: 700;
   position: absolute;
@@ -88,7 +122,8 @@
 }
 
 /* Reveal text when hovering this specific button */
-.navItem:hover span {
+.navItem:hover .navLabel,
+.navItem:hover > span:not(.hubBlinkDot) {
   opacity: 1;
   transform: translateX(8px); /* Aggressive slide past the starting point */
 }
@@ -173,7 +208,8 @@
   }
 
   /* Hide tooltip labels on mobile */
-  .navItem span {
+  .navItem .navLabel,
+  .navItem > span:not(.hubBlinkDot) {
     display: none;
   }
 
@@ -216,7 +252,8 @@
     padding-left: 36px;
   }
 
-  .navItem span {
+  .navItem .navLabel,
+  .navItem > span:not(.hubBlinkDot) {
     font-size: 17px;
   }
 }
@@ -227,8 +264,10 @@
     width: 200px;
   }
 
-  .navItem:hover span,
-  .navItem.active span {
+  .navItem:hover .navLabel,
+  .navItem.active .navLabel,
+  .navItem:hover > span:not(.hubBlinkDot),
+  .navItem.active > span:not(.hubBlinkDot) {
     opacity: 1;
     transform: translateX(8px);
   }

@@ -16,6 +16,21 @@ const GlobalPlayer = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
+  const [selectedServer, setSelectedServer] = useState(() => {
+    return localStorage.getItem('aurawatch_player_server') || 'filmu';
+  });
+  const [isSwitching, setIsSwitching] = useState(false);
+
+  const handleServerChange = (serverId) => {
+    if (serverId === selectedServer) return;
+    setIsSwitching(true);
+    setSelectedServer(serverId);
+    localStorage.setItem('aurawatch_player_server', serverId);
+    setTimeout(() => {
+      setIsSwitching(false);
+    }, 400);
+  };
+
   // Watch route changes. If playing and we leave the movie page, force sticky
   useEffect(() => {
     if (isOpen && movieData) {
@@ -204,7 +219,19 @@ const GlobalPlayer = () => {
   const getPlayerUrl = () => {
     const type = (movieData.type || '').toLowerCase();
     const isTV = type === 'tv' || type === 'series';
-    
+    const isAnime = type === 'anime' || (movieData.genres && movieData.genres.some(g => g.name?.toLowerCase().includes('animation')));
+
+    if (selectedServer === 'filmu') {
+      if (isAnime && movieData.season && movieData.episode) {
+        return `https://embed.filmu.in/anime/${movieData.id}/${movieData.season}/${movieData.episode}`;
+      }
+      if (isTV) {
+        return `https://embed.filmu.in/tv/${movieData.id}/${movieData.season || 1}/${movieData.episode || 1}`;
+      }
+      return `https://embed.filmu.in/movie/${movieData.id}`;
+    }
+
+    // Default / Screenscape
     if (isTV) {
       return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season || 1}&e=${movieData.episode || 1}`;
     }
@@ -226,6 +253,9 @@ const GlobalPlayer = () => {
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
+      {/* Background Cinema Atmosphere */}
+      {!isSticky && <div className={styles.ambientCinemaGlow} />}
+
       <button 
         className={styles.closeTrailerBtn} 
         onClick={(e) => {
@@ -233,26 +263,79 @@ const GlobalPlayer = () => {
           closePlayer();
         }}
         title="Close Player"
+        aria-label="Close Player"
       >
-        <X size={28} />
+        <X size={24} />
       </button>
 
-      <div className={styles.playerEpLabel}>
-        {label}
+      <div className={styles.playerTopBar}>
+        <div className={styles.metaInfoBadge}>
+          <span className={styles.pulsingDot}></span>
+          <span className={styles.streamBadgeText}>STREAMING</span>
+          <span className={styles.titleSeparator}>•</span>
+          <span className={styles.playerTitleText} title={label}>
+            {label}
+          </span>
+        </div>
+        
+        <div className={styles.playerSwitchDeck}>
+          <button
+            type="button"
+            className={`${styles.streamOptionBtn} ${selectedServer === 'filmu' ? styles.activeOption : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleServerChange('filmu');
+            }}
+            title="Player 1"
+          >
+            <span className={styles.optionIconWrap}>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </span>
+            <span className={styles.optionMain}>Player 1</span>
+          </button>
+
+          <button
+            type="button"
+            className={`${styles.streamOptionBtn} ${selectedServer === 'screenscape' ? styles.activeOption : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleServerChange('screenscape');
+            }}
+            title="Player 2"
+          >
+            <span className={styles.optionIconWrap}>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </span>
+            <span className={styles.optionMain}>Player 2</span>
+          </button>
+        </div>
       </div>
       
       {isSticky && <div className={styles.dragOverlay}></div>}
       
-      <iframe
-        id="screenscape-player"
-        src={getPlayerUrl()}
-        title={movieData.title}
-        className={styles.trailerIframe}
-        allow="autoplay; encrypted-media; fullscreen"
-        referrerPolicy="no-referrer"
-        allowFullScreen
-        style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
-      ></iframe>
+      <div className={styles.playerStage}>
+        {isSwitching && (
+          <div className={styles.switchOverlay}>
+            <div className={styles.switchSpinner}></div>
+            <span>Connecting to {selectedServer === 'filmu' ? 'Player 1' : 'Player 2'}...</span>
+          </div>
+        )}
+        <iframe
+          key={`${selectedServer}-${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}`}
+          id="stream-player"
+          src={getPlayerUrl()}
+          title={movieData.title}
+          className={`${styles.trailerIframe} ${isSwitching ? styles.frameFading : ''}`}
+          allow="autoplay; encrypted-media; picture-in-picture; accelerometer; gyroscope; fullscreen"
+          referrerPolicy="no-referrer"
+          allowFullScreen
+          style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
+        ></iframe>
+      </div>
     </div>
   );
 };

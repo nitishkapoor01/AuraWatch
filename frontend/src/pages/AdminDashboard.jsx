@@ -5,7 +5,7 @@ import {
   Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, 
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
-  Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe
+  Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe, Sparkles
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -46,6 +46,12 @@ const AdminDashboard = () => {
   const [selectedTicketForReply, setSelectedTicketForReply] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+  
+  // Aura Hub States
+  const [hubPosts, setHubPosts] = useState([]);
+  const [loadingHub, setLoadingHub] = useState(false);
+  const [hubCategoryFilter, setHubCategoryFilter] = useState('all');
+  const [hubReplyInputs, setHubReplyInputs] = useState({});
   
   // Control States
   const [announcement, setAnnouncement] = useState({ active: false, message: '', type: 'info' });
@@ -206,6 +212,68 @@ const AdminDashboard = () => {
           setAdsConfig(prev => ({ ...prev, ...data.config }));
         }
       }
+    } else if (tab === 'hub') {
+      fetchHubPosts();
+    }
+  };
+
+  const fetchHubPosts = async () => {
+    try {
+      setLoadingHub(true);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/hub?sort=recent`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHubPosts(data.posts || []);
+      }
+    } catch (err) {
+      console.error('Failed to load hub posts in admin:', err);
+    } finally {
+      setLoadingHub(false);
+    }
+  };
+
+  const handleUpdateHubStatus = async (postId, status, replyText) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/hub/${postId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status, adminReply: replyText || null })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setHubPosts(prev => prev.map(p => p.id === postId ? updated : p));
+        showToast('Hub post updated successfully!', 'success');
+      } else {
+        showToast('Failed to update status', 'error');
+      }
+    } catch (err) {
+      showToast('Network error updating post', 'error');
+    }
+  };
+
+  const handleDeleteHubPost = async (postId) => {
+    if (!window.confirm('Are you sure you want to permanently delete this hub post?')) return;
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/hub/${postId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setHubPosts(prev => prev.filter(p => p.id !== postId));
+        showToast('Hub post deleted', 'info');
+      } else {
+        showToast('Failed to delete post', 'error');
+      }
+    } catch (err) {
+      showToast('Network error deleting post', 'error');
     }
   };
 
@@ -500,6 +568,9 @@ const AdminDashboard = () => {
         </button>
         <button className={`${styles.tabBtn} ${activeTab === 'support' ? styles.activeTab : ''}`} onClick={() => setActiveTab('support')}>
           <MessageSquare size={18} /> Support
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'hub' ? styles.activeTab : ''}`} onClick={() => setActiveTab('hub')}>
+          <Sparkles size={18} /> Aura Hub
         </button>
         <button className={`${styles.tabBtn} ${activeTab === 'live' ? styles.activeTab : ''}`} onClick={() => setActiveTab('live')}>
           <Zap size={18} /> Live Feed
@@ -1558,6 +1629,169 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* AURA HUB MODERATION TAB */}
+      {activeTab === 'hub' && (
+        <div className={styles.tabContent}>
+          <div className={styles.usersSection}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2>Aura Hub — Community Requests & Feedback</h2>
+                <p style={{ color: '#888', fontSize: '13px', margin: '4px 0 0 0' }}>
+                  Manage movie requests, bug reports, and user ideas. Update status and leave official team responses.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <select
+                  value={hubCategoryFilter}
+                  onChange={(e) => setHubCategoryFilter(e.target.value)}
+                  style={{
+                    background: '#1a1f2e',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: '#fff',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '13px'
+                  }}
+                >
+                  <option value="all">All Categories</option>
+                  <option value="movie_request">Movie / Show Requests</option>
+                  <option value="feature_idea">Feature Ideas</option>
+                  <option value="bug_report">Bug Reports</option>
+                  <option value="general">General</option>
+                </select>
+                <button 
+                  className={styles.primaryBtn} 
+                  onClick={fetchHubPosts}
+                  disabled={loadingHub}
+                >
+                  {loadingHub ? <Loader2 size={16} className={styles.spinner} /> : 'Refresh'}
+                </button>
+              </div>
+            </div>
+
+            {loadingHub ? (
+              <div style={{ padding: '60px', textAlign: 'center', color: '#888' }}>
+                <Loader2 size={32} className={styles.spinner} />
+                <p style={{ marginTop: '10px' }}>Loading Aura Hub posts...</p>
+              </div>
+            ) : hubPosts.filter(p => hubCategoryFilter === 'all' || p.category === hubCategoryFilter).length === 0 ? (
+              <div style={{ padding: '60px', textAlign: 'center', color: '#888' }}>
+                <Sparkles size={36} color="#e50914" style={{ margin: '0 auto 12px auto' }} />
+                <h3>No community posts found in this filter</h3>
+                <p style={{ fontSize: '13px' }}>Users haven't submitted any requests or reports here yet.</p>
+              </div>
+            ) : (
+              <div className={styles.tableContainer}>
+                <table className={styles.usersTable}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: '80px' }}>Upvotes</th>
+                      <th>Post Details</th>
+                      <th style={{ width: '130px' }}>Category</th>
+                      <th style={{ width: '160px' }}>Current Status</th>
+                      <th style={{ width: '280px' }}>Official Response & Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {hubPosts
+                      .filter(p => hubCategoryFilter === 'all' || p.category === hubCategoryFilter)
+                      .map(post => (
+                        <tr key={post.id}>
+                          <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '16px', color: '#ff4d58' }}>
+                            ▲ {post.upvotes}
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '14px', marginBottom: '4px' }}>
+                              {post.title}
+                            </div>
+                            <div style={{ color: '#aaa', fontSize: '13px', lineHeight: 1.4, maxHeight: '80px', overflowY: 'auto' }}>
+                              {post.description}
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#666', marginTop: '6px' }}>
+                              By: <strong style={{ color: '#888' }}>{post.author_name || 'Anonymous'}</strong> • {new Date(post.created_at).toLocaleDateString()}
+                            </div>
+                          </td>
+                          <td>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              background: post.category === 'movie_request' ? 'rgba(59, 130, 246, 0.15)' : post.category === 'bug_report' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(234, 179, 8, 0.15)',
+                              color: post.category === 'movie_request' ? '#60a5fa' : post.category === 'bug_report' ? '#f87171' : '#facc15',
+                              border: '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                              {post.category?.replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td>
+                            <select
+                              value={post.status}
+                              onChange={(e) => handleUpdateHubStatus(post.id, e.target.value, post.admin_reply)}
+                              style={{
+                                background: '#1a1f2e',
+                                border: '1px solid rgba(255,255,255,0.15)',
+                                color: post.status === 'completed' ? '#4ade80' : post.status === 'in_progress' ? '#38bdf8' : '#fbbf24',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                width: '100%'
+                              }}
+                            >
+                              <option value="under_review">🟡 Under Review</option>
+                              <option value="in_progress">🔵 In Progress</option>
+                              <option value="completed">🟢 Completed / Added</option>
+                              <option value="declined">🔴 Declined</option>
+                            </select>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <input
+                                type="text"
+                                placeholder="Write official note (e.g. Added in Player 1!)..."
+                                defaultValue={post.admin_reply || ''}
+                                onChange={(e) => setHubReplyInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                style={{
+                                  background: 'rgba(255,255,255,0.05)',
+                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  color: '#fff',
+                                  padding: '6px 10px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px'
+                                }}
+                              />
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                <button
+                                  className={styles.primaryBtn}
+                                  style={{ padding: '4px 12px', fontSize: '11px', height: '28px' }}
+                                  onClick={() => handleUpdateHubStatus(post.id, post.status, hubReplyInputs[post.id] !== undefined ? hubReplyInputs[post.id] : post.admin_reply)}
+                                >
+                                  Save Reply
+                                </button>
+                                <button
+                                  className={styles.banBtn}
+                                  style={{ padding: '4px 8px', height: '28px' }}
+                                  onClick={() => handleDeleteHubPost(post.id)}
+                                  title="Delete post"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

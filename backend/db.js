@@ -160,6 +160,64 @@ const initDB = async () => {
         user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
       );
 
+      CREATE TABLE IF NOT EXISTS aura_hub_posts (
+        id SERIAL PRIMARY KEY,
+        content TEXT NOT NULL,
+        title TEXT,
+        author_name TEXT DEFAULT 'Anonymous',
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        is_admin BOOLEAN DEFAULT FALSE,
+        post_type TEXT DEFAULT 'text',
+        poll_options JSONB DEFAULT '[]',
+        likes INTEGER DEFAULT 0,
+        visitor_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS aura_hub_likes (
+        id SERIAL PRIMARY KEY,
+        post_id INTEGER NOT NULL REFERENCES aura_hub_posts(id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        visitor_id TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_hub_likes_user_post ON aura_hub_likes (user_id, post_id) WHERE user_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_hub_likes_visitor_post ON aura_hub_likes (visitor_id, post_id) WHERE user_id IS NULL;
+
+      CREATE TABLE IF NOT EXISTS aura_hub_poll_votes (
+        id SERIAL PRIMARY KEY,
+        post_id INTEGER NOT NULL REFERENCES aura_hub_posts(id) ON DELETE CASCADE,
+        option_id INTEGER NOT NULL,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        visitor_id TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_hub_poll_user_post ON aura_hub_poll_votes (user_id, post_id) WHERE user_id IS NOT NULL;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_hub_poll_visitor_post ON aura_hub_poll_votes (visitor_id, post_id) WHERE user_id IS NULL;
+
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='content') THEN
+          ALTER TABLE aura_hub_posts ADD COLUMN content TEXT;
+          UPDATE aura_hub_posts SET content = COALESCE(description, title, 'Post');
+          ALTER TABLE aura_hub_posts ALTER COLUMN content SET NOT NULL;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='is_admin') THEN
+          ALTER TABLE aura_hub_posts ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='post_type') THEN
+          ALTER TABLE aura_hub_posts ADD COLUMN post_type TEXT DEFAULT 'text';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='poll_options') THEN
+          ALTER TABLE aura_hub_posts ADD COLUMN poll_options JSONB DEFAULT '[]';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='likes') THEN
+          ALTER TABLE aura_hub_posts ADD COLUMN likes INTEGER DEFAULT 0;
+        END IF;
+      END $$;
+
       DO $$ 
       BEGIN 
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='is_banned') THEN
@@ -213,6 +271,12 @@ const initDB = async () => {
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='platform_visits' AND COLUMN_NAME='country_name') THEN
           ALTER TABLE platform_visits ADD COLUMN country_name TEXT DEFAULT 'Unknown';
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='is_pinned') THEN
+          ALTER TABLE aura_hub_posts ADD COLUMN is_pinned BOOLEAN DEFAULT FALSE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='pinned_at') THEN
+          ALTER TABLE aura_hub_posts ADD COLUMN pinned_at TIMESTAMP;
+        END IF;
       END $$;
 
       CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
@@ -241,6 +305,49 @@ const initDB = async () => {
       ON CONFLICT (key) DO NOTHING;
 
       CREATE INDEX IF NOT EXISTS idx_download_cache_key ON download_cache(cache_key);
+
+      CREATE TABLE IF NOT EXISTS aura_hub_posts (
+        id SERIAL PRIMARY KEY,
+        title TEXT,
+        description TEXT,
+        content TEXT,
+        author_name TEXT NOT NULL,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        is_admin BOOLEAN DEFAULT FALSE,
+        is_pinned BOOLEAN DEFAULT FALSE,
+        pinned_at TIMESTAMPTZ,
+        post_type TEXT DEFAULT 'text',
+        poll_options JSONB DEFAULT '[]'::jsonb,
+        likes INTEGER DEFAULT 0,
+        visitor_id TEXT,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS aura_hub_likes (
+        id SERIAL PRIMARY KEY,
+        post_id INTEGER NOT NULL REFERENCES aura_hub_posts(id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        visitor_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT unique_hub_like_user UNIQUE(post_id, user_id),
+        CONSTRAINT unique_hub_like_visitor UNIQUE(post_id, visitor_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS aura_hub_poll_votes (
+        id SERIAL PRIMARY KEY,
+        post_id INTEGER NOT NULL REFERENCES aura_hub_posts(id) ON DELETE CASCADE,
+        option_id TEXT NOT NULL,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        visitor_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT unique_hub_poll_vote_user UNIQUE(post_id, user_id),
+        CONSTRAINT unique_hub_poll_vote_visitor UNIQUE(post_id, visitor_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_created ON aura_hub_posts(created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_admin ON aura_hub_posts(is_admin, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_pinned ON aura_hub_posts(is_pinned DESC, created_at DESC);
     `);
     console.log('[DB] PostgreSQL database initialized');
   } catch (err) {
