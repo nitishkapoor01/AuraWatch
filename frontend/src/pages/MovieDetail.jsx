@@ -81,6 +81,7 @@ const MovieDetail = () => {
   const buttonWarnings = useButtonWarnings();
   const [globalSkipAds, setGlobalSkipAds] = useState(false);
   const [adTimerDuration, setAdTimerDuration] = useState(30);
+  const [directLinkUrl, setDirectLinkUrl] = useState('https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11');
 
   const handleImageError = (e, isPoster = true) => {
     const currentSrc = e.target.src;
@@ -129,6 +130,11 @@ const MovieDetail = () => {
           const adsData = await adsRes.json();
           if (adsData.config?.download_modal?.timer_seconds) {
             setAdTimerDuration(Number(adsData.config.download_modal.timer_seconds));
+          }
+          if (adsData.config?.direct_link?.enabled && adsData.config?.direct_link?.url) {
+            setDirectLinkUrl(adsData.config.direct_link.url);
+          } else if (adsData.config?.direct_link?.enabled === false) {
+            setDirectLinkUrl('');
           }
         }
       } catch (e) {
@@ -287,6 +293,27 @@ const MovieDetail = () => {
       return `${baseUrl}/downloads/proxy?url=${encodeURIComponent(link.url)}`;
     }
     return link.url;
+  };
+
+  const triggerSmartlink = () => {
+    const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+    if (isAdmin || globalSkipAds || !directLinkUrl) return;
+
+    try {
+      window.open(directLinkUrl, '_blank', 'noopener,noreferrer');
+      
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      fetch(`${baseUrl}/ads/impression`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slot: 'direct_link',
+          visitorId: localStorage.getItem('trackingVisitorId') || '',
+          sessionId: sessionStorage.getItem('trackingSessionId') || '',
+          deviceType: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop'
+        })
+      }).catch(() => {});
+    } catch (_) {}
   };
 
   const handleDownload = async (forceRefresh = false) => {
@@ -767,6 +794,7 @@ const MovieDetail = () => {
                     showToast(`Admin Notice: ${buttonWarnings.download_movie}`, 'warning');
                   }
                 }
+                triggerSmartlink();
                 handleDownload();
               }}
               data-title={buttonWarnings.download_movie || "Download Movie"}

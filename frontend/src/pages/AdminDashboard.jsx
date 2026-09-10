@@ -92,6 +92,10 @@ const AdminDashboard = () => {
     social_bar: {
       enabled: false,
       script_url: ''
+    },
+    direct_link: {
+      enabled: true,
+      url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11'
     }
   });
   const [savingAdsConfig, setSavingAdsConfig] = useState(false);
@@ -1507,6 +1511,49 @@ const AdminDashboard = () => {
                   <label>Placement Notes</label>
                   <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
                     Appears naturally as a sponsored movie card inside Search results and Category explore grids after every 8th movie card. Zero interruption, 100% clean UX.
+                  </p>
+                </div>
+              </div>
+
+              {/* SLOT 4: DOWNLOAD SMARTLINK / DIRECT LINK */}
+              <div className={styles.adSlotCard}>
+                <div className={styles.adSlotHeader}>
+                  <div className={styles.adSlotTitle}>
+                    <Zap size={20} color="#f5c518" />
+                    <div>
+                      <h3>Download Smartlink (Direct Link)</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>High-CPM Adsterra Direct Link</span>
+                    </div>
+                  </div>
+                  <button 
+                    className={`${styles.toggleBtn} ${adsConfig.direct_link?.enabled ? styles.active : ''}`}
+                    onClick={() => setAdsConfig(prev => ({
+                      ...prev,
+                      direct_link: { ...prev.direct_link, enabled: !prev.direct_link?.enabled }
+                    }))}
+                  >
+                    <div className={styles.toggleThumb}></div>
+                  </button>
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Smartlink Direct URL</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.direct_link?.url || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      direct_link: { ...prev.direct_link, url: e.target.value.trim() }
+                    }))}
+                    placeholder="https://www.profitableratecpmnetwork.com/..."
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Placement Notes</label>
+                  <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
+                    Triggers in a new background tab when a visitor clicks the Download button on any movie, giving maximum eCPM on downloads while the movie download starts cleanly.
                   </p>
                 </div>
               </div>

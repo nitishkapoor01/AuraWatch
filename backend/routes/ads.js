@@ -21,7 +21,7 @@ router.post('/impression', async (req, res) => {
   try {
     const { slot, visitorId, sessionId, deviceType } = req.body;
 
-    const allowedSlots = ['download_modal', 'movie_detail', 'social_bar', 'search_grid'];
+    const allowedSlots = ['download_modal', 'movie_detail', 'social_bar', 'search_grid', 'direct_link'];
     if (!slot || !allowedSlots.includes(slot)) {
       return res.status(400).json({ error: 'Invalid ad slot' });
     }
@@ -94,6 +94,10 @@ router.get('/config', async (req, res) => {
       social_bar: {
         enabled: false,
         script_url: ''
+      },
+      direct_link: {
+        enabled: true,
+        url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11'
       }
     };
 
