@@ -5,7 +5,8 @@ import {
   Activity, Calendar, CalendarDays, CalendarCheck, Info, AlertTriangle, 
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
-  Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe, Sparkles
+  Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe, Sparkles,
+  ArrowUpRight, Table, LayoutGrid
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -27,6 +28,9 @@ const AdminDashboard = () => {
   const [countryStats, setCountryStats] = useState({ countries: [], totalTracked: 0, totalCountries: 0, topCountry: null, period: 'all_time' });
   const [countryPeriod, setCountryPeriod] = useState('all_time');
   const [loadingCountries, setLoadingCountries] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+  const [countrySort, setCountrySort] = useState('count_desc');
+  const [countryView, setCountryView] = useState('table');
   
   // Live Feed & Security States
   const [liveStats, setLiveStats] = useState(null);
@@ -534,6 +538,17 @@ const AdminDashboard = () => {
     }
   };
 
+  const filteredCountries = (countryStats.countries || []).filter(c => {
+    if (!countrySearch.trim()) return true;
+    const q = countrySearch.toLowerCase().trim();
+    return (c.countryName && c.countryName.toLowerCase().includes(q)) ||
+           (c.countryCode && c.countryCode.toLowerCase().includes(q));
+  }).sort((a, b) => {
+    if (countrySort === 'count_asc') return a.count - b.count;
+    if (countrySort === 'name_asc') return (a.countryName || '').localeCompare(b.countryName || '');
+    return b.count - a.count; // default 'count_desc'
+  });
+
   if (loading) return <div className={styles.adminPage}><div className={styles.loader}></div></div>;
   if (error) return (
     <div className={styles.adminPage}>
@@ -603,6 +618,178 @@ const AdminDashboard = () => {
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}><Clock size={28} /></div>
               <div className={styles.statInfo}><h3>{Math.round(stats?.totalWatchTimeHours || 0)}h</h3><p>Total Watch Time</p></div>
+            </div>
+          </div>
+
+          {/* AUDIENCE BY COUNTRY (GEOGRAPHIC REACH & OVERVIEW) */}
+          <div className={styles.overviewCountrySection}>
+            <div className={styles.countryHeader}>
+              <div className={styles.countryTitleGroup}>
+                <div className={styles.sectionIconBadge}>
+                  <Globe size={22} />
+                </div>
+                <div>
+                  <h2>Country-Wise Total Visitors</h2>
+                  <p>Observability of total visitors and counts per country</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div className={styles.timeframeFilter}>
+                  {[
+                    { id: 'today', label: 'Today' },
+                    { id: 'weekly', label: 'Last 7 Days' },
+                    { id: 'monthly', label: 'Last 30 Days' },
+                    { id: 'all_time', label: 'All Time' }
+                  ].map(tf => (
+                    <button
+                      key={tf.id}
+                      className={`${styles.timeframeBtn} ${countryPeriod === tf.id ? styles.timeframeBtnActive : ''}`}
+                      onClick={() => {
+                        setCountryPeriod(tf.id);
+                        fetchCountryAnalytics(tf.id);
+                      }}
+                    >
+                      {tf.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button 
+                  className={styles.viewAllAnalyticsBtn}
+                  onClick={() => {
+                    setActiveTab('analytics');
+                    setTimeout(() => {
+                      const el = document.getElementById('geographic-distribution-section');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
+                >
+                  Full Geographic Analytics <ArrowUpRight size={15} />
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Stat Highlights */}
+            <div className={styles.countryHighlights}>
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Top Audience Country</div>
+                <div className={styles.highlightVal}>
+                  {countryStats.topCountry ? (
+                    <>
+                      <span className={styles.highlightFlag}>{countryStats.topCountry.flag}</span>
+                      <span>{countryStats.topCountry.countryName}</span>
+                      <span className={styles.highlightPercent}>({countryStats.topCountry.percentage}%)</span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: '14px', color: '#666' }}>No data yet</span>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Countries Reached</div>
+                <div className={styles.highlightVal}>
+                  <Globe size={20} color="#0071eb" style={{ marginRight: '4px' }} />
+                  {countryStats.totalCountries || 0} Countries
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Total Tracked Visitors</div>
+                <div className={styles.highlightVal}>
+                  <Users size={20} color="#2ecc71" style={{ marginRight: '4px' }} />
+                  {(countryStats.totalVisitors || countryStats.totalTracked || 0).toLocaleString()} Visitors
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Total Visits / Sessions</div>
+                <div className={styles.highlightVal}>
+                  <Activity size={20} color="#9b59b6" style={{ marginRight: '4px' }} />
+                  {(countryStats.totalVisits || countryStats.totalTracked || 0).toLocaleString()} Visits
+                </div>
+              </div>
+            </div>
+
+            {/* Top Countries Overview Table */}
+            <div className={styles.countryListContainer}>
+              {loadingCountries ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '30px', gap: '10px', color: '#888' }}>
+                  <Loader2 size={20} className={styles.spinner} /> Loading country statistics...
+                </div>
+              ) : countryStats.countries.length === 0 ? (
+                <div className={styles.emptyTable}>No geographic visitor data recorded for this timeframe yet.</div>
+              ) : (
+                <div className={styles.tableContainer}>
+                  <table className={styles.countryDataTable}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '60px' }}>Rank</th>
+                        <th>Country</th>
+                        <th>Code</th>
+                        <th style={{ textAlign: 'right' }}>Total Visitors</th>
+                        <th style={{ textAlign: 'right' }}>Total Visits</th>
+                        <th style={{ width: '220px' }}>Audience Share</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {countryStats.countries.slice(0, 8).map((c, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <span className={idx === 0 ? styles.rankGold : idx === 1 ? styles.rankSilver : idx === 2 ? styles.rankBronze : styles.rankDefault}>
+                              #{c.rank || idx + 1}
+                            </span>
+                          </td>
+                          <td>
+                            <div className={styles.countryIdentity}>
+                              <span className={styles.countryFlagIcon}>{c.flag}</span>
+                              <span className={styles.countryPrimaryName}>{c.countryName}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={styles.countryIsoBadge}>{c.countryCode}</span>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 600, color: '#2ecc71' }}>
+                            {c.count.toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'right', color: '#aaa' }}>
+                            {(c.totalVisits || c.count).toLocaleString()}
+                          </td>
+                          <td>
+                            <div className={styles.tableProgressWrapper}>
+                              <div className={styles.countryProgressBarBg}>
+                                <div
+                                  className={styles.countryProgressBarFill}
+                                  style={{ width: `${Math.max(c.percentage, 2)}%` }}
+                                />
+                              </div>
+                              <span className={styles.tablePercentText}>{c.percentage}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {countryStats.countries.length > 8 && (
+                    <div style={{ textAlign: 'center', paddingTop: '14px' }}>
+                      <button 
+                        className={styles.timeframeBtn}
+                        style={{ color: '#0071eb', textDecoration: 'underline', background: 'transparent' }}
+                        onClick={() => {
+                          setActiveTab('analytics');
+                          setTimeout(() => {
+                            const el = document.getElementById('geographic-distribution-section');
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }, 100);
+                        }}
+                      >
+                        + View all {countryStats.countries.length} countries in Analytics
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -986,7 +1173,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* AUDIENCE BY COUNTRY (GEOGRAPHIC DISTRIBUTION) */}
-          <div className={styles.analyticsSection} style={{ marginTop: '30px' }}>
+          <div id="geographic-distribution-section" className={styles.analyticsSection} style={{ marginTop: '30px' }}>
             <div className={styles.countryHeader}>
               <div className={styles.countryTitleGroup}>
                 <div className={styles.sectionIconBadge}>
@@ -1044,15 +1231,80 @@ const AdminDashboard = () => {
               </div>
 
               <div className={styles.countryHighlightCard}>
-                <div className={styles.highlightLabel}>Tracked Audience Count</div>
+                <div className={styles.highlightLabel}>Total Tracked Visitors</div>
                 <div className={styles.highlightVal}>
                   <Users size={20} color="#2ecc71" style={{ marginRight: '4px' }} />
-                  {(countryStats.totalTracked || 0).toLocaleString()} Visitors
+                  {(countryStats.totalVisitors || countryStats.totalTracked || 0).toLocaleString()} Visitors
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Total Visits / Sessions</div>
+                <div className={styles.highlightVal}>
+                  <Activity size={20} color="#9b59b6" style={{ marginRight: '4px' }} />
+                  {(countryStats.totalVisits || countryStats.totalTracked || 0).toLocaleString()} Visits
                 </div>
               </div>
             </div>
 
-            {/* Country Breakdown List */}
+            {/* Interactive Search, Sort & View Controls */}
+            <div className={styles.countryControlsBar}>
+              <div className={styles.countryControlsLeft}>
+                <div className={styles.countrySearchBox}>
+                  <SearchIcon size={15} />
+                  <input
+                    type="text"
+                    placeholder="Search country or ISO code..."
+                    value={countrySearch}
+                    onChange={(e) => setCountrySearch(e.target.value)}
+                  />
+                  {countrySearch && (
+                    <button
+                      className={styles.clearSearchBtn}
+                      onClick={() => setCountrySearch('')}
+                      title="Clear search"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                <span style={{ fontSize: '12px', color: '#777' }}>
+                  Showing {filteredCountries.length} of {countryStats.countries.length} countries
+                </span>
+              </div>
+
+              <div className={styles.countryControlsRight}>
+                <select
+                  value={countrySort}
+                  onChange={(e) => setCountrySort(e.target.value)}
+                  className={styles.countrySortSelect}
+                  aria-label="Sort countries"
+                >
+                  <option value="count_desc">Most Visitors</option>
+                  <option value="count_asc">Fewest Visitors</option>
+                  <option value="name_asc">Alphabetical (A-Z)</option>
+                </select>
+
+                <div className={styles.viewToggleGroup}>
+                  <button
+                    className={`${styles.viewToggleBtn} ${countryView === 'table' ? styles.viewToggleActive : ''}`}
+                    onClick={() => setCountryView('table')}
+                    title="Detailed Table View"
+                  >
+                    <Table size={15} />
+                  </button>
+                  <button
+                    className={`${styles.viewToggleBtn} ${countryView === 'cards' ? styles.viewToggleActive : ''}`}
+                    onClick={() => setCountryView('cards')}
+                    title="Grid Cards View"
+                  >
+                    <LayoutGrid size={15} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Country Breakdown Display (Table or Cards) */}
             <div className={styles.countryListContainer}>
               {loadingCountries ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '10px', color: '#888' }}>
@@ -1060,9 +1312,63 @@ const AdminDashboard = () => {
                 </div>
               ) : countryStats.countries.length === 0 ? (
                 <div className={styles.emptyTable}>No geographic visitor data recorded for this timeframe yet.</div>
+              ) : filteredCountries.length === 0 ? (
+                <div className={styles.emptyTable}>No countries matching "{countrySearch}".</div>
+              ) : countryView === 'table' ? (
+                <div className={styles.tableContainer}>
+                  <table className={styles.countryDataTable}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '60px' }}>Rank</th>
+                        <th>Country</th>
+                        <th>Code</th>
+                        <th style={{ textAlign: 'right' }}>Total Visitors</th>
+                        <th style={{ textAlign: 'right' }}>Total Visits</th>
+                        <th style={{ width: '220px' }}>Audience Share</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCountries.map((c, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <span className={idx === 0 ? styles.rankGold : idx === 1 ? styles.rankSilver : idx === 2 ? styles.rankBronze : styles.rankDefault}>
+                              #{c.rank || idx + 1}
+                            </span>
+                          </td>
+                          <td>
+                            <div className={styles.countryIdentity}>
+                              <span className={styles.countryFlagIcon}>{c.flag}</span>
+                              <span className={styles.countryPrimaryName}>{c.countryName}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={styles.countryIsoBadge}>{c.countryCode}</span>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 600, color: '#2ecc71' }}>
+                            {c.count.toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'right', color: '#aaa' }}>
+                            {(c.totalVisits || c.count).toLocaleString()}
+                          </td>
+                          <td>
+                            <div className={styles.tableProgressWrapper}>
+                              <div className={styles.countryProgressBarBg}>
+                                <div 
+                                  className={styles.countryProgressBarFill} 
+                                  style={{ width: `${Math.max(c.percentage, 2)}%` }} 
+                                />
+                              </div>
+                              <span className={styles.tablePercentText}>{c.percentage}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <div className={styles.countryGridList}>
-                  {countryStats.countries.map((c, idx) => (
+                  {filteredCountries.map((c, idx) => (
                     <div key={idx} className={styles.countryItemCard}>
                       <div className={styles.countryCardTop}>
                         <div className={styles.countryIdentity}>
@@ -1073,7 +1379,9 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className={styles.countryNumbers}>
-                          <span className={styles.countryCountText}>{c.count.toLocaleString()} visits / viewers</span>
+                          <span className={styles.countryCountText}>
+                            <strong>{c.count.toLocaleString()}</strong> visitors · {(c.totalVisits || c.count).toLocaleString()} visits
+                          </span>
                           <span className={styles.countryPercentBadge}>{c.percentage}%</span>
                         </div>
                       </div>

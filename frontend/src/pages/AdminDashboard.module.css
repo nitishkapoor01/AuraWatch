@@ -2107,4 +2107,252 @@
   font-weight: 500;
 }
 
+/* ============================================================
+   OVERVIEW COUNTRY SECTION & CONTROLS
+   ============================================================ */
+.overviewCountrySection {
+  background: rgba(20, 20, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 24px;
+  margin-top: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(16px);
+}
+
+.viewAllAnalyticsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 113, 235, 0.15);
+  border: 1px solid rgba(0, 113, 235, 0.35);
+  color: #0071eb;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewAllAnalyticsBtn:hover {
+  background: rgba(0, 113, 235, 0.25);
+  color: #fff;
+  border-color: #0071eb;
+  transform: translateY(-1px);
+}
+
+.countryControlsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.countryControlsLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.countryControlsRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.countrySearchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  flex: 1;
+  max-width: 340px;
+  color: #888;
+  transition: all 0.2s ease;
+}
+
+.countrySearchBox:focus-within {
+  border-color: #0071eb;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 12px rgba(0, 113, 235, 0.2);
+  color: #0071eb;
+}
+
+.countrySearchBox input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+}
+
+.countrySearchBox input::placeholder {
+  color: #666;
+}
+
+.clearSearchBtn {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.clearSearchBtn:hover {
+  color: #fff;
+}
+
+.countrySortSelect {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.countrySortSelect:hover,
+.countrySortSelect:focus {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.countrySortSelect option {
+  background: #181818;
+  color: #fff;
+}
+
+.viewToggleGroup {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.viewToggleBtn {
+  background: transparent;
+  border: none;
+  color: #777;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.viewToggleBtn:hover {
+  color: #fff;
+}
+
+.viewToggleActive {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   COUNTRY DATA TABLE
+   ============================================================ */
+.countryDataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.countryDataTable th {
+  text-align: left;
+  padding: 10px 14px;
+  color: #777;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.countryDataTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #ddd;
+  vertical-align: middle;
+}
+
+.countryDataTable tr:hover td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.rankGold {
+  background: linear-gradient(135deg, #f1c40f, #e67e22);
+  color: #111;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-block;
+  box-shadow: 0 2px 8px rgba(241, 196, 15, 0.3);
+}
+
+.rankSilver {
+  background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+  color: #111;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.rankBronze {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  color: #fff;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.rankDefault {
+  background: rgba(255, 255, 255, 0.07);
+  color: #888;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.tableProgressWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tablePercentText {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  min-width: 44px;
+  text-align: right;
+}
+
 

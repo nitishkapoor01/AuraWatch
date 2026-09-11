@@ -128,45 +128,48 @@ router.get('/visitors', isModerator, async (req, res) => {
 // GET Audience Countries Analytics
 router.get('/analytics/countries', isModerator, async (req, res) => {
   try {
-    const period = req.query.period || 'all_time';
+    const rawPeriod = req.query.period || 'all_time';
+    const period = ['today', 'weekly', 'monthly', 'all_time'].includes(rawPeriod) ? rawPeriod : 'all_time';
     let queryText = '';
-    let params = [];
 
     if (period === 'today') {
       queryText = `
         SELECT 
           COALESCE(NULLIF(pv.country_code, 'XX'), NULLIF(uv.country_code, 'XX'), 'XX') as country_code,
           COALESCE(NULLIF(pv.country_name, 'Unknown'), NULLIF(uv.country_name, 'Unknown'), 'Unknown') as country_name,
-          COUNT(DISTINCT pv.session_id) as count
+          COUNT(DISTINCT COALESCE(pv.visitor_id, pv.session_id)) as unique_visitors,
+          COUNT(DISTINCT pv.session_id) as total_visits
         FROM platform_visits pv
         LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
         WHERE pv.date = CURRENT_DATE
         GROUP BY 1, 2
-        ORDER BY count DESC
+        ORDER BY unique_visitors DESC, total_visits DESC
       `;
     } else if (period === 'weekly') {
       queryText = `
         SELECT 
           COALESCE(NULLIF(pv.country_code, 'XX'), NULLIF(uv.country_code, 'XX'), 'XX') as country_code,
           COALESCE(NULLIF(pv.country_name, 'Unknown'), NULLIF(uv.country_name, 'Unknown'), 'Unknown') as country_name,
-          COUNT(DISTINCT pv.session_id) as count
+          COUNT(DISTINCT COALESCE(pv.visitor_id, pv.session_id)) as unique_visitors,
+          COUNT(DISTINCT pv.session_id) as total_visits
         FROM platform_visits pv
         LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
         WHERE pv.date >= CURRENT_DATE - INTERVAL '7 days'
         GROUP BY 1, 2
-        ORDER BY count DESC
+        ORDER BY unique_visitors DESC, total_visits DESC
       `;
     } else if (period === 'monthly') {
       queryText = `
         SELECT 
           COALESCE(NULLIF(pv.country_code, 'XX'), NULLIF(uv.country_code, 'XX'), 'XX') as country_code,
           COALESCE(NULLIF(pv.country_name, 'Unknown'), NULLIF(uv.country_name, 'Unknown'), 'Unknown') as country_name,
-          COUNT(DISTINCT pv.session_id) as count
+          COUNT(DISTINCT COALESCE(pv.visitor_id, pv.session_id)) as unique_visitors,
+          COUNT(DISTINCT pv.session_id) as total_visits
         FROM platform_visits pv
         LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
         WHERE pv.date >= CURRENT_DATE - INTERVAL '30 days'
         GROUP BY 1, 2
-        ORDER BY count DESC
+        ORDER BY unique_visitors DESC, total_visits DESC
       `;
     } else {
       // all_time - aggregate from unique_visitors
@@ -174,44 +177,58 @@ router.get('/analytics/countries', isModerator, async (req, res) => {
         SELECT 
           COALESCE(NULLIF(country_code, ''), 'XX') as country_code,
           COALESCE(NULLIF(country_name, ''), 'Unknown') as country_name,
-          COUNT(*) as count
+          COUNT(*) as unique_visitors,
+          COUNT(*) as total_visits
         FROM unique_visitors
         GROUP BY 1, 2
-        ORDER BY count DESC
+        ORDER BY unique_visitors DESC
       `;
     }
 
-    const result = await db.query(queryText, params);
+    const result = await db.query(queryText);
     const rawRows = result.rows;
 
-    let totalCount = 0;
-    rawRows.forEach(r => { totalCount += parseInt(r.count, 10); });
+    let totalVisitors = 0;
+    let totalVisits = 0;
+    rawRows.forEach(r => { 
+      totalVisitors += parseInt(r.unique_visitors || r.count || 0, 10);
+      totalVisits += parseInt(r.total_visits || r.unique_visitors || r.count || 0, 10);
+    });
 
-    const countries = rawRows.map(row => {
+    const countries = rawRows.map((row, index) => {
       const code = (row.country_code || 'XX').toUpperCase();
-      const count = parseInt(row.count, 10);
-      const percentage = totalCount > 0 ? parseFloat(((count / totalCount) * 100).toFixed(1)) : 0;
+      const visitorCount = parseInt(row.unique_visitors || row.count || 0, 10);
+      const visitCount = parseInt(row.total_visits || row.unique_visitors || row.count || 0, 10);
+      const percentage = totalVisitors > 0 ? parseFloat(((visitorCount / totalVisitors) * 100).toFixed(1)) : 0;
       const countryName = (row.country_name && row.country_name !== 'Unknown') 
         ? row.country_name 
         : getCountryName(code);
 
       return {
+        rank: index + 1,
         countryCode: code,
         countryName,
         flag: getCountryFlag(code),
-        count,
+        count: visitorCount,
+        uniqueVisitors: visitorCount,
+        totalVisits: visitCount,
         percentage
       };
     });
 
     const knownCountries = countries.filter(c => c.countryCode !== 'XX');
     const topCountry = knownCountries.length > 0 ? knownCountries[0] : (countries[0] || null);
+    const knownTraffic = knownCountries.reduce((acc, c) => acc + c.count, 0);
+    const globalTrafficPercent = totalVisitors > 0 ? parseFloat(((knownTraffic / totalVisitors) * 100).toFixed(1)) : 0;
 
     res.json({
       period,
-      totalTracked: totalCount,
+      totalTracked: totalVisitors,
+      totalVisitors,
+      totalVisits,
       totalCountries: knownCountries.length,
       topCountry,
+      globalTrafficPercent,
       countries
     });
   } catch (error) {
