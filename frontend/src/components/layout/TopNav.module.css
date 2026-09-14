@@ -205,7 +205,8 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 260px;
+  min-width: 200px;
 }
 
 .mobileSearchBtn {

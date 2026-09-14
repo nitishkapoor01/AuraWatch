@@ -26,31 +26,28 @@
 /* Tabs Navigation */
 .tabsNav {
   display: flex;
-  gap: 12px;
-  margin-bottom: 40px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scrollbar-width: none;
-}
-
-.tabsNav::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 36px;
+  width: 100%;
 }
 
 .tabBtn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
-  padding: 12px 24px;
+  padding: 10px 18px;
   border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all var(--anim-speed, 0.3s)e;
+  transition: all var(--anim-speed, 0.3s) ease;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  user-select: none;
 }
 
 .tabBtn:hover {
@@ -2710,5 +2707,28 @@
   padding: 3px 8px;
   border-radius: 6px;
 }
+
+@media (max-width: 1024px) {
+  .adminPage {
+    padding: 90px 24px 80px 85px;
+  }
+}
+
+@media (max-width: 768px) {
+  .adminPage {
+    padding: 85px 16px 80px 16px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .tabBtn {
+    padding: 8px 14px;
+    font-size: 12.5px;
+    gap: 6px;
+  }
+}
+
 
 
