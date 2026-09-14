@@ -2355,4 +2355,360 @@
   text-align: right;
 }
 
+/* ============================================================
+   RETENTION & RETURNING USERS ANALYTICS STYLES
+   ============================================================ */
+.retentionContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.retentionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.retentionTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.retentionTitleGroup h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.retentionTitleGroup p {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Split Ratio Bar */
+.ratioCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.ratioCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ratioTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #eee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ratioSplitBar {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 12px;
+}
+
+.splitSegmentReturning {
+  background: linear-gradient(90deg, #f39c12, #e67e22);
+  transition: width 0.5s ease;
+}
+
+.splitSegmentNew {
+  background: linear-gradient(90deg, #2ecc71, #27ae60);
+  transition: width 0.5s ease;
+}
+
+.ratioLegend {
+  display: flex;
+  gap: 24px;
+  font-size: 12px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #aaa;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Cohort Cards */
+.cohortsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.cohortCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 16px 20px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.cohortCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cohortHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cohortBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.cohortVal {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.cohortSub {
+  font-size: 11px;
+  color: #888;
+}
+
+/* 24h Hourly Activity Bar Graph */
+.hourlySection {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 22px 24px;
+}
+
+.hourlySectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.peakBadge {
+  background: rgba(231, 76, 60, 0.15);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hourlyBarsContainer {
+  display: flex;
+  align-items: flex-end;
+  height: 140px;
+  gap: 6px;
+  padding-bottom: 24px;
+  position: relative;
+}
+
+.hourlyCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.hourlyBarFill {
+  width: 100%;
+  max-width: 24px;
+  border-radius: 4px 4px 0 0;
+  background: rgba(0, 113, 235, 0.35);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.hourlyCol:hover .hourlyBarFill {
+  background: #0071eb;
+  box-shadow: 0 0 10px rgba(0, 113, 235, 0.5);
+}
+
+.hourlyCol.hourlyPeak .hourlyBarFill {
+  background: #e50914;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+}
+
+.hourlyLabelText {
+  position: absolute;
+  bottom: -22px;
+  font-size: 10px;
+  color: #666;
+  white-space: nowrap;
+}
+
+/* Loyalty Tier Badges */
+.tierVIP {
+  background: linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(230, 126, 34, 0.2));
+  border: 1px solid rgba(241, 196, 15, 0.4);
+  color: #f1c40f;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tierFrequent {
+  background: rgba(155, 89, 182, 0.2);
+  border: 1px solid rgba(155, 89, 182, 0.4);
+  color: #9b59b6;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+}
+
+.tierReturning {
+  background: rgba(0, 113, 235, 0.15);
+  border: 1px solid rgba(0, 113, 235, 0.3);
+  color: #3498db;
+  font-weight: 600;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Devices Grid */
+.deviceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.deviceCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.deviceIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deviceDetails h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: capitalize;
+  margin-bottom: 2px;
+}
+
+.deviceDetails .deviceCount {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.deviceDetails .deviceShare {
+  font-size: 11px;
+  color: #2ecc71;
+  font-weight: 700;
+}
+
+/* Funnel Steps */
+.funnelGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.funnelCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.funnelStepNum {
+  font-size: 10px;
+  font-weight: 800;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.funnelValue {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.funnelLabel {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.funnelRateBadge {
+  margin-top: 10px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
 

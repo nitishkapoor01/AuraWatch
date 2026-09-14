@@ -241,6 +241,362 @@ router.get('/analytics/most-watched', isModerator, async (req, res) => {
   const result = await db.query('SELECT title, movie_type, COUNT(*) as watches FROM watch_history GROUP BY title, movie_type ORDER BY watches DESC LIMIT 10');
   res.json(result.rows);
 });
+
+// GET Retention & Returning Users Analytics
+router.get('/analytics/retention', isModerator, async (req, res) => {
+  try {
+    const rawPeriod = req.query.period || 'all_time';
+    const period = ['today', 'weekly', 'monthly', 'all_time'].includes(rawPeriod) ? rawPeriod : 'all_time';
+    const search = (req.query.search || '').trim().toLowerCase();
+    const filter = ['all', 'registered', 'guest'].includes(req.query.filter) ? req.query.filter : 'all';
+    const sort = req.query.sort || 'sessions_desc';
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 200);
+    const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+
+    let dateFilter = '';
+    let returningCondition = '';
+
+    if (period === 'today') {
+      dateFilter = 'WHERE pv.date = CURRENT_DATE';
+      returningCondition = '(ats.all_time_sessions > 1 OR ats.all_time_days > 1 OR uv.first_seen < CURRENT_DATE)';
+    } else if (period === 'weekly') {
+      dateFilter = "WHERE pv.date >= CURRENT_DATE - INTERVAL '7 days'";
+      returningCondition = "(ats.all_time_sessions > 1 OR ats.all_time_days > 1 OR uv.first_seen < CURRENT_DATE - INTERVAL '7 days')";
+    } else if (period === 'monthly') {
+      dateFilter = "WHERE pv.date >= CURRENT_DATE - INTERVAL '30 days'";
+      returningCondition = "(ats.all_time_sessions > 1 OR ats.all_time_days > 1 OR uv.first_seen < CURRENT_DATE - INTERVAL '30 days')";
+    } else {
+      returningCondition = '(ats.all_time_sessions > 1 OR ats.all_time_days > 1)';
+    }
+
+    // 1. Retention KPI Summary Query
+    const summaryQuery = `
+      WITH period_visitors AS (
+        SELECT 
+          pv.visitor_id,
+          COUNT(DISTINCT pv.session_id) as period_sessions,
+          COUNT(DISTINCT pv.date) as period_days
+        FROM platform_visits pv
+        ${dateFilter}
+        ${dateFilter ? 'AND pv.visitor_id IS NOT NULL' : 'WHERE pv.visitor_id IS NOT NULL'}
+        GROUP BY pv.visitor_id
+      ),
+      all_time_stats AS (
+        SELECT 
+          pv.visitor_id,
+          COUNT(DISTINCT pv.session_id) as all_time_sessions,
+          COUNT(DISTINCT pv.date) as all_time_days
+        FROM platform_visits pv
+        WHERE pv.visitor_id IS NOT NULL
+        GROUP BY pv.visitor_id
+      )
+      SELECT 
+        COUNT(pv.visitor_id) as total_visitors,
+        COUNT(CASE WHEN ${returningCondition} THEN 1 END) as returning_visitors,
+        COUNT(CASE WHEN NOT (${returningCondition}) THEN 1 END) as new_visitors,
+        COUNT(CASE WHEN (${returningCondition}) AND uv.is_registered = TRUE THEN 1 END) as registered_returning,
+        COUNT(CASE WHEN (${returningCondition}) AND (uv.is_registered IS FALSE OR uv.is_registered IS NULL) THEN 1 END) as guest_returning,
+        ROUND(COALESCE(AVG(CASE WHEN ${returningCondition} THEN ats.all_time_sessions END), 0)::numeric, 1) as avg_returning_sessions,
+        COUNT(CASE WHEN ats.all_time_sessions = 1 AND ats.all_time_days = 1 THEN 1 END) as single_visit,
+        COUNT(CASE WHEN ats.all_time_sessions BETWEEN 2 AND 3 THEN 1 END) as cohort_2_3,
+        COUNT(CASE WHEN ats.all_time_sessions BETWEEN 4 AND 9 THEN 1 END) as cohort_4_9,
+        COUNT(CASE WHEN ats.all_time_sessions >= 10 THEN 1 END) as cohort_10_plus
+      FROM period_visitors pv
+      LEFT JOIN all_time_stats ats ON pv.visitor_id = ats.visitor_id
+      LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id;
+    `;
+
+    // 2. Churn Risk: active > 30 days ago, not seen in last 30 days
+    const churnQuery = `
+      SELECT COUNT(*) as churn_count
+      FROM unique_visitors
+      WHERE first_seen <= CURRENT_TIMESTAMP - INTERVAL '30 days'
+        AND last_seen < CURRENT_TIMESTAMP - INTERVAL '30 days';
+    `;
+
+    // 3. User Longevity Breakdown (Difference between first_seen and last_seen for returning visitors)
+    const longevityQuery = `
+      SELECT 
+        COUNT(CASE WHEN EXTRACT(EPOCH FROM (last_seen - first_seen)) < 86400 THEN 1 END) as same_day,
+        COUNT(CASE WHEN EXTRACT(EPOCH FROM (last_seen - first_seen)) >= 86400 AND EXTRACT(EPOCH FROM (last_seen - first_seen)) < 7 * 86400 THEN 1 END) as one_to_seven_days,
+        COUNT(CASE WHEN EXTRACT(EPOCH FROM (last_seen - first_seen)) >= 7 * 86400 AND EXTRACT(EPOCH FROM (last_seen - first_seen)) < 30 * 86400 THEN 1 END) as eight_to_thirty_days,
+        COUNT(CASE WHEN EXTRACT(EPOCH FROM (last_seen - first_seen)) >= 30 * 86400 THEN 1 END) as over_thirty_days
+      FROM unique_visitors
+      WHERE last_seen > first_seen;
+    `;
+
+    // 4. Hourly Peak Traffic Activity (24 Hours distribution based on last_seen)
+    const hourlyQuery = `
+      SELECT 
+        EXTRACT(HOUR FROM last_seen)::integer as hour,
+        COUNT(*) as count
+      FROM unique_visitors
+      WHERE last_seen IS NOT NULL
+      GROUP BY hour
+      ORDER BY hour ASC;
+    `;
+
+    // 5. Returning Users List (Filtered, Sorted & Paginated)
+    let sortClause = 'ORDER BY ats.all_time_sessions DESC, ats.all_time_days DESC';
+    if (sort === 'days_desc') sortClause = 'ORDER BY ats.all_time_days DESC, ats.all_time_sessions DESC';
+    if (sort === 'last_seen_desc') sortClause = 'ORDER BY uv.last_seen DESC NULLS LAST';
+    if (sort === 'first_seen_desc') sortClause = 'ORDER BY uv.first_seen DESC NULLS LAST';
+
+    const listQuery = `
+      WITH all_time_stats AS (
+        SELECT 
+          pv.visitor_id,
+          COUNT(DISTINCT pv.session_id) as all_time_sessions,
+          COUNT(DISTINCT pv.date) as all_time_days,
+          MIN(pv.date) as first_visit,
+          MAX(pv.date) as last_visit
+        FROM platform_visits pv
+        WHERE pv.visitor_id IS NOT NULL
+        GROUP BY pv.visitor_id
+        HAVING COUNT(DISTINCT pv.session_id) > 1 OR COUNT(DISTINCT pv.date) > 1
+      )
+      SELECT 
+        ats.visitor_id,
+        ats.all_time_sessions,
+        ats.all_time_days,
+        ats.first_visit,
+        ats.last_visit,
+        uv.last_seen,
+        uv.first_seen,
+        uv.last_ip,
+        COALESCE(NULLIF(uv.country_code, ''), 'XX') as country_code,
+        COALESCE(NULLIF(uv.country_name, ''), 'Unknown') as country_name,
+        COALESCE(uv.is_registered, FALSE) as is_registered,
+        u.id as user_id,
+        u.name as user_name,
+        u.email as user_email,
+        u.avatar as user_avatar,
+        u.role as user_role,
+        (SELECT COUNT(*) FROM watch_history wh WHERE wh.user_id = u.id) as watch_count
+      FROM all_time_stats ats
+      LEFT JOIN unique_visitors uv ON ats.visitor_id = uv.visitor_id
+      LEFT JOIN users u ON uv.user_id = u.id
+      WHERE 1=1
+        ${filter === 'registered' ? 'AND uv.is_registered = TRUE' : ''}
+        ${filter === 'guest' ? 'AND (uv.is_registered IS FALSE OR uv.is_registered IS NULL)' : ''}
+        ${search ? `AND (
+          LOWER(ats.visitor_id) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(u.name, '')) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(u.email, '')) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(uv.country_name, '')) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(uv.country_code, '')) LIKE '%' || $1 || '%'
+        )` : ''}
+      ${sortClause}
+      LIMIT ${limit} OFFSET ${offset};
+    `;
+
+    const countListQuery = `
+      WITH all_time_stats AS (
+        SELECT 
+          pv.visitor_id,
+          COUNT(DISTINCT pv.session_id) as all_time_sessions,
+          COUNT(DISTINCT pv.date) as all_time_days
+        FROM platform_visits pv
+        WHERE pv.visitor_id IS NOT NULL
+        GROUP BY pv.visitor_id
+        HAVING COUNT(DISTINCT pv.session_id) > 1 OR COUNT(DISTINCT pv.date) > 1
+      )
+      SELECT COUNT(*) as total_matching
+      FROM all_time_stats ats
+      LEFT JOIN unique_visitors uv ON ats.visitor_id = uv.visitor_id
+      LEFT JOIN users u ON uv.user_id = u.id
+      WHERE 1=1
+        ${filter === 'registered' ? 'AND uv.is_registered = TRUE' : ''}
+        ${filter === 'guest' ? 'AND (uv.is_registered IS FALSE OR uv.is_registered IS NULL)' : ''}
+        ${search ? `AND (
+          LOWER(ats.visitor_id) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(u.name, '')) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(u.email, '')) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(uv.country_name, '')) LIKE '%' || $1 || '%' OR
+          LOWER(COALESCE(uv.country_code, '')) LIKE '%' || $1 || '%'
+        )` : ''};
+    `;
+
+    const queryParams = search ? [search] : [];
+
+    const [summaryRes, churnRes, longevityRes, hourlyRes, listRes, countRes] = await Promise.all([
+      db.query(summaryQuery),
+      db.query(churnQuery),
+      db.query(longevityQuery),
+      db.query(hourlyQuery),
+      db.query(listQuery, queryParams),
+      db.query(countListQuery, queryParams)
+    ]);
+
+    const summary = summaryRes.rows[0] || {};
+    const totalVisitors = parseInt(summary.total_visitors || 0, 10);
+    const returningVisitors = parseInt(summary.returning_visitors || 0, 10);
+    const newVisitors = parseInt(summary.new_visitors || 0, 10);
+    const retentionRate = totalVisitors > 0 ? parseFloat(((returningVisitors / totalVisitors) * 100).toFixed(1)) : 0;
+    const registeredReturning = parseInt(summary.registered_returning || 0, 10);
+    const guestReturning = parseInt(summary.guest_returning || 0, 10);
+    const avgReturningSessions = parseFloat(summary.avg_returning_sessions || 0);
+
+    const churnRisk = parseInt(churnRes.rows[0]?.churn_count || 0, 10);
+
+    const longevityRaw = longevityRes.rows[0] || {};
+    const longevity = {
+      sameDay: parseInt(longevityRaw.same_day || 0, 10),
+      oneToSevenDays: parseInt(longevityRaw.one_to_seven_days || 0, 10),
+      eightToThirtyDays: parseInt(longevityRaw.eight_to_thirty_days || 0, 10),
+      overThirtyDays: parseInt(longevityRaw.over_thirty_days || 0, 10)
+    };
+
+    // Build 24h map
+    const hourlyMap = {};
+    for (let h = 0; h < 24; h++) hourlyMap[h] = 0;
+    hourlyRes.rows.forEach(r => {
+      if (r.hour !== null && r.hour !== undefined) {
+        hourlyMap[parseInt(r.hour, 10)] = parseInt(r.count, 10);
+      }
+    });
+    const hourlyActivity = Object.entries(hourlyMap).map(([hour, count]) => ({
+      hour: parseInt(hour, 10),
+      label: `${String(hour).padStart(2, '0')}:00`,
+      count
+    }));
+
+    // Enrich returning users list
+    const returningUsers = listRes.rows.map(row => {
+      const sessions = parseInt(row.all_time_sessions || 0, 10);
+      const code = (row.country_code || 'XX').toUpperCase();
+      let loyaltyTier = 'Returning';
+      if (sessions >= 10) loyaltyTier = 'VIP';
+      else if (sessions >= 4) loyaltyTier = 'Frequent';
+
+      return {
+        visitorId: row.visitor_id,
+        userId: row.user_id,
+        userName: row.user_name || null,
+        userEmail: row.user_email || null,
+        userAvatar: row.user_avatar || null,
+        userRole: row.user_role || 'user',
+        isRegistered: !!row.is_registered,
+        countryCode: code,
+        countryName: (row.country_name && row.country_name !== 'Unknown') ? row.country_name : getCountryName(code),
+        flag: getCountryFlag(code),
+        totalSessions: sessions,
+        activeDays: parseInt(row.all_time_days || 0, 10),
+        firstVisit: row.first_visit,
+        lastVisit: row.last_visit,
+        firstSeen: row.first_seen,
+        lastSeen: row.last_seen,
+        watchCount: parseInt(row.watch_count || 0, 10),
+        loyaltyTier
+      };
+    });
+
+    const totalMatching = parseInt(countRes.rows[0]?.total_matching || 0, 10);
+
+    res.json({
+      period,
+      totalVisitors,
+      returningVisitors,
+      newVisitors,
+      retentionRate,
+      registeredReturning,
+      guestReturning,
+      avgReturningSessions,
+      cohorts: {
+        single: parseInt(summary.single_visit || 0, 10),
+        cohort_2_3: parseInt(summary.cohort_2_3 || 0, 10),
+        cohort_4_9: parseInt(summary.cohort_4_9 || 0, 10),
+        cohort_10_plus: parseInt(summary.cohort_10_plus || 0, 10)
+      },
+      longevity,
+      churnRisk,
+      hourlyActivity,
+      returningUsers,
+      totalMatching,
+      limit,
+      offset
+    });
+  } catch (error) {
+    console.error('[ADMIN] Failed to fetch retention analytics:', error);
+    res.status(500).json({ message: 'Failed to fetch retention analytics.' });
+  }
+});
+
+// GET Platform Insights (Devices, Funnel, Top Re-watched, Content Gaps)
+router.get('/analytics/platform-insights', isModerator, async (req, res) => {
+  try {
+    // 1. Device breakdown from ad_impressions
+    const deviceRes = await db.query(`
+      SELECT 
+        COALESCE(NULLIF(device_type, ''), 'desktop') as device,
+        COUNT(*) as count
+      FROM ad_impressions
+      GROUP BY 1
+      ORDER BY count DESC
+    `);
+    let totalImpressions = 0;
+    deviceRes.rows.forEach(r => totalImpressions += parseInt(r.count, 10));
+    const deviceBreakdown = deviceRes.rows.map(r => {
+      const count = parseInt(r.count, 10);
+      return {
+        device: r.device,
+        count,
+        percentage: totalImpressions > 0 ? parseFloat(((count / totalImpressions) * 100).toFixed(1)) : 0
+      };
+    });
+
+    // 2. Streaming Funnel
+    const visitsTotalRes = await db.query('SELECT COUNT(DISTINCT session_id) as count FROM platform_visits');
+    const attemptsRes = await db.query('SELECT COUNT(*) as count FROM watch_history');
+    const completedRes = await db.query('SELECT COUNT(*) as count FROM watch_history WHERE progress >= (duration * 0.9) AND duration > 0');
+    
+    const totalVisits = parseInt(visitsTotalRes.rows[0]?.count || 0, 10);
+    const totalAttempts = parseInt(attemptsRes.rows[0]?.count || 0, 10);
+    const completedWatches = parseInt(completedRes.rows[0]?.count || 0, 10);
+    
+    const clickThroughRate = totalVisits > 0 ? parseFloat(((totalAttempts / totalVisits) * 100).toFixed(1)) : 0;
+    const completionRate = totalAttempts > 0 ? parseFloat(((completedWatches / totalAttempts) * 100).toFixed(1)) : 0;
+
+    // 3. Top Re-watched / High Loyalty Titles (watched by multiple viewers or repeatedly)
+    const rewatchedRes = await db.query(`
+      SELECT 
+        title, 
+        movie_type, 
+        COUNT(*) as total_watches,
+        COUNT(DISTINCT user_id) as unique_viewers
+      FROM watch_history
+      GROUP BY title, movie_type
+      ORDER BY total_watches DESC
+      LIMIT 8
+    `);
+
+    // 4. Content Gaps: Top searches with 0 results or failed searches
+    const contentGapsRes = await db.query(`
+      SELECT query, COUNT(*) as count
+      FROM search_logs
+      WHERE success = FALSE OR has_results = FALSE
+      GROUP BY query
+      ORDER BY count DESC
+      LIMIT 8
+    `);
+
+    res.json({
+      deviceBreakdown,
+      streamingFunnel: {
+        totalVisits,
+        totalAttempts,
+        completedWatches,
+        clickThroughRate,
+        completionRate
+      },
+      topReWatched: rewatchedRes.rows,
+      contentGaps: contentGapsRes.rows
+    });
+  } catch (error) {
+    console.error('[ADMIN] Failed to fetch platform insights:', error);
+    res.status(500).json({ message: 'Failed to fetch platform insights.' });
+  }
+});
 router.get('/security/login-logs', isModerator, async (req, res) => {
   const result = await db.query('SELECT l.*, u.name, u.email FROM login_logs l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.created_at DESC LIMIT 50');
   res.json(result.rows);

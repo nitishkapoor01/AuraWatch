@@ -283,6 +283,10 @@ const initDB = async () => {
       CREATE INDEX IF NOT EXISTS idx_support_tickets_visitor ON support_tickets(visitor_id);
       CREATE INDEX IF NOT EXISTS idx_unique_visitors_country ON unique_visitors(country_code);
       CREATE INDEX IF NOT EXISTS idx_platform_visits_country ON platform_visits(country_code);
+      CREATE INDEX IF NOT EXISTS idx_platform_visits_visitor ON platform_visits(visitor_id);
+      CREATE INDEX IF NOT EXISTS idx_platform_visits_date ON platform_visits(date);
+      CREATE INDEX IF NOT EXISTS idx_unique_visitors_last_seen ON unique_visitors(last_seen DESC);
+      CREATE INDEX IF NOT EXISTS idx_unique_visitors_first_seen ON unique_visitors(first_seen);
 
       CREATE TABLE IF NOT EXISTS ad_impressions (
         id SERIAL PRIMARY KEY,

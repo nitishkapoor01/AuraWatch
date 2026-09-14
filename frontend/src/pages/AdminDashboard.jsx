@@ -6,7 +6,7 @@ import {
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
   Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe, Sparkles,
-  ArrowUpRight, Table, LayoutGrid
+  ArrowUpRight, Table, LayoutGrid, Repeat, Smartphone, Monitor, Tablet, UserCheck, Flame, RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -31,6 +31,16 @@ const AdminDashboard = () => {
   const [countrySearch, setCountrySearch] = useState('');
   const [countrySort, setCountrySort] = useState('count_desc');
   const [countryView, setCountryView] = useState('table');
+  
+  // Retention & Returning Users States
+  const [retentionData, setRetentionData] = useState(null);
+  const [retentionPeriod, setRetentionPeriod] = useState('all_time');
+  const [loadingRetention, setLoadingRetention] = useState(false);
+  const [retentionSearch, setRetentionSearch] = useState('');
+  const [retentionFilter, setRetentionFilter] = useState('all');
+  const [retentionSort, setRetentionSort] = useState('sessions_desc');
+  const [platformInsights, setPlatformInsights] = useState(null);
+  const [loadingInsights, setLoadingInsights] = useState(false);
   
   // Live Feed & Security States
   const [liveStats, setLiveStats] = useState(null);
@@ -161,6 +171,7 @@ const AdminDashboard = () => {
       
       // Preload audience countries for summary
       fetchCountryAnalytics('all_time');
+      fetchRetentionData('all_time');
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
@@ -179,6 +190,42 @@ const AdminDashboard = () => {
       console.error('Failed to fetch country analytics', e);
     } finally {
       setLoadingCountries(false);
+    }
+  };
+
+  const fetchRetentionData = async (period = retentionPeriod, filter = retentionFilter, sort = retentionSort, search = retentionSearch) => {
+    try {
+      setLoadingRetention(true);
+      const headers = { Authorization: `Bearer ${token}` };
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const params = new URLSearchParams({ period, filter, sort });
+      if (search && search.trim()) params.append('search', search.trim());
+      const res = await fetch(`${baseUrl}/admin/analytics/retention?${params.toString()}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setRetentionData(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch retention analytics', e);
+    } finally {
+      setLoadingRetention(false);
+    }
+  };
+
+  const fetchPlatformInsights = async () => {
+    try {
+      setLoadingInsights(true);
+      const headers = { Authorization: `Bearer ${token}` };
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const res = await fetch(`${baseUrl}/admin/analytics/platform-insights`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setPlatformInsights(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch platform insights', e);
+    } finally {
+      setLoadingInsights(false);
     }
   };
 
@@ -201,6 +248,9 @@ const AdminDashboard = () => {
       if (searchRes.ok) setSearchLogs(await searchRes.json());
       if (watchedRes.ok) setMostWatched(await watchedRes.json());
       fetchCountryAnalytics(countryPeriod);
+    } else if (tab === 'retention') {
+      fetchRetentionData(retentionPeriod, retentionFilter, retentionSort, retentionSearch);
+      fetchPlatformInsights();
     } else if (tab === 'users') {
       const visitorsRes = await fetch(`${baseUrl}/admin/visitors`, { headers });
       if (visitorsRes.ok) setVisitors(await visitorsRes.json());
@@ -296,6 +346,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchTabSpecificData(activeTab);
   }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'retention') {
+      fetchRetentionData(retentionPeriod, retentionFilter, retentionSort, retentionSearch);
+    }
+  }, [retentionPeriod, retentionFilter, retentionSort]);
 
   // Actions
   const handleUpdateRole = async (userId, newRole) => {
@@ -581,6 +637,9 @@ const AdminDashboard = () => {
         <button className={`${styles.tabBtn} ${activeTab === 'analytics' ? styles.activeTab : ''}`} onClick={() => setActiveTab('analytics')}>
           <BarChart size={18} /> Analytics
         </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'retention' ? styles.activeTab : ''}`} onClick={() => setActiveTab('retention')}>
+          <Repeat size={18} /> Returning & Retention
+        </button>
         <button className={`${styles.tabBtn} ${activeTab === 'support' ? styles.activeTab : ''}`} onClick={() => setActiveTab('support')}>
           <MessageSquare size={18} /> Support
         </button>
@@ -606,6 +665,13 @@ const AdminDashboard = () => {
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}><Zap size={28} /></div>
               <div className={styles.statInfo}><h3>{liveStats?.total || 0}</h3><p>Users Online Now</p></div>
+            </div>
+            <div className={styles.statCard} style={{ cursor: 'pointer' }} onClick={() => setActiveTab('retention')}>
+              <div className={styles.statIcon} style={{ background: 'rgba(243, 156, 18, 0.15)', color: '#f39c12' }}><Repeat size={28} /></div>
+              <div className={styles.statInfo}>
+                <h3>{retentionData?.returningVisitors !== undefined ? retentionData.returningVisitors.toLocaleString() : '...'}</h3>
+                <p>Returning Users ({retentionData?.retentionRate || 0}%)</p>
+              </div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(39, 174, 96, 0.15)', color: '#27ae60' }}><CheckCircle size={28} /></div>
@@ -1395,6 +1461,585 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RETENTION & RETURNING USERS TAB */}
+      {activeTab === 'retention' && (
+        <div className={styles.tabContent}>
+          <div className={styles.retentionContainer}>
+            {/* Header & Timeframe Filter */}
+            <div className={styles.retentionHeader}>
+              <div className={styles.retentionTitleGroup}>
+                <div className={styles.sectionIconBadge} style={{ background: 'rgba(243, 156, 18, 0.15)', color: '#f39c12' }}>
+                  <Repeat size={22} />
+                </div>
+                <div>
+                  <h2>Returning Users & Audience Retention</h2>
+                  <p>Observability of viewer loyalty, repeat visits, churn risk & streaming engagement</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div className={styles.timeframeFilter}>
+                  {[
+                    { id: 'today', label: 'Today' },
+                    { id: 'weekly', label: 'Last 7 Days' },
+                    { id: 'monthly', label: 'Last 30 Days' },
+                    { id: 'all_time', label: 'All Time' }
+                  ].map(tf => (
+                    <button
+                      key={tf.id}
+                      className={`${styles.timeframeBtn} ${retentionPeriod === tf.id ? styles.timeframeBtnActive : ''}`}
+                      onClick={() => {
+                        setRetentionPeriod(tf.id);
+                        fetchRetentionData(tf.id, retentionFilter, retentionSort, retentionSearch);
+                      }}
+                    >
+                      {tf.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button 
+                  className={styles.viewToggleBtn}
+                  onClick={() => {
+                    fetchRetentionData(retentionPeriod, retentionFilter, retentionSort, retentionSearch);
+                    fetchPlatformInsights();
+                    showToast('Refreshed retention analytics', 'info');
+                  }}
+                  title="Refresh Data"
+                  style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', padding: '7px 12px', borderRadius: '8px', color: '#ccc' }}
+                >
+                  <RefreshCw size={15} className={loadingRetention ? styles.spinner : ''} />
+                </button>
+              </div>
+            </div>
+
+            {/* Top 5 Executive KPI Cards */}
+            <div className={styles.countryHighlights}>
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Returning Visitors</div>
+                <div className={styles.highlightVal}>
+                  <Repeat size={20} color="#f39c12" style={{ marginRight: '4px' }} />
+                  {(retentionData?.returningVisitors || 0).toLocaleString()} Users
+                  <span className={styles.highlightPercent} style={{ color: '#f39c12' }}>({retentionData?.retentionRate || 0}%)</span>
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Audience Retention Rate</div>
+                <div className={styles.highlightVal}>
+                  <TrendingUp size={20} color="#2ecc71" style={{ marginRight: '4px' }} />
+                  {retentionData?.retentionRate || 0}%
+                  <span style={{ fontSize: '11px', color: '#888', marginLeft: '6px' }}>Repeat Ratio</span>
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Registered vs Guests</div>
+                <div className={styles.highlightVal}>
+                  <UserCheck size={20} color="#0071eb" style={{ marginRight: '4px' }} />
+                  {retentionData?.registeredReturning || 0} <span style={{ fontSize: '13px', color: '#888', margin: '0 4px' }}>reg /</span> {retentionData?.guestReturning || 0} <span style={{ fontSize: '13px', color: '#888' }}>guest</span>
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Avg Visits Per Returner</div>
+                <div className={styles.highlightVal}>
+                  <Activity size={20} color="#9b59b6" style={{ marginRight: '4px' }} />
+                  {retentionData?.avgReturningSessions || 0} Visits
+                </div>
+              </div>
+
+              <div className={styles.countryHighlightCard}>
+                <div className={styles.highlightLabel}>Churn Risk (&gt;30d Inactive)</div>
+                <div className={styles.highlightVal}>
+                  <AlertTriangle size={20} color="#e74c3c" style={{ marginRight: '4px' }} />
+                  {(retentionData?.churnRisk || 0).toLocaleString()} Users
+                </div>
+              </div>
+            </div>
+
+            {/* Split Audience Ratio Bar (New vs Returning) */}
+            <div className={styles.ratioCard}>
+              <div className={styles.ratioCardTop}>
+                <span className={styles.ratioTitle}>
+                  <Users size={16} /> Audience Composition: New Visitors vs. Returning Viewers
+                </span>
+                <span style={{ fontSize: '12px', color: '#aaa' }}>
+                  Total Tracked: <strong>{(retentionData?.totalVisitors || 0).toLocaleString()}</strong>
+                </span>
+              </div>
+              
+              <div className={styles.ratioSplitBar}>
+                <div 
+                  className={styles.splitSegmentReturning} 
+                  style={{ width: `${Math.min(Math.max(retentionData?.retentionRate || 0, 2), 98)}%` }} 
+                  title={`Returning: ${retentionData?.returningVisitors || 0} (${retentionData?.retentionRate || 0}%)`}
+                />
+                <div 
+                  className={styles.splitSegmentNew} 
+                  style={{ width: `${Math.max(100 - (retentionData?.retentionRate || 0), 2)}%` }} 
+                  title={`New: ${retentionData?.newVisitors || 0} (${(100 - (retentionData?.retentionRate || 0)).toFixed(1)}%)`}
+                />
+              </div>
+
+              <div className={styles.ratioLegend}>
+                <div className={styles.legendItem}>
+                  <span className={styles.legendDot} style={{ background: '#f39c12' }} />
+                  <span>Returning Viewers: <strong>{(retentionData?.returningVisitors || 0).toLocaleString()}</strong> ({retentionData?.retentionRate || 0}%)</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <span className={styles.legendDot} style={{ background: '#2ecc71' }} />
+                  <span>First-Time Visitors: <strong>{(retentionData?.newVisitors || 0).toLocaleString()}</strong> ({retentionData?.totalVisitors ? (100 - (retentionData?.retentionRate || 0)).toFixed(1) : 0}%)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Loyalty Frequency Cohorts */}
+            <div>
+              <div className={styles.sectionHeader} style={{ marginBottom: '14px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#eee', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Flame size={18} color="#f39c12" /> Loyalty Depth & Visit Frequency Cohorts
+                </h3>
+              </div>
+              <div className={styles.cohortsGrid}>
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#aaa' }}>Single Visit</span>
+                    <span className={styles.cohortBadge} style={{ background: 'rgba(255,255,255,0.07)', color: '#aaa' }}>1 Visit</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.cohorts?.single || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>First-time or one-off audience</div>
+                </div>
+
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#3498db' }}>Occasional</span>
+                    <span className={styles.cohortBadge} style={{ background: 'rgba(52, 152, 219, 0.15)', color: '#3498db' }}>2 - 3 Visits</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.cohorts?.cohort_2_3 || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>Returning viewers building habit</div>
+                </div>
+
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#9b59b6' }}>Frequent Streamers</span>
+                    <span className={styles.cohortBadge} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}>4 - 9 Visits</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.cohorts?.cohort_4_9 || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>Highly engaged weekly audience</div>
+                </div>
+
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#f1c40f' }}>VIP Power Users</span>
+                    <span className={styles.cohortBadge} style={{ background: 'linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(230, 126, 34, 0.2))', color: '#f1c40f' }}>10+ Visits</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.cohorts?.cohort_10_plus || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>Most loyal core community</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Audience Longevity / Active Lifespan */}
+            <div>
+              <div className={styles.sectionHeader} style={{ marginBottom: '14px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#eee', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Clock size={18} color="#0071eb" /> Audience Lifespan (First Seen to Last Active)
+                </h3>
+              </div>
+              <div className={styles.cohortsGrid}>
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#aaa' }}>Same-Day Return</span>
+                    <span className={styles.cohortBadge} style={{ background: 'rgba(255,255,255,0.06)', color: '#888' }}>&lt; 24 Hours</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.longevity?.sameDay || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>Multiple sessions within 24h</div>
+                </div>
+
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#2ecc71' }}>Weekly Retention</span>
+                    <span className={styles.cohortBadge} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}>1 - 7 Days</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.longevity?.oneToSevenDays || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>Returned within the first week</div>
+                </div>
+
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#9b59b6' }}>Monthly Retention</span>
+                    <span className={styles.cohortBadge} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}>8 - 30 Days</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.longevity?.eightToThirtyDays || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>Multi-week active retention</div>
+                </div>
+
+                <div className={styles.cohortCard}>
+                  <div className={styles.cohortHeader}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#f39c12' }}>Long-Term Loyal</span>
+                    <span className={styles.cohortBadge} style={{ background: 'rgba(243, 156, 18, 0.15)', color: '#f39c12' }}>30+ Days</span>
+                  </div>
+                  <div className={styles.cohortVal}>{(retentionData?.longevity?.overThirtyDays || 0).toLocaleString()}</div>
+                  <div className={styles.cohortSub}>Active across multiple months</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 24-Hour Peak Traffic Activity Chart */}
+            <div className={styles.hourlySection}>
+              <div className={styles.hourlySectionHeader}>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#eee', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <BarChart3 size={18} color="#0071eb" /> 24-Hour Peak Traffic Distribution (Hourly Audience Heatmap)
+                  </h3>
+                  <p style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+                    Identifies peak streaming hours so you know when viewers return to AuraWatch
+                  </p>
+                </div>
+
+                {(() => {
+                  if (!retentionData?.hourlyActivity || retentionData.hourlyActivity.length === 0) return null;
+                  const peak = [...retentionData.hourlyActivity].sort((a, b) => b.count - a.count)[0];
+                  if (!peak || peak.count === 0) return null;
+                  return (
+                    <div className={styles.peakBadge}>
+                      <Flame size={14} /> Peak Streaming Hour: {peak.label} ({peak.count.toLocaleString()} visits)
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div className={styles.hourlyBarsContainer}>
+                {(() => {
+                  const hours = retentionData?.hourlyActivity || [];
+                  const maxCount = Math.max(...hours.map(h => h.count), 1);
+                  const peak = [...hours].sort((a, b) => b.count - a.count)[0];
+
+                  return hours.map((h) => {
+                    const heightPct = Math.max((h.count / maxCount) * 100, 4);
+                    const isPeak = peak && peak.count > 0 && h.hour === peak.hour;
+
+                    return (
+                      <div 
+                        key={h.hour} 
+                        className={`${styles.hourlyCol} ${isPeak ? styles.hourlyPeak : ''}`}
+                        title={`${h.label} — ${h.count.toLocaleString()} visitors`}
+                      >
+                        <div 
+                          className={styles.hourlyBarFill} 
+                          style={{ height: `${heightPct}%` }}
+                        />
+                        <span className={styles.hourlyLabelText}>
+                          {h.hour % 3 === 0 ? h.label.split(':')[0] + 'h' : ''}
+                        </span>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+
+            {/* Platform Insights (Devices, Funnel, Re-watched, Content Gaps) */}
+            <div className={styles.analyticsSection}>
+              <div className={styles.sectionHeader}>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={20} color="#2ecc71" /> Platform Observability & Content Intelligence
+                </h3>
+                <p style={{ fontSize: '13px', color: '#888', marginTop: '4px' }}>
+                  Device distribution, streaming conversion funnel, repeat watch affinity, and content demand gaps
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginTop: '20px' }}>
+                {/* 1. Device Breakdown */}
+                <div className={styles.settingCard} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                  <div className={styles.settingInfo}>
+                    <h3>Device & Platform Distribution</h3>
+                    <p>Where your audience streams content from</p>
+                  </div>
+
+                  <div className={styles.deviceGrid}>
+                    {(platformInsights?.deviceBreakdown || []).map((dev, idx) => {
+                      const IconComp = dev.device.toLowerCase() === 'mobile' ? Smartphone : dev.device.toLowerCase() === 'tablet' ? Tablet : Monitor;
+                      const iconColor = dev.device.toLowerCase() === 'mobile' ? '#2ecc71' : dev.device.toLowerCase() === 'tablet' ? '#f39c12' : '#0071eb';
+                      return (
+                        <div key={idx} className={styles.deviceCard}>
+                          <div className={styles.deviceIconBox} style={{ background: `${iconColor}22`, color: iconColor }}>
+                            <IconComp size={22} />
+                          </div>
+                          <div className={styles.deviceDetails}>
+                            <h4>{dev.device}</h4>
+                            <div className={styles.deviceCount}>{dev.count.toLocaleString()}</div>
+                            <div className={styles.deviceShare}>{dev.percentage}% share</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {(!platformInsights?.deviceBreakdown || platformInsights.deviceBreakdown.length === 0) && (
+                      <div style={{ color: '#777', padding: '20px' }}>No device records collected yet.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Streaming Conversion Funnel */}
+                <div className={styles.settingCard} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                  <div className={styles.settingInfo}>
+                    <h3>Streaming Conversion Funnel</h3>
+                    <p>Visitor journey from browsing to completed watch</p>
+                  </div>
+
+                  <div className={styles.funnelGrid}>
+                    <div className={styles.funnelCard}>
+                      <div className={styles.funnelStepNum}>Stage 1 · Traffic</div>
+                      <div className={styles.funnelValue}>{(platformInsights?.streamingFunnel?.totalVisits || 0).toLocaleString()}</div>
+                      <div className={styles.funnelLabel}>Platform Visits</div>
+                      <span className={styles.funnelRateBadge} style={{ background: 'rgba(0,113,235,0.15)', color: '#0071eb' }}>
+                        100% Traffic Base
+                      </span>
+                    </div>
+
+                    <div className={styles.funnelCard}>
+                      <div className={styles.funnelStepNum}>Stage 2 · Intent</div>
+                      <div className={styles.funnelValue}>{(platformInsights?.streamingFunnel?.totalAttempts || 0).toLocaleString()}</div>
+                      <div className={styles.funnelLabel}>Media Watch Clicks</div>
+                      <span className={styles.funnelRateBadge} style={{ background: 'rgba(46,204,113,0.15)', color: '#2ecc71' }}>
+                        {platformInsights?.streamingFunnel?.clickThroughRate || 0}% Click-Through
+                      </span>
+                    </div>
+
+                    <div className={styles.funnelCard}>
+                      <div className={styles.funnelStepNum}>Stage 3 · Engagement</div>
+                      <div className={styles.funnelValue}>{(platformInsights?.streamingFunnel?.completedWatches || 0).toLocaleString()}</div>
+                      <div className={styles.funnelLabel}>Completed (90%+)</div>
+                      <span className={styles.funnelRateBadge} style={{ background: 'rgba(243,156,18,0.15)', color: '#f39c12' }}>
+                        {platformInsights?.streamingFunnel?.completionRate || 0}% Completion
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Re-Watched & Content Demand Gaps */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginTop: '24px' }}>
+                {/* Top Re-Watched */}
+                <div className={styles.analyticsCard}>
+                  <h3><Film size={18} color="#e50914" /> High Re-Watch Affinity (Audience Favorites)</h3>
+                  <div className={styles.keywordList}>
+                    {(platformInsights?.topReWatched || []).map((m, idx) => (
+                      <div key={idx} className={styles.keywordItem}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span className={styles.keywordText}>{m.title}</span>
+                          <span style={{ fontSize: '11px', color: '#666' }}>{m.movie_type?.toUpperCase()}</span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span className={styles.keywordCount}>{parseInt(m.total_watches, 10).toLocaleString()} watches</span>
+                          <div style={{ fontSize: '10px', color: '#888' }}>{m.unique_viewers} viewers</div>
+                        </div>
+                      </div>
+                    ))}
+                    {(!platformInsights?.topReWatched || platformInsights.topReWatched.length === 0) && (
+                      <div style={{ padding: '20px', color: '#777' }}>No re-watch activity logged yet.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Content Gaps / Search Failures */}
+                <div className={styles.analyticsCard}>
+                  <h3><AlertCircle size={18} color="#e74c3c" /> Content Demand Gaps (Searches with 0 Results)</h3>
+                  <p style={{ fontSize: '12px', color: '#777', marginBottom: '12px' }}>
+                    What missing movies or series your audience is actively looking for
+                  </p>
+                  <div className={styles.keywordList}>
+                    {(platformInsights?.contentGaps || []).map((g, idx) => (
+                      <div key={idx} className={styles.keywordItem}>
+                        <span className={styles.keywordText} style={{ color: '#f87171' }}>"{g.query}"</span>
+                        <span className={styles.keywordCount} style={{ background: 'rgba(231,76,60,0.15)', color: '#e74c3c' }}>
+                          {g.count} misses
+                        </span>
+                      </div>
+                    ))}
+                    {(!platformInsights?.contentGaps || platformInsights.contentGaps.length === 0) && (
+                      <div style={{ padding: '20px', color: '#777' }}>No search misses recorded.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Returning Users Directory */}
+            <div className={styles.usersSection}>
+              <div className={styles.sectionHeader} style={{ flexWrap: 'wrap', gap: '14px' }}>
+                <div>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Repeat size={20} color="#f39c12" /> Returning Users Directory
+                  </h2>
+                  <p style={{ fontSize: '13px', color: '#888', marginTop: '2px' }}>
+                    Inspect individual repeat visitors, loyalty tiers, total sessions, and activity timeline
+                  </p>
+                </div>
+                <span className={styles.userCount} style={{ background: 'rgba(243, 156, 18, 0.15)', color: '#f39c12' }}>
+                  {retentionData?.totalMatching || retentionData?.returningUsers?.length || 0} Repeat Visitors
+                </span>
+              </div>
+
+              {/* Search, Filter Pills & Sort Controls */}
+              <div className={styles.countryControlsBar} style={{ marginTop: '16px' }}>
+                <div className={styles.countryControlsLeft}>
+                  <div className={styles.countrySearchBox}>
+                    <SearchIcon size={15} />
+                    <input
+                      type="text"
+                      placeholder="Search by name, email, visitor ID, or country..."
+                      value={retentionSearch}
+                      onChange={(e) => {
+                        setRetentionSearch(e.target.value);
+                        fetchRetentionData(retentionPeriod, retentionFilter, retentionSort, e.target.value);
+                      }}
+                    />
+                    {retentionSearch && (
+                      <button
+                        className={styles.clearSearchBtn}
+                        onClick={() => {
+                          setRetentionSearch('');
+                          fetchRetentionData(retentionPeriod, retentionFilter, retentionSort, '');
+                        }}
+                        title="Clear search"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className={styles.timeframeFilter} style={{ margin: 0 }}>
+                    {[
+                      { id: 'all', label: 'All Repeaters' },
+                      { id: 'registered', label: 'Registered Only' },
+                      { id: 'guest', label: 'Guests Only' }
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        className={`${styles.timeframeBtn} ${retentionFilter === f.id ? styles.timeframeBtnActive : ''}`}
+                        onClick={() => {
+                          setRetentionFilter(f.id);
+                          fetchRetentionData(retentionPeriod, f.id, retentionSort, retentionSearch);
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.countryControlsRight}>
+                  <select
+                    value={retentionSort}
+                    onChange={(e) => {
+                      setRetentionSort(e.target.value);
+                      fetchRetentionData(retentionPeriod, retentionFilter, e.target.value, retentionSearch);
+                    }}
+                    className={styles.countrySortSelect}
+                    aria-label="Sort returning users"
+                  >
+                    <option value="sessions_desc">Most Visits / Sessions</option>
+                    <option value="days_desc">Most Days Active</option>
+                    <option value="last_seen_desc">Most Recently Active</option>
+                    <option value="first_seen_desc">First Joined (Oldest)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Returning Users Table */}
+              <div className={styles.tableContainer} style={{ marginTop: '14px' }}>
+                {loadingRetention ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '10px', color: '#888' }}>
+                    <Loader2 size={20} className={styles.spinner} /> Loading returning users directory...
+                  </div>
+                ) : (
+                  <table className={styles.countryDataTable}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '50px' }}>Rank</th>
+                        <th>User / Visitor</th>
+                        <th>Country</th>
+                        <th>Status</th>
+                        <th>Loyalty Tier</th>
+                        <th style={{ textAlign: 'right' }}>Total Sessions</th>
+                        <th style={{ textAlign: 'right' }}>Active Days</th>
+                        <th>First Seen</th>
+                        <th>Last Active</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(retentionData?.returningUsers || []).map((u, idx) => (
+                        <tr key={u.visitorId || idx}>
+                          <td>
+                            <span className={idx === 0 ? styles.rankGold : idx === 1 ? styles.rankSilver : idx === 2 ? styles.rankBronze : styles.rankDefault}>
+                              #{idx + 1}
+                            </span>
+                          </td>
+                          <td>
+                            <div className={styles.userInfo}>
+                              <div className={styles.userAvatar} style={{ background: u.isRegistered ? '#e50914' : '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {u.isRegistered ? <UserCheck size={16} /> : <Users size={16} />}
+                              </div>
+                              <div>
+                                <div className={styles.userName}>
+                                  {u.userName || `Guest #${u.visitorId.substring(0, 8)}`}
+                                  {u.userRole === 'admin' && <span className={styles.superAdminBadge} style={{ marginLeft: '6px' }}>ADMIN</span>}
+                                </div>
+                                <div className={styles.userEmail}>
+                                  {u.userEmail || `ID: ${u.visitorId.substring(0, 16)}...`}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={styles.countryTag}>
+                              {u.flag} {u.countryName}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`${styles.roleBadge} ${u.isRegistered ? styles.roleAdmin : styles.roleUser}`} style={{ background: u.isRegistered ? 'rgba(46, 204, 113, 0.1)' : 'rgba(255,255,255,0.05)', color: u.isRegistered ? '#2ecc71' : '#777', borderColor: 'transparent' }}>
+                              {u.isRegistered ? 'REGISTERED' : 'GUEST'}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={u.loyaltyTier === 'VIP' ? styles.tierVIP : u.loyaltyTier === 'Frequent' ? styles.tierFrequent : styles.tierReturning}>
+                              {u.loyaltyTier === 'VIP' && <Flame size={12} />}
+                              {u.loyaltyTier}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 700, color: '#2ecc71' }}>
+                            {u.totalSessions.toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 600, color: '#0071eb' }}>
+                            {u.activeDays} days
+                          </td>
+                          <td style={{ fontSize: '12px', color: '#888' }}>
+                            {u.firstSeen ? new Date(u.firstSeen).toLocaleDateString() : 'N/A'}
+                          </td>
+                          <td style={{ fontSize: '12px', color: '#ccc' }}>
+                            {u.lastSeen ? new Date(u.lastSeen).toLocaleString() : 'Just now'}
+                          </td>
+                        </tr>
+                      ))}
+                      {(!retentionData?.returningUsers || retentionData.returningUsers.length === 0) && (
+                        <tr>
+                          <td colSpan="9" className={styles.emptyTable}>
+                            No returning users found matching the selected filters.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </div>
           </div>
         </div>
