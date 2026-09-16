@@ -330,7 +330,12 @@ const TopNav = () => {
     <header className={`${styles.topNav} topNav ${isMobileSearchOpen ? styles.searchActive : ''}`}>
       {!isLoginPage && (
         <Link to="/" className={styles.branding} style={{ textDecoration: 'none' }}>
-          <img src="/AuraMovie_logo.png.png" alt="Logo" className={styles.brandLogo} />
+          <img 
+            src="/favicon.png" 
+            onError={(e) => { e.target.src = '/AuraWatch Logo.png'; }}
+            alt="Logo" 
+            className={styles.brandLogo} 
+          />
           <span className={styles.brandName}>
             Aura<span className={styles.watchText}>Watch</span>
           </span>
@@ -401,6 +406,21 @@ const TopNav = () => {
               onBlur={() => setTimeout(() => setIsFocused(false), 400)}
               onKeyDown={handleKeyDown}
             />
+            {isMobileSearchOpen && (
+              <button 
+                type="button"
+                className={styles.mobileSearchCloseBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMobileSearchOpen(false);
+                  setIsFocused(false);
+                  setQuery('');
+                }}
+                title="Close search"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
           
           {isFocused && suggestions.length > 0 && (
@@ -511,8 +531,7 @@ const TopNav = () => {
         </div>
 
         <div className={styles.userProfile}>
-          {!loading && (
-            <div className={styles.profileSection}>
+          <div className={styles.profileSection}>
               <div className={styles.profileDropdownContainer} ref={dropdownRef}>
                 {isLoggedIn && user?.avatar?.startsWith('http') ? (
                   <img 
@@ -640,7 +659,6 @@ const TopNav = () => {
                 )}
               </div>
             </div>
-          )}
         </div>
       </div>
 

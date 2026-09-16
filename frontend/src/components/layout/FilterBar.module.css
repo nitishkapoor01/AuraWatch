@@ -143,7 +143,25 @@
   }
 
   .filterToggle {
-    padding: 2px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .filterToggle:hover,
+  .filterToggle.active {
+    background: rgba(229, 9, 20, 0.2);
+    border-color: rgba(229, 9, 20, 0.5);
+    color: var(--primary-color);
   }
 
   .filterToggle svg {

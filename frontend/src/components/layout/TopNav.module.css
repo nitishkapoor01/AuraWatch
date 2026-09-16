@@ -461,46 +461,54 @@
    ═══════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* ── Base bar ── */
+  /* Base bar */
   .topNav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 56px;
-    padding: 0 14px;
+    height: 52px;
+    padding: 0 10px;
     background: rgba(10, 10, 10, 0.96);
-    /* Removed backdrop-filter to prevent it from trapping position: fixed children */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 6px;
     z-index: 2000;
+    box-sizing: border-box;
+    max-width: 100vw;
+    pointer-events: auto;
   }
 
-  /* ── Left: Branding ── */
+  /* Left: Branding */
   .branding {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 6px;
     flex-shrink: 0;
     margin-left: 0;
+    min-width: 0;
   }
 
   .brandLogo {
-    height: 36px;
-    width: auto;
+    height: 28px;
+    width: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   .brandName {
     display: block;
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 900;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.5px;
     color: var(--primary-color);
     line-height: 1;
     margin-top: 0;
-    margin-left: -3px;
+    margin-left: 0;
     white-space: nowrap;
   }
 
@@ -509,11 +517,11 @@
     color: #fff;
   }
 
-  /* ── Right: All action buttons ── */
+  /* Right: All action buttons */
   .navActions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     margin-left: auto;
     padding-right: 0;
     flex-shrink: 0;
@@ -522,21 +530,48 @@
   .searchContainer {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     width: auto;
+    position: relative;
   }
 
   .filterInline {
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
+  }
+
+  .surpriseWrapper {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .surprisePicker {
+    position: fixed;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(300px, calc(100vw - 24px));
+    min-width: 0;
+    z-index: 10001;
+    padding: 14px;
+    background: rgba(14, 14, 20, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
   }
 
   .searchBox {
     display: flex;
     align-items: center;
     width: auto;
+    min-width: 0 !important;
+    position: relative;
+    flex-shrink: 0;
   }
 
-  /* ── Search: icon-only by default ── */
+  /* Search: icon-only by default */
   .mobileSearchBtn {
     display: flex;
     align-items: center;
@@ -544,11 +579,24 @@
     width: 30px;
     height: 30px;
     padding: 0;
-    background: transparent;
-    border: none;
-    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
     flex-shrink: 0;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+
+  .mobileSearchBtn:hover,
+  .mobileSearchBtn:active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+  }
+
+  .mobileSearchBtn svg {
+    width: 15px;
+    height: 15px;
   }
 
   .searchInput {
@@ -561,17 +609,27 @@
     display: none !important;
   }
 
-  /* ── Surprise button ── */
+  /* Surprise button */
   .surpriseBtn {
     width: 30px;
     height: 30px;
     padding: 0;
-    background-color: rgba(var(--primary-color-rgb), 0.1);
-    border: 1px solid rgba(var(--primary-color-rgb), 0.3);
-    color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .surpriseBtn:hover,
+  .surpriseBtn:active {
+    background-color: rgba(var(--primary-color-rgb), 0.2);
+    border-color: rgba(var(--primary-color-rgb), 0.5);
+    color: var(--primary-color);
   }
 
   .surpriseBtn svg {
@@ -579,21 +637,28 @@
     height: 15px;
   }
 
-  /* ── Avatar ── */
+  /* Avatar / User Profile */
   .avatarCircle {
     width: 30px;
     height: 30px;
     font-size: 13px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .userProfile {
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
   }
 
-  /* ═══════════════════════════════════════
-     Search EXPANDED state
-     Hides branding, shows full-width input
-     ═══════════════════════════════════════ */
+  .dropdownMenu {
+    right: 6px;
+    max-width: calc(100vw - 20px);
+  }
+
+  /* Search EXPANDED state */
   .topNav.searchActive .branding {
     display: none;
   }
@@ -601,6 +666,7 @@
   .topNav.searchActive .navActions {
     width: 100%;
     flex: 1;
+    gap: 8px;
   }
 
   .topNav.searchActive .searchContainer {
@@ -609,12 +675,15 @@
   }
 
   .topNav.searchActive .filterInline,
-  .topNav.searchActive .surpriseWrapper {
+  .topNav.searchActive .surpriseWrapper,
+  .topNav.searchActive .hubHeaderBtn {
     display: none;
   }
 
   .topNav.searchActive .searchBox {
     flex: 1;
+    width: 100%;
+    min-width: 0 !important;
   }
 
   .topNav.searchActive .searchBox .mobileSearchBtn {
@@ -625,50 +694,72 @@
     display: block;
     opacity: 1;
     width: 100%;
-    height: 36px;
-    padding: 0 40px 0 14px; /* Right padding for AI button */
+    height: 38px;
+    padding: 0 38px 0 14px;
     font-size: 14px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 19px;
     color: #fff;
+    box-sizing: border-box;
+  }
+
+  .mobileSearchCloseBtn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
   }
 
   .aiToggleBtn {
     display: none;
   }
-
-  .topNav.searchActive .searchBox .aiToggleBtn {
-    display: flex;
-  }
 }
 
-/* ═══════════════════════════════════════
-   📱 SMALL PHONE (≤380px)
-   ═══════════════════════════════════════ */
+/* Small phone (≤380px) */
 @media (max-width: 380px) {
   .topNav {
-    padding: 0 10px;
+    padding: 0 6px;
+    gap: 4px;
   }
 
   .brandLogo {
-    height: 32px;
+    height: 24px;
+    width: 24px;
   }
 
   .brandName {
-    font-size: 14px;
-    letter-spacing: 1px;
+    font-size: 13px;
+    letter-spacing: 0.3px;
   }
 
-  .navActions {
-    gap: 4px;
+  .navActions,
+  .searchContainer {
+    gap: 3px;
   }
 
   .mobileSearchBtn,
   .surpriseBtn,
   .avatarCircle {
-    width: 28px;
-    height: 28px;
+    width: 27px;
+    height: 27px;
+  }
+
+  .mobileSearchBtn svg,
+  .surpriseBtn svg {
+    width: 13px;
+    height: 13px;
   }
 }
 
@@ -843,7 +934,37 @@
     display: none;
   }
   .hubHeaderBtn {
-    padding: 6px 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .hubHeaderBtn svg {
+    width: 15px;
+    height: 15px;
+  }
+  .hubBlinkDot {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid #141414;
+  }
+}
+@media (max-width: 380px) {
+  .hubHeaderBtn {
+    width: 27px;
+    height: 27px;
+  }
+  .hubHeaderBtn svg {
+    width: 13px;
+    height: 13px;
   }
 }
 

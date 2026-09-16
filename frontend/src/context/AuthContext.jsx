@@ -5,9 +5,16 @@ const AuthContext = createContext(null);
 const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const cached = localStorage.getItem('aurawatch_user');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState(localStorage.getItem('aurawatch_token'));
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [streak, setStreak] = useState({ currentStreak: 0, longestStreak: 0, totalDays: 0 });
 
   const refreshStreak = async (customToken) => {
@@ -32,13 +39,19 @@ export const AuthProvider = ({ children }) => {
       const savedToken = localStorage.getItem('aurawatch_token');
       if (!savedToken) { setLoading(false); return; }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
       try {
         const res = await fetch(`${API_BASE}/auth/me`, {
-          headers: { Authorization: `Bearer ${savedToken}` }
+          headers: { Authorization: `Bearer ${savedToken}` },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (res.ok) {
           const data = await res.json();
           setUser(data.user);
+          localStorage.setItem('aurawatch_user', JSON.stringify(data.user));
           setToken(savedToken);
           // Silently clean up any bad progress data (10/100 defaults)
           fetch(`${API_BASE}/watch-history/cleanup`, {
@@ -47,14 +60,18 @@ export const AuthProvider = ({ children }) => {
           }).catch(() => {});
           // Fetch streak in background
           refreshStreak(savedToken);
-        } else {
+        } else if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('aurawatch_token');
+          localStorage.removeItem('aurawatch_user');
           setToken(null);
+          setUser(null);
         }
       } catch (err) {
         console.error('[Auth] Session restore failed:', err);
+      } finally {
+        clearTimeout(timeoutId);
+        setLoading(false);
       }
-      setLoading(false);
     };
     restoreSession();
   }, []);
@@ -70,6 +87,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       setToken(data.token);
       localStorage.setItem('aurawatch_token', data.token);
+      localStorage.setItem('aurawatch_user', JSON.stringify(data.user));
       refreshStreak(data.token);
     } else {
       throw new Error(data.message);
@@ -87,6 +105,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       setToken(data.token);
       localStorage.setItem('aurawatch_token', data.token);
+      localStorage.setItem('aurawatch_user', JSON.stringify(data.user));
       refreshStreak(data.token);
       return data;
     } else {
@@ -108,7 +127,11 @@ export const AuthProvider = ({ children }) => {
     if (!res.ok) throw new Error(data.message);
     
     console.log('[Auth] Avatar updated successfully:', data.avatar);
-    setUser(prev => ({ ...prev, avatar: data.avatar }));
+    setUser(prev => {
+      const updated = { ...prev, avatar: data.avatar };
+      localStorage.setItem('aurawatch_user', JSON.stringify(updated));
+      return updated;
+    });
     return data;
   };
 
@@ -137,7 +160,11 @@ export const AuthProvider = ({ children }) => {
     }
     
     const data = await res.json();
-    setUser(prev => ({ ...prev, avatar: data.avatar }));
+    setUser(prev => {
+      const updated = { ...prev, avatar: data.avatar };
+      localStorage.setItem('aurawatch_user', JSON.stringify(updated));
+      return updated;
+    });
     return data;
   };
 
@@ -162,7 +189,11 @@ export const AuthProvider = ({ children }) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
     
-    setUser(prev => ({ ...prev, name: data.name }));
+    setUser(prev => {
+      const updated = { ...prev, name: data.name };
+      localStorage.setItem('aurawatch_user', JSON.stringify(updated));
+      return updated;
+    });
     return data;
   };
 
@@ -182,6 +213,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('aurawatch_token');
+    localStorage.removeItem('aurawatch_user');
     setToken(null);
     setUser(null);
   };
