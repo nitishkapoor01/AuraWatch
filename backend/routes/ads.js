@@ -125,7 +125,7 @@ router.get('/config', async (req, res) => {
       pre_roll: {
         enabled: true,
         type: 'vast', // 'vast' | 'video' | 'banner'
-        vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033014',
+        vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033024',
         video_url: '',
         timer_seconds: 5,
         format: 'native',

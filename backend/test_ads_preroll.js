@@ -131,7 +131,7 @@ async function runTests() {
     assert(Array.isArray(statsData.slotBreakdown), 'slotBreakdown is an array');
 
     // 8. Verify /api/ads/vast-proxy endpoint
-    const proxyRes = await fetch(`${baseUrl}/ads/vast-proxy?url=` + encodeURIComponent('https://s.magsrv.com/v1/vast.php?idz=6033014'));
+    const proxyRes = await fetch(`${baseUrl}/ads/vast-proxy?url=` + encodeURIComponent('https://s.magsrv.com/v1/vast.php?idz=6033024'));
     assert(proxyRes.status === 200, 'GET /api/ads/vast-proxy returns 200 OK');
     const proxyXml = await proxyRes.text();
     assert(proxyXml.includes('VAST'), 'VAST proxy returns valid XML content');

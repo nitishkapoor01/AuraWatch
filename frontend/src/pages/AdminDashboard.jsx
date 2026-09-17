@@ -133,7 +133,7 @@ const AdminDashboard = () => {
     pre_roll: {
       enabled: true,
       type: 'vast',
-      vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033014',
+      vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033024',
       video_url: '',
       timer_seconds: 5,
       key: 'ccd684eb4f620dcc7303d2fce2577bae',
@@ -2955,7 +2955,7 @@ const AdminDashboard = () => {
                           ...prev,
                           pre_roll: { ...prev.pre_roll, vast_url: e.target.value.trim() }
                         }))}
-                        placeholder="https://s.magsrv.com/v1/vast.php?idz=6033014"
+                        placeholder="https://s.magsrv.com/v1/vast.php?idz=6033024"
                       />
                     </div>
 

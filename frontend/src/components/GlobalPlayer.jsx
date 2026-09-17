@@ -72,7 +72,7 @@ const GlobalPlayer = () => {
             setPreRollActive(true);
 
             // Attempt to resolve VAST Video if configured
-            const vastUrl = preRoll.vast_url || (preRoll.type === 'vast' ? 'https://s.magsrv.com/v1/vast.php?idz=6033014' : '');
+            const vastUrl = preRoll.vast_url || (preRoll.type === 'vast' ? 'https://s.magsrv.com/v1/vast.php?idz=6033024' : '');
             if (vastUrl && preRoll.type !== 'banner' && preRoll.type !== 'video') {
               try {
                 let xmlText = '';
