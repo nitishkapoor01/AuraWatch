@@ -53,6 +53,29 @@ router.post('/impression', async (req, res) => {
   }
 });
 
+// Proxy endpoint to bypass CORS and headers for VAST requests
+router.get('/vast-proxy', async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url || !url.startsWith('https://')) {
+      return res.status(400).json({ error: 'Invalid VAST URL' });
+    }
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': req.headers['referer'] || 'https://aurawatch.fun',
+        'Origin': 'https://aurawatch.fun'
+      }
+    });
+    const xml = await response.text();
+    res.set('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    console.error('VAST proxy error:', err);
+    res.status(500).json({ error: 'Failed to proxy VAST' });
+  }
+});
+
 // Get current public ads configuration
 router.get('/config', async (req, res) => {
   try {
@@ -101,12 +124,16 @@ router.get('/config', async (req, res) => {
       },
       pre_roll: {
         enabled: true,
+        type: 'vast', // 'vast' | 'video' | 'banner'
+        vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033014',
+        video_url: '',
         timer_seconds: 5,
         format: 'native',
         container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
         key: 'ccd684eb4f620dcc7303d2fce2577bae',
         script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
         direct_url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11',
+        fallback_banner: true,
         width: 300,
         height: 250
       }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Play, ExternalLink, Sparkles } from 'lucide-react';
+import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import AdBanner from './ads/AdBanner';
@@ -22,6 +22,8 @@ const GlobalPlayer = () => {
   const [preRollActive, setPreRollActive] = useState(false);
   const [preRollSeconds, setPreRollSeconds] = useState(5);
   const [preRollConfig, setPreRollConfig] = useState(null);
+  const [vastVideo, setVastVideo] = useState(null);
+  const [isMuted, setIsMuted] = useState(true);
   const activeMovieKeyRef = useRef(null);
 
   // Fetch Ads config and initialize Pre-Roll Gateway when opening a movie
@@ -68,6 +70,54 @@ const GlobalPlayer = () => {
             setPreRollConfig(preRoll);
             setPreRollSeconds(timerSecs);
             setPreRollActive(true);
+
+            // Attempt to resolve VAST Video if configured
+            const vastUrl = preRoll.vast_url || (preRoll.type === 'vast' ? 'https://s.magsrv.com/v1/vast.php?idz=6033014' : '');
+            if (vastUrl && preRoll.type !== 'banner' && preRoll.type !== 'video') {
+              try {
+                let xmlText = '';
+                try {
+                  const vRes = await fetch(vastUrl, { signal: controller.signal });
+                  if (vRes.ok) xmlText = await vRes.text();
+                } catch (_) {
+                  // CORS fallback via internal backend proxy
+                  const proxyUrl = `${baseUrl}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`;
+                  const pRes = await fetch(proxyUrl, { signal: controller.signal });
+                  if (pRes.ok) xmlText = await pRes.text();
+                }
+
+                if (xmlText && isMounted) {
+                  const parser = new DOMParser();
+                  const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                  const mediaFiles = Array.from(xmlDoc.querySelectorAll('MediaFile'));
+                  let foundVideo = '';
+                  for (const mf of mediaFiles) {
+                    const src = mf.textContent.trim();
+                    const type = (mf.getAttribute('type') || '').toLowerCase();
+                    if (src && (type.includes('mp4') || src.includes('.mp4') || !foundVideo)) {
+                      foundVideo = src;
+                      if (type.includes('mp4')) break;
+                    }
+                  }
+
+                  const clickThrough = xmlDoc.querySelector('ClickThrough')?.textContent.trim() || '';
+                  const impressions = Array.from(xmlDoc.querySelectorAll('Impression')).map(i => i.textContent.trim()).filter(Boolean);
+
+                  if (foundVideo) {
+                    setVastVideo({ url: foundVideo, clickThrough, impressions });
+                  } else {
+                    setVastVideo(null);
+                  }
+                }
+              } catch (vErr) {
+                console.warn('VAST resolution note:', vErr);
+                if (isMounted) setVastVideo(null);
+              }
+            } else if (preRoll.type === 'video' && preRoll.video_url) {
+              setVastVideo({ url: preRoll.video_url, clickThrough: preRoll.direct_url || '', impressions: [] });
+            } else {
+              setVastVideo(null);
+            }
           } else {
             setPreRollActive(false);
           }
@@ -355,11 +405,60 @@ const GlobalPlayer = () => {
                 </span>
               </div>
 
-              <div className={styles.preRollAdArea}>
-                <AdBanner slot="pre_roll" customConfig={preRollConfig} />
-              </div>
+              {vastVideo?.url ? (
+                <div className={styles.preRollVideoWrapper}>
+                  <video
+                    key={vastVideo.url}
+                    src={vastVideo.url}
+                    autoPlay
+                    playsInline
+                    muted={isMuted}
+                    className={styles.preRollVideoElement}
+                    onPlay={() => {
+                      if (vastVideo.impressions?.length) {
+                        vastVideo.impressions.forEach(impUrl => {
+                          try { new Image().src = impUrl; } catch (_) {}
+                        });
+                      }
+                    }}
+                    onClick={() => {
+                      if (vastVideo.clickThrough) {
+                        window.open(vastVideo.clickThrough, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                  />
+                  <button 
+                    type="button" 
+                    className={styles.preRollMuteBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMuted(!isMuted);
+                    }}
+                    title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
+                  >
+                    {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+                    <span>{isMuted ? 'Unmute' : 'Sound On'}</span>
+                  </button>
+                  {vastVideo.clickThrough && (
+                    <a
+                      href={vastVideo.clickThrough}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.preRollVideoOverlayLink}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>Visit Sponsor</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.preRollAdArea}>
+                  <AdBanner slot="pre_roll" customConfig={preRollConfig} />
+                </div>
+              )}
 
-              {preRollConfig?.direct_url && (
+              {!vastVideo?.url && preRollConfig?.direct_url && (
                 <a 
                   href={preRollConfig.direct_url} 
                   target="_blank" 

@@ -132,10 +132,14 @@ const AdminDashboard = () => {
     },
     pre_roll: {
       enabled: true,
+      type: 'vast',
+      vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033014',
+      video_url: '',
       timer_seconds: 5,
       key: 'ccd684eb4f620dcc7303d2fce2577bae',
       script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
       direct_url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11',
+      fallback_banner: true,
       width: 300,
       height: 250
     }
@@ -2888,8 +2892,8 @@ const AdminDashboard = () => {
                   <div className={styles.adSlotTitle}>
                     <Play size={20} color="#e50914" />
                     <div>
-                      <h3>Stream Pre-Roll Ad Gateway</h3>
-                      <span style={{ fontSize: '12px', color: '#888' }}>300x250 Video Player Countdown Overlay</span>
+                      <h3>Stream Pre-Roll Video / Ad Gateway</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>ExoClick VAST, Direct MP4 & Adsterra Banner</span>
                     </div>
                   </div>
                   <button 
@@ -2903,48 +2907,140 @@ const AdminDashboard = () => {
                   </button>
                 </div>
 
+                {/* AD TYPE SELECTOR */}
                 <div className={styles.adFieldGroup}>
-                  <label>Adsterra Unit Key</label>
-                  <input 
-                    type="text" 
-                    className={styles.adInput}
-                    value={adsConfig.pre_roll?.key || ''} 
-                    onChange={e => setAdsConfig(prev => ({
-                      ...prev,
-                      pre_roll: { ...prev.pre_roll, key: e.target.value.trim() }
-                    }))}
-                    placeholder="e.g. ccd684eb4f620dcc7303d2fce2577bae"
-                  />
+                  <label>Pre-Roll Ad Technology</label>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                    {[
+                      { id: 'vast', label: '🎬 ExoClick VAST Video' },
+                      { id: 'video', label: '🎥 Custom MP4 Clip' },
+                      { id: 'banner', label: '🖼️ Adsterra Banner' }
+                    ].map(typeItem => (
+                      <button
+                        key={typeItem.id}
+                        type="button"
+                        onClick={() => setAdsConfig(prev => ({
+                          ...prev,
+                          pre_roll: { ...prev.pre_roll, type: typeItem.id }
+                        }))}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          fontSize: '12.5px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          background: (adsConfig.pre_roll?.type || 'vast') === typeItem.id ? '#e50914' : 'rgba(255,255,255,0.06)',
+                          color: '#fff',
+                          border: (adsConfig.pre_roll?.type || 'vast') === typeItem.id ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        {typeItem.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className={styles.adFieldGroup}>
-                  <label>Script Invoke URL</label>
-                  <input 
-                    type="text" 
-                    className={styles.adInput}
-                    value={adsConfig.pre_roll?.script_url || ''} 
-                    onChange={e => setAdsConfig(prev => ({
-                      ...prev,
-                      pre_roll: { ...prev.pre_roll, script_url: e.target.value.trim() }
-                    }))}
-                    placeholder="https://pl31278426.profitableratecpmnetwork.com/.../invoke.js"
-                  />
-                </div>
+                {/* VAST SETTINGS */}
+                {(adsConfig.pre_roll?.type || 'vast') === 'vast' && (
+                  <>
+                    <div className={styles.adFieldGroup}>
+                      <label>ExoClick / VAST 3.0 Tag URL</label>
+                      <input 
+                        type="text" 
+                        className={styles.adInput}
+                        value={adsConfig.pre_roll?.vast_url || ''} 
+                        onChange={e => setAdsConfig(prev => ({
+                          ...prev,
+                          pre_roll: { ...prev.pre_roll, vast_url: e.target.value.trim() }
+                        }))}
+                        placeholder="https://s.magsrv.com/v1/vast.php?idz=6033014"
+                      />
+                    </div>
 
-                <div className={styles.adFieldGroup}>
-                  <label>Sponsor / Smartlink Direct URL (Optional)</label>
-                  <input 
-                    type="text" 
-                    className={styles.adInput}
-                    value={adsConfig.pre_roll?.direct_url || ''} 
-                    onChange={e => setAdsConfig(prev => ({
-                      ...prev,
-                      pre_roll: { ...prev.pre_roll, direct_url: e.target.value.trim() }
-                    }))}
-                    placeholder="https://www.profitableratecpmnetwork.com/..."
-                  />
-                </div>
+                    <div className={styles.adFieldGroup} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <label style={{ margin: 0 }}>Fallback to Banner</label>
+                        <p style={{ fontSize: '11.5px', color: '#888', margin: '2px 0 0 0' }}>Show Adsterra 300x250 banner if VAST video has 0 inventory</p>
+                      </div>
+                      <button 
+                        className={`${styles.toggleBtn} ${adsConfig.pre_roll?.fallback_banner !== false ? styles.active : ''}`}
+                        onClick={() => setAdsConfig(prev => ({
+                          ...prev,
+                          pre_roll: { ...prev.pre_roll, fallback_banner: !prev.pre_roll?.fallback_banner }
+                        }))}
+                      >
+                        <div className={styles.toggleThumb}></div>
+                      </button>
+                    </div>
+                  </>
+                )}
 
+                {/* CUSTOM MP4 VIDEO SETTINGS */}
+                {adsConfig.pre_roll?.type === 'video' && (
+                  <>
+                    <div className={styles.adFieldGroup}>
+                      <label>Direct Video File URL (.mp4 / .webm)</label>
+                      <input 
+                        type="text" 
+                        className={styles.adInput}
+                        value={adsConfig.pre_roll?.video_url || ''} 
+                        onChange={e => setAdsConfig(prev => ({
+                          ...prev,
+                          pre_roll: { ...prev.pre_roll, video_url: e.target.value.trim() }
+                        }))}
+                        placeholder="https://cdn.example.com/sponsor-ad.mp4"
+                      />
+                    </div>
+                    <div className={styles.adFieldGroup}>
+                      <label>Sponsor Click Destination URL</label>
+                      <input 
+                        type="text" 
+                        className={styles.adInput}
+                        value={adsConfig.pre_roll?.direct_url || ''} 
+                        onChange={e => setAdsConfig(prev => ({
+                          ...prev,
+                          pre_roll: { ...prev.pre_roll, direct_url: e.target.value.trim() }
+                        }))}
+                        placeholder="https://t.me/... or https://sponsor.com"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* BANNER FALLBACK / ADSTERRA CONFIG */}
+                {((adsConfig.pre_roll?.type || 'vast') === 'banner' || adsConfig.pre_roll?.fallback_banner !== false) && (
+                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '10px', marginTop: '4px' }}>
+                    <div className={styles.adFieldGroup}>
+                      <label>Adsterra Fallback Unit Key</label>
+                      <input 
+                        type="text" 
+                        className={styles.adInput}
+                        value={adsConfig.pre_roll?.key || ''} 
+                        onChange={e => setAdsConfig(prev => ({
+                          ...prev,
+                          pre_roll: { ...prev.pre_roll, key: e.target.value.trim() }
+                        }))}
+                        placeholder="ccd684eb4f620dcc7303d2fce2577bae"
+                      />
+                    </div>
+                    <div className={styles.adFieldGroup}>
+                      <label>Adsterra Invoke URL</label>
+                      <input 
+                        type="text" 
+                        className={styles.adInput}
+                        value={adsConfig.pre_roll?.script_url || ''} 
+                        onChange={e => setAdsConfig(prev => ({
+                          ...prev,
+                          pre_roll: { ...prev.pre_roll, script_url: e.target.value.trim() }
+                        }))}
+                        placeholder="https://pl31278426.profitableratecpmnetwork.com/.../invoke.js"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* TIMER SLIDER */}
                 <div className={styles.adFieldGroup}>
                   <label>Pre-Roll Countdown Timer: {adsConfig.pre_roll?.timer_seconds || 5}s</label>
                   <div className={styles.sliderRow}>
@@ -2967,7 +3063,7 @@ const AdminDashboard = () => {
                 <div className={styles.adFieldGroup}>
                   <label>Placement Notes</label>
                   <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
-                    Renders a 5-second YouTube-style countdown overlay before video playback begins. 100% impression rate for stream viewers with high eCPM. Admins are automatically exempted.
+                    ExoClick VAST 3.0 delivers high-CPM linear video commercials. If fill is low or network blocks, automatically falls back cleanly without breaking stream playback.
                   </p>
                 </div>
               </div>

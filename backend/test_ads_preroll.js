@@ -130,6 +130,12 @@ async function runTests() {
     const statsData = await statsRes.json();
     assert(Array.isArray(statsData.slotBreakdown), 'slotBreakdown is an array');
 
+    // 8. Verify /api/ads/vast-proxy endpoint
+    const proxyRes = await fetch(`${baseUrl}/ads/vast-proxy?url=` + encodeURIComponent('https://s.magsrv.com/v1/vast.php?idz=6033014'));
+    assert(proxyRes.status === 200, 'GET /api/ads/vast-proxy returns 200 OK');
+    const proxyXml = await proxyRes.text();
+    assert(proxyXml.includes('VAST'), 'VAST proxy returns valid XML content');
+
   } catch (err) {
     console.error('Test execution error:', err);
     failed++;
