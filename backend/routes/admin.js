@@ -142,6 +142,7 @@ router.get('/analytics/countries', isModerator, async (req, res) => {
         FROM platform_visits pv
         LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
         WHERE pv.date = CURRENT_DATE
+          AND COALESCE(uv.last_ip, '') NOT LIKE '57.141.%'
         GROUP BY 1, 2
         ORDER BY unique_visitors DESC, total_visits DESC
       `;
@@ -155,6 +156,7 @@ router.get('/analytics/countries', isModerator, async (req, res) => {
         FROM platform_visits pv
         LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
         WHERE pv.date >= CURRENT_DATE - INTERVAL '7 days'
+          AND COALESCE(uv.last_ip, '') NOT LIKE '57.141.%'
         GROUP BY 1, 2
         ORDER BY unique_visitors DESC, total_visits DESC
       `;
@@ -168,11 +170,12 @@ router.get('/analytics/countries', isModerator, async (req, res) => {
         FROM platform_visits pv
         LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
         WHERE pv.date >= CURRENT_DATE - INTERVAL '30 days'
+          AND COALESCE(uv.last_ip, '') NOT LIKE '57.141.%'
         GROUP BY 1, 2
         ORDER BY unique_visitors DESC, total_visits DESC
       `;
     } else {
-      // all_time - aggregate from unique_visitors
+      // all_time - aggregate from unique_visitors excluding automated crawler bots
       queryText = `
         SELECT 
           COALESCE(NULLIF(country_code, ''), 'XX') as country_code,
@@ -180,6 +183,7 @@ router.get('/analytics/countries', isModerator, async (req, res) => {
           COUNT(*) as unique_visitors,
           COUNT(*) as total_visits
         FROM unique_visitors
+        WHERE COALESCE(last_ip, '') NOT LIKE '57.141.%'
         GROUP BY 1, 2
         ORDER BY unique_visitors DESC
       `;
@@ -190,16 +194,27 @@ router.get('/analytics/countries', isModerator, async (req, res) => {
 
     let totalVisitors = 0;
     let totalVisits = 0;
+    let knownVisitors = 0;
+
     rawRows.forEach(r => { 
-      totalVisitors += parseInt(r.unique_visitors || r.count || 0, 10);
-      totalVisits += parseInt(r.total_visits || r.unique_visitors || r.count || 0, 10);
+      const v = parseInt(r.unique_visitors || r.count || 0, 10);
+      const s = parseInt(r.total_visits || r.unique_visitors || r.count || 0, 10);
+      totalVisitors += v;
+      totalVisits += s;
+      if (r.country_code && r.country_code !== 'XX') {
+        knownVisitors += v;
+      }
     });
+
+    const divisor = knownVisitors > 0 ? knownVisitors : (totalVisitors > 0 ? totalVisitors : 1);
 
     const countries = rawRows.map((row, index) => {
       const code = (row.country_code || 'XX').toUpperCase();
       const visitorCount = parseInt(row.unique_visitors || row.count || 0, 10);
       const visitCount = parseInt(row.total_visits || row.unique_visitors || row.count || 0, 10);
-      const percentage = totalVisitors > 0 ? parseFloat(((visitorCount / totalVisitors) * 100).toFixed(1)) : 0;
+      const percentage = code === 'XX'
+        ? (totalVisitors > 0 ? parseFloat(((visitorCount / totalVisitors) * 100).toFixed(1)) : 0)
+        : parseFloat(((visitorCount / divisor) * 100).toFixed(1));
       const countryName = (row.country_name && row.country_name !== 'Unknown') 
         ? row.country_name 
         : getCountryName(code);
@@ -226,6 +241,7 @@ router.get('/analytics/countries', isModerator, async (req, res) => {
       totalTracked: totalVisitors,
       totalVisitors,
       totalVisits,
+      knownVisitors,
       totalCountries: knownCountries.length,
       topCountry,
       globalTrafficPercent,

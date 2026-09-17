@@ -40,6 +40,18 @@ function App() {
       localStorage.setItem('trackingVisitorId', visitorId);
     }
 
+    // Avoid sending tracking heartbeats for automated crawlers (Facebook previewer, Googlebot, headless agents)
+    const isClientBot = () => {
+      if (typeof navigator === 'undefined') return true;
+      if (navigator.webdriver) return true;
+      const ua = (navigator.userAgent || '').toLowerCase();
+      return /bot|crawler|spider|facebookexternalhit|facebot|meta-externalagent|headlesschrome|lighthouse|phantomjs/i.test(ua);
+    };
+
+    if (isClientBot()) {
+      return;
+    }
+
     const sendHeartbeat = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/tracking/heartbeat`, {
@@ -53,7 +65,8 @@ function App() {
             name: user ? user.name : null,
             path: location.pathname + location.search,
             action: getActionFromPath(location.pathname),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            locale: navigator.language || navigator.userLanguage || ''
           })
         });
         if (res.ok) {

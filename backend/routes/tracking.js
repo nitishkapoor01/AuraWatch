@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authMiddleware, isAdmin } = require('../middleware/auth');
 const db = require('../db');
-const { resolveCountry, getClientIp } = require('../utils/geo');
+const { resolveCountry, getClientIp, isBot } = require('../utils/geo');
 
 // In-memory store for active sessions
 // Map<sessionId, { lastSeen: number, isGuest: boolean, userId: number|null, countryCode: string, countryName: string, flag: string }>
@@ -10,13 +10,27 @@ const activeSessions = new Map();
 
 // Ping endpoint - called by all clients every ~30s
 router.post('/heartbeat', async (req, res) => {
-  const { sessionId, isGuest, userId, visitorId, path, action, name, timezone } = req.body;
+  // Discard automated crawler/scraper bots (Meta/Facebook crawler, Googlebot, etc.)
+  // to maintain pure, accurate human audience analytics matching Adsterra.
+  if (isBot(req)) {
+    let announcement = null;
+    try {
+      const result = await db.query('SELECT value FROM settings WHERE key = $1', ['announcement']);
+      const row = result.rows[0];
+      if (row && row.value) {
+        announcement = JSON.parse(row.value);
+      }
+    } catch (e) {}
+    return res.json({ success: true, isBot: true, announcement });
+  }
+
+  const { sessionId, isGuest, userId, visitorId, path, action, name, timezone, locale } = req.body;
   if (!sessionId) {
     return res.status(400).json({ error: 'sessionId required' });
   }
 
-  // Detect Country using IP + headers + timezone fallback
-  const { countryCode, countryName, flag } = resolveCountry(req, timezone);
+  // Detect Country using IP + headers + timezone + locale fallback
+  const { countryCode, countryName, flag } = resolveCountry(req, timezone, locale);
   const clientIp = getClientIp(req);
 
   activeSessions.set(sessionId, {

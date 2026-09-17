@@ -1,8 +1,9 @@
 const db = require('../db');
+const { getClientIp } = require('../utils/geo');
 
 const securityMiddleware = async (req, res, next) => {
-  // Get IP address
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // Get IP address safely via getClientIp
+  const ip = getClientIp(req);
   
   try {
     const result = await db.query('SELECT * FROM blocked_ips WHERE ip_address = $1', [ip]);

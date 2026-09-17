@@ -19,6 +19,7 @@ const securityMiddleware = require('./middleware/security');
 require('./db');
 
 const app = express();
+app.set('trust proxy', true);
 const PORT = 10000;
 
 const path = require('path');
