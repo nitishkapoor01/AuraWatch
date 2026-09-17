@@ -16,56 +16,6 @@ const GlobalPlayer = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
-  // Helper to determine preferred server based on recency and watch frequency
-  const getPreferredServer = () => {
-    try {
-      const recent = localStorage.getItem('aurawatch_preferred_server') || localStorage.getItem('aurawatch_player_server');
-      if (recent === 'screenscape' || recent === 'filmu') {
-        return recent;
-      }
-      const usageRaw = localStorage.getItem('aurawatch_server_usage');
-      if (usageRaw) {
-        const usage = JSON.parse(usageRaw);
-        if ((usage.filmu || 0) > (usage.screenscape || 0)) {
-          return 'filmu';
-        }
-      }
-    } catch (e) {}
-    // Default priority is Player 1 (ScreenScape)
-    return 'screenscape';
-  };
-
-  const [selectedServer, setSelectedServer] = useState(getPreferredServer);
-  const [isSwitching, setIsSwitching] = useState(false);
-
-  // Sync preferred server whenever player opens or new movie loads
-  useEffect(() => {
-    if (isOpen && movieData) {
-      setSelectedServer(getPreferredServer());
-    }
-  }, [isOpen, movieData?.id, movieData?.season, movieData?.episode]);
-
-  const handleServerChange = (serverId) => {
-    if (serverId === selectedServer) return;
-    setIsSwitching(true);
-    setSelectedServer(serverId);
-    try {
-      // Save as most recent
-      localStorage.setItem('aurawatch_preferred_server', serverId);
-      localStorage.setItem('aurawatch_player_server', serverId);
-      
-      // Update usage frequency counter
-      const usageRaw = localStorage.getItem('aurawatch_server_usage');
-      const usage = usageRaw ? JSON.parse(usageRaw) : { screenscape: 0, filmu: 0 };
-      usage[serverId] = (usage[serverId] || 0) + 1;
-      localStorage.setItem('aurawatch_server_usage', JSON.stringify(usage));
-    } catch (e) {}
-
-    setTimeout(() => {
-      setIsSwitching(false);
-    }, 400);
-  };
-
   // Watch route changes. If playing and we leave the movie page, force sticky
   useEffect(() => {
     if (isOpen && movieData) {
@@ -254,24 +204,12 @@ const GlobalPlayer = () => {
   const getPlayerUrl = () => {
     const type = (movieData.type || '').toLowerCase();
     const isTV = type === 'tv' || type === 'series';
-    const isAnime = type === 'anime' || (movieData.genres && movieData.genres.some(g => g.name?.toLowerCase().includes('animation')));
 
-    // Player 1: ScreenScape
-    if (selectedServer === 'screenscape') {
-      if (isTV) {
-        return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season || 1}&e=${movieData.episode || 1}`;
-      }
-      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=movie`;
-    }
-
-    // Player 2: Filmu
-    if (isAnime && movieData.season && movieData.episode) {
-      return `https://embed.filmu.in/anime/${movieData.id}/${movieData.season}/${movieData.episode}`;
-    }
+    // ScreenScape as sole provider with ad-blocking sandbox
     if (isTV) {
-      return `https://embed.filmu.in/tv/${movieData.id}/${movieData.season || 1}/${movieData.episode || 1}`;
+      return `https://screenscape.me/embed?tmdb=${movieData.id}&type=tv&s=${movieData.season || 1}&e=${movieData.episode || 1}`;
     }
-    return `https://embed.filmu.in/movie/${movieData.id}`;
+    return `https://screenscape.me/embed?tmdb=${movieData.id}&type=movie`;
   };
 
   const isTV = movieData.type === 'tv' || movieData.type === 'Series';
@@ -313,59 +251,17 @@ const GlobalPlayer = () => {
             {label}
           </span>
         </div>
-        
-        <div className={styles.playerSwitchDeck}>
-          <button
-            type="button"
-            className={`${styles.streamOptionBtn} ${selectedServer === 'screenscape' ? styles.activeOption : ''}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleServerChange('screenscape');
-            }}
-            title="Player 1"
-          >
-            <span className={styles.optionIconWrap}>
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </span>
-            <span className={styles.optionMain}>Player 1</span>
-          </button>
-
-          <button
-            type="button"
-            className={`${styles.streamOptionBtn} ${selectedServer === 'filmu' ? styles.activeOption : ''}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleServerChange('filmu');
-            }}
-            title="Player 2"
-          >
-            <span className={styles.optionIconWrap}>
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </span>
-            <span className={styles.optionMain}>Player 2</span>
-          </button>
-        </div>
       </div>
       
       {isSticky && <div className={styles.dragOverlay}></div>}
       
       <div className={styles.playerStage}>
-        {isSwitching && (
-          <div className={styles.switchOverlay}>
-            <div className={styles.switchSpinner}></div>
-            <span>Connecting to {selectedServer === 'screenscape' ? 'Player 1' : 'Player 2'}...</span>
-          </div>
-        )}
         <iframe
-          key={`${selectedServer}-${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}`}
+          key={`screenscape-${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}`}
           id="stream-player"
           src={getPlayerUrl()}
           title={movieData.title}
-          className={`${styles.trailerIframe} ${isSwitching ? styles.frameFading : ''}`}
+          className={styles.trailerIframe}
           sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
           allow="autoplay; encrypted-media; picture-in-picture; accelerometer; gyroscope; fullscreen"
           referrerPolicy="no-referrer"
