@@ -2563,8 +2563,9 @@ const AdminDashboard = () => {
                 {adStats?.dailyTrend && adStats.dailyTrend.length > 0 ? (
                   <div className={styles.trendChart}>
                     {(() => {
-                      const maxCount = Math.max(...adStats.dailyTrend.map(d => d.count), 1);
-                      return adStats.dailyTrend.map((d, i) => {
+                      const trendList = (adStats?.dailyTrend || []).slice(-7);
+                      const maxCount = Math.max(...trendList.map(d => d.count), 1);
+                      return trendList.map((d, i) => {
                         const heightPct = Math.max((d.count / maxCount) * 100, 5);
                         const label = d.date.split('-').slice(1).join('/');
                         return (

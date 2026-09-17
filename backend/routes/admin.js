@@ -889,12 +889,13 @@ router.get('/ads/stats', isModerator, async (req, res) => {
 
     const dailyTrend = await db.query(`
       SELECT 
-        TO_CHAR(created_at, 'YYYY-MM-DD') as date_str, 
-        COUNT(*) as count 
-      FROM ad_impressions 
-      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY date_str 
-      ORDER BY date_str ASC
+        TO_CHAR(d.day, 'YYYY-MM-DD') as date_str, 
+        COUNT(a.id)::int as count 
+      FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, '1 day'::interval) d(day)
+      LEFT JOIN ad_impressions a 
+        ON DATE(a.created_at) = DATE(d.day)
+      GROUP BY d.day 
+      ORDER BY d.day ASC
     `);
 
     // Get current ads_config
