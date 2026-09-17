@@ -434,16 +434,18 @@
 
 .preRollCard {
   width: 100%;
-  max-width: 440px;
-  background: rgba(18, 22, 34, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
-  padding: 20px 22px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(229, 9, 20, 0.15);
+  max-width: 470px;
+  background: rgba(14, 18, 28, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  padding: 18px 22px;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.92), 0 0 45px rgba(229, 9, 20, 0.18);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   position: relative;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .preRollHeader {
@@ -451,7 +453,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -459,15 +461,39 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(229, 9, 20, 0.15);
-  border: 1px solid rgba(229, 9, 20, 0.35);
+  background: rgba(229, 9, 20, 0.16);
+  border: 1px solid rgba(229, 9, 20, 0.38);
   color: #ff4d58;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.8px;
   padding: 4px 10px;
   border-radius: 9999px;
   text-transform: uppercase;
+}
+
+.preRollQualityBadge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 3px 9px;
+  border-radius: 9999px;
+}
+
+.preRollMediaBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  padding: 3px 9px;
+  border-radius: 9999px;
+  letter-spacing: 0.4px;
 }
 
 .preRollDot {
@@ -479,13 +505,69 @@
   animation: pulseDot 1.6s infinite;
 }
 
-.preRollMovieTitle {
-  font-size: 12px;
-  color: rgba(241, 245, 249, 0.7);
+.preRollTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -2px;
+}
+
+.preRollMovieHeading {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  letter-spacing: 0.2px;
+}
+
+.preRollServerNoteBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(20, 24, 38, 0.6) 100%);
+  border: 1px solid rgba(229, 9, 20, 0.25);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.preRollServerNoteIcon {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: heartThrob 2s infinite ease-in-out;
+}
+
+@keyframes heartThrob {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+.preRollServerNoteText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.preRollNoteTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.preRollNoteTitle strong {
+  color: #ff4d58;
+  font-size: 13px;
+}
+
+.preRollNoteDesc {
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(241, 245, 249, 0.72);
+  margin: 0;
 }
 
 .preRollAdArea {
@@ -621,6 +703,48 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.preRollServerStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4ade80;
+  letter-spacing: 0.2px;
+}
+
+.serverPulseDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulseDotGreen 1.8s infinite;
+}
+
+@keyframes pulseDotGreen {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.3); opacity: 0.4; }
+}
+
+.serverIcon {
+  color: #22c55e;
+  opacity: 0.85;
+}
+
+.countdownPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  margin-right: 2px;
 }
 
 .preRollNote {

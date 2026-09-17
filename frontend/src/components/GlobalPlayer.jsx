@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX, Heart, Film, Tv, ShieldCheck, CheckCircle2, Server } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import AdBanner from './ads/AdBanner';
@@ -349,6 +349,8 @@ const GlobalPlayer = () => {
   };
 
   const isTV = movieData.type === 'tv' || movieData.type === 'Series';
+  const isAnime = movieData.type === 'anime' || (movieData.genres && movieData.genres.some(g => (g.name || g || '').toString().toLowerCase().includes('anime')));
+  const mediaLabel = isAnime ? 'Anime' : (isTV ? 'Series' : 'Movie');
   const label = isTV 
     ? `${movieData.title} • S${movieData.season} E${movieData.episode}${movieData.epName ? ` • ${movieData.epName}` : ''}`
     : movieData.title;
@@ -398,11 +400,37 @@ const GlobalPlayer = () => {
               <div className={styles.preRollHeader}>
                 <div className={styles.preRollBadge}>
                   <span className={styles.preRollDot} />
-                  <span>SPONSORED PRESENTATION</span>
+                  <span>COMMUNITY SPONSOR</span>
                 </div>
-                <span className={styles.preRollMovieTitle}>
-                  {movieData.title}
+                <div className={styles.preRollMediaBadge}>
+                  {isTV ? <Tv size={12} /> : <Film size={12} />}
+                  <span>{mediaLabel.toUpperCase()} LOADING</span>
+                </div>
+                <span className={styles.preRollQualityBadge}>
+                  ⚡ 1080p Ultra HD
                 </span>
+              </div>
+
+              {/* Title & Friendly Community Server Note */}
+              <div className={styles.preRollTitleRow}>
+                {isTV ? <Tv size={15} color="#e50914" /> : <Film size={15} color="#e50914" />}
+                <h4 className={styles.preRollMovieHeading} title={label}>
+                  {label}
+                </h4>
+              </div>
+
+              <div className={styles.preRollServerNoteBox}>
+                <div className={styles.preRollServerNoteIcon}>
+                  <Heart size={16} fill="#e50914" color="#e50914" />
+                </div>
+                <div className={styles.preRollServerNoteText}>
+                  <span className={styles.preRollNoteTitle}>
+                    Your requested {mediaLabel.toLowerCase()} will play after these <strong>{preRollSeconds} seconds</strong>
+                  </span>
+                  <p className={styles.preRollNoteDesc}>
+                    These quick sponsor ads help us run our high-speed streaming servers and keep AuraWatch 100% free with zero subscriptions for everyone. Thank you for your support!
+                  </p>
+                </div>
               </div>
 
               {vastVideo?.url ? (
@@ -437,7 +465,7 @@ const GlobalPlayer = () => {
                     title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
                   >
                     {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-                    <span>{isMuted ? 'Unmute' : 'Sound On'}</span>
+                    <span>{isMuted ? 'Unmute Sound' : 'Sound On'}</span>
                   </button>
                   {vastVideo.clickThrough && (
                     <a
@@ -465,6 +493,7 @@ const GlobalPlayer = () => {
                   rel="noopener noreferrer" 
                   className={styles.preRollDirectLink}
                 >
+                  <Sparkles size={13} color="#f5c518" />
                   <span>Special Sponsor Offer</span>
                   <ExternalLink size={13} />
                 </a>
@@ -481,11 +510,12 @@ const GlobalPlayer = () => {
                 </div>
 
                 <div className={styles.preRollActions}>
-                  <span className={styles.preRollNote}>
-                    {preRollSeconds > 0 
-                      ? `Stream starting in ${preRollSeconds}s...`
-                      : 'Ad finished • Ready to stream!'}
-                  </span>
+                  <div className={styles.preRollServerStatus}>
+                    <span className={styles.serverPulseDot} />
+                    <Server size={13} className={styles.serverIcon} />
+                    <span>Server: Ready (Buffer-Free)</span>
+                  </div>
+
                   <button
                     className={`${styles.preRollSkipBtn} ${preRollSeconds === 0 ? styles.preRollSkipBtnReady : ''}`}
                     disabled={preRollSeconds > 0}
@@ -495,11 +525,14 @@ const GlobalPlayer = () => {
                     }}
                   >
                     {preRollSeconds > 0 ? (
-                      `Skip in ${preRollSeconds}s`
+                      <>
+                        <span className={styles.countdownPill}>{preRollSeconds}s</span>
+                        <span>Playing in {preRollSeconds}s</span>
+                      </>
                     ) : (
                       <>
                         <Play size={14} fill="#fff" />
-                        <span>Skip Ad & Play Stream</span>
+                        <span>Watch {mediaLabel} Now 🎬</span>
                       </>
                     )}
                   </button>
