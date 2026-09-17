@@ -366,6 +366,7 @@ const GlobalPlayer = () => {
           src={getPlayerUrl()}
           title={movieData.title}
           className={`${styles.trailerIframe} ${isSwitching ? styles.frameFading : ''}`}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
           allow="autoplay; encrypted-media; picture-in-picture; accelerometer; gyroscope; fullscreen"
           referrerPolicy="no-referrer"
           allowFullScreen
