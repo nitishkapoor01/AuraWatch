@@ -46,19 +46,27 @@ router.post('/heartbeat', async (req, res) => {
     flag
   });
 
+  const isWatching = (action && typeof action === 'string' && action.toLowerCase().startsWith('watching:'));
+
   // Log to unique_visitors table (background-ish)
   if (visitorId) {
     db.query(`
-      INSERT INTO unique_visitors (visitor_id, last_ip, country_code, country_name, is_registered, user_id, last_seen)
-      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+      INSERT INTO unique_visitors (
+        visitor_id, last_ip, country_code, country_name, is_registered, user_id, last_seen,
+        total_visits, total_active_seconds, stream_count, total_watch_seconds
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, 1, 30, $7, $8)
       ON CONFLICT (visitor_id) DO UPDATE SET
         last_ip = EXCLUDED.last_ip,
         country_code = CASE WHEN EXCLUDED.country_code <> 'XX' THEN EXCLUDED.country_code ELSE unique_visitors.country_code END,
         country_name = CASE WHEN EXCLUDED.country_name <> 'Unknown' THEN EXCLUDED.country_name ELSE unique_visitors.country_name END,
         is_registered = EXCLUDED.is_registered,
         user_id = EXCLUDED.user_id,
-        last_seen = CURRENT_TIMESTAMP
-    `, [visitorId, clientIp, countryCode, countryName, !isGuest, userId || null]).catch(e => console.error('[TRACKING] Failed to upsert visitor', e));
+        last_seen = CURRENT_TIMESTAMP,
+        total_active_seconds = COALESCE(unique_visitors.total_active_seconds, 0) + 30,
+        total_watch_seconds = COALESCE(unique_visitors.total_watch_seconds, 0) + $8
+    `, [visitorId, clientIp, countryCode, countryName, !isGuest, userId || null, isWatching ? 1 : 0, isWatching ? 30 : 0])
+      .catch(e => console.error('[TRACKING] Failed to upsert visitor', e));
   }
 
   if (userId) {
@@ -70,14 +78,35 @@ router.post('/heartbeat', async (req, res) => {
   }
 
   try {
-    await db.query(`
-      INSERT INTO platform_visits (session_id, date, visitor_id, country_code, country_name) 
-      VALUES ($1, CURRENT_DATE, $2, $3, $4) 
+    const visitRes = await db.query(`
+      INSERT INTO platform_visits (session_id, date, visitor_id, country_code, country_name, active_seconds, watched_stream) 
+      VALUES ($1, CURRENT_DATE, $2, $3, $4, 30, $5) 
       ON CONFLICT (session_id, date) DO UPDATE SET 
         visitor_id = EXCLUDED.visitor_id,
         country_code = CASE WHEN EXCLUDED.country_code <> 'XX' THEN EXCLUDED.country_code ELSE platform_visits.country_code END,
-        country_name = CASE WHEN EXCLUDED.country_name <> 'Unknown' THEN EXCLUDED.country_name ELSE platform_visits.country_name END
-    `, [sessionId, visitorId || null, countryCode, countryName]);
+        country_name = CASE WHEN EXCLUDED.country_name <> 'Unknown' THEN EXCLUDED.country_name ELSE platform_visits.country_name END,
+        active_seconds = COALESCE(platform_visits.active_seconds, 0) + 30,
+        watched_stream = platform_visits.watched_stream OR EXCLUDED.watched_stream
+      RETURNING (xmax = 0) AS is_new_session;
+    `, [sessionId, visitorId || null, countryCode, countryName, isWatching]);
+
+    // If a brand new session was initiated today, increment total_visits on unique_visitors
+    if (visitorId && visitRes.rows.length > 0 && visitRes.rows[0].is_new_session) {
+      db.query(`
+        UPDATE unique_visitors 
+        SET total_visits = COALESCE(total_visits, 0) + 1 
+        WHERE visitor_id = $1
+      `, [visitorId]).catch(() => {});
+    }
+
+    // If user started watching a stream in this session, increment stream_count once per stream session
+    if (visitorId && isWatching && visitRes.rows.length > 0 && visitRes.rows[0].is_new_session) {
+      db.query(`
+        UPDATE unique_visitors 
+        SET stream_count = COALESCE(stream_count, 0) + 1 
+        WHERE visitor_id = $1
+      `, [visitorId]).catch(() => {});
+    }
   } catch (e) {
     console.error('Failed to log platform visit', e);
   }

@@ -34,9 +34,36 @@ router.get('/stats', isModerator, async (req, res) => {
     const totalVisitsMonthly = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits WHERE date >= CURRENT_DATE - INTERVAL '30 days'")).rows[0].count;
     const totalVisitsAllTime = (await db.query("SELECT COUNT(DISTINCT session_id) as count FROM platform_visits")).rows[0].count;
 
-    const uniqueVisitorsToday = (await db.query("SELECT COUNT(DISTINCT COALESCE(uv.user_id::text, pv.visitor_id)) as count FROM platform_visits pv LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id WHERE pv.date = CURRENT_DATE AND pv.visitor_id IS NOT NULL")).rows[0].count;
+    // Strictly deduplicated unique human visitors today (1 person = 1 count)
+    const uniqueVisitorsToday = (await db.query(`
+      SELECT COUNT(DISTINCT COALESCE(uv.user_id::text, pv.visitor_id)) as count 
+      FROM platform_visits pv 
+      LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id 
+      WHERE pv.date = CURRENT_DATE AND pv.visitor_id IS NOT NULL
+    `)).rows[0].count;
     const uniqueVisitorsWeekly = (await db.query("SELECT COUNT(DISTINCT COALESCE(uv.user_id::text, pv.visitor_id)) as count FROM platform_visits pv LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id WHERE pv.date >= CURRENT_DATE - INTERVAL '7 days' AND pv.visitor_id IS NOT NULL")).rows[0].count;
     const uniqueVisitorsMonthly = (await db.query("SELECT COUNT(DISTINCT COALESCE(uv.user_id::text, pv.visitor_id)) as count FROM platform_visits pv LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id WHERE pv.date >= CURRENT_DATE - INTERVAL '30 days' AND pv.visitor_id IS NOT NULL")).rows[0].count;
+
+    // Unique Movie Stream Viewers Today & Plays
+    const streamStats = (await db.query(`
+      SELECT 
+        COUNT(DISTINCT COALESCE(uv.user_id::text, pv.visitor_id)) as unique_stream_viewers,
+        COUNT(CASE WHEN pv.watched_stream = TRUE THEN 1 END) as stream_plays
+      FROM platform_visits pv
+      LEFT JOIN unique_visitors uv ON pv.visitor_id = uv.visitor_id
+      WHERE pv.date = CURRENT_DATE AND (pv.watched_stream = TRUE OR uv.stream_count > 0)
+    `)).rows[0] || {};
+
+    const allPlatformActiveSeconds = (await db.query(`
+      SELECT COALESCE(SUM(active_seconds), 0) as total_active_seconds
+      FROM platform_visits
+      WHERE date = CURRENT_DATE
+    `)).rows[0]?.total_active_seconds || 0;
+
+    const totalActiveHoursToday = parseFloat((parseInt(allPlatformActiveSeconds, 10) / 3600).toFixed(1));
+    const avgActiveMinutesToday = parseInt(uniqueVisitorsToday, 10) > 0 
+      ? parseFloat(((parseInt(allPlatformActiveSeconds, 10) / 60) / parseInt(uniqueVisitorsToday, 10)).toFixed(1)) 
+      : 0;
 
     res.json({
       totalUsers: parseInt(totalUsers),
@@ -54,22 +81,40 @@ router.get('/stats', isModerator, async (req, res) => {
       totalVisitsAllTime: parseInt(totalVisitsAllTime),
       uniqueVisitorsToday: parseInt(uniqueVisitorsToday),
       uniqueVisitorsWeekly: parseInt(uniqueVisitorsWeekly),
-      uniqueVisitorsMonthly: parseInt(uniqueVisitorsMonthly)
+      uniqueVisitorsMonthly: parseInt(uniqueVisitorsMonthly),
+      streamViewersToday: parseInt(streamStats.unique_stream_viewers || 0),
+      streamPlaysToday: parseInt(streamStats.stream_plays || 0),
+      totalActiveHoursToday,
+      avgActiveMinutesToday
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch platform statistics.' });
   }
 });
 
-// Fetch all users
+// Fetch all users with optional instant search and engagement metrics
 router.get('/users', isModerator, async (req, res) => {
   try {
-    const result = await db.query(`
+    const search = (req.query.search || '').trim().toLowerCase();
+    let query = `
       SELECT u.id, u.name, u.email, u.role, u.is_super_admin, u.admin_permissions, u.avatar, u.created_at,
-             (SELECT last_seen FROM unique_visitors v WHERE v.user_id = u.id ORDER BY last_seen DESC LIMIT 1) as last_seen
+             COALESCE(v.total_visits, 1) as total_visits,
+             COALESCE(v.total_active_seconds, 30) as total_active_seconds,
+             COALESCE(v.stream_count, 0) as stream_count,
+             (SELECT COUNT(DISTINCT pv.session_id) FROM platform_visits pv WHERE pv.visitor_id = v.visitor_id AND pv.date = CURRENT_DATE) as today_visits,
+             v.last_seen
       FROM users u
-      ORDER BY u.created_at DESC
-    `);
+      LEFT JOIN LATERAL (
+        SELECT * FROM unique_visitors WHERE user_id = u.id ORDER BY last_seen DESC LIMIT 1
+      ) v ON true
+    `;
+    const params = [];
+    if (search) {
+      params.push(`%${search}%`);
+      query += ` WHERE LOWER(u.name) LIKE $1 OR LOWER(u.email) LIKE $1 OR u.id::text = $1`;
+    }
+    query += ` ORDER BY u.created_at DESC`;
+    const result = await db.query(query, params);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch users.' });
@@ -114,15 +159,126 @@ router.get('/announcement', isModerator, async (req, res) => {
 
 const { getCountryFlag, getCountryName } = require('../utils/geo');
 
-// GET Visitors, Most Watched, Login Logs
+// GET Visitors with search, filter, sort, and server-side pagination (No 5000 limit)
 router.get('/visitors', isModerator, async (req, res) => {
-  const result = await db.query('SELECT * FROM unique_visitors ORDER BY last_seen DESC LIMIT 5000');
-  const enriched = result.rows.map(row => ({
-    ...row,
-    flag: getCountryFlag(row.country_code),
-    country_name: (row.country_name && row.country_name !== 'Unknown') ? row.country_name : getCountryName(row.country_code)
-  }));
-  res.json(enriched);
+  try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(Math.max(1, parseInt(req.query.limit, 10) || 25), 200);
+    const offset = (page - 1) * limit;
+    const search = (req.query.search || '').trim().toLowerCase();
+    const filter = ['all', 'today', 'registered', 'guest', 'streaming'].includes(req.query.filter) ? req.query.filter : 'all';
+    const sortBy = req.query.sortBy || 'recent';
+
+    const conditions = [];
+    const params = [];
+
+    if (search) {
+      params.push(`%${search}%`);
+      const pIdx = params.length;
+      conditions.push(`(
+        LOWER(uv.visitor_id) LIKE $${pIdx} OR 
+        LOWER(COALESCE(uv.last_ip, '')) LIKE $${pIdx} OR 
+        LOWER(COALESCE(uv.country_code, '')) LIKE $${pIdx} OR 
+        LOWER(COALESCE(uv.country_name, '')) LIKE $${pIdx} OR
+        LOWER(COALESCE(u.name, '')) LIKE $${pIdx} OR
+        LOWER(COALESCE(u.email, '')) LIKE $${pIdx}
+      )`);
+    }
+
+    if (filter === 'today') {
+      conditions.push(`uv.last_seen >= CURRENT_DATE`);
+    } else if (filter === 'registered') {
+      conditions.push(`uv.is_registered = TRUE`);
+    } else if (filter === 'guest') {
+      conditions.push(`(uv.is_registered IS FALSE OR uv.is_registered IS NULL)`);
+    } else if (filter === 'streaming') {
+      conditions.push(`uv.stream_count > 0`);
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    let orderClause = 'ORDER BY uv.last_seen DESC';
+    if (sortBy === 'visits') {
+      orderClause = 'ORDER BY uv.total_visits DESC, uv.last_seen DESC';
+    } else if (sortBy === 'active') {
+      orderClause = 'ORDER BY uv.total_active_seconds DESC, uv.last_seen DESC';
+    } else if (sortBy === 'streams') {
+      orderClause = 'ORDER BY uv.stream_count DESC, uv.last_seen DESC';
+    } else if (sortBy === 'first_seen') {
+      orderClause = 'ORDER BY uv.first_seen DESC';
+    }
+
+    const countResult = await db.query(`
+      SELECT COUNT(*) as total
+      FROM unique_visitors uv
+      LEFT JOIN users u ON uv.user_id = u.id
+      ${whereClause}
+    `, params);
+    const totalCount = parseInt(countResult.rows[0].total, 10) || 0;
+
+    const queryParams = [...params, limit, offset];
+    const dataResult = await db.query(`
+      SELECT 
+        uv.*,
+        u.name as user_name,
+        u.email as user_email,
+        COALESCE(uv.total_visits, 1) as total_visits,
+        COALESCE(uv.total_active_seconds, 30) as total_active_seconds,
+        COALESCE(uv.stream_count, 0) as stream_count,
+        COALESCE(uv.total_watch_seconds, 0) as total_watch_seconds,
+        (
+          SELECT COUNT(DISTINCT pv.session_id) 
+          FROM platform_visits pv 
+          WHERE pv.visitor_id = uv.visitor_id AND pv.date = CURRENT_DATE
+        ) as today_visits,
+        (
+          SELECT COALESCE(SUM(pv.active_seconds), 0) 
+          FROM platform_visits pv 
+          WHERE pv.visitor_id = uv.visitor_id AND pv.date = CURRENT_DATE
+        ) as today_active_seconds
+      FROM unique_visitors uv
+      LEFT JOIN users u ON uv.user_id = u.id
+      ${whereClause}
+      ${orderClause}
+      LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}
+    `, queryParams);
+
+    // Segment summary counts for quick UI filter badges
+    const countsResult = await db.query(`
+      SELECT 
+        COUNT(*) as total_all,
+        COUNT(CASE WHEN last_seen >= CURRENT_DATE THEN 1 END) as active_today,
+        COUNT(CASE WHEN is_registered = TRUE THEN 1 END) as registered_count,
+        COUNT(CASE WHEN is_registered IS FALSE OR is_registered IS NULL THEN 1 END) as guest_count,
+        COUNT(CASE WHEN stream_count > 0 THEN 1 END) as stream_viewers_count
+      FROM unique_visitors
+    `);
+    const counts = countsResult.rows[0] || {};
+
+    const enriched = dataResult.rows.map(row => ({
+      ...row,
+      flag: getCountryFlag(row.country_code),
+      country_name: (row.country_name && row.country_name !== 'Unknown') ? row.country_name : getCountryName(row.country_code)
+    }));
+
+    res.json({
+      visitors: enriched,
+      totalCount,
+      page,
+      totalPages: Math.ceil(totalCount / limit) || 1,
+      limit,
+      counts: {
+        all: parseInt(counts.total_all, 10) || 0,
+        activeToday: parseInt(counts.active_today, 10) || 0,
+        registered: parseInt(counts.registered_count, 10) || 0,
+        guests: parseInt(counts.guest_count, 10) || 0,
+        streamViewers: parseInt(counts.stream_viewers_count, 10) || 0
+      }
+    });
+  } catch (error) {
+    console.error('Failed to fetch visitors:', error);
+    res.status(500).json({ message: 'Failed to fetch visitors.' });
+  }
 });
 
 // GET Audience Countries Analytics

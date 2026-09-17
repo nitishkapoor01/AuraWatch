@@ -277,12 +277,34 @@ const initDB = async () => {
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='aura_hub_posts' AND COLUMN_NAME='pinned_at') THEN
           ALTER TABLE aura_hub_posts ADD COLUMN pinned_at TIMESTAMP;
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='unique_visitors' AND COLUMN_NAME='total_visits') THEN
+          ALTER TABLE unique_visitors ADD COLUMN total_visits INTEGER DEFAULT 1;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='unique_visitors' AND COLUMN_NAME='total_active_seconds') THEN
+          ALTER TABLE unique_visitors ADD COLUMN total_active_seconds INTEGER DEFAULT 30;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='unique_visitors' AND COLUMN_NAME='stream_count') THEN
+          ALTER TABLE unique_visitors ADD COLUMN stream_count INTEGER DEFAULT 0;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='unique_visitors' AND COLUMN_NAME='total_watch_seconds') THEN
+          ALTER TABLE unique_visitors ADD COLUMN total_watch_seconds INTEGER DEFAULT 0;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='platform_visits' AND COLUMN_NAME='active_seconds') THEN
+          ALTER TABLE platform_visits ADD COLUMN active_seconds INTEGER DEFAULT 30;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='platform_visits' AND COLUMN_NAME='watched_stream') THEN
+          ALTER TABLE platform_visits ADD COLUMN watched_stream BOOLEAN DEFAULT FALSE;
+        END IF;
       END $$;
 
       CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
       CREATE INDEX IF NOT EXISTS idx_support_tickets_visitor ON support_tickets(visitor_id);
       CREATE INDEX IF NOT EXISTS idx_unique_visitors_country ON unique_visitors(country_code);
+      CREATE INDEX IF NOT EXISTS idx_unique_visitors_visits ON unique_visitors(total_visits DESC);
+      CREATE INDEX IF NOT EXISTS idx_unique_visitors_active ON unique_visitors(total_active_seconds DESC);
+      CREATE INDEX IF NOT EXISTS idx_unique_visitors_streams ON unique_visitors(stream_count DESC);
       CREATE INDEX IF NOT EXISTS idx_platform_visits_country ON platform_visits(country_code);
+      CREATE INDEX IF NOT EXISTS idx_platform_visits_watched ON platform_visits(watched_stream);
       CREATE INDEX IF NOT EXISTS idx_platform_visits_visitor ON platform_visits(visitor_id);
       CREATE INDEX IF NOT EXISTS idx_platform_visits_date ON platform_visits(date);
       CREATE INDEX IF NOT EXISTS idx_unique_visitors_last_seen ON unique_visitors(last_seen DESC);
@@ -353,6 +375,20 @@ const initDB = async () => {
       CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_admin ON aura_hub_posts(is_admin, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_pinned ON aura_hub_posts(is_pinned DESC, created_at DESC);
     `);
+
+    // Backfill total_visits from platform_visits for existing historical records
+    await pool.query(`
+      UPDATE unique_visitors uv
+      SET total_visits = GREATEST(COALESCE(uv.total_visits, 1), sub.cnt)
+      FROM (
+        SELECT visitor_id, COUNT(DISTINCT session_id) as cnt
+        FROM platform_visits
+        WHERE visitor_id IS NOT NULL
+        GROUP BY visitor_id
+      ) sub
+      WHERE uv.visitor_id = sub.visitor_id;
+    `).catch(() => {});
+
     console.log('[DB] PostgreSQL database initialized');
   } catch (err) {
     console.error('[DB] Failed to initialize PostgreSQL:', err);

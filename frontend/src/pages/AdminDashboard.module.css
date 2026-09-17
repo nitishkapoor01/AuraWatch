@@ -2730,5 +2730,190 @@
   }
 }
 
+/* Users Tab Search, Filters, Badges & Pagination */
+.userTableControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.userSearchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 260px;
+  max-width: 440px;
+}
+
+.userSearchWrap svg {
+  position: absolute;
+  left: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.userSearchInput {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 14px 10px 40px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.userSearchInput:focus {
+  border-color: var(--primary-color, #e50914);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.25);
+}
+
+.userFilterPills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.userFilterPill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userFilterPill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.userFilterPillActive {
+  background: rgba(229, 9, 20, 0.15);
+  border-color: rgba(229, 9, 20, 0.4);
+  color: #e50914;
+}
+
+.userSortSelect {
+  background: rgba(20, 24, 34, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  outline: none;
+  cursor: pointer;
+}
+
+.paginationBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 4px 6px 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.paginationActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pageBtn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: rgba(229, 9, 20, 0.2);
+  border-color: #e50914;
+}
+
+.pageBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.limitSelect {
+  background: rgba(20, 24, 34, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+  margin-left: 6px;
+}
+
+.visitsBadge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.visitsBadge strong {
+  font-size: 13px;
+  color: #2ecc71;
+}
+
+.visitsBadge span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.activeTimeBadge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activeTimeBadge strong {
+  font-size: 13px;
+  color: #3498db;
+}
+
+.activeTimeBadge span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.streamBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(229, 9, 20, 0.12);
+  color: #e50914;
+  border: 1px solid rgba(229, 9, 20, 0.25);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 
 

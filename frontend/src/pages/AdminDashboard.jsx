@@ -6,7 +6,8 @@ import {
   X, LayoutDashboard, Shield, BarChart, Zap, Search as SearchIcon,
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
   Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe, Sparkles,
-  ArrowUpRight, Table, LayoutGrid, Repeat, Smartphone, Monitor, Tablet, UserCheck, Flame, RefreshCw
+  ArrowUpRight, Table, LayoutGrid, Repeat, Smartphone, Monitor, Tablet, UserCheck, Flame, RefreshCw,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -51,7 +52,19 @@ const AdminDashboard = () => {
   const [selectedUserForPerms, setSelectedUserForPerms] = useState(null);
   const [tempPerms, setTempPerms] = useState({ read: true, write: false });
   const [mostWatched, setMostWatched] = useState([]);
+
+  // Users Tab Observability & Pagination States
   const [visitors, setVisitors] = useState([]);
+  const [visitorsTotalCount, setVisitorsTotalCount] = useState(0);
+  const [visitorsPage, setVisitorsPage] = useState(1);
+  const [visitorsTotalPages, setVisitorsTotalPages] = useState(1);
+  const [visitorsLimit, setVisitorsLimit] = useState(25);
+  const [visitorsSearch, setVisitorsSearch] = useState('');
+  const [visitorsFilter, setVisitorsFilter] = useState('all');
+  const [visitorsSort, setVisitorsSort] = useState('recent');
+  const [visitorsCounts, setVisitorsCounts] = useState({ all: 0, activeToday: 0, registered: 0, guests: 0, streamViewers: 0 });
+  const [loadingVisitors, setLoadingVisitors] = useState(false);
+  const [registeredUserSearch, setRegisteredUserSearch] = useState('');
   
   // Support States
   const [supportTickets, setSupportTickets] = useState([]);
@@ -252,8 +265,8 @@ const AdminDashboard = () => {
       fetchRetentionData(retentionPeriod, retentionFilter, retentionSort, retentionSearch);
       fetchPlatformInsights();
     } else if (tab === 'users') {
-      const visitorsRes = await fetch(`${baseUrl}/admin/visitors`, { headers });
-      if (visitorsRes.ok) setVisitors(await visitorsRes.json());
+      fetchVisitors(visitorsPage, visitorsLimit, visitorsSearch, visitorsFilter, visitorsSort);
+      fetchUsers(registeredUserSearch);
     } else if (tab === 'support') {
       const supportRes = await fetch(`${baseUrl}/support`, { headers });
       if (supportRes.ok) setSupportTickets(await supportRes.json());
@@ -268,6 +281,71 @@ const AdminDashboard = () => {
       }
     } else if (tab === 'hub') {
       fetchHubPosts();
+    }
+  };
+
+  const formatDuration = (seconds) => {
+    if (!seconds || seconds <= 0) return '0m';
+    const mins = Math.floor(seconds / 60);
+    if (mins < 60) return `${mins}m`;
+    const hours = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    return remMins > 0 ? `${hours}h ${remMins}m` : `${hours}h`;
+  };
+
+  const fetchVisitors = async (
+    page = visitorsPage,
+    limit = visitorsLimit,
+    search = visitorsSearch,
+    filter = visitorsFilter,
+    sort = visitorsSort
+  ) => {
+    try {
+      setLoadingVisitors(true);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        filter,
+        sortBy: sort
+      });
+      if (search) params.set('search', search);
+
+      const res = await fetch(`${baseUrl}/admin/visitors?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.visitors) {
+          setVisitors(data.visitors);
+          setVisitorsTotalCount(data.totalCount || 0);
+          setVisitorsPage(data.page || 1);
+          setVisitorsTotalPages(data.totalPages || 1);
+          if (data.counts) setVisitorsCounts(data.counts);
+        } else if (Array.isArray(data)) {
+          setVisitors(data);
+          setVisitorsTotalCount(data.length);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load visitors:', err);
+    } finally {
+      setLoadingVisitors(false);
+    }
+  };
+
+  const fetchUsers = async (search = registeredUserSearch) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const url = search ? `${baseUrl}/admin/users?search=${encodeURIComponent(search)}` : `${baseUrl}/admin/users`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setUsers(await res.json());
+      }
+    } catch (err) {
+      console.error('Failed to load registered users:', err);
     }
   };
 
@@ -660,12 +738,45 @@ const AdminDashboard = () => {
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(229, 9, 20, 0.15)', color: '#e50914' }}><Users size={28} /></div>
-              <div className={styles.statInfo}><h3>{stats?.uniqueVisitorsToday}</h3><p>Unique Visitors Today</p></div>
+              <div className={styles.statInfo}>
+                <h3>{stats?.uniqueVisitorsToday?.toLocaleString() || 0}</h3>
+                <p>Unique Visitors Today</p>
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>1 user = 1 count (deduplicated)</span>
+              </div>
             </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}><Activity size={28} /></div>
+              <div className={styles.statInfo}>
+                <h3>{stats?.totalVisitsToday?.toLocaleString() || 0}</h3>
+                <p>Total Site Opens Today</p>
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>All session & return opens</span>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(230, 126, 34, 0.15)', color: '#e67e22' }}><Film size={28} /></div>
+              <div className={styles.statInfo}>
+                <h3>{stats?.streamViewersToday?.toLocaleString() || 0}</h3>
+                <p>Stream Viewers Today</p>
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>{stats?.streamPlaysToday || 0} streams played</span>
+              </div>
+            </div>
+
+            <div className={styles.statCard}>
+              <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}><Clock size={28} /></div>
+              <div className={styles.statInfo}>
+                <h3>{stats?.totalActiveHoursToday || 0}h</h3>
+                <p>Active Time Today</p>
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>Avg {stats?.avgActiveMinutesToday || 0}m / visitor</span>
+              </div>
+            </div>
+
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71' }}><Zap size={28} /></div>
               <div className={styles.statInfo}><h3>{liveStats?.total || 0}</h3><p>Users Online Now</p></div>
             </div>
+
             <div className={styles.statCard} style={{ cursor: 'pointer' }} onClick={() => setActiveTab('retention')}>
               <div className={styles.statIcon} style={{ background: 'rgba(243, 156, 18, 0.15)', color: '#f39c12' }}><Repeat size={28} /></div>
               <div className={styles.statInfo}>
@@ -673,16 +784,14 @@ const AdminDashboard = () => {
                 <p>Returning Users ({retentionData?.retentionRate || 0}%)</p>
               </div>
             </div>
+
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(39, 174, 96, 0.15)', color: '#27ae60' }}><CheckCircle size={28} /></div>
               <div className={styles.statInfo}><h3>{stats?.totalWatches || 0}</h3><p>Completed Watches</p></div>
             </div>
+
             <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: 'rgba(0, 113, 235, 0.15)', color: '#0071eb' }}><Activity size={28} /></div>
-              <div className={styles.statInfo}><h3>{stats?.totalAttempts || 0}</h3><p>Total Clicks</p></div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: 'rgba(155, 89, 182, 0.15)', color: '#9b59b6' }}><Clock size={28} /></div>
+              <div className={styles.statIcon} style={{ background: 'rgba(52, 152, 219, 0.15)', color: '#3498db' }}><Eye size={28} /></div>
               <div className={styles.statInfo}><h3>{Math.round(stats?.totalWatchTimeHours || 0)}h</h3><p>Total Watch Time</p></div>
             </div>
           </div>
@@ -983,11 +1092,40 @@ const AdminDashboard = () => {
       {activeTab === 'users' && (
         <div className={styles.tabContent}>
           <div className={styles.usersSection}>
-            <div className={styles.sectionHeader}><h2>Registered Users</h2><span className={styles.userCount}>{users.length} Users</span></div>
+            <div className={styles.sectionHeader} style={{ flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <h2>Registered Users</h2>
+                <span className={styles.userCount}>{users.length} Users</span>
+              </div>
+              <div className={styles.userSearchWrap} style={{ maxWidth: '320px' }}>
+                <SearchIcon size={16} />
+                <input 
+                  type="text"
+                  placeholder="Search name, email or ID..."
+                  className={styles.userSearchInput}
+                  value={registeredUserSearch}
+                  onChange={(e) => {
+                    setRegisteredUserSearch(e.target.value);
+                    fetchUsers(e.target.value);
+                  }}
+                />
+              </div>
+            </div>
+
             <div className={styles.tableContainer}>
               <table className={styles.usersTable}>
                 <thead>
-                  <tr><th>User</th><th>Role</th><th>Joined</th><th>Last Active</th><th>Security</th><th>Actions</th></tr>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Site Opens</th>
+                    <th>Active Time</th>
+                    <th>Streams</th>
+                    <th>Last Active</th>
+                    <th>Security</th>
+                    <th>Actions</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {users.map(u => (
@@ -1012,6 +1150,22 @@ const AdminDashboard = () => {
                         </select>
                       </td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <div className={styles.visitsBadge}>
+                          <strong>{u.today_visits || 0} today</strong>
+                          <span>{u.total_visits || 1} total</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className={styles.activeTimeBadge}>
+                          <strong>{formatDuration(u.total_active_seconds || 30)}</strong>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={styles.streamBadge}>
+                          <Film size={12} /> {u.stream_count || 0}
+                        </span>
+                      </td>
                       <td style={{ fontSize: '12px' }}>
                         {u.last_seen ? new Date(u.last_seen).toLocaleString() : 'Never'}
                       </td>
@@ -1045,6 +1199,9 @@ const AdminDashboard = () => {
                       </td>
                     </tr>
                   ))}
+                  {users.length === 0 && (
+                    <tr><td colSpan="9" className={styles.emptyTable}>No registered users found matching search.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1097,16 +1254,85 @@ const AdminDashboard = () => {
           </div>
 
           <div className={styles.usersSection} style={{ marginTop: '40px' }}>
-            <div className={styles.sectionHeader}>
-              <h2>Historical Unique Visitors</h2>
+            <div className={styles.sectionHeader} style={{ flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2>Historical Unique Visitors</h2>
+                <p style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>
+                  Deduplicated individual visitor profiles with real-time session opens, stream plays, and active engagement time
+                </p>
+              </div>
               <span className={styles.userCount} style={{ background: 'rgba(233, 30, 99, 0.15)', color: '#e91e63' }}>
-                {visitors.length} Unique People
+                {visitorsTotalCount.toLocaleString()} Unique People
               </span>
             </div>
+
+            {/* Visitor Search, Filters, and Sorting Controls */}
+            <div className={styles.userTableControls}>
+              <div className={styles.userSearchWrap}>
+                <SearchIcon size={16} />
+                <input 
+                  type="text"
+                  placeholder="Search by Visitor ID, IP, Country, or Name..."
+                  className={styles.userSearchInput}
+                  value={visitorsSearch}
+                  onChange={(e) => {
+                    setVisitorsSearch(e.target.value);
+                    fetchVisitors(1, visitorsLimit, e.target.value, visitorsFilter, visitorsSort);
+                  }}
+                />
+              </div>
+
+              <div className={styles.userFilterPills}>
+                {[
+                  { id: 'all', label: `All (${visitorsCounts.all || visitorsTotalCount})` },
+                  { id: 'today', label: `Active Today (${visitorsCounts.activeToday || 0})` },
+                  { id: 'registered', label: `Registered (${visitorsCounts.registered || 0})` },
+                  { id: 'guest', label: `Guests (${visitorsCounts.guests || 0})` },
+                  { id: 'streaming', label: `Streaming (${visitorsCounts.streamViewers || 0})` }
+                ].map(f => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    className={`${styles.userFilterPill} ${visitorsFilter === f.id ? styles.userFilterPillActive : ''}`}
+                    onClick={() => {
+                      setVisitorsFilter(f.id);
+                      fetchVisitors(1, visitorsLimit, visitorsSearch, f.id, visitorsSort);
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              <select 
+                className={styles.userSortSelect}
+                value={visitorsSort}
+                onChange={(e) => {
+                  setVisitorsSort(e.target.value);
+                  fetchVisitors(1, visitorsLimit, visitorsSearch, visitorsFilter, e.target.value);
+                }}
+              >
+                <option value="recent">Recently Active</option>
+                <option value="visits">Most Opens (Visits)</option>
+                <option value="active">Most Active Time</option>
+                <option value="streams">Most Streams Watched</option>
+                <option value="first_seen">Earliest Joined</option>
+              </select>
+            </div>
+
             <div className={styles.tableContainer}>
               <table className={styles.usersTable}>
                 <thead>
-                  <tr><th>Visitor</th><th>Country</th><th>Status</th><th>Last IP</th><th>First Seen</th><th>Last Active</th></tr>
+                  <tr>
+                    <th>Visitor / User</th>
+                    <th>Country & IP</th>
+                    <th>Site Opens</th>
+                    <th>Active Time</th>
+                    <th>Streams</th>
+                    <th>Status</th>
+                    <th>First Seen</th>
+                    <th>Last Active</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {visitors.map(v => (
@@ -1118,7 +1344,7 @@ const AdminDashboard = () => {
                           </div>
                           <div>
                             <div className={styles.userName}>{v.user_name || `Visitor #${v.visitor_id.substring(0, 6)}`}</div>
-                            <div className={styles.userEmail}>{v.visitor_id.substring(0, 20)}...</div>
+                            <div className={styles.userEmail}>{v.user_email || `${v.visitor_id.substring(0, 20)}...`}</div>
                           </div>
                         </div>
                       </td>
@@ -1126,20 +1352,84 @@ const AdminDashboard = () => {
                         <span className={styles.countryTag}>
                           {v.flag || '🌐'} {v.country_name || 'Unknown'}
                         </span>
+                        <div style={{ fontSize: '11px', opacity: 0.6, marginTop: '2px' }}>{v.last_ip}</div>
+                      </td>
+                      <td>
+                        <div className={styles.visitsBadge}>
+                          <strong>{v.today_visits || 0} today</strong>
+                          <span>{v.total_visits || 1} total</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className={styles.activeTimeBadge}>
+                          <strong>{formatDuration(v.today_active_seconds || 0)} today</strong>
+                          <span>{formatDuration(v.total_active_seconds || 30)} total</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={styles.streamBadge}>
+                          <Film size={12} /> {v.stream_count || 0}
+                        </span>
                       </td>
                       <td>
                         <span className={`${styles.roleBadge} ${v.is_registered ? styles.roleAdmin : styles.roleUser}`} style={{ background: v.is_registered ? 'rgba(46, 204, 113, 0.1)' : 'rgba(255,255,255,0.05)', color: v.is_registered ? '#2ecc71' : '#777', borderColor: 'transparent' }}>
                           {v.is_registered ? 'REGISTERED' : 'GUEST'}
                         </span>
                       </td>
-                      <td style={{ fontSize: '11px', opacity: 0.7 }}>{v.last_ip}</td>
                       <td style={{ fontSize: '12px' }}>{new Date(v.first_seen).toLocaleDateString()}</td>
                       <td style={{ fontSize: '12px' }}>{new Date(v.last_seen).toLocaleString()}</td>
                     </tr>
                   ))}
-                  {visitors.length === 0 && <tr><td colSpan="6" className={styles.emptyTable}>No historical records found.</td></tr>}
+                  {visitors.length === 0 && (
+                    <tr><td colSpan="8" className={styles.emptyTable}>No visitors found matching current filters.</td></tr>
+                  )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Server-Side Pagination Bar */}
+            <div className={styles.paginationBar}>
+              <div>
+                Showing {visitorsTotalCount === 0 ? 0 : (visitorsPage - 1) * visitorsLimit + 1} - {Math.min(visitorsPage * visitorsLimit, visitorsTotalCount)} of {visitorsTotalCount.toLocaleString()} visitors
+                <span style={{ marginLeft: '14px' }}>
+                  Rows per page:
+                  <select 
+                    className={styles.limitSelect}
+                    value={visitorsLimit}
+                    onChange={(e) => {
+                      const newLim = parseInt(e.target.value, 10);
+                      setVisitorsLimit(newLim);
+                      fetchVisitors(1, newLim, visitorsSearch, visitorsFilter, visitorsSort);
+                    }}
+                  >
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </span>
+              </div>
+
+              <div className={styles.paginationActions}>
+                <button 
+                  type="button"
+                  className={styles.pageBtn}
+                  disabled={visitorsPage <= 1 || loadingVisitors}
+                  onClick={() => fetchVisitors(visitorsPage - 1, visitorsLimit, visitorsSearch, visitorsFilter, visitorsSort)}
+                >
+                  <ChevronLeft size={16} /> Previous
+                </button>
+                <span style={{ color: '#fff', fontWeight: 600, fontSize: '12.5px' }}>
+                  Page {visitorsPage} of {visitorsTotalPages}
+                </span>
+                <button 
+                  type="button"
+                  className={styles.pageBtn}
+                  disabled={visitorsPage >= visitorsTotalPages || loadingVisitors}
+                  onClick={() => fetchVisitors(visitorsPage + 1, visitorsLimit, visitorsSearch, visitorsFilter, visitorsSort)}
+                >
+                  Next <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
