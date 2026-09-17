@@ -129,6 +129,15 @@ const AdminDashboard = () => {
     direct_link: {
       enabled: true,
       url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11'
+    },
+    pre_roll: {
+      enabled: true,
+      timer_seconds: 5,
+      key: 'ccd684eb4f620dcc7303d2fce2577bae',
+      script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
+      direct_url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11',
+      width: 300,
+      height: 250
     }
   });
   const [savingAdsConfig, setSavingAdsConfig] = useState(false);
@@ -2579,6 +2588,7 @@ const AdminDashboard = () => {
                 </div>
                 <div style={{ marginTop: '20px' }}>
                   {[
+                    { id: 'pre_roll', label: 'Stream Pre-Roll Gateway (Player 300x250)' },
                     { id: 'download_modal', label: 'Download Modal (300x250)' },
                     { id: 'movie_detail', label: 'Movie Detail Banner (728x90)' },
                     { id: 'search_grid', label: 'Search & Category In-Feed Cards' }
@@ -2868,6 +2878,96 @@ const AdminDashboard = () => {
                   <label>Placement Notes</label>
                   <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
                     Triggers in a new background tab when a visitor clicks the Download button on any movie, giving maximum eCPM on downloads while the movie download starts cleanly.
+                  </p>
+                </div>
+              </div>
+
+              {/* SLOT 5: STREAM PRE-ROLL AD GATEWAY (PLAYER) */}
+              <div className={styles.adSlotCard}>
+                <div className={styles.adSlotHeader}>
+                  <div className={styles.adSlotTitle}>
+                    <Play size={20} color="#e50914" />
+                    <div>
+                      <h3>Stream Pre-Roll Ad Gateway</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>300x250 Video Player Countdown Overlay</span>
+                    </div>
+                  </div>
+                  <button 
+                    className={`${styles.toggleBtn} ${adsConfig.pre_roll?.enabled ? styles.active : ''}`}
+                    onClick={() => setAdsConfig(prev => ({
+                      ...prev,
+                      pre_roll: { ...prev.pre_roll, enabled: !prev.pre_roll?.enabled }
+                    }))}
+                  >
+                    <div className={styles.toggleThumb}></div>
+                  </button>
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Adsterra Unit Key</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.pre_roll?.key || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      pre_roll: { ...prev.pre_roll, key: e.target.value.trim() }
+                    }))}
+                    placeholder="e.g. ccd684eb4f620dcc7303d2fce2577bae"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Script Invoke URL</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.pre_roll?.script_url || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      pre_roll: { ...prev.pre_roll, script_url: e.target.value.trim() }
+                    }))}
+                    placeholder="https://pl31278426.profitableratecpmnetwork.com/.../invoke.js"
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Sponsor / Smartlink Direct URL (Optional)</label>
+                  <input 
+                    type="text" 
+                    className={styles.adInput}
+                    value={adsConfig.pre_roll?.direct_url || ''} 
+                    onChange={e => setAdsConfig(prev => ({
+                      ...prev,
+                      pre_roll: { ...prev.pre_roll, direct_url: e.target.value.trim() }
+                    }))}
+                    placeholder="https://www.profitableratecpmnetwork.com/..."
+                  />
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Pre-Roll Countdown Timer: {adsConfig.pre_roll?.timer_seconds || 5}s</label>
+                  <div className={styles.sliderRow}>
+                    <input 
+                      type="range" 
+                      min="3" 
+                      max="15" 
+                      step="1"
+                      className={styles.sliderInput}
+                      value={adsConfig.pre_roll?.timer_seconds || 5}
+                      onChange={e => setAdsConfig(prev => ({
+                        ...prev,
+                        pre_roll: { ...prev.pre_roll, timer_seconds: Number(e.target.value) }
+                      }))}
+                    />
+                    <span className={styles.sliderValue}>{adsConfig.pre_roll?.timer_seconds || 5} sec</span>
+                  </div>
+                </div>
+
+                <div className={styles.adFieldGroup}>
+                  <label>Placement Notes</label>
+                  <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
+                    Renders a 5-second YouTube-style countdown overlay before video playback begins. 100% impression rate for stream viewers with high eCPM. Admins are automatically exempted.
                   </p>
                 </div>
               </div>

@@ -21,7 +21,7 @@ router.post('/impression', async (req, res) => {
   try {
     const { slot, visitorId, sessionId, deviceType } = req.body;
 
-    const allowedSlots = ['download_modal', 'movie_detail', 'social_bar', 'search_grid', 'direct_link'];
+    const allowedSlots = ['download_modal', 'movie_detail', 'social_bar', 'search_grid', 'direct_link', 'pre_roll'];
     if (!slot || !allowedSlots.includes(slot)) {
       return res.status(400).json({ error: 'Invalid ad slot' });
     }
@@ -98,6 +98,17 @@ router.get('/config', async (req, res) => {
       direct_link: {
         enabled: true,
         url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11'
+      },
+      pre_roll: {
+        enabled: true,
+        timer_seconds: 5,
+        format: 'native',
+        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
+        key: 'ccd684eb4f620dcc7303d2fce2577bae',
+        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
+        direct_url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11',
+        width: 300,
+        height: 250
       }
     };
 

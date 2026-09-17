@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -326,7 +327,7 @@ const initDB = async () => {
       INSERT INTO settings (key, value)
       VALUES (
         'ads_config',
-        '{"enabled":true,"download_modal":{"enabled":true,"timer_seconds":30,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":300,"height":250},"movie_detail":{"enabled":true,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":728,"height":90},"social_bar":{"enabled":true,"script_url":"https://pl31260175.profitableratecpmnetwork.com/b4/2e/27/b42e272664d703c5177e5d684f92dc85.js"}}'
+        '{"enabled":true,"download_modal":{"enabled":true,"timer_seconds":30,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":300,"height":250},"movie_detail":{"enabled":true,"format":"iframe","key":"8e9991a7d4aa3fef2ca28a617f3c1844","script_url":"//heavenlysuspicious.com/8e9991a7d4aa3fef2ca28a617f3c1844/invoke.js","width":728,"height":90},"social_bar":{"enabled":true,"script_url":"https://pl31260175.profitableratecpmnetwork.com/b4/2e/27/b42e272664d703c5177e5d684f92dc85.js"},"pre_roll":{"enabled":true,"timer_seconds":5,"format":"native","container_id":"container-ccd684eb4f620dcc7303d2fce2577bae","key":"ccd684eb4f620dcc7303d2fce2577bae","script_url":"https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js","direct_url":"https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11","width":300,"height":250}}'
       )
       ON CONFLICT (key) DO NOTHING;
 

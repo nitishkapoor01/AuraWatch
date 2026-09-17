@@ -20,6 +20,15 @@ const DEFAULT_CONFIGS = {
     height: 180,
     key: 'ccd684eb4f620dcc7303d2fce2577bae',
     script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
+  },
+  pre_roll: {
+    enabled: true,
+    format: 'native',
+    container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
+    width: 300,
+    height: 250,
+    key: 'ccd684eb4f620dcc7303d2fce2577bae',
+    script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
   }
 };
 
@@ -176,7 +185,7 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
 
   return (
     <div 
-      className={`${styles.adContainer} ${slot === 'download_modal' ? styles.downloadModalAd : styles.movieDetailAd}`}
+      className={`${styles.adContainer} ${slot === 'download_modal' ? styles.downloadModalAd : slot === 'pre_roll' ? styles.preRollAd : styles.movieDetailAd}`}
       style={{ width: `${renderWidth}px` }}
     >
       <div className={styles.adBadge}>Sponsored</div>

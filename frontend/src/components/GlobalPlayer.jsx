@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, Play, ExternalLink, Sparkles } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
+import AdBanner from './ads/AdBanner';
 import styles from './GlobalPlayer.module.css';
 
 const GlobalPlayer = () => {
@@ -10,11 +11,96 @@ const GlobalPlayer = () => {
   const { isOpen, isSticky, movieData } = playerState;
   const location = useLocation();
   const navigate = useNavigate();
-  const { isLoggedIn, token } = useAuth();
+  const { isLoggedIn, token, user } = useAuth();
+  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
+
+  // Pre-Roll Ad Gateway States
+  const [preRollActive, setPreRollActive] = useState(false);
+  const [preRollSeconds, setPreRollSeconds] = useState(5);
+  const [preRollConfig, setPreRollConfig] = useState(null);
+  const activeMovieKeyRef = useRef(null);
+
+  // Fetch Ads config and initialize Pre-Roll Gateway when opening a movie
+  useEffect(() => {
+    if (!isOpen || !movieData) {
+      setPreRollActive(false);
+      return;
+    }
+
+    const currentKey = `${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}`;
+    if (activeMovieKeyRef.current === currentKey) {
+      return;
+    }
+    activeMovieKeyRef.current = currentKey;
+
+    // Skip ads entirely for admins
+    if (isAdmin) {
+      setPreRollActive(false);
+      return;
+    }
+
+    let isMounted = true;
+    const fetchAdsConfig = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+          (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s safeguard timeout
+
+        const res = await fetch(`${baseUrl}/ads/config`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          if (data.skipAdsTimer) {
+            setPreRollActive(false);
+            return;
+          }
+
+          const preRoll = data.config?.pre_roll;
+          if (data.config?.enabled && preRoll?.enabled) {
+            const timerSecs = Math.max(3, preRoll.timer_seconds || 5);
+            setPreRollConfig(preRoll);
+            setPreRollSeconds(timerSecs);
+            setPreRollActive(true);
+          } else {
+            setPreRollActive(false);
+          }
+        }
+      } catch (e) {
+        if (isMounted) setPreRollActive(false);
+      }
+    };
+
+    fetchAdsConfig();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, movieData, isAdmin]);
+
+  // Pre-Roll Countdown Timer with Auto-Advance
+  useEffect(() => {
+    if (!preRollActive) return;
+
+    if (preRollSeconds > 0) {
+      const timer = setTimeout(() => {
+        setPreRollSeconds(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      // Auto-start stream after 2.5s if user has not clicked skip
+      const autoStartTimer = setTimeout(() => {
+        setPreRollActive(false);
+      }, 2500);
+      return () => clearTimeout(autoStartTimer);
+    }
+  }, [preRollActive, preRollSeconds]);
 
   // Watch route changes. If playing and we leave the movie page, force sticky
   useEffect(() => {
@@ -256,18 +342,86 @@ const GlobalPlayer = () => {
       {isSticky && <div className={styles.dragOverlay}></div>}
       
       <div className={styles.playerStage}>
-        <iframe
-          key={`screenscape-${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}`}
-          id="stream-player"
-          src={getPlayerUrl()}
-          title={movieData.title}
-          className={styles.trailerIframe}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
-          allow="autoplay; encrypted-media; picture-in-picture; accelerometer; gyroscope; fullscreen"
-          referrerPolicy="no-referrer"
-          allowFullScreen
-          style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
-        ></iframe>
+        {preRollActive ? (
+          <div className={styles.preRollGateway}>
+            <div className={styles.preRollCard}>
+              <div className={styles.preRollHeader}>
+                <div className={styles.preRollBadge}>
+                  <span className={styles.preRollDot} />
+                  <span>SPONSORED PRESENTATION</span>
+                </div>
+                <span className={styles.preRollMovieTitle}>
+                  {movieData.title}
+                </span>
+              </div>
+
+              <div className={styles.preRollAdArea}>
+                <AdBanner slot="pre_roll" customConfig={preRollConfig} />
+              </div>
+
+              {preRollConfig?.direct_url && (
+                <a 
+                  href={preRollConfig.direct_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.preRollDirectLink}
+                >
+                  <span>Special Sponsor Offer</span>
+                  <ExternalLink size={13} />
+                </a>
+              )}
+
+              <div className={styles.preRollFooter}>
+                <div className={styles.preRollProgressBar}>
+                  <div 
+                    className={styles.preRollProgressFill} 
+                    style={{ 
+                      width: `${Math.max(0, Math.min(100, (((preRollConfig?.timer_seconds || 5) - preRollSeconds) / (preRollConfig?.timer_seconds || 5)) * 100))}%` 
+                    }}
+                  />
+                </div>
+
+                <div className={styles.preRollActions}>
+                  <span className={styles.preRollNote}>
+                    {preRollSeconds > 0 
+                      ? `Stream starting in ${preRollSeconds}s...`
+                      : 'Ad finished • Ready to stream!'}
+                  </span>
+                  <button
+                    className={`${styles.preRollSkipBtn} ${preRollSeconds === 0 ? styles.preRollSkipBtnReady : ''}`}
+                    disabled={preRollSeconds > 0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPreRollActive(false);
+                    }}
+                  >
+                    {preRollSeconds > 0 ? (
+                      `Skip in ${preRollSeconds}s`
+                    ) : (
+                      <>
+                        <Play size={14} fill="#fff" />
+                        <span>Skip Ad & Play Stream</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <iframe
+            key={`screenscape-${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}`}
+            id="stream-player"
+            src={getPlayerUrl()}
+            title={movieData.title}
+            className={styles.trailerIframe}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+            allow="autoplay; encrypted-media; picture-in-picture; accelerometer; gyroscope; fullscreen"
+            referrerPolicy="no-referrer"
+            allowFullScreen
+            style={{ pointerEvents: isSticky ? 'none' : 'auto' }}
+          ></iframe>
+        )}
       </div>
     </div>
   );

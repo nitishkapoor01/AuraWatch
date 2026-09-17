@@ -414,3 +414,208 @@
     height: 146px !important;
   }
 }
+
+/* ==========================================================================
+   STREAM PRE-ROLL AD GATEWAY STYLES
+   ========================================================================== */
+.preRollGateway {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(16, 20, 32, 0.98), rgba(4, 6, 12, 0.99));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.preRollCard {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(18, 22, 34, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(229, 9, 20, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+
+.preRollHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.preRollBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(229, 9, 20, 0.15);
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  color: #ff4d58;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.preRollDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e50914;
+  box-shadow: 0 0 8px #e50914;
+  animation: pulseDot 1.6s infinite;
+}
+
+.preRollMovieTitle {
+  font-size: 12px;
+  color: rgba(241, 245, 249, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.preRollAdArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  width: 100%;
+}
+
+.preRollDirectLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  margin-top: -4px;
+}
+
+.preRollDirectLink:hover {
+  background: rgba(229, 9, 20, 0.2);
+  border-color: rgba(229, 9, 20, 0.4);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.preRollFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.preRollProgressBar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.preRollProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #e50914 0%, #ff6b6b 100%);
+  transition: width 1s linear;
+}
+
+.preRollActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.preRollNote {
+  font-size: 11.5px;
+  color: rgba(241, 245, 249, 0.6);
+  font-weight: 500;
+}
+
+.preRollSkipBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(241, 245, 249, 0.5);
+  cursor: not-allowed;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.preRollSkipBtnReady {
+  background: linear-gradient(135deg, #e50914 0%, #b80710 100%);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.5);
+  cursor: pointer;
+  animation: skipReadyPulse 1.8s infinite;
+}
+
+.preRollSkipBtnReady:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 24px rgba(229, 9, 20, 0.7);
+  background: linear-gradient(135deg, #ff1a25 0%, #cf0a13 100%);
+}
+
+@keyframes skipReadyPulse {
+  0%, 100% {
+    box-shadow: 0 4px 18px rgba(229, 9, 20, 0.5);
+  }
+  50% {
+    box-shadow: 0 4px 28px rgba(229, 9, 20, 0.85);
+  }
+}
+
+@media (max-width: 480px) {
+  .preRollCard {
+    padding: 14px;
+    gap: 10px;
+  }
+  
+  .preRollMovieTitle {
+    max-width: 120px;
+  }
+
+  .preRollActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .preRollSkipBtn {
+    justify-content: center;
+    width: 100%;
+  }
+}
