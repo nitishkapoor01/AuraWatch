@@ -12,7 +12,7 @@ const DEFAULT_CONFIG = {
   height: 250
 };
 
-const AdCard = () => {
+const AdCard = ({ style, compact = false }) => {
   const { user } = useAuth();
   const [adConfig, setAdConfig] = useState(DEFAULT_CONFIG);
   const [scale, setScale] = useState(0.6);
@@ -46,15 +46,20 @@ const AdCard = () => {
     return () => { isMounted = false; };
   }, []);
 
-  // Compute responsive scale factor to fit 300px ad inside card width
+  // Compute responsive scale factor to fit 300px ad inside card bounds
   useEffect(() => {
     if (!cardRef.current) return;
 
     const updateScale = () => {
       if (cardRef.current) {
         const cardWidth = cardRef.current.offsetWidth;
-        if (cardWidth > 0) {
-          // Keep a small margin
+        const cardHeight = cardRef.current.offsetHeight;
+        if (cardWidth > 0 && cardHeight > 0) {
+          const scaleX = (cardWidth - 8) / 300;
+          const scaleY = (cardHeight - 8) / 250;
+          const newScale = Math.min(1, Math.max(0.35, Math.min(scaleX, scaleY)));
+          setScale(newScale);
+        } else if (cardWidth > 0) {
           const newScale = Math.min(1, Math.max(0.45, (cardWidth - 10) / 300));
           setScale(newScale);
         }
@@ -65,7 +70,7 @@ const AdCard = () => {
     const ro = new ResizeObserver(updateScale);
     ro.observe(cardRef.current);
     return () => ro.disconnect();
-  }, [adConfig]);
+  }, [adConfig, compact]);
 
   const logImpression = async () => {
     if (impressionLoggedRef.current) return;
@@ -168,7 +173,11 @@ const AdCard = () => {
   `;
 
   return (
-    <div ref={cardRef} className={styles.adCard}>
+    <div 
+      ref={cardRef} 
+      className={`${styles.adCard} ${compact ? styles.compact : ''}`}
+      style={style}
+    >
       <span className={styles.badge}>Ad</span>
       <div className={styles.frameWrapper}>
         <div style={{

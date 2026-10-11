@@ -948,4 +948,47 @@ router.post('/ads/config', isAdmin, async (req, res) => {
   }
 });
 
+// 1-Click Universal Ads Toggle: Turn all ads off/on globally
+router.post('/ads/universal-toggle', isAdmin, async (req, res) => {
+  try {
+    const { enabled, disableAllSlots } = req.body;
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ message: 'enabled must be a boolean' });
+    }
+
+    const configRow = await db.query("SELECT value FROM settings WHERE key = 'ads_config'");
+    let currentConfig = {};
+    if (configRow.rows[0]?.value) {
+      try { currentConfig = JSON.parse(configRow.rows[0].value); } catch (_) {}
+    }
+
+    currentConfig.enabled = enabled;
+
+    if (disableAllSlots) {
+      if (currentConfig.download_modal) currentConfig.download_modal.enabled = enabled;
+      if (currentConfig.movie_detail) currentConfig.movie_detail.enabled = enabled;
+      if (currentConfig.search_grid) currentConfig.search_grid.enabled = enabled;
+      if (currentConfig.social_bar) currentConfig.social_bar.enabled = enabled;
+      if (currentConfig.direct_link) currentConfig.direct_link.enabled = enabled;
+      if (currentConfig.pre_roll) currentConfig.pre_roll.enabled = enabled;
+    }
+
+    await db.query(`
+      INSERT INTO settings (key, value)
+      VALUES ('ads_config', $1)
+      ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value
+    `, [JSON.stringify(currentConfig)]);
+
+    res.json({
+      success: true,
+      enabled,
+      config: currentConfig,
+      message: enabled ? 'All ads have been turned ON platform-wide.' : 'All ads have been turned OFF platform-wide.'
+    });
+  } catch (error) {
+    console.error('Universal ads toggle error:', error);
+    res.status(500).json({ message: 'Failed to update universal ads status.' });
+  }
+});
+
 module.exports = router;

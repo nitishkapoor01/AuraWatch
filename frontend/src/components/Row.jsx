@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchWithCache } from '../utils/api';
 import styles from '../pages/Home.module.css';
 import AdCard from './ads/AdCard';
 
-const Row = ({ title, endpoint, compact = false }) => {
+const Row = ({ title, endpoint, compact = false, rowIndex }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -107,7 +107,44 @@ const Row = ({ title, endpoint, compact = false }) => {
     el.scrollBy({ left: dir === 'right' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
   };
 
+  // Deterministic organic ad placement per row: prevents ads from lining up in the same vertical column
+  const { hasAd, firstSlot, stride } = useMemo(() => {
+    const epLower = (endpoint || '').toLowerCase();
+    const titleLower = (title || '').toLowerCase();
+    
+    // Top 10 rankings shouldn't be interrupted by ads
+    const isTop10 = epLower.includes('top-10') || 
+                    epLower.includes('trending-india') || 
+                    titleLower.includes('top 10');
+    
+    if (isTop10) {
+      return { hasAd: false, firstSlot: -1, stride: 999 };
+    }
 
+    // Deterministic hash based on endpoint + title + rowIndex
+    let hash = (rowIndex != null ? rowIndex * 37 : 19);
+    const seedStr = `${endpoint || ''}_${title || ''}_${rowIndex != null ? rowIndex : ''}`;
+    for (let i = 0; i < seedStr.length; i++) {
+      hash = ((hash << 5) - hash) + seedStr.charCodeAt(i);
+      hash |= 0;
+    }
+    const seed = Math.abs(hash);
+
+    // Stagger first slot across indices [4, 6, 2, 5, 3, 7] so adjacent rows never line up in the same column
+    const slotOptions = [4, 6, 2, 5, 3, 7];
+    const baseIndex = rowIndex != null ? rowIndex : (seed % slotOptions.length);
+    const firstSlot = slotOptions[(baseIndex + (seed % 3)) % slotOptions.length];
+    
+    // Stride between subsequent ads during horizontal scroll: between 9 and 12 cards
+    const stride = 9 + (seed % 4);
+
+    return { hasAd: true, firstSlot, stride };
+  }, [endpoint, title, rowIndex]);
+
+  const shouldShowAd = useCallback((idx) => {
+    if (!hasAd || firstSlot < 0) return false;
+    return idx === firstSlot || (idx > firstSlot && (idx - firstSlot) % stride === 0);
+  }, [hasAd, firstSlot, stride]);
 
   if (loading) {
     return (
@@ -150,15 +187,17 @@ const Row = ({ title, endpoint, compact = false }) => {
                   <span className={styles.cardTitle}>{movie.title}</span>
                 </div>
               </Link>
-              {!compact && (idx === 3 || (idx > 3 && (idx - 3) % 8 === 0)) && (
+              {shouldShowAd(idx) && (
                 <div 
                   className={`${styles.cardContainer} cardContainer`}
                   style={{
-                    aspectRatio: '2 / 3',
-                    minWidth: '150px'
+                    flex: compact ? '0 0 calc(20% - 8px)' : undefined,
+                    aspectRatio: compact ? '16 / 9' : '2 / 3',
+                    height: compact ? 'auto' : undefined,
+                    minWidth: compact ? undefined : '150px'
                   }}
                 >
-                  <AdCard />
+                  <AdCard compact={compact} />
                 </div>
               )}
             </React.Fragment>

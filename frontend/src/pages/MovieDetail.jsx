@@ -128,13 +128,18 @@ const MovieDetail = () => {
         }
         if (adsRes.ok) {
           const adsData = await adsRes.json();
-          if (adsData.config?.download_modal?.timer_seconds) {
-            setAdTimerDuration(Number(adsData.config.download_modal.timer_seconds));
-          }
-          if (adsData.config?.direct_link?.enabled && adsData.config?.direct_link?.url) {
-            setDirectLinkUrl(adsData.config.direct_link.url);
-          } else if (adsData.config?.direct_link?.enabled === false) {
+          if (adsData.config?.enabled === false) {
             setDirectLinkUrl('');
+            setGlobalSkipAds(true);
+          } else {
+            if (adsData.config?.download_modal?.timer_seconds) {
+              setAdTimerDuration(Number(adsData.config.download_modal.timer_seconds));
+            }
+            if (adsData.config?.direct_link?.enabled && adsData.config?.direct_link?.url) {
+              setDirectLinkUrl(adsData.config.direct_link.url);
+            } else if (adsData.config?.direct_link?.enabled === false) {
+              setDirectLinkUrl('');
+            }
           }
         }
       } catch (e) {

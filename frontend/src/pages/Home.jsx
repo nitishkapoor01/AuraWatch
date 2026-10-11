@@ -129,22 +129,22 @@ const Home = () => {
         }}
       >
         <ContinueWatchingRow compact={layout === 'grid'} />
-        <Row title="Trending Now" endpoint="trending" compact={layout === 'grid'} />
-        <Row title="Top 10 in India Today" endpoint="trending-india" compact={layout === 'grid'} />
-        <Row title="New Releases This Week" endpoint="new-this-week" compact={layout === 'grid'} />
+        <Row title="Trending Now" endpoint="trending" compact={layout === 'grid'} rowIndex={0} />
+        <Row title="Top 10 in India Today" endpoint="trending-india" compact={layout === 'grid'} rowIndex={1} />
+        <Row title="New Releases This Week" endpoint="new-this-week" compact={layout === 'grid'} rowIndex={2} />
 
-        <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} />
-        <Row title="Popular K-Dramas" endpoint="k-drama" compact={layout === 'grid'} />
-        <Row title="Popular on Netflix" endpoint="continue-watching" compact={layout === 'grid'} />
-        <Row title="Top Rated Classics" endpoint="top-rated" compact={layout === 'grid'} />
-        <Row title="Action & Adventure" endpoint="action" compact={layout === 'grid'} />
-        <Row title="Sci-Fi & Fantasy" endpoint="genre/878" compact={layout === 'grid'} />
-        <Row title="Laugh Out Loud" endpoint="comedy" compact={layout === 'grid'} />
-        <Row title="Horror & Thrillers" endpoint="horror" compact={layout === 'grid'} />
-        <Row title="Romantic Movies" endpoint="genre/10749" compact={layout === 'grid'} />
-        <Row title="Magical Worlds" endpoint="genre/14" compact={layout === 'grid'} />
-        <Row title="Animation" endpoint="genre/16" compact={layout === 'grid'} />
-        <Row title="Documentaries" endpoint="genre/99" compact={layout === 'grid'} />
+        <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} rowIndex={3} />
+        <Row title="Popular K-Dramas" endpoint="k-drama" compact={layout === 'grid'} rowIndex={4} />
+        <Row title="Popular on Netflix" endpoint="continue-watching" compact={layout === 'grid'} rowIndex={5} />
+        <Row title="Top Rated Classics" endpoint="top-rated" compact={layout === 'grid'} rowIndex={6} />
+        <Row title="Action & Adventure" endpoint="action" compact={layout === 'grid'} rowIndex={7} />
+        <Row title="Sci-Fi & Fantasy" endpoint="genre/878" compact={layout === 'grid'} rowIndex={8} />
+        <Row title="Laugh Out Loud" endpoint="comedy" compact={layout === 'grid'} rowIndex={9} />
+        <Row title="Horror & Thrillers" endpoint="horror" compact={layout === 'grid'} rowIndex={10} />
+        <Row title="Romantic Movies" endpoint="genre/10749" compact={layout === 'grid'} rowIndex={11} />
+        <Row title="Magical Worlds" endpoint="genre/14" compact={layout === 'grid'} rowIndex={12} />
+        <Row title="Animation" endpoint="genre/16" compact={layout === 'grid'} rowIndex={13} />
+        <Row title="Documentaries" endpoint="genre/99" compact={layout === 'grid'} rowIndex={14} />
       </div>
     </div>
   );
