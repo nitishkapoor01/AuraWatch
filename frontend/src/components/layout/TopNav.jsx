@@ -7,6 +7,7 @@ import ProfileModal from '../profile/ProfileModal';
 import HelpModal from '../profile/HelpModal';
 import LoginPromptModal from '../profile/LoginPromptModal';
 import CustomizeModal from '../profile/CustomizeModal';
+import CinemaRouletteModal from '../CinemaRouletteModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 import { useButtonWarnings } from '../../hooks/useButtonWarnings';
@@ -35,7 +36,7 @@ const TopNav = () => {
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [showSurprisePicker, setShowSurprisePicker] = useState(false);
+  const [showRouletteModal, setShowRouletteModal] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [hasUnreadHub, setHasUnreadHub] = useState(false);
   const surpriseRef = useRef(null);
@@ -348,34 +349,14 @@ const TopNav = () => {
             <FilterBar onFilterChange={handleFilterChange} />
           </div>
           
-          <div className={styles.surpriseWrapper} ref={surpriseRef}>
+          <div className={styles.surpriseWrapper}>
             <button
               className={styles.surpriseBtn}
-              onClick={() => setShowSurprisePicker(p => !p)}
-              title="Surprise Me!"
+              onClick={() => setShowRouletteModal(true)}
+              title="Cinema Roulette (Surprise Me!)"
             >
               <Dices size={18} />
             </button>
-
-            {showSurprisePicker && (
-              <div className={styles.surprisePicker}>
-                <p className={styles.surprisePickerTitle}>What are you in the mood for?</p>
-                <div className={styles.surpriseOptions}>
-                  <button className={styles.surpriseOption} onClick={() => handleSurpriseMe('movie')}>
-                    <Film size={22} />
-                    <span>Movie</span>
-                  </button>
-                  <button className={styles.surpriseOption} onClick={() => handleSurpriseMe('tv')}>
-                    <Tv size={22} />
-                    <span>Series</span>
-                  </button>
-                  <button className={styles.surpriseOption} onClick={() => handleSurpriseMe('anime')}>
-                    <Sparkles size={22} />
-                    <span>Anime</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           <Link
@@ -682,6 +663,12 @@ const TopNav = () => {
       <CustomizeModal
         isOpen={isCustomizeOpen}
         onClose={() => setIsCustomizeOpen(false)}
+      />
+
+      {/* Cinema Roulette Modal */}
+      <CinemaRouletteModal
+        isOpen={showRouletteModal}
+        onClose={() => setShowRouletteModal(false)}
       />
     </header>
   );
