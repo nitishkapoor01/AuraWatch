@@ -6,16 +6,19 @@
 }
 
 .filterToggle {
+  width: 36px;
+  height: 36px;
+  padding: 0;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
-  padding: 8px;
+  color: rgba(255, 255, 255, 0.7);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all var(--anim-speed, 0.3s);
+  box-sizing: border-box;
 }
 
 .filterToggle:hover {
@@ -143,8 +146,8 @@
   }
 
   .filterToggle {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -165,8 +168,19 @@
   }
 
   .filterToggle svg {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 380px) {
+  .filterToggle {
+    width: 28px;
+    height: 28px;
+  }
+  .filterToggle svg {
+    width: 13px;
+    height: 13px;
   }
 }
 

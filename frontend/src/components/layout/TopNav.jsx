@@ -344,7 +344,7 @@ const TopNav = () => {
       )}
 
       <div className={styles.navActions}>
-        <div className={styles.searchContainer} ref={searchContainerRef}>
+        <div className={styles.actionControlsGroup}>
           <div className={styles.filterInline}>
             <FilterBar onFilterChange={handleFilterChange} />
           </div>
@@ -355,7 +355,7 @@ const TopNav = () => {
               onClick={() => setShowRouletteModal(true)}
               title="Cinema Roulette (Surprise Me!)"
             >
-              <Dices size={18} />
+              <Dices size={17} />
             </button>
           </div>
 
@@ -364,11 +364,13 @@ const TopNav = () => {
             className={styles.hubHeaderBtn}
             title="Aura Hub - Community Feed"
           >
-            <Sparkles size={15} />
+            <Sparkles size={14} />
             <span className={styles.hubBtnLabel}>Aura Hub</span>
             {hasUnreadHub && <span className={styles.hubBlinkDot} />}
           </Link>
+        </div>
 
+        <div className={styles.searchContainer} ref={searchContainerRef}>
           <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`}>
             <button 
               className={styles.mobileSearchBtn} 
