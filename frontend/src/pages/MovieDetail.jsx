@@ -11,6 +11,7 @@ import { useToast } from '../context/ToastContext';
 import { usePlayer } from '../context/PlayerContext';
 import HelpModal from '../components/profile/HelpModal';
 import AdBanner from '../components/ads/AdBanner';
+import PlaylistModal from '../components/PlaylistModal';
 
 const isTVType = (t) => {
   if (!t) return false;
@@ -48,6 +49,7 @@ const MovieDetail = () => {
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showLoginTeaser, setShowLoginTeaser] = useState(false);
 
@@ -777,9 +779,13 @@ const MovieDetail = () => {
                     showToast(`Admin Notice: ${buttonWarnings.add_to_list}`, 'warning');
                   }
                 }
-                handleToggleFavorite();
+                if (!isLoggedIn) {
+                  setShowLoginTeaser(true);
+                  return;
+                }
+                setShowPlaylistModal(true);
               }}
-              data-title={buttonWarnings.add_to_list || (isLoggedIn ? (isFavorite ? 'Remove from My List' : 'Add to My List') : 'Login to save')}
+              data-title={buttonWarnings.add_to_list || (isLoggedIn ? 'Save to playlist or watchlist' : 'Login to save')}
             >
               <span className={isFavorite ? styles.iconActive : styles.iconInactive}>
                 {isFavorite ? <Check size={22} /> : <Plus size={22} />}
@@ -1153,6 +1159,23 @@ const MovieDetail = () => {
         onClose={() => setShowReportModal(false)}
         initialTab="report_issue"
         prefillDescription={`Issue with: ${movie?.title || ''} (${type === 'tv' ? 'Series' : 'Movie'})\n\nDescribe the problem:`}
+      />
+
+      {/* Playlist & Watchlist Management Modal */}
+      <PlaylistModal
+        isOpen={showPlaylistModal}
+        onClose={() => setShowPlaylistModal(false)}
+        movie={{
+          id: movie.id,
+          type: type || 'movie',
+          title: movie.title,
+          poster: movie.poster,
+          backdrop: movie.backdrop,
+          overview: movie.overview,
+          rating: movie.rating,
+          year: movie.year
+        }}
+        onFavoriteChange={(val) => setIsFavorite(val)}
       />
     </div>
   );

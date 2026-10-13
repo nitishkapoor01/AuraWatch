@@ -13,6 +13,7 @@ import Category from './pages/Category';
 import Login from './pages/Login';
 import MyList from './pages/MyList';
 import SharedList from './pages/SharedList';
+import SharedPlaylist from './pages/SharedPlaylist';
 import WatchHistory from './pages/WatchHistory';
 import AdminDashboard from './pages/AdminDashboard';
 import AuraHub from './pages/AuraHub';
@@ -120,6 +121,8 @@ function App() {
     if (path.startsWith('/movies')) return 'Browsing Movies';
     if (path.startsWith('/login')) return 'At Login Page';
     if (path.startsWith('/list')) return 'Viewing My List';
+    if (path.startsWith('/shared-playlist/')) return 'Viewing Shared Playlist';
+    if (path.startsWith('/shared-list/')) return 'Viewing Shared List';
     if (path.startsWith('/history')) return 'Viewing Watch History';
     if (path.startsWith('/admin')) return 'In Admin Dashboard';
     if (path.startsWith('/hub')) return 'In Aura Hub';
@@ -144,6 +147,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/list" element={<MyList />} />
             <Route path="/shared-list/:userId" element={<SharedList />} />
+            <Route path="/shared-playlist/:id" element={<SharedPlaylist />} />
             <Route path="/history" element={<WatchHistory />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/hub" element={<AuraHub />} />

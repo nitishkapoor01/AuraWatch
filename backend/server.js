@@ -13,6 +13,7 @@ const sitemapRoutes = require('./routes/sitemap');
 const supportRoutes = require('./routes/support');
 const adsRoutes = require('./routes/ads');
 const hubRoutes = require('./routes/hub');
+const playlistsRoutes = require('./routes/playlists');
 const securityMiddleware = require('./middleware/security');
 
 // Initialize database
@@ -37,6 +38,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/movies', movieRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
+app.use('/api/playlists', playlistsRoutes);
 app.use('/api/watch-history', watchHistoryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tracking', trackingRoutes);

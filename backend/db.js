@@ -375,6 +375,37 @@ const initDB = async () => {
       CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_created ON aura_hub_posts(created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_admin ON aura_hub_posts(is_admin, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_aura_hub_posts_pinned ON aura_hub_posts(is_pinned DESC, created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS playlists (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        is_public BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_playlists_user ON playlists(user_id);
+      CREATE INDEX IF NOT EXISTS idx_playlists_updated ON playlists(user_id, updated_at DESC);
+
+      CREATE TABLE IF NOT EXISTS playlist_items (
+        id SERIAL PRIMARY KEY,
+        playlist_id INTEGER NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+        movie_id INTEGER NOT NULL,
+        movie_type TEXT NOT NULL DEFAULT 'movie',
+        title TEXT NOT NULL,
+        poster TEXT,
+        backdrop TEXT,
+        overview TEXT,
+        rating TEXT,
+        year TEXT,
+        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(playlist_id, movie_id, movie_type)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_playlist_items_playlist ON playlist_items(playlist_id);
+      CREATE INDEX IF NOT EXISTS idx_playlist_items_added ON playlist_items(playlist_id, added_at DESC);
     `);
 
     // Backfill total_visits from platform_visits for existing historical records
