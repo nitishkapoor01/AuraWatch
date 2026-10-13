@@ -13,7 +13,8 @@ const SuggestionAd = () => {
   });
   const impressionLoggedRef = useRef(false);
 
-  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
+  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  const isAdExempt = isAdmin || Boolean(user?.is_premium);
 
   useEffect(() => {
     let isMounted = true;

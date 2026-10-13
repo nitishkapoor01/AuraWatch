@@ -12,7 +12,8 @@ const GlobalPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoggedIn, token, user } = useAuth();
-  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
+  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  const isAdExempt = isAdmin || Boolean(user?.is_premium);
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -135,7 +136,7 @@ const GlobalPlayer = () => {
     return () => {
       isMounted = false;
     };
-  }, [isOpen, movieData, isAdmin]);
+  }, [isOpen, movieData, isAdExempt]);
 
   // Pre-Roll Countdown Timer with Auto-Advance
   useEffect(() => {

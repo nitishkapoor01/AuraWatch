@@ -5,7 +5,8 @@ const SocialBarAd = () => {
   const { user } = useAuth();
   const scriptInjectedRef = useRef(false);
 
-  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
+  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  const isAdExempt = isAdmin || Boolean(user?.is_premium);
 
   useEffect(() => {
     if (isAdExempt || scriptInjectedRef.current) return;
@@ -62,7 +63,7 @@ const SocialBarAd = () => {
     loadSocialBar();
 
     return () => { isMounted = false; };
-  }, [isAdmin]);
+  }, [isAdExempt]);
 
   return null;
 };
