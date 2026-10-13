@@ -161,33 +161,32 @@
 }
 
 /* =========================================
-   REAL THUMBNAIL ROULETTE REEL STAGE
+   CONTINUOUS GLIDING CS:GO / CASINO STRIP REEL
    ========================================= */
 
 .reelStage {
   position: relative;
   width: 100%;
-  height: 220px;
-  background: #09090c;
+  height: 200px;
+  background: #09090d;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95);
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9);
 }
 
-/* Left & Right cinematic shadow vignette masks */
+/* Vignette edge fades */
 .reelStage::before {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  width: 45px;
-  background: linear-gradient(90deg, #09090c 20%, transparent 100%);
-  z-index: 4;
+  width: 65px;
+  background: linear-gradient(90deg, #09090d 30%, transparent 100%);
+  z-index: 5;
   pointer-events: none;
 }
 
@@ -197,94 +196,120 @@
   top: 0;
   bottom: 0;
   right: 0;
-  width: 45px;
-  background: linear-gradient(-90deg, #09090c 20%, transparent 100%);
+  width: 65px;
+  background: linear-gradient(-90deg, #09090d 30%, transparent 100%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Vertical Center Pointer Laser Needles */
+.reelPointerTop {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 14px solid #e50914;
+  z-index: 7;
+  filter: drop-shadow(0 2px 8px #e50914);
+}
+
+.reelPointerBottom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 14px solid #e50914;
+  z-index: 7;
+  filter: drop-shadow(0 -2px 8px #e50914);
+}
+
+.centerMarkerLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: linear-gradient(180deg, #e50914 0%, rgba(229, 9, 20, 0.3) 50%, #e50914 100%);
+  box-shadow: 0 0 12px #e50914;
   z-index: 4;
   pointer-events: none;
 }
 
-.reelCenterMarker {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  width: 132px;
-  border: 2px solid #e50914;
-  border-radius: 14px;
-  box-shadow: 0 0 25px rgba(229, 9, 20, 0.45), inset 0 0 15px rgba(229, 9, 20, 0.2);
-  z-index: 3;
-  pointer-events: none;
-  animation: borderPulse 1.4s infinite alternate;
-}
-
-@keyframes borderPulse {
-  0% { border-color: rgba(229, 9, 20, 0.7); box-shadow: 0 0 15px rgba(229, 9, 20, 0.3); }
-  100% { border-color: #ff333d; box-shadow: 0 0 30px rgba(229, 9, 20, 0.6); }
-}
-
-.reelTrack {
+/* Horizontal Gliding Reel Track */
+.glideTrack {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
+  gap: 10px;
+  padding: 0;
   height: 100%;
+  will-change: transform;
 }
 
-.posterThumb {
+.stripCard {
   position: relative;
+  width: 105px;
+  height: 156px;
   border-radius: 10px;
   overflow: hidden;
-  background: #18181b;
+  background: #141418;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.15s ease-out;
   flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
 }
 
-.sidePoster {
-  width: 82px;
-  height: 124px;
-  opacity: 0.4;
-  filter: blur(1.5px) grayscale(40%);
-  transform: scale(0.88);
+.stripCardWinner {
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.35);
+  transform: scale(1.06);
+  z-index: 3;
 }
 
-.centerPoster {
-  width: 122px;
-  height: 182px;
-  z-index: 2;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.centerPosterSpinning {
-  filter: blur(1.2px);
-  animation: reelFlicker 0.1s infinite alternate;
-}
-
-@keyframes reelFlicker {
-  0% { transform: scale(0.98); }
-  100% { transform: scale(1.02); }
-}
-
-.posterImg {
+.stripImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.spinningIndicator {
+.stripCardTitle {
   position: absolute;
-  bottom: 12px;
+  bottom: 0;
   left: 0;
   right: 0;
-  z-index: 5;
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);
+  padding: 10px 6px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.spinningIndicator {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  z-index: 8;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
-  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  padding: 4px 12px;
   border-radius: 20px;
   width: fit-content;
   margin: 0 auto;
@@ -300,26 +325,64 @@
 }
 
 /* =========================================
-   REVEALED MOVIE CARD SHOWCASE
+   REVEALED MOVIE CARD & REWARD STAGE
    ========================================= */
 
 .revealedCard {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  animation: revealZoom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: rewardEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   pointer-events: auto !important;
 }
 
-@keyframes revealZoom {
-  from {
+@keyframes rewardEntrance {
+  0% {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.92) translateY(10px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
+}
+
+.jackpotBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, rgba(229, 9, 20, 0.22) 0%, rgba(245, 197, 24, 0.22) 100%);
+  border: 1px solid rgba(245, 197, 24, 0.5);
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 0 25px rgba(245, 197, 24, 0.28);
+  animation: rewardPulse 1.8s infinite alternate;
+}
+
+@keyframes rewardPulse {
+  0% { box-shadow: 0 0 16px rgba(245, 197, 24, 0.2); }
+  100% { box-shadow: 0 0 32px rgba(245, 197, 24, 0.5); }
+}
+
+.jackpotBadgeText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.jackpotTagScore {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffd700;
+  background: rgba(245, 197, 24, 0.15);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 197, 24, 0.35);
 }
 
 .mediaFrame {
@@ -330,7 +393,7 @@
   overflow: hidden;
   background: #141418;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
 }
 
 .backdropImg {
@@ -447,7 +510,7 @@
 .primaryBtn {
   width: 100%;
   padding: 13px 20px;
-  background: #e50914;
+  background: linear-gradient(135deg, #e50914 0%, #b8050e 100%);
   border: none;
   border-radius: 12px;
   color: #fff;
@@ -467,7 +530,7 @@
 .primaryBtn:hover:not(:disabled) {
   background: #f40612;
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(229, 9, 20, 0.55);
+  box-shadow: 0 6px 24px rgba(229, 9, 20, 0.6);
 }
 
 .primaryBtn:active:not(:disabled) {
@@ -548,21 +611,12 @@
   }
 
   .reelStage {
-    height: 190px;
+    height: 180px;
   }
 
-  .centerPoster {
-    width: 105px;
-    height: 158px;
-  }
-
-  .sidePoster {
-    width: 68px;
-    height: 104px;
-  }
-
-  .reelCenterMarker {
-    width: 114px;
+  .stripCard {
+    width: 90px;
+    height: 136px;
   }
 
   .movieTitle {

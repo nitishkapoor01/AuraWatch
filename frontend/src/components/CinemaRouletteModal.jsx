@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { 
   X, Play, RotateCw, Star, Film, Tv, Sparkles, 
-  Flame, Award, Clapperboard, Dices, FolderPlus, Compass
+  Flame, Award, Clapperboard, Dices, FolderPlus, Compass, Trophy
 } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useToast } from '../context/ToastContext';
@@ -11,7 +11,7 @@ import { fetchWithCache } from '../utils/api';
 import PlaylistModal from './PlaylistModal';
 import styles from './CinemaRouletteModal.module.css';
 
-// 100% Verified Real TMDB Movie Pool (Instant Zero-Network Fallback)
+// 100% Verified Real TMDB Movie Pool (Zero-Network Instant Fallback)
 const CURATED_SEED_POOL = [
   {
     id: 157336,
@@ -105,7 +105,7 @@ const CURATED_SEED_POOL = [
   }
 ];
 
-// Helper to scrape existing cached movies from localStorage
+// Read existing cached movies from localStorage
 const getLocalCachedPool = () => {
   try {
     const collected = [];
@@ -125,7 +125,6 @@ const getLocalCachedPool = () => {
       }
     }
     if (collected.length >= 5) {
-      // Deduplicate by ID
       const map = new Map();
       collected.forEach(m => map.set(m.id, m));
       return Array.from(map.values());
@@ -134,7 +133,7 @@ const getLocalCachedPool = () => {
   return CURATED_SEED_POOL;
 };
 
-// Safe Synthesized Web Audio Ticks
+// Audio Synthesizers
 const playTick = () => {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -143,13 +142,34 @@ const playTick = () => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(750, ctx.currentTime);
+    osc.frequency.setValueAtTime(780, ctx.currentTime);
     gain.gain.setValueAtTime(0.04, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + 0.035);
+  } catch (_) {}
+};
+
+const playJackpotFanfare = () => {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+    notes.forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.07);
+      gain.gain.setValueAtTime(0.07, ctx.currentTime + i * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.07 + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.07);
+      osc.stop(ctx.currentTime + i * 0.07 + 0.35);
+    });
   } catch (_) {}
 };
 
@@ -165,6 +185,9 @@ const CATEGORIES = [
   { id: 'top_rated', label: 'Top Rated', icon: Award }
 ];
 
+const WINNER_INDEX = 18; // The card position in the strip that lands dead-center
+const STRIP_LENGTH = 26;
+
 const CinemaRouletteModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { openPlayer } = usePlayer();
@@ -175,10 +198,13 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
   const [currentMovie, setCurrentMovie] = useState(null);
   const [state, setState] = useState('idle'); // 'idle' | 'spinning' | 'revealed'
 
-  // Indices for the 3 visible carousel thumbnails
-  const [reelIndices, setReelIndices] = useState({ left: 0, center: 1, right: 2 });
+  // Conveyor Strip & Smooth Physics State
+  const [stripMovies, setStripMovies] = useState([]);
+  const [trackOffset, setTrackOffset] = useState(0);
+  const [hasTransition, setHasTransition] = useState(false);
+  const [isWinnerHighlighted, setIsWinnerHighlighted] = useState(false);
 
-  // Trailer Peek state
+  // Trailer Peek
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState(null);
   const [loadingTrailer, setLoadingTrailer] = useState(false);
@@ -186,21 +212,37 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
   // Playlist Modal
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
-  const spinTimerRef = useRef(null);
+  const stageRef = useRef(null);
+  const spinTimeoutsRef = useRef([]);
+
   const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' 
     ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` 
     : 'https://aurawatch-1.onrender.com/api');
 
-  // Sync initial reel thumbnails when moviePool updates
-  useEffect(() => {
-    if (moviePool.length >= 3) {
-      setReelIndices({
-        left: 0,
-        center: 1,
-        right: 2
-      });
-      setCurrentMovie(moviePool[1]);
+  // Build a randomized 26-card strip from the pool
+  const buildStrip = (pool, forcedWinner = null) => {
+    const validPool = pool && pool.length > 0 ? pool : CURATED_SEED_POOL;
+    const winner = forcedWinner || validPool[Math.floor(Math.random() * validPool.length)];
+    const strip = [];
+    for (let i = 0; i < STRIP_LENGTH; i++) {
+      if (i === WINNER_INDEX) {
+        strip.push(winner);
+      } else {
+        const rand = validPool[Math.floor(Math.random() * validPool.length)];
+        strip.push(rand);
+      }
     }
+    return { strip, winner };
+  };
+
+  // Initialize strip on mount or category change
+  useEffect(() => {
+    const { strip, winner } = buildStrip(moviePool);
+    setStripMovies(strip);
+    setCurrentMovie(winner);
+    setTrackOffset(0);
+    setHasTransition(false);
+    setIsWinnerHighlighted(false);
   }, [moviePool]);
 
   // Load pool whenever category changes or modal opens
@@ -249,16 +291,19 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
 
     return () => {
       isMounted = false;
-      if (spinTimerRef.current) clearTimeout(spinTimerRef.current);
+      spinTimeoutsRef.current.forEach(t => clearTimeout(t));
     };
   }, [isOpen, activeCategory]);
 
-  // Reset states on modal close/open
+  // Reset state when opening modal
   useEffect(() => {
     if (isOpen) {
       setState('idle');
       setShowTrailer(false);
       setTrailerKey(null);
+      setTrackOffset(0);
+      setHasTransition(false);
+      setIsWinnerHighlighted(false);
     }
   }, [isOpen]);
 
@@ -280,55 +325,69 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, state, moviePool, showTrailer, showPlaylistModal]);
+  }, [isOpen, state, showTrailer, showPlaylistModal]);
 
-  // The Suspenseful Spin Animation with Visible Flipping Real Thumbnails
+  // Buttery-Smooth Continuous Gliding Spin Animation
   const triggerSpin = () => {
-    const pool = moviePool.length > 0 ? moviePool : CURATED_SEED_POOL;
+    if (state === 'spinning') return;
 
-    setState('spinning');
+    // Clear previous timers
+    spinTimeoutsRef.current.forEach(t => clearTimeout(t));
+    spinTimeoutsRef.current = [];
+
     setShowTrailer(false);
     setTrailerKey(null);
+    setIsWinnerHighlighted(false);
 
-    let tick = 0;
-    const totalTicks = 15;
-    let delay = 50; // Initial rapid velocity
+    // Build fresh strip with newly selected winner
+    const { strip, winner } = buildStrip(moviePool);
+    setStripMovies(strip);
+    setCurrentMovie(winner);
 
-    if (spinTimerRef.current) clearTimeout(spinTimerRef.current);
+    // 1. Instantly snap track to 0px
+    setHasTransition(false);
+    setTrackOffset(0);
+    setState('spinning');
 
-    const step = () => {
-      tick++;
+    // 2. Measure DOM width to calculate exact center landing
+    const stageWidth = stageRef.current ? stageRef.current.clientWidth : 420;
+    const cardWidth = window.innerWidth <= 480 ? 90 : 105;
+    const gap = 10;
+    const stride = cardWidth + gap;
+    const centerPoint = (stageWidth / 2) - (cardWidth / 2);
+    const targetOffset = -(WINNER_INDEX * stride - centerPoint);
 
-      // Cycle center thumbnail across the pool
-      const centerIdx = Math.floor(Math.random() * pool.length);
-      const leftIdx = (centerIdx - 1 + pool.length) % pool.length;
-      const rightIdx = (centerIdx + 1) % pool.length;
+    // 3. Trigger GPU glide animation on next animation frame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setHasTransition(true);
+        setTrackOffset(targetOffset);
 
-      setReelIndices({
-        left: leftIdx,
-        center: centerIdx,
-        right: rightIdx
+        // 4. Schedule realistic decelerating ticks
+        const tickDelays = [
+          80, 160, 250, 350, 460, 580, 720, 880, 1060, 1260, 
+          1490, 1750, 2040, 2370, 2730, 3100
+        ];
+        tickDelays.forEach(d => {
+          const timer = setTimeout(() => playTick(), d);
+          spinTimeoutsRef.current.push(timer);
+        });
+
+        // 5. Completion: Triumphant Fanfare + Reward Reveal
+        const finishTimer = setTimeout(() => {
+          playJackpotFanfare();
+          setIsWinnerHighlighted(true);
+
+          // Rewarding delay: let user savor the winning poster under the laser needle
+          const revealTimer = setTimeout(() => {
+            setState('revealed');
+          }, 500);
+          spinTimeoutsRef.current.push(revealTimer);
+        }, 3200);
+
+        spinTimeoutsRef.current.push(finishTimer);
       });
-
-      setCurrentMovie(pool[centerIdx]);
-      playTick();
-
-      // Smooth deceleration curve
-      if (tick > 9) {
-        delay += 40;
-      }
-
-      if (tick >= totalTicks) {
-        // Final locked pick
-        const finalPick = pool[centerIdx];
-        setCurrentMovie(finalPick);
-        setState('revealed');
-      } else {
-        spinTimerRef.current = setTimeout(step, delay);
-      }
-    };
-
-    step();
+    });
   };
 
   // Instant Stream
@@ -387,10 +446,6 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const movieType = currentMovie?.type === 'Series' || currentMovie?.type === 'tv' ? 'tv' : 'movie';
-  const pool = moviePool.length > 0 ? moviePool : CURATED_SEED_POOL;
-  const leftItem = pool[reelIndices.left] || pool[0];
-  const centerItem = pool[reelIndices.center] || currentMovie || pool[1];
-  const rightItem = pool[reelIndices.right] || pool[2] || pool[0];
 
   return createPortal(
     <div className={styles.overlay} onClick={onClose}>
@@ -401,7 +456,12 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
             <Dices size={15} />
             <span>Cinema Roulette</span>
           </div>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close Roulette">
+          <button 
+            type="button" 
+            className={styles.closeBtn} 
+            onClick={onClose} 
+            aria-label="Close Roulette"
+          >
             <X size={16} />
           </button>
         </div>
@@ -435,45 +495,43 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
 
         {/* Body Area */}
         <div className={styles.bodyArea}>
-          {/* STATE 1 & 2: REEL STAGE WITH VISIBLE REAL THUMBNAILS */}
+          {/* STATE 1 & 2: CONTINUOUS GLIDING FILM STRIP STAGE */}
           {state !== 'revealed' && (
             <>
-              <div className={styles.reelStage}>
-                <div className={styles.reelCenterMarker} />
+              <div className={styles.reelStage} ref={stageRef}>
+                {/* Center Laser Pointer Needles */}
+                <div className={styles.reelPointerTop} />
+                <div className={styles.centerMarkerLine} />
+                <div className={styles.reelPointerBottom} />
 
-                <div className={styles.reelTrack}>
-                  {/* Left Side Thumbnail */}
-                  <div className={`${styles.posterThumb} ${styles.sidePoster}`}>
-                    <img
-                      src={leftItem?.poster || leftItem?.backdrop}
-                      alt={leftItem?.title || 'Poster'}
-                      className={styles.posterImg}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => { e.target.src = 'https://picsum.photos/id/10/300/450'; }}
-                    />
-                  </div>
-
-                  {/* Center Focused Spinning Thumbnail */}
-                  <div className={`${styles.posterThumb} ${styles.centerPoster} ${state === 'spinning' ? styles.centerPosterSpinning : ''}`}>
-                    <img
-                      src={centerItem?.poster || centerItem?.backdrop}
-                      alt={centerItem?.title || 'Selected Movie'}
-                      className={styles.posterImg}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => { e.target.src = 'https://picsum.photos/id/10/300/450'; }}
-                    />
-                  </div>
-
-                  {/* Right Side Thumbnail */}
-                  <div className={`${styles.posterThumb} ${styles.sidePoster}`}>
-                    <img
-                      src={rightItem?.poster || rightItem?.backdrop}
-                      alt={rightItem?.title || 'Poster'}
-                      className={styles.posterImg}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => { e.target.src = 'https://picsum.photos/id/10/300/450'; }}
-                    />
-                  </div>
+                {/* The Conveyor Film Strip */}
+                <div 
+                  className={styles.glideTrack}
+                  style={{
+                    transform: `translate3d(${trackOffset}px, 0, 0)`,
+                    transition: hasTransition ? 'transform 3.2s cubic-bezier(0.12, 0.8, 0.33, 1)' : 'none'
+                  }}
+                >
+                  {stripMovies.map((movie, idx) => {
+                    const isWinner = idx === WINNER_INDEX;
+                    return (
+                      <div 
+                        key={`${movie?.id || idx}-${idx}`}
+                        className={`${styles.stripCard} ${isWinner && isWinnerHighlighted ? styles.stripCardWinner : ''}`}
+                      >
+                        <img
+                          src={movie?.poster || movie?.backdrop}
+                          alt={movie?.title || 'Film'}
+                          className={styles.stripImg}
+                          referrerPolicy="no-referrer"
+                          onError={(e) => { e.target.src = 'https://picsum.photos/id/10/300/450'; }}
+                        />
+                        <div className={styles.stripCardTitle}>
+                          {movie?.title}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {state === 'spinning' && (
@@ -498,7 +556,7 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                   {state === 'spinning' ? (
                     <>
                       <RotateCw size={17} className="spin" />
-                      <span>Deciphering...</span>
+                      <span>Rolling the Vault...</span>
                     </>
                   ) : (
                     <>
@@ -511,9 +569,20 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
             </>
           )}
 
-          {/* STATE 3: REVEALED JACKPOT CARD */}
+          {/* STATE 3: CELEBRATION JACKPOT REWARD CARD */}
           {state === 'revealed' && currentMovie && (
             <div className={styles.revealedCard}>
+              {/* Rewarding Jackpot Banner */}
+              <div className={styles.jackpotBanner}>
+                <div className={styles.jackpotBadgeText}>
+                  <Trophy size={15} color="#ffd700" />
+                  <span>VAULT JACKPOT UNLOCKED</span>
+                </div>
+                <div className={styles.jackpotTagScore}>
+                  98% AURA MATCH
+                </div>
+              </div>
+
               {/* Media Frame (Backdrop OR Trailer Embed) */}
               <div className={styles.mediaFrame}>
                 {showTrailer && trailerKey ? (
@@ -538,7 +607,7 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                       {currentMovie.year && <span>• {currentMovie.year}</span>}
                     </div>
                     <div className={styles.matchBadge}>
-                      98% MATCH
+                      CERTIFIED PICK
                     </div>
                   </>
                 )}
@@ -555,12 +624,12 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                         <span>{currentMovie.rating}</span>
                       </span>
                     )}
-                    <span className={styles.chip}>HD</span>
+                    <span className={styles.chip}>4K ULTRA HD</span>
                   </div>
                 </div>
 
                 <p className={styles.overviewText}>
-                  {currentMovie.overview || 'Tonight’s mystery feature selected by Cinema Roulette.'}
+                  {currentMovie.overview || 'Tonight’s mystery feature unlocked from the Cinema Roulette vault.'}
                 </p>
               </div>
 
@@ -572,7 +641,7 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                   onClick={(e) => { e.stopPropagation(); handleWatchNow(); }}
                 >
                   <Play size={16} fill="#fff" />
-                  <span>Watch Now</span>
+                  <span>Stream Instantly</span>
                 </button>
 
                 <div className={styles.secondaryRow}>
