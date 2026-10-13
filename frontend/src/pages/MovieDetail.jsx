@@ -491,41 +491,40 @@ const MovieDetail = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showTrailer, isTV, isThisMoviePlaying, movieData, episodes]);
 
-  const handleToggleFavorite = async () => {
+  const handleQuickSave = async () => {
     if (!isLoggedIn) {
       setShowLoginTeaser(true);
       return;
     }
 
     try {
-      if (isFavorite) {
-        await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/favorites/${id}?type=${type}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setIsFavorite(false);
-      } else {
-        await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/favorites`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}` 
-          },
-          body: JSON.stringify({
-            movieId: id,
-            movieType: type,
-            title: movie.title,
-            poster: movie.poster,
-            backdrop: movie.backdrop,
-            overview: movie.overview,
-            rating: movie.rating,
-            year: movie.year
-          })
-        });
-        setIsFavorite(true);
-      }
+      setIsFavorite(true);
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/favorites`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          movieId: id,
+          movieType: type,
+          title: movie.title,
+          poster: movie.poster,
+          backdrop: movie.backdrop,
+          overview: movie.overview,
+          rating: movie.rating,
+          year: movie.year
+        })
+      });
+
+      showToast('Added to Watchlist!', 'success', {
+        label: 'Add to Playlist 📁',
+        onClick: () => setShowPlaylistModal(true)
+      });
     } catch (err) {
-      console.error('Failed to toggle favorite:', err);
+      console.error('Failed to quick save to favorites:', err);
+      setIsFavorite(false);
+      showToast('Failed to save to Watchlist.', 'error');
     }
   };
 
@@ -783,9 +782,15 @@ const MovieDetail = () => {
                   setShowLoginTeaser(true);
                   return;
                 }
-                setShowPlaylistModal(true);
+                if (!isFavorite) {
+                  // 1-Click Quick Save to Watchlist (Zero interruption, Toast provides "Add to Playlist" action)
+                  handleQuickSave();
+                } else {
+                  // Already saved -> open modal to manage playlists or remove
+                  setShowPlaylistModal(true);
+                }
               }}
-              data-title={buttonWarnings.add_to_list || (isLoggedIn ? 'Save to playlist or watchlist' : 'Login to save')}
+              data-title={buttonWarnings.add_to_list || (isLoggedIn ? (isFavorite ? 'In Watchlist · Click to manage playlists' : 'Quick Save to Watchlist') : 'Login to save')}
             >
               <span className={isFavorite ? styles.iconActive : styles.iconInactive}>
                 {isFavorite ? <Check size={22} /> : <Plus size={22} />}

@@ -83,6 +83,31 @@
   letter-spacing: 0.3px;
 }
 
+.actionBtn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.actionBtn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
+}
+
+.actionBtn:active {
+  transform: translateY(0);
+}
+
 .closeBtn {
   background: rgba(255, 255, 255, 0.05);
   border: none;

@@ -9,9 +9,9 @@ export const useToast = () => useContext(ToastContext);
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = (message, type = 'info') => {
+  const showToast = (message, type = 'info', action = null) => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts(prev => [...prev, { id, message, type, action }]);
     setTimeout(() => removeToast(id), 5000);
   };
 
@@ -33,6 +33,19 @@ export const ToastProvider = ({ children }) => {
             <div className={styles.content}>
               <p>{toast.message}</p>
             </div>
+            {toast.action && (
+              <button 
+                className={styles.actionBtn} 
+                onClick={() => {
+                  if (typeof toast.action.onClick === 'function') {
+                    toast.action.onClick();
+                  }
+                  removeToast(toast.id);
+                }}
+              >
+                {toast.action.label}
+              </button>
+            )}
             <button className={styles.closeBtn} onClick={() => removeToast(toast.id)}>
               <X size={16} />
             </button>

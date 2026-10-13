@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Plus, Globe, Lock, Bookmark, FolderPlus, Loader2 } from 'lucide-react';
+import { X, Check, Plus, Globe, Lock, Bookmark, FolderPlus, Loader2, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import styles from './PlaylistModal.module.css';
@@ -11,6 +11,7 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
   const [loading, setLoading] = useState(true);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [playlists, setPlaylists] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Create new playlist form state
   const [isCreating, setIsCreating] = useState(false);
@@ -269,6 +270,31 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
           </div>
         </div>
 
+        {/* Search Playlists Bar (shows if user has playlists or is searching) */}
+        {playlists.length > 2 && (
+          <div className={styles.searchBarWrapper}>
+            <div className={styles.searchContainer}>
+              <Search size={15} color="rgba(255,255,255,0.4)" />
+              <input
+                type="text"
+                placeholder="Search playlists..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className={styles.searchInput}
+              />
+              {searchQuery && (
+                <button 
+                  className={styles.clearSearchBtn}
+                  onClick={() => setSearchQuery('')}
+                  title="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Playlists List */}
         <div className={styles.body}>
           {loading ? (
@@ -278,7 +304,7 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
             </div>
           ) : (
             <>
-              {/* Default Watchlist */}
+              {/* Default Watchlist (always visible) */}
               <div 
                 className={`${styles.playlistItem} ${isInWatchlist ? styles.playlistItemActive : ''}`}
                 onClick={handleToggleWatchlist}
@@ -295,29 +321,57 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
                 </div>
               </div>
 
-              {/* Custom Playlists */}
-              {playlists.map((pl) => (
-                <div 
-                  key={pl.id} 
-                  className={`${styles.playlistItem} ${pl.is_in_playlist ? styles.playlistItemActive : ''}`}
-                  onClick={() => handleTogglePlaylist(pl)}
-                >
-                  <div className={styles.playlistLeft}>
-                    <div className={`${styles.checkboxBox} ${pl.is_in_playlist ? styles.checkboxChecked : ''}`}>
-                      {pl.is_in_playlist && <Check size={14} strokeWidth={3} />}
+              {/* Filtered Custom Playlists */}
+              {playlists
+                .filter(pl => pl.name.toLowerCase().includes(searchQuery.toLowerCase().trim()))
+                .map((pl) => (
+                  <div 
+                    key={pl.id} 
+                    className={`${styles.playlistItem} ${pl.is_in_playlist ? styles.playlistItemActive : ''}`}
+                    onClick={() => handleTogglePlaylist(pl)}
+                  >
+                    <div className={styles.playlistLeft}>
+                      <div className={`${styles.checkboxBox} ${pl.is_in_playlist ? styles.checkboxChecked : ''}`}>
+                        {pl.is_in_playlist && <Check size={14} strokeWidth={3} />}
+                      </div>
+                      <span className={styles.playlistName}>{pl.name}</span>
+                      <span className={styles.playlistCount}>({pl.item_count || 0})</span>
                     </div>
-                    <span className={styles.playlistName}>{pl.name}</span>
-                    <span className={styles.playlistCount}>({pl.item_count || 0})</span>
+                    <div className={styles.playlistRight}>
+                      {pl.is_public ? (
+                        <Globe size={14} title="Public Playlist" />
+                      ) : (
+                        <Lock size={14} title="Private Playlist" />
+                      )}
+                    </div>
                   </div>
-                  <div className={styles.playlistRight}>
-                    {pl.is_public ? (
-                      <Globe size={14} title="Public Playlist" />
-                    ) : (
-                      <Lock size={14} title="Private Playlist" />
-                    )}
-                  </div>
+                ))}
+
+              {/* No match state */}
+              {playlists.length > 0 && 
+                playlists.filter(pl => pl.name.toLowerCase().includes(searchQuery.toLowerCase().trim())).length === 0 && (
+                <div className={styles.noMatch}>
+                  <p>No playlist named "{searchQuery}"</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewPlaylistName(searchQuery.trim());
+                      setIsCreating(true);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#e50914',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      marginTop: '6px'
+                    }}
+                  >
+                    + Create "{searchQuery.trim()}"
+                  </button>
                 </div>
-              ))}
+              )}
             </>
           )}
         </div>
