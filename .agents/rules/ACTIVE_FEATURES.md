@@ -1,4 +1,4 @@
-# AuraWatch Active Features & Branch Architecture
+# AuraWatch Active Features & Repository Knowledge Base
 
 ## 1. Branch Safety & Deployment Contract (CRITICAL)
 - **`main` Branch**:
@@ -12,34 +12,64 @@
 
 ---
 
-## 2. Feature Status Tracker
+## 2. Active & Paused Features (Recent Work)
 
-### Feature 1: VIP Ad-Free Monetization (Branch: `feature/vip`)
-- **Status**: **ON-HOLD / LOCAL WORKSPACE ONLY**
-- **Location**: Git branch `feature/vip`
-- **Implemented Scope**:
-  - Backend: `backend/routes/vip.js`, `backend/routes/admin.js`, schema migration for VIP orders/gift codes, UPI reference submission, tamper-proof rate-limited server verification.
-  - Frontend: `VipModal.jsx`, `VipModal.module.css`, `useVip` state hook, admin approval UI, VIP badge.
-- **Action for Future Chats**: If user wants to resume VIP, switch to `feature/vip` (`git checkout feature/vip`). Keep `main` clean.
-
-### Feature 2: Custom Playlists & Collections Hub (Branch: `main`)
-- **Status**: **PAUSED / IN PROGRESS**
+### 1. Custom Playlists & Collections Hub
+- **Branch**: `main`
+- **Status**: ⏸️ **Paused / In Progress**
+- **Purpose**: Allow users to create custom playlists/collections by custom name (so `My List` doesn't get cluttered with 50+ movies together). Supports public shareable links (`/shared-playlist/:id`).
 - **Files**:
-  - Backend: `backend/routes/playlists.js` (CRUD for custom playlists, privacy toggles, public shareable links).
+  - Backend: `backend/routes/playlists.js` (Full REST API for CRUD, privacy toggles, adding/removing media items).
   - Frontend: `frontend/src/components/PlaylistModal.jsx`, `frontend/src/components/PlaylistModal.module.css`.
-  - Integration: Integration into `MyList.jsx` (2x2 poster collage, creating custom watchlists, adding media to custom lists).
-- **Next Steps when Resuming**: Test playlist creation end-to-end, verify UI modal integration on media cards and movie/show detail pages.
+  - Pages: `frontend/src/pages/MyList.jsx`, `frontend/src/pages/SharedPlaylist.jsx`.
+- **Pending Work**: Connecting the modal to detail pages and movie cards, 2x2 collage view in My List.
 
-### Feature 3: Cinema Roulette / Arcade Reel (Branch: `main`)
-- **Status**: **ACTIVE & POLISHED**
+### 2. Cinema Roulette / Aura Arcade Reel
+- **Branch**: `main`
+- **Status**: ⏸️ **Polished / Iteration on Hold**
+- **Purpose**: Replaces basic "Surprise Me" button with an interactive cinematic arcade reel.
 - **Files**:
   - Frontend: `frontend/src/components/CinemaRouletteModal.jsx`, `frontend/src/components/CinemaRouletteModal.module.css`.
   - Backend: `backend/routes/roulette.js`.
-  - Notes: Cleaned up fake badges (4K Ultra HD / Certified Pick removed). Continuous glide spin animation and genre filtering functional.
+- **Status details**:
+  - Features real movie thumbnails on conveyor strip, realistic sound clicks, 5.0s suspenseful deceleration glide.
+  - Fake badges ("4K ULTRA HD", "CERTIFIED PICK") have been removed from the result card.
+
+### 3. VIP Ad-Free & UPI Monetization System
+- **Branch**: `feature/vip`
+- **Status**: ⏸️ **Local Only / Paused**
+- **Files**:
+  - Backend: `backend/routes/vip.js`, `backend/routes/admin.js`, schema migrations for orders and gift codes.
+  - Frontend: `frontend/src/components/VipModal.jsx`, `frontend/src/components/VipModal.module.css`, `useVip` state hook, admin approval panel.
+- **Rule**: STRICTLY kept on branch `feature/vip`. Do not merge to `main` or push to remote without explicit user command.
 
 ---
 
-## 3. How to Switch Contexts
-- Work on VIP System: `git checkout feature/vip`
-- Work on Production / Playlists / Roulette / UI: `git checkout main`
-- Always verify active branch before committing: `git branch --show-current`
+## 3. Previously Built Features Kept Dormant / Never Taken Live
+
+### 4. Live TV / IPTV Channels Streaming
+- **Status**: 📦 **Built in Backend / Never Linked to Frontend**
+- **Files**:
+  - Backend: `backend/routes/livetv.js` (M3U playlist parser, channel categories, logos, stream proxies).
+- **Context**: Backend endpoints exist to parse M3U sources (IPTV-org, JioTV streams), but no live frontend tab/route was launched to keep site simple and focused on VOD movies/series.
+
+### 5. AI Smart Search (Groq AI)
+- **Status**: 🛑 **Disabled / UI Removed**
+- **Context**:
+  - Previously implemented conversational AI search powered by Groq LLM (`groq-sdk`).
+  - Disabled and UI components removed (commits `5d27a15` and `2a7fe42`) to avoid API costs, simplify the search experience, and keep fast instant TMDB search.
+  - Do not re-enable unless the user explicitly requests AI search back.
+
+### 6. Torrent & Multi-Source Download Scraper
+- **Status**: 📦 **Built in Backend / Hidden from Live Movie Detail UI**
+- **Files**:
+  - Backend: `backend/routes/downloads.js`, `backend/utils/movieCrawler.js`.
+  - Direct sources: MoviesVerse, UHDMovies, 1337x, VidVault.
+- **Context**: Backend scraper engine exists with 24h caching in `download_cache` table. Kept off live movie detail page to avoid link rot, slow scraper wait times, and copyright scrutiny.
+
+---
+
+## 4. Quick Context Switch Commands
+- To work on VIP: `git checkout feature/vip`
+- To work on Live Site / Playlists / Roulette: `git checkout main`
+- Check active branch before pushing: `git branch --show-current`
