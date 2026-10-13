@@ -492,89 +492,268 @@
   }
 }
 
-/* 🎵 Playlists Tabs & Controls */
-.playlistTabs {
+/* 🎵 Playlists Hub & Top Navigation */
+.mainNavTabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 16px;
+}
+
+.mainTabBtn {
   display: flex;
   align-items: center;
   gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  margin-bottom: 24px;
-  scrollbar-width: thin;
-}
-
-.playlistTabs::-webkit-scrollbar {
-  height: 4px;
-}
-
-.playlistTabs::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-}
-
-.tabPill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 30px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
-.tabPill:hover {
-  background: rgba(255, 255, 255, 0.1);
+.mainTabBtn:hover {
+  background: rgba(255, 255, 255, 0.09);
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
 }
 
-.tabPillActive {
+.mainTabBtnActive {
   background: #e50914 !important;
   color: #fff !important;
   border-color: #e50914 !important;
-  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.35);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
 }
 
 .tabBadge {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2px 7px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 8px;
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
-.tabPillActive .tabBadge {
+.mainTabBtnActive .tabBadge {
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
 }
 
-.addPlaylistPill {
+/* Playlists Library Control Bar */
+.playlistsControlBar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.playlistSearchBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 30px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+  min-width: 280px;
+  flex: 1;
+  max-width: 450px;
   transition: all 0.2s;
 }
 
-.addPlaylistPill:hover {
+.playlistSearchBox:focus-within {
+  border-color: #e50914;
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.2);
+}
+
+.playlistSearchInput {
+  background: transparent;
+  border: none;
+  outline: none;
   color: #fff;
+  font-size: 14px;
+  width: 100%;
+}
+
+.playlistSearchInput::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.clearSearch {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.clearSearch:hover {
+  color: #fff;
+}
+
+.createPlaylistBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #e50914;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+}
+
+.createPlaylistBtn:hover {
+  background: #f40612;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.45);
+}
+
+/* Playlists Grid & 2x2 Collage Cards */
+.playlistsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+  margin-top: 10px;
+}
+
+.playlistCard {
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.playlistCard:hover {
+  transform: translateY(-6px);
+  border-color: rgba(229, 9, 20, 0.4);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(229, 9, 20, 0.15);
+}
+
+.coverCollage {
+  aspect-ratio: 16 / 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  background: #111;
+  overflow: hidden;
+  position: relative;
+}
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.playlistCard:hover .coverImg {
+  transform: scale(1.05);
+}
+
+.emptyCollage {
+  grid-column: span 2;
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.cardBody {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.playlistCardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlistCardMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.privacyBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Breadcrumb Navigation when inside a Playlist */
+.breadcrumbBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateX(-2px);
 }
 
 .actionGroup {
