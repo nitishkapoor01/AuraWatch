@@ -23,14 +23,23 @@
 .navActions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
   margin-left: auto; /* Always push to the right */
   padding-right: 20px;
+  flex-shrink: 0;
+}
+
+.actionControlsGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .userProfile {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .profileSection {
@@ -40,8 +49,8 @@
 }
 
 .avatarCircle {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -52,6 +61,7 @@
   cursor: pointer;
   transition: all var(--anim-speed, 0.3s);
   border: 2px solid transparent;
+  box-sizing: border-box;
 }
 
 .avatarCircle:hover {
@@ -194,19 +204,18 @@
 
 .searchContainer {
   position: relative;
-  width: 400px;
   display: flex;
   align-items: center;
-  gap: 10px;
   transition: all var(--anim-speed, 0.3s);
+  flex-shrink: 0;
 }
 
 .searchBox {
   position: relative;
   display: flex;
   align-items: center;
-  width: 260px;
-  min-width: 200px;
+  width: 240px;
+  flex-shrink: 0;
 }
 
 .mobileSearchBtn {
@@ -214,25 +223,30 @@
 }
 
 .filterInline {
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
 }
 
 .searchInput {
   width: 100%;
-  padding: 10px 45px 10px 10px; /* Right padding to make room for AI button */
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background-color: transparent;
+  height: 36px;
+  padding: 0 16px 0 38px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(18, 18, 24, 0.65);
+  backdrop-filter: blur(10px);
   color: #fff;
-  font-size: 14px;
+  font-size: 13.5px;
   outline: none;
+  box-sizing: border-box;
   transition: all var(--anim-speed, 0.3s) ease;
 }
 
 .searchInput:focus {
-  border-color: var(--accent-primary);
-  background-color: rgba(0, 0, 0, 0.8);
-  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+  border-color: rgba(229, 9, 20, 0.7);
+  background: rgba(12, 12, 16, 0.95);
+  box-shadow: 0 0 14px rgba(229, 9, 20, 0.25);
 }
 
 .aiMode .searchInput {
@@ -284,20 +298,26 @@
 }
 
 .searchIcon {
-  display: none; /* Hide if we have filter icon on left */
+  position: absolute;
+  left: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+  z-index: 1;
+  display: block;
 }
 
 .iconButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.4);
   color: #fff;
   transition: all var(--anim-speed, 0.3s);
   backdrop-filter: blur(4px);
+  box-sizing: border-box;
 }
 
 .iconButton:hover {
@@ -311,12 +331,13 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: rgba(var(--primary-color-rgb), 0.2);
+  background-color: rgba(var(--primary-color-rgb), 0.15);
   color: var(--primary-color, #e50914);
-  border: 1px solid rgba(var(--primary-color-rgb), 0.5);
+  border: 1px solid rgba(var(--primary-color-rgb), 0.4);
   cursor: pointer;
   transition: all var(--anim-speed, 0.3s);
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .surpriseBtn:hover {
@@ -521,18 +542,26 @@
   .navActions {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     margin-left: auto;
     padding-right: 0;
+    flex-shrink: 0;
+  }
+
+  .actionControlsGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     flex-shrink: 0;
   }
 
   .searchContainer {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     width: auto;
     position: relative;
+    flex-shrink: 0;
   }
 
   .filterInline {
@@ -576,8 +605,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -586,6 +615,7 @@
     flex-shrink: 0;
     border-radius: 50%;
     transition: all 0.2s ease;
+    box-sizing: border-box;
   }
 
   .mobileSearchBtn:hover,
@@ -611,8 +641,8 @@
 
   /* Surprise button */
   .surpriseBtn {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -623,6 +653,7 @@
     border-radius: 50%;
     flex-shrink: 0;
     transition: all 0.2s ease;
+    box-sizing: border-box;
   }
 
   .surpriseBtn:hover,
@@ -639,12 +670,13 @@
 
   /* Avatar / User Profile */
   .avatarCircle {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     font-size: 13px;
     border-radius: 50%;
     flex-shrink: 0;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
   }
 
   .userProfile {
@@ -659,25 +691,21 @@
   }
 
   /* Search EXPANDED state */
-  .topNav.searchActive .branding {
-    display: none;
+  .topNav.searchActive .branding,
+  .topNav.searchActive .actionControlsGroup,
+  .topNav.searchActive .userProfile {
+    display: none !important;
   }
 
   .topNav.searchActive .navActions {
     width: 100%;
     flex: 1;
-    gap: 8px;
+    gap: 0;
   }
 
   .topNav.searchActive .searchContainer {
     flex: 1;
     width: 100%;
-  }
-
-  .topNav.searchActive .filterInline,
-  .topNav.searchActive .surpriseWrapper,
-  .topNav.searchActive .hubHeaderBtn {
-    display: none;
   }
 
   .topNav.searchActive .searchBox {
@@ -695,7 +723,7 @@
     opacity: 1;
     width: 100%;
     height: 38px;
-    padding: 0 38px 0 14px;
+    padding: 0 38px 0 16px;
     font-size: 14px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -745,19 +773,22 @@
   }
 
   .navActions,
+  .actionControlsGroup,
   .searchContainer {
-    gap: 3px;
+    gap: 4px;
   }
 
   .mobileSearchBtn,
   .surpriseBtn,
-  .avatarCircle {
-    width: 27px;
-    height: 27px;
+  .avatarCircle,
+  .vipHeaderBtn {
+    width: 28px;
+    height: 28px;
   }
 
   .mobileSearchBtn svg,
-  .surpriseBtn svg {
+  .surpriseBtn svg,
+  .vipHeaderBtn svg {
     width: 13px;
     height: 13px;
   }
@@ -766,42 +797,42 @@
 /* 📺 TV / LARGE SCREENS (≥1440px) */
 @media (min-width: 1440px) {
   .topNav {
-    padding: 10px 20px;
+    padding: 8px 24px;
   }
 
   .brandLogo {
-    height: 72px;
-  }
-
-  .brandName {
-    font-size: 28px;
-    letter-spacing: 4px;
-  }
-
-  .searchContainer {
-    width: 420px;
-  }
-
-  .searchInput {
-    padding: 14px 50px 14px 20px; /* 50px right padding for AI button */
-    font-size: 16px;
-    border-radius: 28px;
-  }
-
-  .loginBtn {
-    padding: 10px 22px;
-    font-size: 16px;
-  }
-
-  .logoutBtn {
-    width: 44px;
     height: 44px;
   }
 
+  .brandName {
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+
+  .searchBox {
+    width: 280px;
+  }
+
+  .searchInput {
+    height: 38px;
+    padding: 0 16px 0 38px;
+    font-size: 14px;
+  }
+
+  .loginBtn {
+    padding: 8px 18px;
+    font-size: 14px;
+  }
+
+  .logoutBtn {
+    width: 38px;
+    height: 38px;
+  }
+
   .avatarCircle {
-    width: 40px;
-    height: 40px;
-    font-size: 17px;
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
   }
 }
 
@@ -912,13 +943,16 @@
   background: rgba(229, 9, 20, 0.12);
   border: 1px solid rgba(229, 9, 20, 0.35);
   color: #ff4d58;
-  padding: 6px 14px;
+  height: 36px;
+  padding: 0 14px;
   border-radius: 9999px;
   font-size: 12.5px;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .hubHeaderBtn:hover {
@@ -930,41 +964,8 @@
 }
 
 @media (max-width: 768px) {
-  .hubBtnLabel {
-    display: none;
-  }
   .hubHeaderBtn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border-radius: 50%;
-    flex-shrink: 0;
-    position: relative;
-  }
-  .hubHeaderBtn svg {
-    width: 15px;
-    height: 15px;
-  }
-  .hubBlinkDot {
-    position: absolute;
-    top: -1px;
-    right: -1px;
-    width: 8px;
-    height: 8px;
-    border: 1.5px solid #141414;
-  }
-}
-@media (max-width: 380px) {
-  .hubHeaderBtn {
-    width: 27px;
-    height: 27px;
-  }
-  .hubHeaderBtn svg {
-    width: 13px;
-    height: 13px;
+    display: none !important;
   }
 }
 
@@ -994,11 +995,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, rgba(255, 183, 3, 0.12), rgba(255, 123, 0, 0.08));
-  border: 1px solid rgba(255, 183, 3, 0.35);
+  background: linear-gradient(135deg, rgba(255, 183, 3, 0.14), rgba(255, 123, 0, 0.09));
+  border: 1px solid rgba(255, 183, 3, 0.38);
   color: #ffb703;
-  padding: 6px 12px;
-  border-radius: 20px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 9999px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -1006,6 +1008,7 @@
   flex-shrink: 0;
   transition: all 0.2s ease;
   text-decoration: none;
+  box-sizing: border-box;
 }
 
 .vipHeaderBtn:hover {
@@ -1042,7 +1045,10 @@
     height: 32px;
     padding: 0;
     border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
+    box-sizing: border-box;
   }
 }
 

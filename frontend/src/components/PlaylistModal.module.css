@@ -400,3 +400,44 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@media (max-width: 480px) {
+  .overlay {
+    padding: 10px;
+  }
+
+  .modal {
+    border-radius: 16px;
+    max-height: 90vh;
+  }
+
+  .header {
+    padding: 14px 18px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .movieMini {
+    padding: 12px 18px;
+  }
+
+  .miniPoster {
+    width: 36px;
+    height: 50px;
+  }
+
+  .searchBarWrapper {
+    padding: 10px 18px 4px;
+  }
+
+  .body {
+    padding: 10px 18px 14px;
+    max-height: 240px;
+  }
+
+  .footer {
+    padding: 14px 18px 16px;
+  }
+}

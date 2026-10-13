@@ -346,18 +346,19 @@ const TopNav = () => {
       )}
 
       <div className={styles.navActions}>
-        <div className={styles.searchContainer} ref={searchContainerRef}>
+        {/* Action Controls & Navigation Shortcuts */}
+        <div className={styles.actionControlsGroup}>
           <div className={styles.filterInline}>
             <FilterBar onFilterChange={handleFilterChange} />
           </div>
-          
+
           <div className={styles.surpriseWrapper}>
             <button
               className={styles.surpriseBtn}
               onClick={() => setShowRouletteModal(true)}
               title="Cinema Roulette (Surprise Me!)"
             >
-              <Dices size={18} />
+              <Dices size={17} />
             </button>
           </div>
 
@@ -366,7 +367,7 @@ const TopNav = () => {
             className={styles.hubHeaderBtn}
             title="Aura Hub - Community Feed"
           >
-            <Sparkles size={15} />
+            <Sparkles size={14} />
             <span className={styles.hubBtnLabel}>Aura Hub</span>
             {hasUnreadHub && <span className={styles.hubBlinkDot} />}
           </Link>
@@ -382,10 +383,12 @@ const TopNav = () => {
             }}
             title={user?.is_premium ? "VIP Membership Active (Ad-Free)" : "Get VIP - 100% Ad-Free"}
           >
-            <Crown size={15} className={user?.is_premium ? styles.crownActive : ''} />
+            <Crown size={14} className={user?.is_premium ? styles.crownActive : ''} />
             <span className={styles.vipBtnLabel}>{user?.is_premium ? 'VIP ACTIVE' : 'GET VIP'}</span>
           </button>
+        </div>
 
+        <div className={styles.searchContainer} ref={searchContainerRef}>
           <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`}>
             <button 
               className={styles.mobileSearchBtn} 
@@ -393,7 +396,7 @@ const TopNav = () => {
             >
               <Search size={18} />
             </button>
-            <Search size={18} className={styles.searchIcon} />
+            <Search size={16} className={styles.searchIcon} />
             <input 
               type="text" 
               placeholder="Search movies, shows..." 
@@ -406,7 +409,7 @@ const TopNav = () => {
             />
             {isMobileSearchOpen && (
               <button 
-                type="button"
+                type="button" 
                 className={styles.mobileSearchCloseBtn}
                 onClick={(e) => {
                   e.stopPropagation();
