@@ -238,12 +238,18 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
 
   // Initialize strip on mount or category change
   useEffect(() => {
-    const { strip, winner } = buildStrip(moviePool);
-    setStripMovies(strip);
-    setCurrentMovie(winner);
-    setTrackOffset(0);
-    setHasTransition(false);
-    setIsWinnerHighlighted(false);
+    if (state !== 'spinning') {
+      const { strip, winner } = buildStrip(moviePool);
+      setStripMovies(strip);
+      setCurrentMovie(winner);
+      setTrackOffset(0);
+      setHasTransition(false);
+      setIsWinnerHighlighted(false);
+      if (trackRef.current) {
+        trackRef.current.style.transition = 'none';
+        trackRef.current.style.transform = 'translate3d(0px, 0, 0)';
+      }
+    }
   }, [moviePool]);
 
   // Load pool whenever category changes or modal opens
@@ -296,15 +302,27 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
     };
   }, [isOpen, activeCategory]);
 
+  // Reset all animations and return machine to idle ready state
+  const resetMachine = () => {
+    spinTimeoutsRef.current.forEach(t => clearTimeout(t));
+    spinTimeoutsRef.current = [];
+    setState('idle');
+    setShowTrailer(false);
+    setTrailerKey(null);
+    setIsWinnerHighlighted(false);
+    setTrackOffset(0);
+    setHasTransition(false);
+    if (trackRef.current) {
+      trackRef.current.style.transition = 'none';
+      trackRef.current.style.transform = 'translate3d(0px, 0, 0)';
+      void trackRef.current.offsetHeight;
+    }
+  };
+
   // Reset state when opening modal
   useEffect(() => {
     if (isOpen) {
-      setState('idle');
-      setShowTrailer(false);
-      setTrailerKey(null);
-      setTrackOffset(0);
-      setHasTransition(false);
-      setIsWinnerHighlighted(false);
+      resetMachine();
     }
   }, [isOpen]);
 
@@ -491,9 +509,8 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                 onClick={(e) => {
                   e.stopPropagation();
                   if (activeCategory !== cat.id) {
+                    resetMachine();
                     setActiveCategory(cat.id);
-                  } else if (state !== 'spinning') {
-                    triggerSpin();
                   }
                 }}
                 disabled={state === 'spinning'}
