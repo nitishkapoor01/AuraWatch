@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import styles from './PlaylistModal.module.css';
 
-const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
+const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange, onPlaylistsChange }) => {
   const { token } = useAuth();
   const { showToast } = useToast();
 
@@ -12,6 +12,13 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const notifyPlaylistsCount = (list) => {
+    if (onPlaylistsChange && Array.isArray(list)) {
+      const count = list.filter(p => p.is_in_playlist).length;
+      onPlaylistsChange(count);
+    }
+  };
   
   // Create new playlist form state
   const [isCreating, setIsCreating] = useState(false);
@@ -47,7 +54,9 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
 
         if (isMounted) {
           setIsInWatchlist(Boolean(favData?.isFavorite));
-          setPlaylists(Array.isArray(plData?.playlists) ? plData.playlists : []);
+          const list = Array.isArray(plData?.playlists) ? plData.playlists : [];
+          setPlaylists(list);
+          notifyPlaylistsCount(list);
         }
       } catch (err) {
         console.error('Failed to load playlists:', err);
@@ -119,8 +128,8 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
     const nextInPlaylist = !pl.is_in_playlist;
 
     // Optimistic update
-    setPlaylists(prev =>
-      prev.map(p => {
+    setPlaylists(prev => {
+      const updated = prev.map(p => {
         if (p.id === pl.id) {
           return {
             ...p,
@@ -129,8 +138,10 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
           };
         }
         return p;
-      })
-    );
+      });
+      notifyPlaylistsCount(updated);
+      return updated;
+    });
 
     try {
       if (nextInPlaylist) {
@@ -222,14 +233,18 @@ const PlaylistModal = ({ isOpen, onClose, movie, onFavoriteChange }) => {
       showToast(`Created "${name}" & added movie!`, 'success');
 
       // Update state
-      setPlaylists(prev => [
-        {
-          ...newPl,
-          is_in_playlist: true,
-          item_count: 1
-        },
-        ...prev
-      ]);
+      setPlaylists(prev => {
+        const updated = [
+          {
+            ...newPl,
+            is_in_playlist: true,
+            item_count: 1
+          },
+          ...prev
+        ];
+        notifyPlaylistsCount(updated);
+        return updated;
+      });
 
       setNewPlaylistName('');
       setIsCreating(false);

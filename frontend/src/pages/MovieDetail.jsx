@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle, Flag, Share2 } from 'lucide-react';
+import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle, Flag, Share2, FolderPlus, FolderCheck } from 'lucide-react';
 import styles from './MovieDetail.module.css';
 import Row from '../components/Row';
 import SEO from '../components/SEO';
@@ -49,6 +49,7 @@ const MovieDetail = () => {
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [inPlaylistsCount, setInPlaylistsCount] = useState(0);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showLoginTeaser, setShowLoginTeaser] = useState(false);
@@ -200,23 +201,36 @@ const MovieDetail = () => {
     }
   }, [movie, loading, searchParams, type, openPlayer]);
 
-  // Check if favorite
+  // Check if favorite and playlists status
   useEffect(() => {
     if (!isLoggedIn || !id) return;
-    const checkFavorite = async () => {
+    const checkStatus = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}`}/favorites/check/${id}?type=${type}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setIsFavorite(data.isFavorite);
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' 
+          ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` 
+          : 'https://aurawatch-1.onrender.com/api');
+
+        const [favRes, plRes] = await Promise.all([
+          fetch(`${baseUrl}/favorites/check/${id}?type=${type}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }).then(r => r.json()).catch(() => ({})),
+          fetch(`${baseUrl}/playlists/check/${id}?type=${type}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }).then(r => r.json()).catch(() => ({}))
+        ]);
+
+        if (favRes?.isFavorite !== undefined) {
+          setIsFavorite(favRes.isFavorite);
+        }
+        if (Array.isArray(plRes?.playlists)) {
+          const count = plRes.playlists.filter(p => p.is_in_playlist).length;
+          setInPlaylistsCount(count);
         }
       } catch (err) {
-        console.error('Failed to check favorite:', err);
+        console.error('Failed to check status:', err);
       }
     };
-    checkFavorite();
+    checkStatus();
   }, [id, type, isLoggedIn, token]);
 
   // Fetch seasons for TV
@@ -491,40 +505,50 @@ const MovieDetail = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showTrailer, isTV, isThisMoviePlaying, movieData, episodes]);
 
-  const handleQuickSave = async () => {
+  const handleToggleWatchlist = async () => {
     if (!isLoggedIn) {
       setShowLoginTeaser(true);
       return;
     }
 
-    try {
-      setIsFavorite(true);
-      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api')}/favorites`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({
-          movieId: id,
-          movieType: type,
-          title: movie.title,
-          poster: movie.poster,
-          backdrop: movie.backdrop,
-          overview: movie.overview,
-          rating: movie.rating,
-          year: movie.year
-        })
-      });
+    const nextState = !isFavorite;
+    setIsFavorite(nextState);
 
-      showToast('Added to Watchlist!', 'success', {
-        label: 'Add to Playlist 📁',
-        onClick: () => setShowPlaylistModal(true)
-      });
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' 
+        ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` 
+        : 'https://aurawatch-1.onrender.com/api');
+
+      if (nextState) {
+        await fetch(`${baseUrl}/favorites`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify({
+            movieId: id,
+            movieType: type,
+            title: movie.title,
+            poster: movie.poster,
+            backdrop: movie.backdrop,
+            overview: movie.overview,
+            rating: movie.rating,
+            year: movie.year
+          })
+        });
+        showToast('Added to Watchlist!', 'success');
+      } else {
+        await fetch(`${baseUrl}/favorites/${id}?type=${type}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast('Removed from Watchlist.', 'info');
+      }
     } catch (err) {
-      console.error('Failed to quick save to favorites:', err);
-      setIsFavorite(false);
-      showToast('Failed to save to Watchlist.', 'error');
+      console.error('Failed to toggle Watchlist:', err);
+      setIsFavorite(!nextState);
+      showToast('Failed to update Watchlist.', 'error');
     }
   };
 
@@ -765,6 +789,7 @@ const MovieDetail = () => {
               Watch Trailer
               {buttonWarnings.watch_trailer && <span className={styles.warningBadge} />}
             </button>
+            {/* Quick Watchlist Toggle Button */}
             <button 
               className={`${styles.listBtn} ${isFavorite ? styles.listBtnActive : ''}`} 
               onClick={(e) => {
@@ -778,24 +803,29 @@ const MovieDetail = () => {
                     showToast(`Admin Notice: ${buttonWarnings.add_to_list}`, 'warning');
                   }
                 }
-                if (!isLoggedIn) {
-                  setShowLoginTeaser(true);
-                  return;
-                }
-                if (!isFavorite) {
-                  // 1-Click Quick Save to Watchlist (Zero interruption, Toast provides "Add to Playlist" action)
-                  handleQuickSave();
-                } else {
-                  // Already saved -> open modal to manage playlists or remove
-                  setShowPlaylistModal(true);
-                }
+                handleToggleWatchlist();
               }}
-              data-title={buttonWarnings.add_to_list || (isLoggedIn ? (isFavorite ? 'In Watchlist · Click to manage playlists' : 'Quick Save to Watchlist') : 'Login to save')}
+              data-title={isLoggedIn ? (isFavorite ? 'Remove from Watchlist' : 'Add to Watchlist') : 'Login to save'}
             >
               <span className={isFavorite ? styles.iconActive : styles.iconInactive}>
                 {isFavorite ? <Check size={22} /> : <Plus size={22} />}
               </span>
               {buttonWarnings.add_to_list && <span className={styles.warningBadge} style={{top: '-2px', right: '-2px'}} />}
+            </button>
+
+            {/* Dedicated Custom Playlist Button */}
+            <button 
+              className={`${styles.listBtn} ${styles.playlistBtn} ${inPlaylistsCount > 0 ? styles.playlistBtnActive : ''}`}
+              onClick={() => {
+                if (!isLoggedIn) {
+                  setShowLoginTeaser(true);
+                  return;
+                }
+                setShowPlaylistModal(true);
+              }}
+              data-title={isLoggedIn ? (inPlaylistsCount > 0 ? `In ${inPlaylistsCount} playlist${inPlaylistsCount !== 1 ? 's' : ''} (Click to manage)` : 'Save to Custom Playlist') : 'Login to use Playlists'}
+            >
+              {inPlaylistsCount > 0 ? <FolderCheck size={22} /> : <FolderPlus size={22} />}
             </button>
             <button 
               className={`${styles.listBtn} downloadBtn`}
@@ -1181,6 +1211,7 @@ const MovieDetail = () => {
           year: movie.year
         }}
         onFavoriteChange={(val) => setIsFavorite(val)}
+        onPlaylistsChange={(count) => setInPlaylistsCount(count)}
       />
     </div>
   );
