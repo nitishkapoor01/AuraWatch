@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { 
   X, Play, RotateCw, Star, Film, Tv, Sparkles, 
@@ -391,7 +392,7 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
   const centerItem = pool[reelIndices.center] || currentMovie || pool[1];
   const rightItem = pool[reelIndices.right] || pool[2] || pool[0];
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         {/* Header */}
@@ -413,8 +414,10 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
             return (
               <button
                 key={cat.id}
+                type="button"
                 className={`${styles.categoryPill} ${isActive ? styles.categoryPillActive : ''}`}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (activeCategory !== cat.id) {
                     setActiveCategory(cat.id);
                   } else if (state !== 'spinning') {
@@ -484,8 +487,12 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
               {/* Action Button */}
               <div className={styles.actionsArea}>
                 <button
+                  type="button"
                   className={styles.primaryBtn}
-                  onClick={triggerSpin}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerSpin();
+                  }}
                   disabled={state === 'spinning'}
                 >
                   {state === 'spinning' ? (
@@ -559,15 +566,20 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
 
               {/* Actions Area */}
               <div className={styles.actionsArea}>
-                <button className={styles.primaryBtn} onClick={handleWatchNow}>
+                <button 
+                  type="button" 
+                  className={styles.primaryBtn} 
+                  onClick={(e) => { e.stopPropagation(); handleWatchNow(); }}
+                >
                   <Play size={16} fill="#fff" />
                   <span>Watch Now</span>
                 </button>
 
                 <div className={styles.secondaryRow}>
                   <button
+                    type="button"
                     className={`${styles.secondaryBtn} ${showTrailer ? styles.secondaryBtnActive : ''}`}
-                    onClick={handleToggleTrailer}
+                    onClick={(e) => { e.stopPropagation(); handleToggleTrailer(); }}
                     disabled={loadingTrailer}
                   >
                     <Clapperboard size={14} />
@@ -575,16 +587,18 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                   </button>
 
                   <button
+                    type="button"
                     className={styles.secondaryBtn}
-                    onClick={() => setShowPlaylistModal(true)}
+                    onClick={(e) => { e.stopPropagation(); setShowPlaylistModal(true); }}
                   >
                     <FolderPlus size={14} />
                     <span>Playlist</span>
                   </button>
 
                   <button
+                    type="button"
                     className={styles.secondaryBtn}
-                    onClick={triggerSpin}
+                    onClick={(e) => { e.stopPropagation(); triggerSpin(); }}
                   >
                     <RotateCw size={14} />
                     <span>Re-roll</span>
@@ -613,7 +627,8 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
           />
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

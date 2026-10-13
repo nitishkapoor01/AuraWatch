@@ -4,12 +4,13 @@
   background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  z-index: 99999;
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 12px;
   animation: fadeIn 0.2s ease-out forwards;
+  pointer-events: auto !important;
 }
 
 @keyframes fadeIn {
@@ -31,6 +32,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   animation: popScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto !important;
 }
 
 .modal::-webkit-scrollbar {
@@ -60,6 +62,7 @@
   padding: 14px 18px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
+  pointer-events: auto !important;
 }
 
 .titleBadge {
@@ -68,7 +71,7 @@
   gap: 7px;
   background: rgba(229, 9, 20, 0.12);
   border: 1px solid rgba(229, 9, 20, 0.35);
-  color: #ff333d;
+  color: #ff3844;
   padding: 5px 12px;
   border-radius: 20px;
   font-size: 11px;
@@ -82,7 +85,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.65);
-  cursor: pointer;
+  cursor: pointer !important;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -90,6 +93,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  pointer-events: auto !important;
 }
 
 .closeBtn:hover {
@@ -109,6 +113,7 @@
   -webkit-overflow-scrolling: touch;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
+  pointer-events: auto !important;
 }
 
 .categoryBar::-webkit-scrollbar {
@@ -126,10 +131,11 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: pointer !important;
   white-space: nowrap;
   transition: all 0.2s;
   flex-shrink: 0;
+  pointer-events: auto !important;
 }
 
 .categoryPill:hover {
@@ -151,6 +157,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  pointer-events: auto !important;
 }
 
 /* =========================================
@@ -301,6 +308,7 @@
   flex-direction: column;
   gap: 12px;
   animation: revealZoom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto !important;
 }
 
 @keyframes revealZoom {
@@ -433,6 +441,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  pointer-events: auto !important;
 }
 
 .primaryBtn {
@@ -444,7 +453,7 @@
   color: #fff;
   font-size: 14px;
   font-weight: 700;
-  cursor: pointer;
+  cursor: pointer !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -452,6 +461,7 @@
   box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 44px;
+  pointer-events: auto !important;
 }
 
 .primaryBtn:hover:not(:disabled) {
@@ -473,6 +483,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+  pointer-events: auto !important;
 }
 
 .secondaryBtn {
@@ -487,10 +498,11 @@
   color: rgba(255, 255, 255, 0.85);
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: pointer !important;
   transition: all 0.2s;
   min-height: 40px;
   white-space: nowrap;
+  pointer-events: auto !important;
 }
 
 .secondaryBtn:hover:not(:disabled) {
