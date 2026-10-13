@@ -1,0 +1,497 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.statIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statInfo h3 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 2px 0;
+}
+
+.statInfo p {
+  font-size: 13px;
+  color: #bbb;
+  margin: 0 0 4px 0;
+}
+
+.statSub {
+  font-size: 11px;
+  color: #777;
+}
+
+/* Sub-Navigation Tabs */
+.subTabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+  overflow-x: auto;
+}
+
+.subTabBtn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.subTabBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.subTabActive {
+  background: linear-gradient(135deg, rgba(255, 183, 3, 0.2), rgba(255, 123, 0, 0.15));
+  border-color: #ffb703;
+  color: #ffb703;
+}
+
+.pendingBadge {
+  background: #f59e0b;
+  color: #000;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* Section Card */
+.sectionCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px 0;
+}
+
+.sectionDesc {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+/* SubGrid */
+.subGrid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .subGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Filters */
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.searchInput {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.selectFilter {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.refreshBtn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #bbb;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refreshBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.dataTable th {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 12px 16px;
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dataTable td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ddd;
+}
+
+.dataTable tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.userCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.subText {
+  font-size: 11px;
+  color: #777;
+}
+
+.dimText {
+  color: #555;
+}
+
+.utrCode {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #ffb703;
+  display: inline-block;
+  font-family: monospace;
+}
+
+.screenshotLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #0071eb;
+  margin-left: 8px;
+  text-decoration: none;
+}
+
+.screenshotLink:hover {
+  text-decoration: underline;
+}
+
+/* Status Pills */
+.statusPill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.statusPill.pending {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+}
+
+.statusPill.approved {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.statusPill.rejected {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+
+.actionBtns {
+  display: flex;
+  gap: 6px;
+}
+
+.approveBtn {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #10b981;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.approveBtn:hover {
+  background: #10b981;
+  color: #000;
+}
+
+.rejectBtn {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.rejectBtn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.reviewedBy {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Code Cell */
+.codeCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.codeCell code {
+  font-family: monospace;
+  color: #ffb703;
+  font-weight: 700;
+}
+
+.iconCopyBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #aaa;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.iconCopyBtn:hover {
+  color: #fff;
+}
+
+.deleteBtn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.deleteBtn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Forms */
+.generateForm, .settingsForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formCol label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.formCol input, .formCol select {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.generateBtn, .saveSettingsBtn {
+  background: linear-gradient(135deg, #ffb703, #ff7b00);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+/* User Actions Inline */
+.actionRowInline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.miniSelect {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.editBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: none;
+  color: #777;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* States */
+.loadingState, .emptyState {
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #777;
+  font-size: 13px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

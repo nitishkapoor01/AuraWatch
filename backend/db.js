@@ -296,6 +296,18 @@ const initDB = async () => {
         IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='platform_visits' AND COLUMN_NAME='watched_stream') THEN
           ALTER TABLE platform_visits ADD COLUMN watched_stream BOOLEAN DEFAULT FALSE;
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='is_premium') THEN
+          ALTER TABLE users ADD COLUMN is_premium BOOLEAN DEFAULT FALSE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='premium_expires_at') THEN
+          ALTER TABLE users ADD COLUMN premium_expires_at TIMESTAMPTZ;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='premium_plan') THEN
+          ALTER TABLE users ADD COLUMN premium_plan TEXT DEFAULT 'free';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='users' AND COLUMN_NAME='premium_activated_by') THEN
+          ALTER TABLE users ADD COLUMN premium_activated_by TEXT;
+        END IF;
       END $$;
 
       CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
@@ -406,6 +418,38 @@ const initDB = async () => {
 
       CREATE INDEX IF NOT EXISTS idx_playlist_items_playlist ON playlist_items(playlist_id);
       CREATE INDEX IF NOT EXISTS idx_playlist_items_added ON playlist_items(playlist_id, added_at DESC);
+
+      CREATE TABLE IF NOT EXISTS vip_redeem_codes (
+        id SERIAL PRIMARY KEY,
+        code TEXT UNIQUE NOT NULL,
+        duration_days INTEGER NOT NULL DEFAULT 30,
+        plan_name TEXT DEFAULT 'VIP Ad-Free',
+        created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        used_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        used_at TIMESTAMPTZ,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_vip_codes_code ON vip_redeem_codes(code);
+      CREATE INDEX IF NOT EXISTS idx_vip_codes_active ON vip_redeem_codes(is_active);
+
+      CREATE TABLE IF NOT EXISTS vip_payment_requests (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        utr_number TEXT NOT NULL,
+        amount NUMERIC(10, 2) DEFAULT 0.00,
+        screenshot_url TEXT,
+        plan_duration_days INTEGER NOT NULL DEFAULT 30,
+        status TEXT DEFAULT 'pending',
+        admin_notes TEXT,
+        reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        reviewed_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_vip_requests_status ON vip_payment_requests(status);
+      CREATE INDEX IF NOT EXISTS idx_vip_requests_user ON vip_payment_requests(user_id);
     `);
 
     // Backfill total_visits from platform_visits for existing historical records

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles, Clock, Heart, Trash2, X, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles, Clock, Heart, Trash2, X, MessageSquare, AlertTriangle, Crown } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -8,6 +8,7 @@ import HelpModal from '../profile/HelpModal';
 import LoginPromptModal from '../profile/LoginPromptModal';
 import CustomizeModal from '../profile/CustomizeModal';
 import CinemaRouletteModal from '../CinemaRouletteModal';
+import VipModal from '../VipModal';
 import FilterBar from './FilterBar';
 import styles from './TopNav.module.css';
 import { useButtonWarnings } from '../../hooks/useButtonWarnings';
@@ -37,6 +38,7 @@ const TopNav = () => {
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showRouletteModal, setShowRouletteModal] = useState(false);
+  const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [hasUnreadHub, setHasUnreadHub] = useState(false);
   const surpriseRef = useRef(null);
@@ -369,6 +371,21 @@ const TopNav = () => {
             {hasUnreadHub && <span className={styles.hubBlinkDot} />}
           </Link>
 
+          <button
+            className={`${styles.vipHeaderBtn} ${user?.is_premium ? styles.vipActive : ''}`}
+            onClick={() => {
+              if (!isLoggedIn) {
+                setIsLoginPromptOpen(true);
+              } else {
+                setIsVipModalOpen(true);
+              }
+            }}
+            title={user?.is_premium ? "VIP Membership Active (Ad-Free)" : "Get VIP - 100% Ad-Free"}
+          >
+            <Crown size={15} className={user?.is_premium ? styles.crownActive : ''} />
+            <span className={styles.vipBtnLabel}>{user?.is_premium ? 'VIP ACTIVE' : 'GET VIP'}</span>
+          </button>
+
           <div className={`${styles.searchBox} ${isMobileSearchOpen ? styles.expanded : ''}`}>
             <button 
               className={styles.mobileSearchBtn} 
@@ -585,6 +602,33 @@ const TopNav = () => {
                         </div>
                       </div>
                     )}
+                    <button 
+                      className={styles.dropdownItem} 
+                      onClick={() => { 
+                        setIsDropdownOpen(false); 
+                        if (!isLoggedIn) {
+                          setIsLoginPromptOpen(true);
+                        } else {
+                          setIsVipModalOpen(true);
+                        }
+                      }}
+                    >
+                      <Crown size={16} color={user?.is_premium ? '#ffb703' : '#aaa'} /> 
+                      {user?.is_premium ? 'VIP Membership (Active)' : 'Upgrade to VIP (No Ads)'}
+                      {user?.is_premium && (
+                        <span style={{
+                          marginLeft: 'auto',
+                          background: 'linear-gradient(90deg, #ffb703, #ff7b00)',
+                          color: '#000',
+                          fontSize: '10px',
+                          fontWeight: '800',
+                          padding: '2px 6px',
+                          borderRadius: '4px'
+                        }}>
+                          VIP
+                        </span>
+                      )}
+                    </button>
                     <button className={styles.dropdownItem} onClick={() => handleRestrictedAction(() => setIsProfileModalOpen(true))}>
                       <User size={16} /> Edit Profile
                       {!isLoggedIn && <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />}
@@ -669,6 +713,13 @@ const TopNav = () => {
       <CinemaRouletteModal
         isOpen={showRouletteModal}
         onClose={() => setShowRouletteModal(false)}
+      />
+
+      {/* VIP Membership Modal */}
+      <VipModal
+        isOpen={isVipModalOpen}
+        onClose={() => setIsVipModalOpen(false)}
+        onRequireLogin={() => setIsLoginPromptOpen(true)}
       />
     </header>
   );

@@ -14,6 +14,7 @@ const supportRoutes = require('./routes/support');
 const adsRoutes = require('./routes/ads');
 const hubRoutes = require('./routes/hub');
 const playlistsRoutes = require('./routes/playlists');
+const vipRoutes = require('./routes/vip');
 const securityMiddleware = require('./middleware/security');
 
 // Initialize database
@@ -39,6 +40,7 @@ app.use('/api/movies', movieRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/playlists', playlistsRoutes);
+app.use('/api/vip', vipRoutes);
 app.use('/api/watch-history', watchHistoryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tracking', trackingRoutes);

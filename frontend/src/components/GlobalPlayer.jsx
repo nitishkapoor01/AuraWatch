@@ -12,7 +12,7 @@ const GlobalPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoggedIn, token, user } = useAuth();
-  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -39,8 +39,8 @@ const GlobalPlayer = () => {
     }
     activeMovieKeyRef.current = currentKey;
 
-    // Skip ads entirely for admins
-    if (isAdmin) {
+    // Skip ads entirely for admins or VIP members
+    if (isAdExempt) {
       setPreRollActive(false);
       return;
     }
@@ -54,12 +54,15 @@ const GlobalPlayer = () => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s safeguard timeout
 
-        const res = await fetch(`${baseUrl}/ads/config`, { signal: controller.signal });
+        const savedToken = localStorage.getItem('aurawatch_token') || token;
+        const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
+
+        const res = await fetch(`${baseUrl}/ads/config`, { signal: controller.signal, headers });
         clearTimeout(timeoutId);
 
         if (res.ok && isMounted) {
           const data = await res.json();
-          if (data.skipAdsTimer) {
+          if (data.is_premium || data.skipAdsTimer || !data.config?.enabled) {
             setPreRollActive(false);
             return;
           }

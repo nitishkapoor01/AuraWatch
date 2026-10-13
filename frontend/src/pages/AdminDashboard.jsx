@@ -7,10 +7,11 @@ import {
   Ban, ShieldCheck, UserCog, History, MessageSquare, CheckCircle, HelpCircle,
   Download, List, Palette, Play, Loader2, DollarSign, Eye, TrendingUp, Globe, Sparkles,
   ArrowUpRight, Table, LayoutGrid, Repeat, Smartphone, Monitor, Tablet, UserCheck, Flame, RefreshCw,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Crown
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import AdminVipTab from '../components/admin/AdminVipTab';
 import styles from './AdminDashboard.module.css';
 
 const AdminDashboard = () => {
@@ -742,6 +743,9 @@ const AdminDashboard = () => {
         </button>
         <button className={`${styles.tabBtn} ${activeTab === 'ads' ? styles.activeTab : ''}`} onClick={() => setActiveTab('ads')}>
           <DollarSign size={18} /> Ads & Monetization
+        </button>
+        <button className={`${styles.tabBtn} ${activeTab === 'vip' ? styles.activeTab : ''}`} onClick={() => setActiveTab('vip')}>
+          <Crown size={18} color="#ffb703" /> VIP Monetization
         </button>
       </div>
 
@@ -3070,6 +3074,13 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* VIP MONETIZATION MANAGEMENT TAB */}
+      {activeTab === 'vip' && (
+        <div className={styles.tabContent}>
+          <AdminVipTab token={token} />
         </div>
       )}
 

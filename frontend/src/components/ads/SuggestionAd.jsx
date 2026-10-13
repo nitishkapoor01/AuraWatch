@@ -13,7 +13,7 @@ const SuggestionAd = () => {
   });
   const impressionLoggedRef = useRef(false);
 
-  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
 
   useEffect(() => {
     let isMounted = true;
@@ -22,15 +22,16 @@ const SuggestionAd = () => {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
-        const res = await fetch(`${baseUrl}/ads/config`);
+        const token = localStorage.getItem('aurawatch_token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const res = await fetch(`${baseUrl}/ads/config`, { headers });
         if (res.ok && isMounted) {
           const data = await res.json();
-          if (data.config) {
-            if (!data.config.enabled) {
-              setAdConfig(null);
-            } else if (data.config.search_grid) {
-              setAdConfig(data.config.search_grid);
-            }
+          if (data.is_premium || (data.config && !data.config.enabled)) {
+            setAdConfig(null);
+          } else if (data.config && data.config.search_grid) {
+            setAdConfig(data.config.search_grid);
           }
         }
       } catch (_) {}
@@ -38,7 +39,7 @@ const SuggestionAd = () => {
 
     fetchConfig();
     return () => { isMounted = false; };
-  }, []);
+  }, [user]);
 
   const logImpression = async () => {
     if (impressionLoggedRef.current) return;
@@ -64,8 +65,8 @@ const SuggestionAd = () => {
     } catch (_) {}
   };
 
-  // Strictly hide from admins and when disabled
-  if (isAdmin || !adConfig || !adConfig.enabled) {
+  // Strictly hide from admins, VIP members, and when disabled
+  if (isAdExempt || !adConfig || !adConfig.enabled) {
     return null;
   }
 

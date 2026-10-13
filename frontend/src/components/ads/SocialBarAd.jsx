@@ -5,10 +5,10 @@ const SocialBarAd = () => {
   const { user } = useAuth();
   const scriptInjectedRef = useRef(false);
 
-  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
 
   useEffect(() => {
-    if (isAdmin || scriptInjectedRef.current) return;
+    if (isAdExempt || scriptInjectedRef.current) return;
 
     let isMounted = true;
     const loadSocialBar = async () => {
@@ -16,10 +16,14 @@ const SocialBarAd = () => {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
-        const res = await fetch(`${baseUrl}/ads/config`);
+        const token = localStorage.getItem('aurawatch_token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const res = await fetch(`${baseUrl}/ads/config`, { headers });
         if (!res.ok || !isMounted) return;
 
         const data = await res.json();
+        if (data.is_premium) return;
         const config = data?.config;
 
         if (config?.enabled && config?.social_bar?.enabled && config?.social_bar?.script_url) {

@@ -216,6 +216,22 @@ const ProfileModal = ({ isOpen, onClose }) => {
             {!editingName ? (
               <div className={styles.nameRow}>
                 <h3>{user.name}</h3>
+                {user.is_premium && (
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: 'linear-gradient(90deg, #ffb703, #ff7b00)',
+                    color: '#000',
+                    fontWeight: '800',
+                    fontSize: '11px',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    letterSpacing: '0.5px'
+                  }}>
+                    👑 VIP
+                  </span>
+                )}
                 <button className={styles.editNameBtn} onClick={handleNameEdit} title="Edit Name">
                   <Pencil size={14} />
                 </button>

@@ -211,6 +211,25 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const refreshUser = async () => {
+    const savedToken = localStorage.getItem('aurawatch_token') || token;
+    if (!savedToken) return null;
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${savedToken}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user);
+        localStorage.setItem('aurawatch_user', JSON.stringify(data.user));
+        return data.user;
+      }
+    } catch (err) {
+      console.error('[Auth] Failed to refresh user:', err);
+    }
+    return null;
+  };
+
   const logout = () => {
     localStorage.removeItem('aurawatch_token');
     localStorage.removeItem('aurawatch_user');
@@ -233,7 +252,8 @@ export const AuthProvider = ({ children }) => {
       updateName,
       changePassword,
       getSecurityQuestion,
-      refreshStreak
+      refreshStreak,
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>

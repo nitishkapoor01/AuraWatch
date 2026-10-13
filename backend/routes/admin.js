@@ -991,4 +991,426 @@ router.post('/ads/universal-toggle', isAdmin, async (req, res) => {
   }
 });
 
+// ==========================================
+// VIP MONETIZATION ADMIN MANAGEMENT ENDPOINTS
+// ==========================================
+
+// 1. VIP Overview Stats
+router.get('/vip/overview', isModerator, async (req, res) => {
+  try {
+    const [vipUsersRes, expiredVipRes, pendingReqRes, activeCodesRes, totalRevenueRes] = await Promise.all([
+      db.query(`SELECT COUNT(*) as count FROM users WHERE is_premium = TRUE AND (premium_expires_at IS NULL OR premium_expires_at > NOW())`),
+      db.query(`SELECT COUNT(*) as count FROM users WHERE is_premium = FALSE AND premium_expires_at IS NOT NULL`),
+      db.query(`SELECT COUNT(*) as count FROM vip_payment_requests WHERE status = 'pending'`),
+      db.query(`SELECT COUNT(*) as count FROM vip_redeem_codes WHERE is_active = TRUE`),
+      db.query(`SELECT COALESCE(SUM(amount), 0) as total FROM vip_payment_requests WHERE status = 'approved'`)
+    ]);
+
+    res.json({
+      activeVipUsers: parseInt(vipUsersRes.rows[0].count) || 0,
+      expiredVipUsers: parseInt(expiredVipRes.rows[0].count) || 0,
+      pendingRequests: parseInt(pendingReqRes.rows[0].count) || 0,
+      activeCodes: parseInt(activeCodesRes.rows[0].count) || 0,
+      totalRevenue: parseFloat(totalRevenueRes.rows[0].total) || 0
+    });
+  } catch (error) {
+    console.error('[Admin VIP Overview] Error:', error);
+    res.status(500).json({ message: 'Failed to fetch VIP overview.' });
+  }
+});
+
+// 2. Search & List Users with VIP details
+router.get('/vip/users', isModerator, async (req, res) => {
+  try {
+    const { search = '', filter = 'all', page = 1, limit = 20 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const cleanSearch = search.trim().toLowerCase();
+
+    let whereClause = '1=1';
+    const params = [];
+
+    if (filter === 'active') {
+      whereClause += ` AND u.is_premium = TRUE AND (u.premium_expires_at IS NULL OR u.premium_expires_at > NOW())`;
+    } else if (filter === 'expired') {
+      whereClause += ` AND (u.is_premium = FALSE AND u.premium_expires_at IS NOT NULL)`;
+    } else if (filter === 'free') {
+      whereClause += ` AND u.is_premium = FALSE AND u.premium_expires_at IS NULL`;
+    }
+
+    if (cleanSearch) {
+      params.push(`%${cleanSearch}%`);
+      whereClause += ` AND (LOWER(u.name) LIKE $${params.length} OR LOWER(u.email) LIKE $${params.length})`;
+    }
+
+    const countQuery = `SELECT COUNT(*) as count FROM users u WHERE ${whereClause}`;
+    const countRes = await db.query(countQuery, params);
+    const total = parseInt(countRes.rows[0].count) || 0;
+
+    const dataParams = [...params, parseInt(limit), offset];
+    const dataQuery = `
+      SELECT u.id, u.name, u.email, u.avatar, u.role, u.is_premium, u.premium_expires_at,
+             u.premium_plan, u.premium_activated_by, u.created_at
+      FROM users u
+      WHERE ${whereClause}
+      ORDER BY u.is_premium DESC, u.premium_expires_at DESC NULLS LAST, u.created_at DESC
+      LIMIT $${dataParams.length - 1} OFFSET $${dataParams.length}
+    `;
+    const usersRes = await db.query(dataQuery, dataParams);
+
+    res.json({
+      users: usersRes.rows,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (error) {
+    console.error('[Admin VIP Users] Error:', error);
+    res.status(500).json({ message: 'Failed to fetch VIP users.' });
+  }
+});
+
+// 3. Grant / Extend / Revoke VIP for a User
+router.put('/vip/users/:id', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_premium, duration_days = 30, plan_name = 'VIP Ad-Free' } = req.body;
+
+    const userRes = await db.query('SELECT id, is_premium, premium_expires_at FROM users WHERE id = $1', [id]);
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const user = userRes.rows[0];
+
+    if (is_premium) {
+      const days = parseInt(duration_days, 10) || 30;
+      const now = new Date();
+      let baseDate = now;
+      if (user.is_premium && user.premium_expires_at && new Date(user.premium_expires_at) > now) {
+        baseDate = new Date(user.premium_expires_at);
+      }
+      const newExpiry = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+
+      await db.query(
+        `UPDATE users
+         SET is_premium = TRUE,
+             premium_expires_at = $1,
+             premium_plan = $2,
+             premium_activated_by = 'admin'
+         WHERE id = $3`,
+        [newExpiry, plan_name, id]
+      );
+
+      return res.json({
+        success: true,
+        message: `Granted ${days} days VIP to user successfully.`,
+        is_premium: true,
+        premium_expires_at: newExpiry,
+        premium_plan: plan_name
+      });
+    } else {
+      await db.query(
+        `UPDATE users
+         SET is_premium = FALSE,
+             premium_expires_at = CURRENT_TIMESTAMP,
+             premium_plan = 'free',
+             premium_activated_by = 'admin_revoked'
+         WHERE id = $1`,
+        [id]
+      );
+
+      return res.json({
+        success: true,
+        message: 'VIP membership revoked successfully.',
+        is_premium: false,
+        premium_expires_at: new Date()
+      });
+    }
+  } catch (error) {
+    console.error('[Admin Grant/Revoke VIP] Error:', error);
+    res.status(500).json({ message: 'Failed to modify VIP status.' });
+  }
+});
+
+// 4. Batch Generate VIP Gift / Redeem Codes
+router.post('/vip/codes/generate', isAdmin, async (req, res) => {
+  try {
+    const crypto = require('crypto');
+    const { count = 1, duration_days = 30, plan_name = 'VIP Ad-Free', prefix = 'AURA' } = req.body;
+
+    const safeCount = Math.min(Math.max(1, parseInt(count, 10) || 1), 50);
+    const safeDays = Math.max(1, parseInt(duration_days, 10) || 30);
+    const safePlan = typeof plan_name === 'string' && plan_name.trim() ? plan_name.trim() : 'VIP Ad-Free';
+    const safePrefix = (typeof prefix === 'string' ? prefix.trim().toUpperCase() : 'AURA').replace(/[^A-Z0-9]/g, '');
+
+    const generatedCodes = [];
+
+    for (let i = 0; i < safeCount; i++) {
+      const randPart1 = crypto.randomBytes(3).toString('hex').toUpperCase();
+      const randPart2 = crypto.randomBytes(3).toString('hex').toUpperCase();
+      const code = `${safePrefix}-${randPart1}-${randPart2}`;
+
+      const insertRes = await db.query(
+        `INSERT INTO vip_redeem_codes (code, duration_days, plan_name, created_by, is_active)
+         VALUES ($1, $2, $3, $4, TRUE)
+         ON CONFLICT (code) DO NOTHING
+         RETURNING *`,
+        [code, safeDays, safePlan, req.user.id]
+      );
+
+      if (insertRes.rows.length > 0) {
+        generatedCodes.push(insertRes.rows[0]);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Generated ${generatedCodes.length} VIP code(s) successfully!`,
+      codes: generatedCodes
+    });
+  } catch (error) {
+    console.error('[Admin Generate VIP Codes] Error:', error);
+    res.status(500).json({ message: 'Failed to generate VIP codes.' });
+  }
+});
+
+// 5. List VIP Codes
+router.get('/vip/codes', isModerator, async (req, res) => {
+  try {
+    const { filter = 'all', page = 1, limit = 20, search = '' } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    let whereClause = '1=1';
+    const params = [];
+
+    if (filter === 'active') {
+      whereClause += ' AND c.is_active = TRUE';
+    } else if (filter === 'used') {
+      whereClause += ' AND c.is_active = FALSE';
+    }
+
+    if (search.trim()) {
+      params.push(`%${search.trim().toUpperCase()}%`);
+      whereClause += ` AND UPPER(c.code) LIKE $${params.length}`;
+    }
+
+    const countRes = await db.query(`SELECT COUNT(*) as count FROM vip_redeem_codes c WHERE ${whereClause}`, params);
+    const total = parseInt(countRes.rows[0].count) || 0;
+
+    const dataParams = [...params, parseInt(limit), offset];
+    const dataRes = await db.query(
+      `SELECT c.*,
+              u.name as used_by_name,
+              u.email as used_by_email,
+              creator.name as created_by_name
+       FROM vip_redeem_codes c
+       LEFT JOIN users u ON c.used_by = u.id
+       LEFT JOIN users creator ON c.created_by = creator.id
+       WHERE ${whereClause}
+       ORDER BY c.created_at DESC
+       LIMIT $${dataParams.length - 1} OFFSET $${dataParams.length}`,
+      dataParams
+    );
+
+    res.json({
+      codes: dataRes.rows,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (error) {
+    console.error('[Admin List VIP Codes] Error:', error);
+    res.status(500).json({ message: 'Failed to list VIP codes.' });
+  }
+});
+
+// 6. Delete / Deactivate VIP Code
+router.delete('/vip/codes/:id', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM vip_redeem_codes WHERE id = $1', [id]);
+    res.json({ success: true, message: 'VIP code deleted.' });
+  } catch (error) {
+    console.error('[Admin Delete VIP Code] Error:', error);
+    res.status(500).json({ message: 'Failed to delete VIP code.' });
+  }
+});
+
+// 7. List VIP Payment Requests
+router.get('/vip/requests', isModerator, async (req, res) => {
+  try {
+    const { status = 'all', page = 1, limit = 20 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    let whereClause = '1=1';
+    const params = [];
+
+    if (status !== 'all') {
+      params.push(status);
+      whereClause += ` AND r.status = $${params.length}`;
+    }
+
+    const countRes = await db.query(`SELECT COUNT(*) as count FROM vip_payment_requests r WHERE ${whereClause}`, params);
+    const total = parseInt(countRes.rows[0].count) || 0;
+
+    const dataParams = [...params, parseInt(limit), offset];
+    const dataRes = await db.query(
+      `SELECT r.*,
+              u.name as user_name,
+              u.email as user_email,
+              u.is_premium,
+              u.premium_expires_at,
+              reviewer.name as reviewer_name
+       FROM vip_payment_requests r
+       JOIN users u ON r.user_id = u.id
+       LEFT JOIN users reviewer ON r.reviewed_by = reviewer.id
+       WHERE ${whereClause}
+       ORDER BY CASE WHEN r.status = 'pending' THEN 0 ELSE 1 END, r.created_at DESC
+       LIMIT $${dataParams.length - 1} OFFSET $${dataParams.length}`,
+      dataParams
+    );
+
+    res.json({
+      requests: dataRes.rows,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (error) {
+    console.error('[Admin List VIP Requests] Error:', error);
+    res.status(500).json({ message: 'Failed to list payment requests.' });
+  }
+});
+
+// 8. Review VIP Payment Request (Approve or Reject)
+router.put('/vip/requests/:id/review', isAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { status, admin_notes = '' } = req.body;
+
+  if (status !== 'approved' && status !== 'rejected') {
+    return res.status(400).json({ message: 'Status must be approved or rejected.' });
+  }
+
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const reqRes = await client.query(
+      'SELECT * FROM vip_payment_requests WHERE id = $1 FOR UPDATE',
+      [id]
+    );
+
+    if (reqRes.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Payment request not found.' });
+    }
+
+    const paymentReq = reqRes.rows[0];
+    if (paymentReq.status !== 'pending') {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ message: `Request has already been ${paymentReq.status}.` });
+    }
+
+    if (status === 'approved') {
+      // Calculate and extend VIP for user
+      const userRes = await client.query(
+        'SELECT id, is_premium, premium_expires_at FROM users WHERE id = $1 FOR UPDATE',
+        [paymentReq.user_id]
+      );
+      const user = userRes.rows[0];
+
+      const now = new Date();
+      let baseDate = now;
+      if (user.is_premium && user.premium_expires_at && new Date(user.premium_expires_at) > now) {
+        baseDate = new Date(user.premium_expires_at);
+      }
+      const days = parseInt(paymentReq.plan_duration_days, 10) || 30;
+      const newExpiry = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+
+      await client.query(
+        `UPDATE users
+         SET is_premium = TRUE,
+             premium_expires_at = $1,
+             premium_plan = 'VIP Ad-Free',
+             premium_activated_by = 'upi_payment'
+         WHERE id = $2`,
+        [newExpiry, paymentReq.user_id]
+      );
+    }
+
+    // Update request status
+    const updateRes = await client.query(
+      `UPDATE vip_payment_requests
+       SET status = $1,
+           admin_notes = $2,
+           reviewed_by = $3,
+           reviewed_at = CURRENT_TIMESTAMP
+       WHERE id = $4
+       RETURNING *`,
+      [status, admin_notes, req.user.id, id]
+    );
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      message: `Payment request ${status} successfully.`,
+      request: updateRes.rows[0]
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('[Admin Review VIP Request] Error:', error);
+    res.status(500).json({ message: 'Failed to process payment review.' });
+  } finally {
+    client.release();
+  }
+});
+
+// 9. Get / Update VIP Payment Settings (UPI ID, QR code, pricing)
+router.get('/vip/payment-info', isModerator, async (req, res) => {
+  try {
+    const row = await db.query("SELECT value FROM settings WHERE key = 'vip_payment_info'");
+    let info = {
+      upi_id: 'aurawatch@upi',
+      upi_name: 'AuraWatch VIP',
+      qr_image_url: '',
+      plans: [
+        { id: '1_month', name: '1 Month', duration_days: 30, price_inr: 29, badge: 'Popular' },
+        { id: '3_months', name: '3 Months', duration_days: 90, price_inr: 69, badge: 'Best Value' },
+        { id: '1_year', name: '1 Year', duration_days: 365, price_inr: 199, badge: 'VIP Master' }
+      ]
+    };
+    if (row.rows[0]?.value) {
+      try { info = { ...info, ...JSON.parse(row.rows[0].value) }; } catch (_) {}
+    }
+    res.json(info);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to get payment info.' });
+  }
+});
+
+router.post('/vip/payment-info', isAdmin, async (req, res) => {
+  try {
+    const { upi_id, upi_name, qr_image_url, plans } = req.body;
+    const data = {
+      upi_id: upi_id || '',
+      upi_name: upi_name || 'AuraWatch VIP',
+      qr_image_url: qr_image_url || '',
+      plans: Array.isArray(plans) ? plans : []
+    };
+
+    await db.query(
+      `INSERT INTO settings (key, value)
+       VALUES ('vip_payment_info', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [JSON.stringify(data)]
+    );
+
+    res.json({ success: true, message: 'VIP payment configuration saved.', data });
+  } catch (error) {
+    console.error('[Admin VIP Payment Info] Error:', error);
+    res.status(500).json({ message: 'Failed to save payment info.' });
+  }
+});
+
 module.exports = router;

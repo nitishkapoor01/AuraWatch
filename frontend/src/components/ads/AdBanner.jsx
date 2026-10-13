@@ -38,8 +38,8 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
   const [skipAds, setSkipAds] = useState(false);
   const impressionLoggedRef = useRef(false);
 
-  // Check if admin bypass applies
-  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  // Check if admin or VIP bypass applies
+  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
 
   useEffect(() => {
     let isMounted = true;
@@ -48,18 +48,19 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
         
-        const res = await fetch(`${baseUrl}/ads/config`);
+        const token = localStorage.getItem('aurawatch_token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const res = await fetch(`${baseUrl}/ads/config`, { headers });
         if (res.ok && isMounted) {
           const data = await res.json();
-          if (data.skipAdsTimer && slot === 'download_modal') {
+          if (data.is_premium || data.skipAdsTimer) {
             setSkipAds(true);
           }
-          if (data.config) {
-            if (!data.config.enabled) {
-              setAdConfig(null); // All ads disabled globally
-            } else if (data.config[slot]) {
-              setAdConfig(data.config[slot]);
-            }
+          if (data.is_premium || (data.config && !data.config.enabled)) {
+            setAdConfig(null); // All ads disabled
+          } else if (data.config && data.config[slot]) {
+            setAdConfig(data.config[slot]);
           }
         }
       } catch (e) {
@@ -71,7 +72,7 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
       fetchAdConfig();
     }
     return () => { isMounted = false; };
-  }, [slot, customConfig]);
+  }, [slot, customConfig, user]);
 
   const logImpression = async () => {
     if (impressionLoggedRef.current) return;
@@ -99,8 +100,8 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
     }
   };
 
-  // Strictly hide ads from all administrators
-  if (isAdmin || skipAds || !adConfig || !adConfig.enabled) {
+  // Strictly hide ads from all administrators and VIP members
+  if (isAdExempt || skipAds || !adConfig || !adConfig.enabled) {
     return null;
   }
 

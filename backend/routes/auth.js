@@ -61,7 +61,19 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'Account created successfully!',
       token,
-      user: { id: newUserId, email: cleanEmail, name: name.trim(), role: 'user', avatar: 'red', is_super_admin: false, admin_permissions: { all: false }, ui_preferences: {} }
+      user: {
+        id: newUserId,
+        email: cleanEmail,
+        name: name.trim(),
+        role: 'user',
+        avatar: 'red',
+        is_super_admin: false,
+        admin_permissions: { all: false },
+        ui_preferences: {},
+        is_premium: false,
+        premium_expires_at: null,
+        premium_plan: 'free'
+      }
     });
   } catch (error) {
     console.error('[Auth] Register error:', error);
@@ -131,10 +143,29 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    let isPremium = user.is_premium || false;
+    const expiresAt = user.premium_expires_at;
+    if (isPremium && expiresAt && new Date(expiresAt) < new Date()) {
+      isPremium = false;
+      await db.query('UPDATE users SET is_premium = FALSE WHERE id = $1', [user.id]).catch(() => {});
+    }
+
     res.json({
       message: 'Login successful!',
       token,
-      user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role, is_super_admin: user.is_super_admin, admin_permissions: user.admin_permissions, ui_preferences: user.ui_preferences || {} }
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar,
+        role: user.role,
+        is_super_admin: user.is_super_admin,
+        admin_permissions: user.admin_permissions,
+        ui_preferences: user.ui_preferences || {},
+        is_premium: isPremium,
+        premium_expires_at: expiresAt,
+        premium_plan: user.premium_plan || 'free'
+      }
     });
   } catch (error) {
     console.error('[Auth] Login error:', error);
@@ -243,13 +274,23 @@ router.post('/forgot-password/reset', async (req, res) => {
 
 // Get current user
 router.get('/me', authMiddleware, async (req, res) => {
-  const result = await db.query('SELECT id, name, email, avatar, role, is_super_admin, admin_permissions, ui_preferences FROM users WHERE id = $1', [req.user.id]);
+  const result = await db.query(
+    'SELECT id, name, email, avatar, role, is_super_admin, admin_permissions, ui_preferences, is_premium, premium_expires_at, premium_plan FROM users WHERE id = $1',
+    [req.user.id]
+  );
     
   if (result.rows.length === 0) {
     return res.status(404).json({ message: 'User not found' });
   }
 
   const user = result.rows[0];
+  let isPremium = user.is_premium || false;
+  const expiresAt = user.premium_expires_at;
+  if (isPremium && expiresAt && new Date(expiresAt) < new Date()) {
+    isPremium = false;
+    await db.query('UPDATE users SET is_premium = FALSE WHERE id = $1', [user.id]).catch(() => {});
+  }
+
   res.json({
     user: {
       id: user.id,
@@ -259,7 +300,10 @@ router.get('/me', authMiddleware, async (req, res) => {
       role: user.role,
       is_super_admin: user.is_super_admin,
       admin_permissions: user.admin_permissions,
-      ui_preferences: user.ui_preferences || {}
+      ui_preferences: user.ui_preferences || {},
+      is_premium: isPremium,
+      premium_expires_at: expiresAt,
+      premium_plan: user.premium_plan || 'free'
     }
   });
 });

@@ -19,7 +19,7 @@ const AdCard = ({ style, compact = false }) => {
   const cardRef = useRef(null);
   const impressionLoggedRef = useRef(false);
 
-  const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
+  const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,15 +28,16 @@ const AdCard = ({ style, compact = false }) => {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
-        const res = await fetch(`${baseUrl}/ads/config`);
+        const token = localStorage.getItem('aurawatch_token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        const res = await fetch(`${baseUrl}/ads/config`, { headers });
         if (res.ok && isMounted) {
           const data = await res.json();
-          if (data.config) {
-            if (!data.config.enabled) {
-              setAdConfig(null);
-            } else if (data.config.search_grid) {
-              setAdConfig(data.config.search_grid);
-            }
+          if (data.is_premium || (data.config && !data.config.enabled)) {
+            setAdConfig(null);
+          } else if (data.config && data.config.search_grid) {
+            setAdConfig(data.config.search_grid);
           }
         }
       } catch (_) {}
@@ -44,7 +45,7 @@ const AdCard = ({ style, compact = false }) => {
 
     fetchConfig();
     return () => { isMounted = false; };
-  }, []);
+  }, [user]);
 
   // Compute responsive scale factor to fit 300px ad inside card bounds
   useEffect(() => {
@@ -96,8 +97,8 @@ const AdCard = ({ style, compact = false }) => {
     } catch (_) {}
   };
 
-  // Strictly hide ads from all administrators
-  if (isAdmin || !adConfig || !adConfig.enabled) {
+  // Strictly hide ads from all administrators and VIP members
+  if (isAdExempt || !adConfig || !adConfig.enabled) {
     return null;
   }
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { optionalAuth } = require('../middleware/auth');
 
 // In-memory rate limiting map for impressions: key => lastLoggedTimestamp
 // key format: `${visitorId || sessionId}_${slot}`
@@ -77,8 +78,26 @@ router.get('/vast-proxy', async (req, res) => {
 });
 
 // Get current public ads configuration
-router.get('/config', async (req, res) => {
+router.get('/config', optionalAuth, async (req, res) => {
   try {
+    // If authenticated user is verified VIP, completely turn off ads at the server level
+    if (req.user && req.user.is_premium) {
+      return res.json({
+        config: {
+          enabled: false,
+          is_premium: true,
+          download_modal: { enabled: false, timer_seconds: 0 },
+          movie_detail: { enabled: false },
+          search_grid: { enabled: false },
+          social_bar: { enabled: false },
+          direct_link: { enabled: false },
+          pre_roll: { enabled: false, timer_seconds: 0 }
+        },
+        skipAdsTimer: true,
+        is_premium: true
+      });
+    }
+
     const [adsConfigRes, skipTimerRes] = await Promise.all([
       db.query("SELECT value FROM settings WHERE key = 'ads_config'"),
       db.query("SELECT value FROM settings WHERE key = 'skip_ads_timer'")

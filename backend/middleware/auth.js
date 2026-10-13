@@ -14,11 +14,26 @@ const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const db = require('../db');
-    const uRes = await db.query('SELECT role, is_super_admin FROM users WHERE id = $1', [decoded.id]);
+    const uRes = await db.query(
+      'SELECT role, is_super_admin, is_premium, premium_expires_at, premium_plan FROM users WHERE id = $1',
+      [decoded.id]
+    );
+    const userData = uRes.rows[0];
+    let isPremium = userData?.is_premium || false;
+    const expiresAt = userData?.premium_expires_at;
+
+    if (isPremium && expiresAt && new Date(expiresAt) < new Date()) {
+      isPremium = false;
+      db.query('UPDATE users SET is_premium = FALSE WHERE id = $1', [decoded.id]).catch(() => {});
+    }
+
     req.user = {
       ...decoded,
-      role: uRes.rows[0]?.role || 'user',
-      is_super_admin: uRes.rows[0]?.is_super_admin || false
+      role: userData?.role || 'user',
+      is_super_admin: userData?.is_super_admin || false,
+      is_premium: isPremium,
+      premium_expires_at: expiresAt,
+      premium_plan: userData?.premium_plan || 'free'
     };
     next();
   } catch (error) {
@@ -38,11 +53,26 @@ const optionalAuth = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const db = require('../db');
-    const uRes = await db.query('SELECT role, is_super_admin FROM users WHERE id = $1', [decoded.id]);
+    const uRes = await db.query(
+      'SELECT role, is_super_admin, is_premium, premium_expires_at, premium_plan FROM users WHERE id = $1',
+      [decoded.id]
+    );
+    const userData = uRes.rows[0];
+    let isPremium = userData?.is_premium || false;
+    const expiresAt = userData?.premium_expires_at;
+
+    if (isPremium && expiresAt && new Date(expiresAt) < new Date()) {
+      isPremium = false;
+      db.query('UPDATE users SET is_premium = FALSE WHERE id = $1', [decoded.id]).catch(() => {});
+    }
+
     req.user = {
       ...decoded,
-      role: uRes.rows[0]?.role || 'user',
-      is_super_admin: uRes.rows[0]?.is_super_admin || false
+      role: userData?.role || 'user',
+      is_super_admin: userData?.is_super_admin || false,
+      is_premium: isPremium,
+      premium_expires_at: expiresAt,
+      premium_plan: userData?.premium_plan || 'free'
     };
   } catch (error) {
     // Ignore invalid/expired tokens for optional endpoints

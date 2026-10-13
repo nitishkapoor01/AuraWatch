@@ -317,8 +317,8 @@ const MovieDetail = () => {
   };
 
   const triggerSmartlink = () => {
-    const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
-    if (isAdmin || globalSkipAds || !directLinkUrl) return;
+    const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
+    if (isAdExempt || globalSkipAds || !directLinkUrl) return;
 
     try {
       window.open(directLinkUrl, '_blank', 'noopener,noreferrer');
@@ -345,8 +345,8 @@ const MovieDetail = () => {
     setIsDownloading(true);
     setShowDownloadModal(true);
     
-    const isAdmin = user?.role === 'admin';
-    const shouldSkipTimer = isAdmin || globalSkipAds;
+    const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
+    const shouldSkipTimer = isAdExempt || globalSkipAds;
     setDownloadStep('ad');
     setAdTimer(shouldSkipTimer ? 0 : adTimerDuration);
     setParsedDownloads({});
@@ -1013,7 +1013,7 @@ const MovieDetail = () => {
                 <h2>Generating Premium Links</h2>
                 <p>Please wait while we securely fetch the best available download links for you.</p>
                 
-                {(!user || (user.role !== 'admin' && !user.is_super_admin)) && !globalSkipAds ? (
+                {(!user || (!user.is_premium && user.role !== 'admin' && !user.is_super_admin)) && !globalSkipAds ? (
                   <>
                     {/* ADVERTISEMENT SCRIPT */}
                     <div className={styles.adPlaceholder} style={{ padding: 0, background: 'transparent', border: 'none' }}>
