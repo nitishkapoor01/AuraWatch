@@ -185,8 +185,8 @@ const CATEGORIES = [
   { id: 'top_rated', label: 'Top Rated', icon: Award }
 ];
 
-const WINNER_INDEX = 18; // The card position in the strip that lands dead-center
-const STRIP_LENGTH = 26;
+const WINNER_INDEX = 28; // The card position in the strip that lands dead-center
+const STRIP_LENGTH = 36;
 
 const CinemaRouletteModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -213,6 +213,7 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
   const stageRef = useRef(null);
+  const trackRef = useRef(null);
   const spinTimeoutsRef = useRef([]);
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' 
@@ -344,12 +345,7 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
     setStripMovies(strip);
     setCurrentMovie(winner);
 
-    // 1. Instantly snap track to 0px
-    setHasTransition(false);
-    setTrackOffset(0);
-    setState('spinning');
-
-    // 2. Measure DOM width to calculate exact center landing
+    // Measure DOM width to calculate exact center landing
     const stageWidth = stageRef.current ? stageRef.current.clientWidth : 420;
     const cardWidth = window.innerWidth <= 480 ? 90 : 105;
     const gap = 10;
@@ -357,33 +353,49 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
     const centerPoint = (stageWidth / 2) - (cardWidth / 2);
     const targetOffset = -(WINNER_INDEX * stride - centerPoint);
 
-    // 3. Trigger GPU glide animation on next animation frame
+    // 1. Instantly reset track to 0px without transition
+    if (trackRef.current) {
+      trackRef.current.style.transition = 'none';
+      trackRef.current.style.transform = 'translate3d(0px, 0, 0)';
+      // Force layout reflow so the browser is 100% guaranteed to start from 0
+      void trackRef.current.offsetHeight;
+    }
+    setTrackOffset(0);
+    setHasTransition(false);
+    setState('spinning');
+
+    // 2. Next animation frame: start the 5.0-second suspenseful glide
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         setHasTransition(true);
         setTrackOffset(targetOffset);
 
-        // 4. Schedule realistic decelerating ticks
+        if (trackRef.current) {
+          trackRef.current.style.transition = 'transform 5.0s cubic-bezier(0.08, 0.85, 0.16, 1)';
+          trackRef.current.style.transform = `translate3d(${targetOffset}px, 0, 0)`;
+        }
+
+        // 3. Schedule realistic decelerating ticks across 5.0s
         const tickDelays = [
-          80, 160, 250, 350, 460, 580, 720, 880, 1060, 1260, 
-          1490, 1750, 2040, 2370, 2730, 3100
+          100, 200, 310, 430, 560, 700, 860, 1040, 1240, 1460, 
+          1710, 1990, 2300, 2650, 3050, 3500, 4000, 4550
         ];
         tickDelays.forEach(d => {
           const timer = setTimeout(() => playTick(), d);
           spinTimeoutsRef.current.push(timer);
         });
 
-        // 5. Completion: Triumphant Fanfare + Reward Reveal
+        // 4. Completion: Triumphant Fanfare + Reward Reveal
         const finishTimer = setTimeout(() => {
           playJackpotFanfare();
           setIsWinnerHighlighted(true);
 
-          // Rewarding delay: let user savor the winning poster under the laser needle
+          // Rewarding pause: let user absorb the winner card under the laser needle
           const revealTimer = setTimeout(() => {
             setState('revealed');
-          }, 500);
+          }, 1200);
           spinTimeoutsRef.current.push(revealTimer);
-        }, 3200);
+        }, 5000);
 
         spinTimeoutsRef.current.push(finishTimer);
       });
@@ -506,10 +518,10 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
 
                 {/* The Conveyor Film Strip */}
                 <div 
+                  ref={trackRef}
                   className={styles.glideTrack}
                   style={{
-                    transform: `translate3d(${trackOffset}px, 0, 0)`,
-                    transition: hasTransition ? 'transform 3.2s cubic-bezier(0.12, 0.8, 0.33, 1)' : 'none'
+                    transform: `translate3d(${trackOffset}px, 0, 0)`
                   }}
                 >
                   {stripMovies.map((movie, idx) => {
@@ -569,20 +581,9 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
             </>
           )}
 
-          {/* STATE 3: CELEBRATION JACKPOT REWARD CARD */}
+          {/* STATE 3: CELEBRATION REVEAL CARD */}
           {state === 'revealed' && currentMovie && (
             <div className={styles.revealedCard}>
-              {/* Rewarding Jackpot Banner */}
-              <div className={styles.jackpotBanner}>
-                <div className={styles.jackpotBadgeText}>
-                  <Trophy size={15} color="#ffd700" />
-                  <span>VAULT JACKPOT UNLOCKED</span>
-                </div>
-                <div className={styles.jackpotTagScore}>
-                  98% AURA MATCH
-                </div>
-              </div>
-
               {/* Media Frame (Backdrop OR Trailer Embed) */}
               <div className={styles.mediaFrame}>
                 {showTrailer && trailerKey ? (
