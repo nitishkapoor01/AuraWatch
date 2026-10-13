@@ -1,13 +1,14 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(14px);
+  background: rgba(0, 0, 0, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -18,22 +19,34 @@
 
 .modal {
   position: relative;
-  background: #111113;
+  background: #0d0d10;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
   width: 100%;
-  max-width: 820px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(229, 9, 20, 0.15);
+  max-width: 760px;
+  max-height: 92dvh;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 60px rgba(229, 9, 20, 0.18);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   animation: popScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+.modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
 }
 
 @keyframes popScale {
   from {
     opacity: 0;
-    transform: scale(0.92) translateY(20px);
+    transform: scale(0.92) translateY(16px);
   }
   to {
     opacity: 1;
@@ -46,368 +59,675 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 28px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
 }
 
-.titleBadge {
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vaultBadge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.2) 0%, rgba(255, 75, 43, 0.08) 100%);
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  color: #ff3844;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  box-shadow: 0 0 16px rgba(229, 9, 20, 0.25);
+}
+
+.statusIndicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulseDot 1.6s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.headerActions {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(229, 9, 20, 0.12);
-  border: 1px solid rgba(229, 9, 20, 0.35);
-  color: #ff333d;
-  padding: 6px 16px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  box-shadow: 0 0 20px rgba(229, 9, 20, 0.2);
 }
 
-.closeBtn {
-  background: rgba(255, 255, 255, 0.06);
+.iconBtn {
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
   cursor: pointer;
-  padding: 8px;
+  padding: 7px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
 }
 
-.closeBtn:hover {
-  background: rgba(255, 255, 255, 0.15);
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  transform: rotate(90deg);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Category Filters */
-.categoryBar {
+/* =========================================
+   STATE 1 & 2: VAULT MACHINE & REEL HUD
+   ========================================= */
+
+.vaultBody {
+  padding: 22px 24px 26px;
   display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sectionSub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+/* Vibe Selector Grid */
+.vibeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.vibeCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  user-select: none;
+}
+
+.vibeCard:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.vibeCardActive {
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.18) 0%, rgba(255, 50, 60, 0.05) 100%) !important;
+  border-color: #e50914 !important;
+  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.3), inset 0 0 12px rgba(229, 9, 20, 0.15);
+  transform: translateY(-2px);
+}
+
+.vibeTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vibeEmoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.vibeTag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.vibeCardActive .vibeTag {
+  color: #ff6b72;
+  background: rgba(229, 9, 20, 0.15);
+}
+
+.vibeLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.vibeDesc {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.3;
+}
+
+/* Machine Stage (Reel Slot HUD) */
+.arcadeStage {
+  position: relative;
+  background: #121215;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 20px;
+  overflow: hidden;
+  box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.arcadeStage::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(229, 9, 20, 0.5), transparent);
+}
+
+.reelContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.reelWindow {
+  position: relative;
+  height: 90px;
+  background: #09090b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 8px;
+  text-align: center;
+}
+
+.reelWindowGlow {
+  border-color: rgba(229, 9, 20, 0.5);
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.35);
+}
+
+.reelLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+}
+
+.reelValue {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  transition: transform 0.1s ease;
+}
+
+.reelValueSpinning {
+  filter: blur(1.5px);
+  animation: reelSpinMotion 0.15s infinite linear;
+  color: #ff4b55;
+}
+
+@keyframes reelSpinMotion {
+  0% { transform: translateY(-10px); opacity: 0.4; }
+  50% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(10px); opacity: 0.4; }
+}
+
+.centerPosterReel {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background: #09090b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.spinningCenterReel {
+  border-color: #e50914;
+  box-shadow: 0 0 35px rgba(229, 9, 20, 0.5), inset 0 0 25px rgba(229, 9, 20, 0.25);
+}
+
+.reelBackdropFlash {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(3px) brightness(0.65);
+  transition: opacity 0.1s;
+}
+
+.reelCenterOverlay {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 16px 28px 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  text-align: center;
 }
 
-.categoryBar::-webkit-scrollbar {
-  display: none;
-}
-
-.categoryPill {
+.leverActionBtn {
+  position: relative;
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #e50914 0%, #b8050e 100%);
+  border: none;
+  border-radius: 16px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 8px 30px rgba(229, 9, 20, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
-.categoryPill:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
+.leverActionBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(229, 9, 20, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.categoryPillActive {
-  background: #e50914 !important;
-  color: #fff !important;
-  border-color: #e50914 !important;
-  box-shadow: 0 4px 16px rgba(229, 9, 20, 0.4);
+.leverActionBtn:active:not(:disabled) {
+  transform: translateY(2px) scale(0.99);
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
 }
 
-/* Content Area */
-.contentArea {
-  padding: 20px 28px 28px;
+.leverActionBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   STATE 3: JACKPOT REVEAL SHOWCASE
+   ========================================= */
+
+.revealBody {
+  padding: 20px 24px 26px;
   display: flex;
-  gap: 28px;
-  align-items: stretch;
-  min-height: 380px;
+  flex-direction: column;
+  gap: 18px;
+  animation: revealEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Left Poster Slot Reel */
-.posterContainer {
+@keyframes revealEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.jackpotBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, rgba(229, 9, 20, 0.2) 0%, rgba(245, 197, 24, 0.1) 100%);
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  border-radius: 12px;
+  padding: 8px 16px;
+}
+
+.jackpotTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff4752;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.jackpotVibeTag {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+/* Movie Showcase Hero */
+.movieHero {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.posterCard {
   position: relative;
-  width: 250px;
+  width: 170px;
   flex-shrink: 0;
   aspect-ratio: 2 / 3;
   border-radius: 16px;
   overflow: hidden;
-  background: #18181a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.8), 0 0 25px rgba(229, 9, 20, 0.25);
 }
 
-.spinningGlow {
-  border-color: #e50914;
-  box-shadow: 0 0 35px rgba(229, 9, 20, 0.6), inset 0 0 20px rgba(229, 9, 20, 0.3);
-  animation: pulseGlow 0.8s infinite alternate;
-}
-
-@keyframes pulseGlow {
-  from { box-shadow: 0 0 20px rgba(229, 9, 20, 0.4); }
-  to { box-shadow: 0 0 45px rgba(229, 9, 20, 0.8); }
-}
-
-.posterImage {
+.posterImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
 }
 
-.posterOverlayDice {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-}
-
-.diceIconPulse {
-  animation: diceRoll 0.5s infinite linear;
-}
-
-@keyframes diceRoll {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.15); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-/* Right Details Section */
-.detailsContainer {
+.movieInfo {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   min-width: 0;
 }
 
-.topMetaRow {
+.metaRow {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-.metaBadge {
-  display: flex;
+.badge {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.9);
 }
 
+.typeBadge {
+  background: rgba(0, 113, 235, 0.16);
+  border-color: rgba(0, 113, 235, 0.35);
+  color: #3b82f6;
+  text-transform: uppercase;
+}
+
 .ratingBadge {
-  background: rgba(245, 197, 24, 0.12);
+  background: rgba(245, 197, 24, 0.14);
   border-color: rgba(245, 197, 24, 0.3);
   color: #f5c518;
 }
 
-.typeBadge {
-  background: rgba(0, 113, 235, 0.15);
-  border-color: rgba(0, 113, 235, 0.35);
-  color: #3b82f6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.title {
-  font-size: 32px;
+.movieTitle {
+  font-size: 26px;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 10px 0;
-  line-height: 1.2;
-  letter-spacing: -0.5px;
+  line-height: 1.25;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
 }
 
-.genreTags {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.genreTag {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  padding: 3px 8px;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 500;
-}
-
-.overview {
-  font-size: 14px;
-  line-height: 1.6;
+.overviewText {
+  font-size: 13px;
+  line-height: 1.55;
   color: rgba(255, 255, 255, 0.65);
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-/* Action Buttons Bar */
-.actionsBar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: auto;
+/* Trailer Player Frame */
+.trailerSection {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  aspect-ratio: 16 / 9;
+  max-height: 280px;
 }
 
-.watchNowBtn {
+.trailerIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Action Control Deck */
+.actionsDeck {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.primaryActionRow {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
+
+.streamBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 12px 24px;
-  background: #e50914;
+  padding: 13px 20px;
+  background: linear-gradient(135deg, #e50914 0%, #b8050e 100%);
   border: none;
   border-radius: 12px;
   color: #fff;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
 }
 
-.watchNowBtn:hover {
-  background: #f40612;
+.streamBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.55);
+  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.6);
+}
+
+.secondaryRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .secondaryBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.06);
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 12px;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
+  border-radius: 10px;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
-.secondaryBtn:hover {
-  background: rgba(255, 255, 255, 0.12);
+.secondaryBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.25);
   color: #fff;
   transform: translateY(-1px);
 }
 
-.spinAgainBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+.secondaryBtnActive {
+  background: rgba(229, 9, 20, 0.15) !important;
+  border-color: #e50914 !important;
+  color: #ff4752 !important;
 }
 
-.spinAgainBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: #ff333d;
-  color: #ff333d;
-  transform: translateY(-1px);
-}
+/* =========================================
+   MOBILE RESPONSIVENESS (Phone Specific Ergonomics)
+   ========================================= */
 
-.spinAgainBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+@media (max-width: 640px) {
+  .overlay {
+    padding: 10px;
+    align-items: flex-end; /* Mobile Bottom Sheet / Elevated Card style */
+  }
 
-/* Skeleton Loading State inside content */
-.skeletonCard {
-  width: 100%;
-  height: 100%;
-  border-radius: 16px;
-  background: linear-gradient(90deg, #18181a 25%, #252528 50%, #18181a 75%);
-  background-size: 200% 100%;
-  animation: skeletonPulse 1.5s infinite;
-}
-
-@keyframes skeletonPulse {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
   .modal {
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: 88dvh;
+    border-radius: 20px 20px 14px 14px;
   }
 
-  .contentArea {
-    flex-direction: column;
-    align-items: center;
-    padding: 16px 20px 24px;
-    gap: 20px;
+  .header {
+    padding: 14px 16px 12px;
   }
 
-  .posterContainer {
-    width: 170px;
+  .vaultBadge {
+    padding: 5px 10px;
+    font-size: 11px;
   }
 
-  .title {
-    font-size: 24px;
-    text-align: center;
+  .vaultBody {
+    padding: 14px 16px 18px;
+    gap: 14px;
   }
 
-  .topMetaRow, .genreTags {
-    justify-content: center;
+  .vibeGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
-  .overview {
-    text-align: center;
-    -webkit-line-clamp: 3;
-    margin-bottom: 20px;
+  .vibeCard {
+    padding: 10px 12px;
   }
 
-  .actionsBar {
-    justify-content: center;
-    width: 100%;
+  .vibeEmoji {
+    font-size: 18px;
   }
 
-  .watchNowBtn, .secondaryBtn, .spinAgainBtn {
-    flex: 1;
-    justify-content: center;
-    padding: 12px 14px;
+  .vibeLabel {
+    font-size: 12px;
+  }
+
+  .vibeDesc {
+    font-size: 10px;
+    display: none; /* Hide detailed desc on mobile to preserve height */
+  }
+
+  .arcadeStage {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .reelContainer {
+    gap: 8px;
+  }
+
+  .reelWindow {
+    height: 72px;
+    padding: 6px;
+  }
+
+  .reelValue {
+    font-size: 12px;
+  }
+
+  .centerPosterReel {
+    height: 100px;
+    margin-top: 10px;
+  }
+
+  .leverActionBtn {
+    padding: 14px 18px;
+    font-size: 14px;
+  }
+
+  /* Reveal State Mobile */
+  .revealBody {
+    padding: 14px 16px 18px;
+    gap: 14px;
+  }
+
+  .movieHero {
+    gap: 14px;
+  }
+
+  .posterCard {
+    width: 95px;
+    border-radius: 12px;
+  }
+
+  .movieTitle {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .overviewText {
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+    margin-bottom: 8px;
+  }
+
+  .trailerSection {
+    max-height: 200px;
+  }
+
+  .secondaryRow {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .secondaryBtn {
+    padding: 10px 6px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .streamBtn {
+    padding: 12px 16px;
     font-size: 13px;
   }
 }
