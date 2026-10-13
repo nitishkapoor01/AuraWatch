@@ -624,9 +624,6 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                       <span>{movieType === 'tv' ? 'Series' : 'Movie'}</span>
                       {currentMovie.year && <span>• {currentMovie.year}</span>}
                     </div>
-                    <div className={styles.matchBadge}>
-                      CERTIFIED PICK
-                    </div>
                   </>
                 )}
               </div>
@@ -642,7 +639,6 @@ const CinemaRouletteModal = ({ isOpen, onClose }) => {
                         <span>{currentMovie.rating}</span>
                       </span>
                     )}
-                    <span className={styles.chip}>4K ULTRA HD</span>
                   </div>
                 </div>
 
