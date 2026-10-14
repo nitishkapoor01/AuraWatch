@@ -10,6 +10,8 @@
   justify-content: center;
   padding: 16px;
   animation: fadeIn 0.25s ease-out;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 @keyframes fadeIn {
@@ -18,18 +20,19 @@
 }
 
 .modalCard {
-  background: linear-gradient(135deg, rgba(22, 22, 28, 0.96), rgba(14, 14, 18, 0.98));
+  background: linear-gradient(135deg, rgba(22, 22, 28, 0.98), rgba(14, 14, 18, 0.99));
   border: 1px solid rgba(255, 183, 3, 0.25);
   border-radius: 20px;
   width: 100%;
   max-width: 680px;
-  max-height: 92vh;
-  overflow-y: auto;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 183, 3, 0.12);
+  max-height: calc(100vh - 40px);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 183, 3, 0.15);
   display: flex;
   flex-direction: column;
   animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  margin: auto;
 }
 
 @keyframes scaleUp {
@@ -37,22 +40,17 @@
   to { transform: scale(1); opacity: 1; }
 }
 
-/* Custom Scrollbar */
-.modalCard::-webkit-scrollbar {
-  width: 6px;
-}
-.modalCard::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
-}
-
 /* Header */
 .modalHeader {
-  padding: 18px 24px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  background: rgba(22, 22, 28, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10;
 }
 
 .crownBadge {
@@ -101,6 +99,29 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 183, 3, 0.4) rgba(255, 255, 255, 0.04);
+}
+
+.modalBody::-webkit-scrollbar {
+  width: 8px;
+}
+.modalBody::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+}
+.modalBody::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ffb703, #ff7b00);
+  border-radius: 4px;
+}
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: #ffc300;
 }
 
 /* Active VIP Card */
