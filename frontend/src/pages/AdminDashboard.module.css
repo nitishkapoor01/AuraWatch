@@ -2716,17 +2716,46 @@
 
 @media (max-width: 768px) {
   .adminPage {
-    padding: 85px 16px 80px 16px;
+    padding: 68px 12px 90px 12px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .header {
+    margin-bottom: 20px;
   }
 
   .header h1 {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .header p {
+    font-size: 13px;
+  }
+
+  .tabsNav {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    width: 100%;
+    scrollbar-width: none;
+  }
+
+  .tabsNav::-webkit-scrollbar {
+    display: none;
   }
 
   .tabBtn {
-    padding: 8px 14px;
-    font-size: 12.5px;
+    padding: 8px 12px;
+    font-size: 12px;
     gap: 6px;
+    flex-shrink: 0;
   }
 }
 

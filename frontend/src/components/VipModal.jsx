@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   Crown, 
@@ -208,7 +209,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const upiPayLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(paymentInfo.upi_name || 'AuraWatch')}&am=${selectedPlan.price_inr}&cu=INR&tn=${encodeURIComponent(`VIP ${selectedPlan.name}`)}`;
   const qrCodeUrl = paymentInfo.qr_image_url || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiPayLink)}`;
 
-  return (
+  return createPortal(
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
         {/* Glowing Header */}
@@ -518,7 +519,8 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

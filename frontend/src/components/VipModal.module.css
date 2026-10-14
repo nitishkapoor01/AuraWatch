@@ -4,7 +4,7 @@
   background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  z-index: 99999;
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,6 +12,7 @@
   animation: fadeIn 0.25s ease-out;
   overflow-y: auto;
   overscroll-behavior: contain;
+  pointer-events: auto !important;
 }
 
 @keyframes fadeIn {
@@ -33,6 +34,15 @@
   animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   margin: auto;
+  pointer-events: auto !important;
+}
+
+.modalCard button,
+.modalCard input,
+.modalCard a,
+.modalCard label,
+.modalCard div {
+  pointer-events: auto;
 }
 
 @keyframes scaleUp {
