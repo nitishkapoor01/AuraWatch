@@ -4,7 +4,7 @@ import styles from './AdBanner.module.css';
 
 const DEFAULT_CONFIGS = {
   download_modal: {
-    enabled: true,
+    enabled: false,
     format: 'native',
     container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 300,
@@ -13,7 +13,7 @@ const DEFAULT_CONFIGS = {
     script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
   },
   movie_detail: {
-    enabled: true,
+    enabled: false,
     format: 'native',
     container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 728,
@@ -22,7 +22,7 @@ const DEFAULT_CONFIGS = {
     script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
   },
   pre_roll: {
-    enabled: true,
+    enabled: false,
     format: 'native',
     container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 300,
@@ -34,7 +34,7 @@ const DEFAULT_CONFIGS = {
 
 const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
   const { user } = useAuth();
-  const [adConfig, setAdConfig] = useState(customConfig || DEFAULT_CONFIGS[slot]);
+  const [adConfig, setAdConfig] = useState(customConfig || null);
   const [skipAds, setSkipAds] = useState(false);
   const impressionLoggedRef = useRef(false);
 

@@ -10,7 +10,7 @@ import { useButtonWarnings } from '../hooks/useButtonWarnings';
 import { useToast } from '../context/ToastContext';
 import { usePlayer } from '../context/PlayerContext';
 import HelpModal from '../components/profile/HelpModal';
-import AdBanner from '../components/ads/AdBanner';
+
 import PlaylistModal from '../components/PlaylistModal';
 
 const isTVType = (t) => {
@@ -1062,8 +1062,7 @@ const MovieDetail = () => {
         </div>
       )}
 
-      {/* In-Content Banner Ad */}
-      <AdBanner slot="movie_detail" />
+
 
       {/* More Like This */}
       <div className={`${styles.recommendations} recommendations`}>
@@ -1088,10 +1087,7 @@ const MovieDetail = () => {
                 
                 {(!user || (!user.is_premium && user.role !== 'admin' && !user.is_super_admin)) && !globalSkipAds ? (
                   <>
-                    {/* ADVERTISEMENT SCRIPT */}
-                    <div className={styles.adPlaceholder} style={{ padding: 0, background: 'transparent', border: 'none' }}>
-                      <AdBanner slot="download_modal" />
-                    </div>
+
                     
                     <div className={styles.timerBox}>
                       <Loader2 size={24} className={styles.spinner} />

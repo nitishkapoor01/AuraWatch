@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import styles from './AdCard.module.css';
 
 const DEFAULT_CONFIG = {
-  enabled: true,
+  enabled: false,
   format: 'native',
   container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
   key: 'ccd684eb4f620dcc7303d2fce2577bae',
@@ -14,7 +14,7 @@ const DEFAULT_CONFIG = {
 
 const AdCard = ({ style, compact = false }) => {
   const { user } = useAuth();
-  const [adConfig, setAdConfig] = useState(DEFAULT_CONFIG);
+  const [adConfig, setAdConfig] = useState(null);
   const [scale, setScale] = useState(0.6);
   const cardRef = useRef(null);
   const impressionLoggedRef = useRef(false);

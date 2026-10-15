@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import styles from './Search.module.css';
 import homeStyles from './Home.module.css';
 import SEO from '../components/SEO';
-import AdCard from '../components/ads/AdCard';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -246,9 +245,6 @@ const Search = () => {
               >
                 <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
               </Link>
-              {(idx === 3 || (idx > 3 && (idx - 3) % 8 === 0) || (results.length < 4 && idx === results.length - 1)) && (
-                <AdCard key={`ad-grid-${idx}`} />
-              )}
             </React.Fragment>
           ))}
         </div>

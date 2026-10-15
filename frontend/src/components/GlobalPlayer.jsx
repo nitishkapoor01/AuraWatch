@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { X, ExternalLink, Volume2, VolumeX, Loader2, Crown } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
-import AdBanner from './ads/AdBanner';
 import styles from './GlobalPlayer.module.css';
 
 const GlobalPlayer = () => {
@@ -647,9 +646,10 @@ const GlobalPlayer = () => {
                         rel="noopener noreferrer"
                         className={styles.ytVisitBtn}
                         onClick={(e) => e.stopPropagation()}
+                        title="Visit Advertiser"
+                        aria-label="Visit Advertiser"
                       >
-                        <span>Visit Advertiser</span>
-                        <ExternalLink size={12} />
+                        <ExternalLink size={16} />
                       </a>
                     )}
                   </div>
@@ -688,58 +688,10 @@ const GlobalPlayer = () => {
               </div>
             ) : (
               <div className={styles.ytFallbackContainer}>
-                {isResolvingVast ? (
-                  <div className={styles.ytLoadingOverlay}>
-                    <Loader2 className={styles.spinner} size={32} />
-                    <span>Loading player...</span>
-                  </div>
-                ) : (
-                  <div className={styles.ytFallbackWrapper}>
-                    <div className={styles.ytTopOverlay}>
-                      <div className={styles.ytAdTag}>
-                        <span className={styles.ytAdYellow}>Ad</span>
-                        <span className={styles.ytAdDot}>•</span>
-                        <span>1 of 1</span>
-                      </div>
-
-                      {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
-                        <div 
-                          className={styles.ytQuestBadge} 
-                          title="Unlock Free VIP Pass"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
-                          }}
-                        >
-                          <Crown size={12} color="#ffb703" />
-                          <span>Free VIP Pass</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className={styles.preRollAdArea}>
-                      <AdBanner slot="pre_roll" customConfig={preRollConfig} />
-                    </div>
-
-                    <div className={styles.ytBottomRight}>
-                      {preRollSeconds > 0 ? (
-                        <div className={styles.ytCountdownBox}>
-                          <span>Video will play after ad</span>
-                          <span className={styles.ytCountdownNum}>{preRollSeconds}</span>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          className={styles.ytSkipBtn}
-                          onClick={handleSkipAd}
-                        >
-                          <span>Skip Ad</span>
-                          <span className={styles.ytSkipArrow}>➔</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <div className={styles.ytLoadingOverlay}>
+                  <Loader2 className={styles.spinner} size={32} />
+                  <span>Loading stream...</span>
+                </div>
               </div>
             )}
           </div>
