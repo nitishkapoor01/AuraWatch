@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LogOut, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles, Clock, Heart, Trash2, X, MessageSquare, AlertTriangle, Crown } from 'lucide-react';
+import { Search, LogOut, LogIn, User, HelpCircle, Lock, Settings, Dices, Film, Tv, Sparkles, Clock, Heart, Trash2, X, MessageSquare, AlertTriangle, Crown } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -701,9 +701,15 @@ const TopNav = () => {
                         <LogOut size={16} /> Log Out
                       </button>
                     ) : (
-                      <button className={styles.dropdownItem} onClick={() => handleRestrictedAction(null)}>
-                        <LogOut size={16} /> Log Out
-                        <Lock size={12} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+                      <button 
+                        className={styles.dropdownItem} 
+                        onClick={() => { 
+                          setIsDropdownOpen(false); 
+                          navigate('/login'); 
+                        }}
+                        style={{ color: '#ff4d4d', fontWeight: '600' }}
+                      >
+                        <LogIn size={16} /> Log In / Sign Up
                       </button>
                     )}
                   </div>
