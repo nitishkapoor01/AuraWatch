@@ -143,6 +143,9 @@ router.get('/video-proxy', async (req, res) => {
   }
 });
 
+let cachedPublicConfig = null;
+let lastPublicConfigFetch = 0;
+
 // Get current public ads configuration
 router.get('/config', optionalAuth, async (req, res) => {
   try {
@@ -164,10 +167,21 @@ router.get('/config', optionalAuth, async (req, res) => {
       });
     }
 
-    const [adsConfigRes, skipTimerRes] = await Promise.all([
+    const now = Date.now();
+    if (cachedPublicConfig && (now - lastPublicConfigFetch < 60000)) {
+      return res.json(cachedPublicConfig);
+    }
+
+    const dbPromise = Promise.all([
       db.query("SELECT value FROM settings WHERE key = 'ads_config'"),
       db.query("SELECT value FROM settings WHERE key = 'skip_ads_timer'")
     ]);
+
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('DB query timeout')), 1500)
+    );
+
+    const [adsConfigRes, skipTimerRes] = await Promise.race([dbPromise, timeoutPromise]);
 
     let config = {
       enabled: true,
@@ -222,10 +236,13 @@ router.get('/config', optionalAuth, async (req, res) => {
       }
     }
 
-    res.json({
+    cachedPublicConfig = {
       config,
       skipAdsTimer: !!skipAdsTimer
-    });
+    };
+    lastPublicConfigFetch = now;
+
+    res.json(cachedPublicConfig);
   } catch (error) {
     console.error('Failed to get public ads config, serving default fallback:', error);
     res.json({

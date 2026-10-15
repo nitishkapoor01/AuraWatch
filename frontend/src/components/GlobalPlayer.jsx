@@ -67,17 +67,27 @@ const GlobalPlayer = () => {
         const savedToken = localStorage.getItem('aurawatch_token') || token;
         const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
 
-        let res = null;
-        try {
-          res = await fetch(`${baseUrl}/ads/config`, { headers });
-        } catch (_) {}
+        const fetchWithTimeout = async (url, options = {}, timeoutMs = 1200) => {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), timeoutMs);
+          try {
+            const resp = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(timer);
+            return resp;
+          } catch (_) {
+            clearTimeout(timer);
+            return null;
+          }
+        };
+
+        const res = await fetchWithTimeout(`${baseUrl}/ads/config`, { headers }, 1200);
 
         let data = null;
         if (res && res.ok) {
           try { data = await res.json(); } catch (_) {}
         }
         
-        // If config endpoint failed, use hardened HilltopAds VAST default so ads never fail
+        // If config endpoint was slow or failed, use hardened HilltopAds VAST default so ads never freeze
         if (!data) {
           data = {
             config: {
@@ -95,6 +105,7 @@ const GlobalPlayer = () => {
         if (isMounted) {
           if (data.is_premium || data.skipAdsTimer || !data.config?.enabled) {
             setPreRollActive(false);
+            setIsResolvingVast(false);
             return;
           }
 
@@ -111,19 +122,15 @@ const GlobalPlayer = () => {
             if (vastUrl && preRoll.type !== 'banner' && preRoll.type !== 'video') {
               try {
                 let xmlText = '';
-                // Try backend proxy first for reliable bypass of ad blockers and CORS
-                try {
-                  const proxyUrl = `${baseUrl}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`;
-                  const pRes = await fetch(proxyUrl);
-                  if (pRes.ok) xmlText = await pRes.text();
-                } catch (_) {}
+                // 1. Try fast backend proxy
+                const proxyUrl = `${baseUrl}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`;
+                const pRes = await fetchWithTimeout(proxyUrl, {}, 1200);
+                if (pRes && pRes.ok) xmlText = await pRes.text();
 
-                // If proxy didn't succeed, fetch directly from client
+                // 2. If proxy was slow or failed, fetch directly from HilltopAds
                 if (!xmlText) {
-                  try {
-                    const vRes = await fetch(vastUrl);
-                    if (vRes.ok) xmlText = await vRes.text();
-                  } catch (_) {}
+                  const vRes = await fetchWithTimeout(vastUrl, {}, 1500);
+                  if (vRes && vRes.ok) xmlText = await vRes.text();
                 }
 
                 if (xmlText && isMounted) {
@@ -141,8 +148,10 @@ const GlobalPlayer = () => {
                   const clickThrough = clickMatch ? clickMatch[1].trim() : '';
 
                   if (foundVideo) {
-                    const proxiedVideo = `${baseUrl}/ads/video-proxy?url=${encodeURIComponent(foundVideo)}`;
-                    setVastVideo({ url: proxiedVideo, rawUrl: foundVideo, clickThrough, impressions: impMatches });
+                    const safeDirectVideo = foundVideo.replace('://silent-basis.pro', '://www.silent-basis.pro');
+                    const proxiedVideo = `${baseUrl}/ads/video-proxy?url=${encodeURIComponent(safeDirectVideo)}`;
+                    // Use direct CDN video for instant, zero-lag 60fps playback, with proxy as fallback
+                    setVastVideo({ url: safeDirectVideo, proxyUrl: proxiedVideo, rawUrl: foundVideo, clickThrough, impressions: impMatches });
                     setIsResolvingVast(false);
                   } else {
                     console.warn('No video found in VAST XML, advancing to stream');
@@ -491,9 +500,9 @@ const GlobalPlayer = () => {
                     setPreRollActive(false);
                   }}
                   onError={(e) => {
-                    if (vastVideo?.rawUrl && e.target.src !== vastVideo.rawUrl) {
-                      console.warn('Video proxy playback failed, falling back to direct video URL:', vastVideo.rawUrl);
-                      e.target.src = vastVideo.rawUrl;
+                    if (vastVideo?.proxyUrl && e.target.src !== vastVideo.proxyUrl) {
+                      console.warn('Direct CDN video blocked, falling back to first-party proxy:', vastVideo.proxyUrl);
+                      e.target.src = vastVideo.proxyUrl;
                       e.target.play().catch(() => {});
                       return;
                     }
