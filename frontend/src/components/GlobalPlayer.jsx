@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX, Heart, Film, Tv, ShieldCheck, CheckCircle2, Server, Loader2 } from 'lucide-react';
+import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX, Heart, Film, Tv, ShieldCheck, CheckCircle2, Server, Loader2, Gift } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import AdBanner from './ads/AdBanner';
@@ -30,6 +30,8 @@ const GlobalPlayer = () => {
   const [adVideoStarted, setAdVideoStarted] = useState(false);
   const [adProgressPercent, setAdProgressPercent] = useState(0);
   const [isResolvingVast, setIsResolvingVast] = useState(false);
+  const [adPassStatus, setAdPassStatus] = useState(null);
+  const completedRef = useRef(false);
 
   // Fetch Ads config and initialize Pre-Roll Gateway when opening a movie
   useEffect(() => {
@@ -58,6 +60,7 @@ const GlobalPlayer = () => {
     setIsResolvingVast(true);
     setPreRollSeconds(10);
 
+    completedRef.current = false;
     let isMounted = true;
     const fetchAdsConfig = async () => {
       try {
@@ -65,7 +68,9 @@ const GlobalPlayer = () => {
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
         const savedToken = localStorage.getItem('aurawatch_token') || token;
+        const visitorId = localStorage.getItem('trackingVisitorId') || '';
         const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
+        if (visitorId) headers['x-visitor-id'] = visitorId;
 
         const fetchWithTimeout = async (url, options = {}, timeoutMs = 1200) => {
           const controller = new AbortController();
@@ -80,7 +85,21 @@ const GlobalPlayer = () => {
           }
         };
 
-        const res = await fetchWithTimeout(`${baseUrl}/ads/config`, { headers }, 1200);
+        // Concurrently fetch VIP Ad-Pass quest status
+        fetchWithTimeout(`${baseUrl}/vip/ad-pass/progress?visitor_id=${encodeURIComponent(visitorId)}`, { headers }, 1200)
+          .then(r => r ? r.json() : null)
+          .then(qData => {
+            if (qData && isMounted) {
+              setAdPassStatus(qData);
+              if (qData.is_unlocked) {
+                setPreRollActive(false);
+                setIsResolvingVast(false);
+              }
+            }
+          })
+          .catch(() => {});
+
+        const res = await fetchWithTimeout(`${baseUrl}/ads/config?visitor_id=${encodeURIComponent(visitorId)}`, { headers }, 1200);
 
         let data = null;
         if (res && res.ok) {
@@ -195,6 +214,40 @@ const GlobalPlayer = () => {
       isMounted = false;
     };
   }, [isOpen, movieData, isAdExempt]);
+
+  // Complete Ad-Pass Quest helper
+  const completeAdQuest = async () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+        (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const vid = localStorage.getItem('trackingVisitorId') || '';
+      const savedToken = localStorage.getItem('aurawatch_token') || token;
+      const headers = { 'Content-Type': 'application/json' };
+      if (savedToken) headers['Authorization'] = `Bearer ${savedToken}`;
+      if (vid) headers['x-visitor-id'] = vid;
+
+      const res = await fetch(`${baseUrl}/vip/ad-pass/complete-ad`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ visitor_id: vid })
+      });
+      const data = await res.json();
+      if (data && data.success) {
+        setAdPassStatus(prev => ({
+          ...prev,
+          current_count: data.current_count,
+          target_count: data.target_count,
+          is_unlocked: data.is_unlocked,
+          unlocked_until: data.unlocked_until
+        }));
+        if (data.is_unlocked) {
+          window.dispatchEvent(new CustomEvent('aurawatch_vip_unlocked', { detail: data }));
+        }
+      }
+    } catch (_) {}
+  };
 
   // Pre-Roll Countdown Timer with Auto-Advance (only for fallback banners)
   useEffect(() => {
@@ -497,6 +550,7 @@ const GlobalPlayer = () => {
                     setAdProgressPercent(Math.min(100, (ct / Math.max(1, Math.min(dur, requiredSecs))) * 100));
                   }}
                   onEnded={() => {
+                    completeAdQuest();
                     setPreRollActive(false);
                   }}
                   onError={(e) => {
@@ -532,6 +586,13 @@ const GlobalPlayer = () => {
                     <span>1 of 1</span>
                     {adVideoStarted && preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
                   </div>
+
+                  {adPassStatus?.enabled && !adPassStatus?.is_unlocked && (
+                    <div className={styles.ytQuestBadge} title="Complete the daily quest to unlock 24 Hours of Ad-Free VIP!">
+                      <Gift size={13} />
+                      <span>Ad-Pass: {Math.min(adPassStatus.target_count || 5, (adPassStatus.current_count || 0) + 1)}/{adPassStatus.target_count || 5} (Watch to get {adPassStatus.reward_hours || 24}h VIP)</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* YouTube Bottom Controls */}
@@ -579,6 +640,7 @@ const GlobalPlayer = () => {
                       className={styles.ytSkipBtn}
                       onClick={(e) => {
                         e.stopPropagation();
+                        completeAdQuest();
                         setPreRollActive(false);
                       }}
                     >

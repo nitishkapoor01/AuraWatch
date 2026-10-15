@@ -450,6 +450,23 @@ const initDB = async () => {
 
       CREATE INDEX IF NOT EXISTS idx_vip_requests_status ON vip_payment_requests(status);
       CREATE INDEX IF NOT EXISTS idx_vip_requests_user ON vip_payment_requests(user_id);
+
+      CREATE TABLE IF NOT EXISTS ad_pass_quests (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        visitor_id TEXT,
+        current_count INTEGER DEFAULT 0,
+        target_count INTEGER DEFAULT 5,
+        reward_hours INTEGER DEFAULT 24,
+        unlocked_until TIMESTAMPTZ,
+        last_ad_completed_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_ad_pass_user ON ad_pass_quests(user_id);
+      CREATE INDEX IF NOT EXISTS idx_ad_pass_visitor ON ad_pass_quests(visitor_id);
+      CREATE INDEX IF NOT EXISTS idx_ad_pass_unlocked ON ad_pass_quests(unlocked_until);
     `);
 
     // Backfill total_visits from platform_visits for existing historical records

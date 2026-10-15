@@ -149,8 +149,21 @@ let lastPublicConfigFetch = 0;
 // Get current public ads configuration
 router.get('/config', optionalAuth, async (req, res) => {
   try {
-    // If authenticated user is verified VIP, completely turn off ads at the server level
-    if (req.user && req.user.is_premium) {
+    // If authenticated user is verified VIP or guest has active Ad-Pass, completely turn off ads at the server level
+    let isVipActive = Boolean(req.user && req.user.is_premium);
+
+    const visitorId = req.headers['x-visitor-id'] || req.query.visitor_id;
+    if (!isVipActive && visitorId) {
+      const qRes = await db.query(
+        'SELECT id FROM ad_pass_quests WHERE visitor_id = $1 AND user_id IS NULL AND unlocked_until > CURRENT_TIMESTAMP LIMIT 1',
+        [String(visitorId).trim().slice(0, 100)]
+      ).catch(() => ({ rows: [] }));
+      if (qRes.rows.length > 0) {
+        isVipActive = true;
+      }
+    }
+
+    if (isVipActive) {
       return res.json({
         config: {
           enabled: false,

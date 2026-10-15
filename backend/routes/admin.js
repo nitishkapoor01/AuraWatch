@@ -1413,4 +1413,44 @@ router.post('/vip/payment-info', isAdmin, async (req, res) => {
   }
 });
 
+// 10. Get / Update Ad-Pass Quest Configuration
+router.get('/vip/ad-pass-config', isModerator, async (req, res) => {
+  try {
+    const row = await db.query("SELECT value FROM settings WHERE key = 'ad_pass_config'");
+    let cfg = { enabled: true, target_ads: 5, reward_hours: 24 };
+    if (row.rows[0]?.value) {
+      try { cfg = { ...cfg, ...JSON.parse(row.rows[0].value) }; } catch (_) {}
+    }
+    res.json(cfg);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to retrieve Ad-Pass configuration.' });
+  }
+});
+
+router.post('/vip/ad-pass-config', isAdmin, async (req, res) => {
+  try {
+    const { enabled = true, target_ads = 5, reward_hours = 24 } = req.body;
+    const safeTarget = Math.max(1, Math.min(50, parseInt(target_ads, 10) || 5));
+    const safeReward = Math.max(1, Math.min(720, parseInt(reward_hours, 10) || 24)); // up to 30 days
+    const cfg = {
+      enabled: Boolean(enabled),
+      target_ads: safeTarget,
+      reward_hours: safeReward
+    };
+
+    await db.query(
+      `INSERT INTO settings (key, value)
+       VALUES ('ad_pass_config', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [JSON.stringify(cfg)]
+    );
+
+    res.json({ success: true, message: 'Ad-Pass configuration updated successfully!', data: cfg });
+  } catch (error) {
+    console.error('[Admin Ad-Pass Config] Error:', error);
+    res.status(500).json({ message: 'Failed to update Ad-Pass configuration.' });
+  }
+});
+
 module.exports = router;
+

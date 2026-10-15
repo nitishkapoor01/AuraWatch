@@ -15,7 +15,10 @@ import {
   ArrowRight, 
   Loader2, 
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Play,
+  Flame,
+  Send
 } from 'lucide-react';
 import styles from './VipModal.module.css';
 
@@ -27,7 +30,7 @@ const DEFAULT_PLANS = [
 
 const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const { user, isLoggedIn, refreshUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('upi'); // 'upi' | 'redeem'
+  const [activeTab, setActiveTab] = useState('quest'); // 'quest' | 'redeem' | 'upi'
   const [selectedPlan, setSelectedPlan] = useState(DEFAULT_PLANS[0]);
   const [redeemCode, setRedeemCode] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
@@ -43,17 +46,46 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   });
   const [vipStatus, setVipStatus] = useState(null);
   const [isExtending, setIsExtending] = useState(false);
+  const [questProgress, setQuestProgress] = useState({
+    enabled: true,
+    current_count: 0,
+    target_count: 5,
+    reward_hours: 24,
+    is_unlocked: false,
+    unlocked_until: null,
+    seconds_remaining: 0
+  });
 
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
 
-  // Fetch Payment Info (UPI ID, plans) & VIP status
+  const fetchQuest = () => {
+    const token = localStorage.getItem('aurawatch_token');
+    const visitorId = localStorage.getItem('trackingVisitorId') || '';
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (visitorId) headers['x-visitor-id'] = visitorId;
+
+    fetch(`${API_BASE}/vip/ad-pass/progress?visitor_id=${encodeURIComponent(visitorId)}`, { headers })
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.enabled !== undefined) {
+          setQuestProgress(data);
+        }
+      })
+      .catch(() => {});
+  };
+
+  // Fetch Payment Info (UPI ID, plans) & VIP status & Quest status
   useEffect(() => {
     if (!isOpen) return;
 
     setStatusMessage({ text: '', type: '' });
     setIsExtending(false);
 
-    // 1. Fetch public payment info
+    // 1. Fetch quest progress
+    fetchQuest();
+
+    // 2. Fetch public payment info
     fetch(`${API_BASE}/settings/vip_payment_info`)
       .then(res => res.json())
       .then(data => {
@@ -70,7 +102,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
       })
       .catch(() => {});
 
-    // 2. Fetch authenticated VIP status if logged in
+    // 3. Fetch authenticated VIP status if logged in
     const token = localStorage.getItem('aurawatch_token');
     if (token) {
       fetch(`${API_BASE}/vip/status`, {
@@ -106,12 +138,6 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
 
   const handleRedeemCode = async (e) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      onClose();
-      if (onRequireLogin) onRequireLogin();
-      return;
-    }
-
     if (!redeemCode.trim()) {
       setStatusMessage({ text: 'Please enter a VIP gift code.', type: 'error' });
       return;
@@ -122,27 +148,35 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
 
     try {
       const token = localStorage.getItem('aurawatch_token');
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (visitorId) headers['x-visitor-id'] = visitorId;
+
       const res = await fetch(`${API_BASE}/vip/redeem`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ code: redeemCode.trim() })
+        headers,
+        body: JSON.stringify({ code: redeemCode.trim(), visitor_id: visitorId })
       });
       const data = await res.json();
 
       if (res.ok) {
         setStatusMessage({ text: data.message, type: 'success' });
         setRedeemCode('');
-        await refreshUser();
-        // Update local vipStatus
+        if (token) await refreshUser();
+        // Update local vipStatus and quest status
         setVipStatus(prev => ({
           ...prev,
           is_premium: true,
           premium_expires_at: data.premium_expires_at,
           premium_plan: data.premium_plan
         }));
+        setQuestProgress(prev => ({
+          ...prev,
+          is_unlocked: true,
+          unlocked_until: data.premium_expires_at
+        }));
+        window.dispatchEvent(new CustomEvent('aurawatch_vip_unlocked', { detail: data }));
       } else {
         setStatusMessage({ text: data.message || 'Failed to redeem code.', type: 'error' });
       }
@@ -341,22 +375,157 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
               {/* Mode Tabs */}
               <div className={styles.tabsContainer}>
                 <button
-                  className={`${styles.tabBtn} ${activeTab === 'upi' ? styles.tabActive : ''}`}
-                  onClick={() => { setActiveTab('upi'); setStatusMessage({ text: '', type: '' }); }}
+                  className={`${styles.tabBtn} ${activeTab === 'quest' ? styles.tabActive : ''}`}
+                  onClick={() => { setActiveTab('quest'); setStatusMessage({ text: '', type: '' }); }}
                 >
-                  <QrCode size={16} />
-                  <span>UPI / QR Pay</span>
+                  <Sparkles size={16} />
+                  <span>🎮 Watch & Unlock (Free)</span>
                 </button>
                 <button
                   className={`${styles.tabBtn} ${activeTab === 'redeem' ? styles.tabActive : ''}`}
                   onClick={() => { setActiveTab('redeem'); setStatusMessage({ text: '', type: '' }); }}
                 >
                   <Gift size={16} />
-                  <span>Redeem Gift Code</span>
+                  <span>🎁 Redeem Giveaway Key</span>
+                </button>
+                <button
+                  className={`${styles.tabBtn} ${activeTab === 'upi' ? styles.tabActive : ''}`}
+                  onClick={() => { setActiveTab('upi'); setStatusMessage({ text: '', type: '' }); }}
+                >
+                  <QrCode size={16} />
+                  <span>⚡ Direct VIP Pass</span>
                 </button>
               </div>
 
-              {/* Tab 1: UPI / QR Pay */}
+              {/* Tab 1: 🎮 Watch & Unlock VIP (Free Quest) */}
+              {activeTab === 'quest' && (
+                <div className={styles.tabContent}>
+                  <div className={styles.questCard}>
+                    <div className={styles.questHeader}>
+                      <div className={styles.questTitleGroup}>
+                        <Crown size={28} className={styles.questIcon} />
+                        <div>
+                          <h3 className={styles.questTitle}>Ad-Pass VIP Quest</h3>
+                          <p className={styles.questSubtitle}>
+                            Watch {questProgress.target_count || 5} sponsor ads to instantly unlock {questProgress.reward_hours || 24} Hours of 100% Ad-Free VIP Pass!
+                          </p>
+                        </div>
+                      </div>
+
+                      {questProgress.is_unlocked && (
+                        <div className={styles.questActiveBadge}>
+                          <Check size={16} />
+                          <span>Pass Active ({Math.ceil(questProgress.seconds_remaining / 3600)}h left)</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles.questProgressBarOuter}>
+                      <div 
+                        className={styles.questProgressBarInner}
+                        style={{ 
+                          width: `${Math.min(100, Math.round(((questProgress.current_count || 0) / (questProgress.target_count || 5)) * 100))}%` 
+                        }}
+                      />
+                    </div>
+
+                    <div className={styles.questStats}>
+                      <span className={styles.questCounter}>
+                        {questProgress.current_count || 0} of {questProgress.target_count || 5} Ads Watched
+                      </span>
+                      <span className={styles.questPercent}>
+                        {Math.min(100, Math.round(((questProgress.current_count || 0) / (questProgress.target_count || 5)) * 100))}% Completed
+                      </span>
+                    </div>
+
+                    <div className={styles.perkDesc} style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      💡 <strong>How it works:</strong> Whenever you play a movie, simply let the 10-second sponsor ad finish. Your quest counter saves automatically. Once you hit {questProgress.target_count || 5} ads, all player pre-rolls, popup redirects, and banners vanish across the entire site for {questProgress.reward_hours || 24} hours!
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                      <button
+                        type="button"
+                        className={styles.activateBtn}
+                        onClick={onClose}
+                      >
+                        <Play size={16} />
+                        <span>Start Streaming to Progress Quest</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: 🎁 Redeem Giveaway Key */}
+              {activeTab === 'redeem' && (
+                <div className={styles.tabContent}>
+                  <div className={styles.redeemSection}>
+                    <div className={styles.redeemIconWrapper}>
+                      <Gift size={36} className={styles.redeemIcon} />
+                    </div>
+                    <h3 className={styles.redeemTitle}>Have a VIP Giveaway Key?</h3>
+                    <p className={styles.redeemSubtitle}>
+                      Enter your activation key dropped in our community giveaways or Discord to instantly unlock VIP.
+                    </p>
+
+                    <form onSubmit={handleRedeemCode} className={styles.redeemForm}>
+                      <div className={styles.codeGroup}>
+                        <input
+                          type="text"
+                          className={styles.codeInput}
+                          placeholder="AURA-XXXX-XXXX"
+                          value={redeemCode}
+                          onChange={e => setRedeemCode(e.target.value.toUpperCase())}
+                          maxLength={32}
+                          required
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className={styles.activateBtn}
+                        disabled={loading || !redeemCode.trim()}
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 size={18} className={styles.spinner} />
+                            <span>Validating Key...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Crown size={18} />
+                            <span>Activate VIP Key</span>
+                          </>
+                        )}
+                      </button>
+                    </form>
+
+                    {/* Telegram Community Giveaway Banner */}
+                    <div className={styles.telegramDropCard}>
+                      <div className={styles.telegramLeft}>
+                        <div className={styles.telegramIconWrap}>
+                          <Send size={22} />
+                        </div>
+                        <div>
+                          <div className={styles.telegramTitle}>AuraWatch Telegram VIP Key Drops</div>
+                          <div className={styles.telegramDesc}>We drop 50+ free 7-Day & 30-Day VIP keys weekly in our channel!</div>
+                        </div>
+                      </div>
+                      <a
+                        href="https://t.me/AuraWatchOfficial"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.telegramBtn}
+                      >
+                        <span>Join Telegram Drops</span>
+                        <ExternalLink size={13} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: ⚡ Direct VIP Pass (UPI / QR Pay) */}
               {activeTab === 'upi' && (
                 <div className={styles.tabContent}>
                   {/* Plan Picker */}
@@ -465,53 +634,6 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                         </button>
                       </form>
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: Redeem VIP Code */}
-              {activeTab === 'redeem' && (
-                <div className={styles.tabContent}>
-                  <div className={styles.redeemSection}>
-                    <div className={styles.redeemIconWrapper}>
-                      <Gift size={36} className={styles.redeemIcon} />
-                    </div>
-                    <h3 className={styles.redeemTitle}>Have a VIP Gift Code?</h3>
-                    <p className={styles.redeemSubtitle}>
-                      Enter your activation code received from community events, giveaways, or admin to instantly unlock VIP.
-                    </p>
-
-                    <form onSubmit={handleRedeemCode} className={styles.redeemForm}>
-                      <div className={styles.codeGroup}>
-                        <input
-                          type="text"
-                          className={styles.codeInput}
-                          placeholder="AURA-XXXX-XXXX"
-                          value={redeemCode}
-                          onChange={e => setRedeemCode(e.target.value.toUpperCase())}
-                          maxLength={32}
-                          required
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        className={styles.activateBtn}
-                        disabled={loading || !redeemCode.trim()}
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 size={18} className={styles.spinner} />
-                            <span>Validating Code...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Crown size={18} />
-                            <span>Activate VIP Now</span>
-                          </>
-                        )}
-                      </button>
-                    </form>
                   </div>
                 </div>
               )}

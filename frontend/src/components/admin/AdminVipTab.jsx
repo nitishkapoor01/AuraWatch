@@ -65,7 +65,27 @@ const AdminVipTab = ({ token }) => {
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
+  // 5. Ad-Pass Quest Configuration State
+  const [adPassSettings, setAdPassSettings] = useState({
+    enabled: true,
+    target_ads: 5,
+    reward_hours: 24
+  });
+  const [savingAdPass, setSavingAdPass] = useState(false);
+
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
+
+  const fetchAdPassSettings = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/admin/vip/ad-pass-config`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAdPassSettings(data);
+      }
+    } catch (_) {}
+  };
 
   const fetchOverview = async () => {
     try {
@@ -142,7 +162,10 @@ const AdminVipTab = ({ token }) => {
     if (subTab === 'requests') fetchRequests();
     if (subTab === 'codes') fetchCodes();
     if (subTab === 'users') fetchVipUsers();
-    if (subTab === 'settings') fetchPaymentSettings();
+    if (subTab === 'settings') {
+      fetchPaymentSettings();
+      fetchAdPassSettings();
+    }
   }, [subTab, requestFilter, codeFilter, userFilter]);
 
   // Handle Review Request
@@ -273,6 +296,46 @@ const AdminVipTab = ({ token }) => {
     setCopiedCodeId(id);
     setTimeout(() => setCopiedCodeId(null), 2000);
   };
+
+  // Handle Save Ad-Pass Quest Settings
+  const handleSaveAdPassSettings = async (e) => {
+    e.preventDefault();
+    setSavingAdPass(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/vip/ad-pass-config`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(adPassSettings)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Ad-Pass Quest configuration updated successfully!', 'success');
+      } else {
+        showToast('Failed to save Ad-Pass settings', 'error');
+      }
+    } catch (_) {
+      showToast('Network error saving Ad-Pass settings', 'error');
+    }
+    setSavingAdPass(false);
+  };
+
+  // Quick 1-click copy for Telegram / Discord giveaway drops
+  const handleCopyAllTelegramCodes = () => {
+    const activeCodes = codes.filter(c => c.is_active);
+    if (activeCodes.length === 0) {
+      showToast('No active codes found in current list to copy.', 'error');
+      return;
+    }
+    const text = `🎉 AURA VIP PASS GIVEAWAY! 🎉\nRedeem on AuraWatch to unlock 100% Ad-Free streaming:\n\n` +
+      activeCodes.map(c => `🔑 ${c.code} (${c.duration_days} Days)`).join('\n') +
+      `\n\n⚡ First come, first served! Enjoy 0s downloads & zero ads! 🔥`;
+    navigator.clipboard.writeText(text);
+    showToast(`Copied ${activeCodes.length} VIP keys for Telegram/Discord drop!`, 'success');
+  };
+
 
   return (
     <div className={styles.container}>
@@ -575,6 +638,16 @@ const AdminVipTab = ({ token }) => {
                   <option value="active">Active Only</option>
                   <option value="used">Redeemed</option>
                 </select>
+                <button
+                  type="button"
+                  className={styles.approveBtn}
+                  onClick={handleCopyAllTelegramCodes}
+                  title="Copy formatted list of all active codes for Telegram or Discord drops"
+                  style={{ whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Copy size={13} />
+                  <span>Copy for Telegram</span>
+                </button>
                 <button className={styles.refreshBtn} onClick={fetchCodes} title="Refresh">
                   <RefreshCw size={14} className={loadingCodes ? styles.spinner : ''} />
                 </button>
@@ -775,66 +848,138 @@ const AdminVipTab = ({ token }) => {
         </div>
       )}
 
-      {/* 4. PAYMENT SETTINGS SUBTAB */}
+      {/* 4. SETTINGS SUBTAB */}
       {subTab === 'settings' && (
-        <div className={styles.sectionCard}>
-          <h3 className={styles.sectionTitle}>UPI & Payment Configuration</h3>
-          <p className={styles.sectionDesc}>Customize the UPI receiver account, QR code image, and public pricing tiers.</p>
-
-          <form onSubmit={handleSaveSettings} className={styles.settingsForm}>
-            <div className={styles.formRow}>
-              <div className={styles.formCol}>
-                <label>Receiver UPI ID</label>
-                <input
-                  type="text"
-                  value={paymentSettings.upi_id}
-                  onChange={e => setPaymentSettings({ ...paymentSettings, upi_id: e.target.value })}
-                  placeholder="e.g. aurawatch@upi"
-                  required
-                />
-              </div>
-              <div className={styles.formCol}>
-                <label>Payee Name / Title</label>
-                <input
-                  type="text"
-                  value={paymentSettings.upi_name}
-                  onChange={e => setPaymentSettings({ ...paymentSettings, upi_name: e.target.value })}
-                  placeholder="AuraWatch VIP"
-                  required
-                />
-              </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Ad-Pass Quest Configuration */}
+          <div className={styles.sectionCard}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <Crown size={22} color="#ffb703" />
+              <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Gamified Ad-Pass Quest Configuration</h3>
             </div>
+            <p className={styles.sectionDesc}>
+              Allow users and guests to unlock 100% Ad-Free VIP Pass by watching sponsor ads instead of paying.
+            </p>
 
-            <div className={styles.formRow}>
-              <div className={styles.formCol}>
-                <label>Custom QR Code Image URL (Leave blank to auto-generate)</label>
-                <input
-                  type="url"
-                  value={paymentSettings.qr_image_url}
-                  onChange={e => setPaymentSettings({ ...paymentSettings, qr_image_url: e.target.value })}
-                  placeholder="https://.../my-qr.png"
-                />
+            <form onSubmit={handleSaveAdPassSettings} className={styles.settingsForm}>
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
+                  <label>Enable Ad-Pass Quest</label>
+                  <select
+                    value={adPassSettings.enabled ? 'true' : 'false'}
+                    onChange={e => setAdPassSettings({ ...adPassSettings, enabled: e.target.value === 'true' })}
+                  >
+                    <option value="true">Active (Enabled across player and VIP modal)</option>
+                    <option value="false">Disabled</option>
+                  </select>
+                </div>
+                <div className={styles.formCol}>
+                  <label>Target Ads Required</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={adPassSettings.target_ads}
+                    onChange={e => setAdPassSettings({ ...adPassSettings, target_ads: e.target.value })}
+                    required
+                  />
+                  <small style={{ color: '#888', marginTop: '4px' }}>Recommended: 5 to 10 ads for optimal monetization</small>
+                </div>
+                <div className={styles.formCol}>
+                  <label>Reward Duration (Hours)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="720"
+                    value={adPassSettings.reward_hours}
+                    onChange={e => setAdPassSettings({ ...adPassSettings, reward_hours: e.target.value })}
+                    required
+                  />
+                  <small style={{ color: '#888', marginTop: '4px' }}>24 Hours = 1 Day VIP Pass, 48 Hours = 2 Days</small>
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              className={styles.saveSettingsBtn}
-              disabled={savingSettings}
-            >
-              {savingSettings ? (
-                <>
-                  <Loader2 size={16} className={styles.spinner} />
-                  <span>Saving Configuration...</span>
-                </>
-              ) : (
-                <>
-                  <ShieldCheck size={16} />
-                  <span>Save Payment Settings</span>
-                </>
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className={styles.saveSettingsBtn}
+                disabled={savingAdPass}
+                style={{ background: 'linear-gradient(135deg, #ffb703, #ff7a00)', color: '#000', fontWeight: '700' }}
+              >
+                {savingAdPass ? (
+                  <>
+                    <Loader2 size={16} className={styles.spinner} />
+                    <span>Saving Ad-Pass...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={16} />
+                    <span>Save Ad-Pass Configuration</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* UPI & Payment Settings */}
+          <div className={styles.sectionCard}>
+            <h3 className={styles.sectionTitle}>UPI & Payment Configuration (Optional)</h3>
+            <p className={styles.sectionDesc}>Customize the UPI receiver account, QR code image, and public pricing tiers.</p>
+
+            <form onSubmit={handleSaveSettings} className={styles.settingsForm}>
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
+                  <label>Receiver UPI ID</label>
+                  <input
+                    type="text"
+                    value={paymentSettings.upi_id}
+                    onChange={e => setPaymentSettings({ ...paymentSettings, upi_id: e.target.value })}
+                    placeholder="e.g. aurawatch@upi"
+                    required
+                  />
+                </div>
+                <div className={styles.formCol}>
+                  <label>Payee Name / Title</label>
+                  <input
+                    type="text"
+                    value={paymentSettings.upi_name}
+                    onChange={e => setPaymentSettings({ ...paymentSettings, upi_name: e.target.value })}
+                    placeholder="AuraWatch VIP"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
+                  <label>Custom QR Code Image URL (Leave blank to auto-generate)</label>
+                  <input
+                    type="url"
+                    value={paymentSettings.qr_image_url}
+                    onChange={e => setPaymentSettings({ ...paymentSettings, qr_image_url: e.target.value })}
+                    placeholder="https://.../my-qr.png"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className={styles.saveSettingsBtn}
+                disabled={savingSettings}
+              >
+                {savingSettings ? (
+                  <>
+                    <Loader2 size={16} className={styles.spinner} />
+                    <span>Saving Configuration...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={16} />
+                    <span>Save Payment Settings</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>
