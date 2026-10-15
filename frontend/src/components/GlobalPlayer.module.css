@@ -46,23 +46,7 @@
   }
 }
 
-.ambientMovieBackdrop {
-  position: absolute;
-  inset: -40px;
-  background-size: cover;
-  background-position: center;
-  filter: blur(50px) brightness(0.24);
-  opacity: 0.85;
-  transform: scale(1.15);
-  z-index: 1;
-  pointer-events: none;
-  animation: movieBackdropFade 0.8s ease-out;
-}
 
-@keyframes movieBackdropFade {
-  from { opacity: 0; filter: blur(70px) brightness(0.1); }
-  to { opacity: 0.85; filter: blur(50px) brightness(0.24); }
-}
 
 /* Top Floating Header Dock */
 .playerTopBar {
@@ -533,53 +517,6 @@
   font-size: 10px;
 }
 
-.ytStreamQueuedPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(10, 14, 22, 0.88);
-  border: 1px solid rgba(34, 197, 94, 0.45);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 11.5px;
-  color: #f1f5f9;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  max-width: 45%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
-  animation: glowPill 2.5s infinite alternate ease-in-out;
-}
-
-@keyframes glowPill {
-  0% { border-color: rgba(34, 197, 94, 0.35); box-shadow: 0 0 8px rgba(34, 197, 94, 0.2); }
-  100% { border-color: rgba(34, 197, 94, 0.7); box-shadow: 0 0 14px rgba(34, 197, 94, 0.4); }
-}
-
-.pulsingGreenDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e, 0 0 3px #22c55e;
-  animation: pulseDot 1.6s infinite;
-  flex-shrink: 0;
-}
-
-.ytQueuedText {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-}
-
-.ytQueuedText strong {
-  color: #4ade80;
-  font-weight: 700;
-}
-
 .ytQuestBadge {
   display: inline-flex;
   align-items: center;
@@ -609,36 +546,9 @@
   transform: scale(0.96);
 }
 
-.ytQuestBtn {
-  background: #ffb703;
-  color: #0b0b0f;
-  font-weight: 800;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  letter-spacing: 0.3px;
-  margin-left: 2px;
-}
-
 @keyframes pulseQuest {
   0%, 100% { border-color: rgba(255, 183, 3, 0.45); box-shadow: 0 0 10px rgba(255, 183, 3, 0.2); }
   50% { border-color: rgba(255, 183, 3, 0.85); box-shadow: 0 0 16px rgba(255, 183, 3, 0.45); }
-}
-
-.ytCountdownLabel {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.ytCountdownDesktopText,
-.ytVisitDesktopText {
-  display: inline;
-}
-
-.ytCountdownMobileText,
-.ytVisitMobileText {
-  display: none;
 }
 
 
@@ -840,177 +750,35 @@
   to { transform: rotate(360deg); }
 }
 
-/* Mobile Ad Deck (shown in mobile portrait mode below the video) */
-.ytMobileAdDeck {
-  display: none;
-}
-
-/* Fallback Intermission Container & Card */
+/* Fallback Intermission Container */
 .ytFallbackContainer {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 50% 50%, rgba(20, 24, 36, 0.8) 0%, #06080d 100%);
+  background: #000;
   position: relative;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.ytFallbackCard {
-  width: 100%;
-  max-width: 480px;
-  background: rgba(14, 18, 28, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(229, 9, 20, 0.12);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  margin: auto;
-}
-
-.ytFallbackHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.ytFallbackUpNext {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  max-width: 75%;
-}
-
-.ytFallbackThumb {
-  width: 36px;
-  height: 52px;
-  object-fit: cover;
-  border-radius: 6px;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.ytFallbackMetaCol {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.ytFallbackQueueStatus {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  color: #22c55e;
-  text-transform: uppercase;
-}
-
-.ytFallbackTitle {
-  font-size: 13.5px;
-  color: #ffffff;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.ytFallbackTitle strong {
-  color: #fff;
-  font-weight: 700;
-}
-
-.ytFallbackSponsoredBadge {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  color: #fbc02d;
-  background: rgba(251, 192, 45, 0.14);
-  border: 1px solid rgba(251, 192, 45, 0.35);
-  padding: 3px 8px;
-  border-radius: 4px;
-  flex-shrink: 0;
+.ytFallbackWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
 }
 
 .preRollAdArea {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 250px;
   width: 100%;
-  overflow: hidden;
-}
-
-.ytFallbackFooter {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ytFallbackCountdownRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.ytFallbackProgressBar {
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.ytFallbackProgressFill {
   height: 100%;
-  background: linear-gradient(90deg, #fbc02d 0%, #ff9800 100%);
-  transition: width 0.3s ease;
-}
-
-.ytFallbackActions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.ytFallbackVipBtn {
-  background: transparent;
-  border: 1px solid rgba(255, 183, 3, 0.35);
-  color: #ffb703;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 9px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-}
-
-.ytFallbackVipBtn:hover {
-  background: rgba(255, 183, 3, 0.14);
-  border-color: rgba(255, 183, 3, 0.65);
-}
-
-.ytFallbackVipBtn:active {
-  transform: scale(0.97);
+  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -1046,16 +814,6 @@
 }
 
 @media (max-width: 600px) {
-  .ytCountdownDesktopText,
-  .ytVisitDesktopText {
-    display: none !important;
-  }
-
-  .ytCountdownMobileText,
-  .ytVisitMobileText {
-    display: inline !important;
-  }
-
   .ytTopOverlay {
     top: 8px;
     left: 8px;
@@ -1064,30 +822,17 @@
   }
 
   .ytAdTag {
-    padding: 3px 7px;
-    font-size: 10.5px;
+    padding: 3px 8px;
+    font-size: 11px;
     gap: 4px;
-    border-radius: 4px;
-  }
-
-  .ytStreamQueuedPill {
-    padding: 3px 7px;
-    font-size: 10px;
-    gap: 4px;
-    max-width: 44%;
     border-radius: 4px;
   }
 
   .ytQuestBadge {
-    padding: 3px 7px;
-    font-size: 10.5px;
-    gap: 3px;
+    padding: 3px 8px;
+    font-size: 11px;
+    gap: 4px;
     border-radius: 4px;
-  }
-
-  .ytQuestBtn {
-    padding: 1px 5px;
-    font-size: 9.5px;
   }
 
   .ytBottomLeft {
@@ -1097,13 +842,13 @@
   }
 
   .ytSoundBtn {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
   }
 
   .ytVisitBtn {
-    padding: 4px 8px;
-    font-size: 10.5px;
+    padding: 5px 9px;
+    font-size: 11px;
     gap: 4px;
     border-radius: 4px;
   }
@@ -1114,14 +859,10 @@
   }
 
   .ytCountdownBox {
-    padding: 5px 10px;
-    font-size: 11px;
-    gap: 5px;
+    padding: 6px 11px;
+    font-size: 11.5px;
+    gap: 6px;
     border-radius: 4px;
-  }
-
-  .ytCountdownLabel {
-    font-size: 11px;
   }
 
   .ytCountdownNum {
@@ -1130,35 +871,12 @@
   }
 
   .ytSkipBtn {
-    padding: 6px 12px;
-    font-size: 11.5px;
+    padding: 6px 13px;
+    font-size: 12px;
     gap: 5px;
     font-weight: 700;
     border-radius: 4px;
   }
-
-  .ytFallbackCard {
-    padding: 14px;
-    width: 100%;
-    border-radius: 12px;
-  }
-
-  .ytFallbackActions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .ytFallbackActions .ytSkipBtn {
-    justify-content: center;
-    width: 100%;
-    padding: 10px;
-  }
-
-  .ytFallbackVipBtn {
-    justify-content: center;
-    width: 100%;
-    padding: 9px;
-  }
 }
+
 
