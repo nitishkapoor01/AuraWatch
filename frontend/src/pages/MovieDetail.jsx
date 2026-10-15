@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle, Flag, Share2, FolderPlus, FolderCheck } from 'lucide-react';
+import { Play, X, ChevronDown, Plus, Check, Star, Download, Loader2, AlertTriangle, Flag, Share2, FolderPlus, FolderCheck, Crown } from 'lucide-react';
 import styles from './MovieDetail.module.css';
 import Row from '../components/Row';
 import SEO from '../components/SEO';
@@ -883,6 +883,30 @@ const MovieDetail = () => {
             </button>
           </div>
 
+          {/* Native VIP Ad-Pass Callout Strip */}
+          {!user?.is_premium && (
+            <div 
+              className={styles.vipActionStrip}
+              onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
+              role="button"
+              tabIndex={0}
+              title="Click to unlock Free VIP Pass"
+            >
+              <div className={styles.vipStripLeft}>
+                <div className={styles.vipStripIcon}>
+                  <Crown size={18} color="#ffb703" />
+                </div>
+                <div className={styles.vipStripText}>
+                  <span className={styles.vipStripTitle}>Stream 100% Ad-Free with Free VIP Pass</span>
+                  <span className={styles.vipStripSubtitle}>Skip server popups and video buffer ads. Quick sponsor quest available.</span>
+                </div>
+              </div>
+              <div className={styles.vipStripAction}>
+                <span className={styles.vipStripBadge}>Unlock Free VIP</span>
+              </div>
+            </div>
+          )}
+
           {/* TV: Season + Episode Dropdowns */}
           {isTV && seasons.length > 0 && (
             <div className={styles.tvSelectors}>
@@ -947,6 +971,29 @@ const MovieDetail = () => {
       {/* Episodes Section (Netflix Style) */}
       {isTV && seasons.length > 0 && (
         <div className={`${styles.seasonsSection} seasonsSection`}>
+          {!user?.is_premium && (
+            <div 
+              className={styles.bingeVipCallout}
+              onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
+              role="button"
+              tabIndex={0}
+              title="Click to unlock Free VIP Binge Pass"
+            >
+              <div className={styles.bingeVipLeft}>
+                <div className={styles.bingeVipIcon}>
+                  <Crown size={18} color="#ffb703" />
+                </div>
+                <div>
+                  <div className={styles.bingeVipTitle}>Binge-Watching This Series?</div>
+                  <div className={styles.bingeVipDesc}>Unlock uninterrupted ad-free playback across all episodes. Free quest access available.</div>
+                </div>
+              </div>
+              <button type="button" className={styles.bingeVipBtn}>
+                Claim Free Pass
+              </button>
+            </div>
+          )}
+
           <div className={styles.seasonHeader}>
             <h2 className={styles.episodesTitle}>Episodes</h2>
             <div className={styles.seasonDropdownWrapper}>
@@ -1037,6 +1084,24 @@ const MovieDetail = () => {
                     <div className={styles.timerBox}>
                       <Loader2 size={24} className={styles.spinner} />
                       <span>Links ready in {adTimer} seconds...</span>
+                    </div>
+
+                    <div 
+                      className={styles.downloadVipBox}
+                      onClick={() => {
+                        setShowDownloadModal(false);
+                        window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      title="Click to unlock Free VIP Pass"
+                    >
+                      <Crown size={20} color="#ffb703" />
+                      <div className={styles.downloadVipContent}>
+                        <span className={styles.downloadVipHeading}>Skip Waiting Times Forever</span>
+                        <span className={styles.downloadVipSub}>VIP Pass holders download instantly with zero countdowns or popups. Click to unlock free VIP.</span>
+                      </div>
+                      <span className={styles.downloadVipBtn}>Get VIP Pass</span>
                     </div>
                   </>
                 ) : (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX, Heart, Film, Tv, ShieldCheck, CheckCircle2, Server, Loader2, Gift } from 'lucide-react';
+import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX, Heart, Film, Tv, ShieldCheck, CheckCircle2, Server, Loader2, Gift, Crown } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import AdBanner from './ads/AdBanner';
@@ -552,7 +552,7 @@ const GlobalPlayer = () => {
                     {adVideoStarted && preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
                   </div>
 
-                  {adPassStatus?.enabled && !adPassStatus?.is_unlocked && (
+                  {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
                     <div 
                       className={styles.ytQuestBadge} 
                       title="Click to unlock Free VIP Pass"
@@ -560,10 +560,11 @@ const GlobalPlayer = () => {
                         e.stopPropagation();
                         window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
                       }}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: 'pointer', pointerEvents: 'auto' }}
                     >
-                      <Crown size={13} color="#ffb703" />
-                      <span>Tired of ads? Watch 8 ads in VIP Quest to unlock 24h Ad-Free VIP</span>
+                      <Crown size={14} color="#ffb703" />
+                      <span>Skip All Ads With Free VIP Pass</span>
+                      <span className={styles.ytQuestBtn}>Claim Free</span>
                     </div>
                   )}
                 </div>

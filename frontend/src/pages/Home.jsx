@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Info } from 'lucide-react';
+import { Play, Info, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { fetchWithCache } from '../utils/api';
 import styles from './Home.module.css';
@@ -7,8 +7,10 @@ import Row from '../components/Row';
 import ContinueWatchingRow from '../components/ContinueWatchingRow';
 import SEO from '../components/SEO';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
+  const { user } = useAuth();
   const [trending, setTrending] = useState([]);
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
@@ -132,6 +134,33 @@ const Home = () => {
         <Row title="Trending Now" endpoint="trending" compact={layout === 'grid'} rowIndex={0} />
         <Row title="Top 10 in India Today" endpoint="trending-india" compact={layout === 'grid'} rowIndex={1} />
         <Row title="New Releases This Week" endpoint="new-this-week" compact={layout === 'grid'} rowIndex={2} />
+
+        {/* Native VIP Ad-Pass Promotional Banner */}
+        {!user?.is_premium && (
+          <div 
+            className={styles.vipPromoBanner}
+            onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
+            role="button"
+            tabIndex={0}
+            title="Click to unlock Free VIP Pass"
+          >
+            <div className={styles.vipPromoLeft}>
+              <div className={styles.vipPromoBadge}>
+                <Crown size={15} color="#ffb703" />
+                <span>AuraWatch VIP Pass</span>
+              </div>
+              <h3 className={styles.vipPromoTitle}>Stream All Movies & Series 100% Ad-Free</h3>
+              <p className={styles.vipPromoDesc}>
+                Say goodbye to server redirects and sponsor popups. Complete a quick sponsor quest to activate your free VIP streaming pass today.
+              </p>
+            </div>
+            <div className={styles.vipPromoRight}>
+              <button type="button" className={styles.vipPromoBtn}>
+                Start Free Quest
+              </button>
+            </div>
+          </div>
+        )}
 
         <Row title="Netflix Originals" endpoint="originals" compact={layout === 'grid'} rowIndex={3} />
         <Row title="Popular K-Dramas" endpoint="k-drama" compact={layout === 'grid'} rowIndex={4} />
