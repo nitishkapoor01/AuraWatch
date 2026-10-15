@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX, Heart, Film, Tv, ShieldCheck, CheckCircle2, Server } from 'lucide-react';
+import { X, Play, ExternalLink, Sparkles, Volume2, VolumeX, Heart, Film, Tv, ShieldCheck, CheckCircle2, Server, Loader2 } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import AdBanner from './ads/AdBanner';
@@ -25,6 +25,8 @@ const GlobalPlayer = () => {
   const [preRollConfig, setPreRollConfig] = useState(null);
   const [vastVideo, setVastVideo] = useState(null);
   const [isMuted, setIsMuted] = useState(true);
+  const [adVideoStarted, setAdVideoStarted] = useState(false);
+  const [adProgressPercent, setAdProgressPercent] = useState(0);
   const activeMovieKeyRef = useRef(null);
 
   // Fetch Ads config and initialize Pre-Roll Gateway when opening a movie
@@ -32,6 +34,8 @@ const GlobalPlayer = () => {
     if (!isOpen || !movieData) {
       setPreRollActive(false);
       activeMovieKeyRef.current = null;
+      setAdVideoStarted(false);
+      setAdProgressPercent(0);
       return;
     }
 
@@ -40,6 +44,8 @@ const GlobalPlayer = () => {
       return;
     }
     activeMovieKeyRef.current = currentKey;
+    setAdVideoStarted(false);
+    setAdProgressPercent(0);
 
     // Skip ads entirely for admins or VIP members
     if (isAdExempt) {
@@ -139,9 +145,10 @@ const GlobalPlayer = () => {
     };
   }, [isOpen, movieData, isAdExempt]);
 
-  // Pre-Roll Countdown Timer with Auto-Advance
+  // Pre-Roll Countdown Timer with Auto-Advance (only for fallback banners)
   useEffect(() => {
     if (!preRollActive) return;
+    if (vastVideo?.url) return; // Video playback drives countdown strictly via onTimeUpdate
 
     if (preRollSeconds > 0) {
       const timer = setTimeout(() => {
@@ -149,7 +156,7 @@ const GlobalPlayer = () => {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [preRollActive, preRollSeconds]);
+  }, [preRollActive, preRollSeconds, vastVideo]);
 
   // Watch route changes. If playing and we leave the movie page, force sticky
   useEffect(() => {
@@ -404,12 +411,28 @@ const GlobalPlayer = () => {
                   playsInline
                   muted={isMuted}
                   className={styles.ytVideoElement}
-                  onPlay={() => {
+                  onPlaying={() => {
+                    setAdVideoStarted(true);
                     if (vastVideo.impressions?.length) {
                       vastVideo.impressions.forEach(impUrl => {
                         try { new Image().src = impUrl; } catch (_) {}
                       });
                     }
+                  }}
+                  onTimeUpdate={(e) => {
+                    const ct = e.target.currentTime;
+                    const requiredSecs = preRollConfig?.timer_seconds || 5;
+                    const rem = Math.max(0, Math.ceil(requiredSecs - ct));
+                    setPreRollSeconds(rem);
+                    const dur = e.target.duration || requiredSecs;
+                    setAdProgressPercent(Math.min(100, (ct / Math.max(1, Math.min(dur, requiredSecs))) * 100));
+                  }}
+                  onEnded={() => {
+                    setPreRollActive(false);
+                  }}
+                  onError={() => {
+                    console.warn('Ad video playback error, advancing to stream');
+                    setPreRollActive(false);
                   }}
                   onClick={() => {
                     if (vastVideo.clickThrough) {
@@ -418,13 +441,21 @@ const GlobalPlayer = () => {
                   }}
                 />
 
+                {/* Loading overlay while ad video is buffering */}
+                {!adVideoStarted && (
+                  <div className={styles.ytLoadingOverlay}>
+                    <Loader2 className={styles.spinner} size={28} />
+                    <span>Loading ad...</span>
+                  </div>
+                )}
+
                 {/* YouTube Top Bar */}
                 <div className={styles.ytTopOverlay}>
                   <div className={styles.ytAdTag}>
                     <span className={styles.ytAdYellow}>Ad</span>
                     <span className={styles.ytAdDot}>•</span>
                     <span>1 of 1</span>
-                    {preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
+                    {adVideoStarted && preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
                   </div>
                 </div>
 
@@ -458,7 +489,11 @@ const GlobalPlayer = () => {
 
                 {/* YouTube Bottom-Right Skip Button */}
                 <div className={styles.ytBottomRight}>
-                  {preRollSeconds > 0 ? (
+                  {!adVideoStarted ? (
+                    <div className={styles.ytCountdownBox}>
+                      <span>Ad starting...</span>
+                    </div>
+                  ) : preRollSeconds > 0 ? (
                     <div className={styles.ytCountdownBox}>
                       <span>Video will play after ad</span>
                       <span className={styles.ytCountdownNum}>{preRollSeconds}</span>
@@ -482,9 +517,7 @@ const GlobalPlayer = () => {
                 <div className={styles.ytProgressBar}>
                   <div 
                     className={styles.ytProgressFill}
-                    style={{ 
-                      width: `${Math.max(0, Math.min(100, (((preRollConfig?.timer_seconds || 5) - preRollSeconds) / (preRollConfig?.timer_seconds || 5)) * 100))}%` 
-                    }}
+                    style={{ width: `${adProgressPercent}%` }}
                   />
                 </div>
               </div>

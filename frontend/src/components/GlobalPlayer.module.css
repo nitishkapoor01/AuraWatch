@@ -634,6 +634,30 @@
   z-index: 65;
 }
 
+.ytLoadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(6, 8, 12, 0.85);
+  z-index: 52;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.ytLoadingOverlay span {
+  opacity: 0.85;
+  letter-spacing: 0.3px;
+}
+
 .ytProgressFill {
   height: 100%;
   background: #fbc02d;
