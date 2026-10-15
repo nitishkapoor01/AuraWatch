@@ -378,6 +378,7 @@ const TopNav = () => {
         </Link>
       )}
 
+      <div className={styles.navActions}>
         {/* Action Controls & Navigation Shortcuts */}
         <div className={styles.actionControlsGroup}>
           <div className={styles.filterInline}>
