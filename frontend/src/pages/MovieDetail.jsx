@@ -293,6 +293,7 @@ const MovieDetail = () => {
   };
 
   const handlePlayEpisode = (season, episode, epName = '') => {
+    triggerSmartlink();
     openPlayer({
       id: movie.id,
       type,
@@ -320,7 +321,15 @@ const MovieDetail = () => {
     const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
     if (isAdExempt || globalSkipAds || !directLinkUrl) return;
 
+    // Strict 1x per 24 hours frequency cap so user is never spammed
+    const lastPopTime = localStorage.getItem('aurawatch_last_popunder');
+    const now = Date.now();
+    if (lastPopTime && now - Number(lastPopTime) < 24 * 60 * 60 * 1000) {
+      return; // Already shown once in the last 24h
+    }
+
     try {
+      localStorage.setItem('aurawatch_last_popunder', String(now));
       window.open(directLinkUrl, '_blank', 'noopener,noreferrer');
       
       const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
@@ -763,7 +772,10 @@ const MovieDetail = () => {
                   const ep = episodes.find(e => e.number === selectedEpisode);
                   handlePlayEpisode(selectedSeason, selectedEpisode, ep?.name || '');
                 }
-                else { openPlayer({ id: movie.id, type, title: movie.title, poster: movie.poster, backdrop: movie.backdrop, rating: movie.rating, year: movie.year, runtime: movie.runtime }); }
+                else { 
+                  triggerSmartlink();
+                  openPlayer({ id: movie.id, type, title: movie.title, poster: movie.poster, backdrop: movie.backdrop, rating: movie.rating, year: movie.year, runtime: movie.runtime }); 
+                }
               }}
             >
               <Play fill="black" size={22} /> Play Now

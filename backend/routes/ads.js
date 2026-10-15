@@ -106,30 +106,21 @@ router.get('/config', optionalAuth, async (req, res) => {
     let config = {
       enabled: true,
       download_modal: {
-        enabled: true,
-        timer_seconds: 30,
+        enabled: false,
+        timer_seconds: 5,
         format: 'native',
-        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
-        key: 'ccd684eb4f620dcc7303d2fce2577bae',
-        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
         width: 300,
         height: 250
       },
       movie_detail: {
-        enabled: true,
+        enabled: false,
         format: 'native',
-        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
-        key: 'ccd684eb4f620dcc7303d2fce2577bae',
-        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
         width: 728,
         height: 180
       },
       search_grid: {
-        enabled: true,
+        enabled: false,
         format: 'native',
-        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
-        key: 'ccd684eb4f620dcc7303d2fce2577bae',
-        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
         width: 300,
         height: 250
       },
@@ -139,22 +130,14 @@ router.get('/config', optionalAuth, async (req, res) => {
       },
       direct_link: {
         enabled: true,
-        url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11'
+        url: 'https://plump-plastic.com/b.3RVK0pP/3EpIvPbnm/VIJBZWDe0K3kNkT/IVx/M/T/AF5tL/TGcy1/Mjj/EGxhMOTJMT'
       },
       pre_roll: {
         enabled: true,
         type: 'vast', // 'vast' | 'video' | 'banner'
-        vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033024',
-        video_url: '',
+        vast_url: 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH',
         timer_seconds: 5,
-        format: 'native',
-        container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
-        key: 'ccd684eb4f620dcc7303d2fce2577bae',
-        script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
-        direct_url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11',
-        fallback_banner: true,
-        width: 300,
-        height: 250
+        fallback_banner: false
       }
     };
 
