@@ -1245,4 +1245,187 @@
   gap: 4px;
 }
 
+/* In-Modal Sponsor Ad Player */
+.questAdSection {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 183, 3, 0.25);
+  border-radius: 14px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.watchAdBtn {
+  background: linear-gradient(135deg, #ffb703, #ff7a00);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 18px rgba(255, 183, 3, 0.35);
+  width: 100%;
+  max-width: 400px;
+}
+
+.watchAdBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 183, 3, 0.5);
+}
+
+.watchAdBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.watchAdHint {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+  line-height: 1.4;
+  max-width: 440px;
+}
+
+.adPlayerBox {
+  width: 100%;
+  max-width: 520px;
+  background: #000;
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  margin-top: 6px;
+}
+
+.adPlayerVideo {
+  width: 100%;
+  max-height: 260px;
+  background: #000;
+  display: block;
+}
+
+.adPlayerOverlayTop {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.adTagBadge {
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  color: #ffb703;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adCountdownPill {
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.adPlayerOverlayBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(14, 14, 18, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 8px;
+}
+
+.adMuteBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #eee;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.adMuteBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.adClaimBtn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.adClaimBtn:hover {
+  background: #10b981;
+}
+
+.adVisitLink {
+  color: #24a1de;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.adVisitLink:hover {
+  text-decoration: underline;
+}
+
+.questCompleteCard {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+
 

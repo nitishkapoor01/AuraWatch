@@ -215,40 +215,6 @@ const GlobalPlayer = () => {
     };
   }, [isOpen, movieData, isAdExempt]);
 
-  // Complete Ad-Pass Quest helper
-  const completeAdQuest = async () => {
-    if (completedRef.current) return;
-    completedRef.current = true;
-    try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 
-        (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
-      const vid = localStorage.getItem('trackingVisitorId') || '';
-      const savedToken = localStorage.getItem('aurawatch_token') || token;
-      const headers = { 'Content-Type': 'application/json' };
-      if (savedToken) headers['Authorization'] = `Bearer ${savedToken}`;
-      if (vid) headers['x-visitor-id'] = vid;
-
-      const res = await fetch(`${baseUrl}/vip/ad-pass/complete-ad`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ visitor_id: vid })
-      });
-      const data = await res.json();
-      if (data && data.success) {
-        setAdPassStatus(prev => ({
-          ...prev,
-          current_count: data.current_count,
-          target_count: data.target_count,
-          is_unlocked: data.is_unlocked,
-          unlocked_until: data.unlocked_until
-        }));
-        if (data.is_unlocked) {
-          window.dispatchEvent(new CustomEvent('aurawatch_vip_unlocked', { detail: data }));
-        }
-      }
-    } catch (_) {}
-  };
-
   // Pre-Roll Countdown Timer with Auto-Advance (only for fallback banners)
   useEffect(() => {
     if (!preRollActive) return;
@@ -550,7 +516,6 @@ const GlobalPlayer = () => {
                     setAdProgressPercent(Math.min(100, (ct / Math.max(1, Math.min(dur, requiredSecs))) * 100));
                   }}
                   onEnded={() => {
-                    completeAdQuest();
                     setPreRollActive(false);
                   }}
                   onError={(e) => {
@@ -590,15 +555,15 @@ const GlobalPlayer = () => {
                   {adPassStatus?.enabled && !adPassStatus?.is_unlocked && (
                     <div 
                       className={styles.ytQuestBadge} 
-                      title="Click to view your free VIP quest progress and milestones"
+                      title="Click to unlock Free VIP Pass"
                       onClick={(e) => {
                         e.stopPropagation();
                         window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
                       }}
                       style={{ cursor: 'pointer' }}
                     >
-                      <Gift size={13} />
-                      <span>Ad-Pass: {Math.min(adPassStatus.target_count || 5, (adPassStatus.current_count || 0) + 1)}/{adPassStatus.target_count || 5} (Watch for {adPassStatus.reward_hours || 24}h VIP)</span>
+                      <Crown size={13} color="#ffb703" />
+                      <span>Tired of ads? Watch 5 ads in VIP Quest to unlock 24h Ad-Free VIP</span>
                     </div>
                   )}
                 </div>
@@ -648,7 +613,6 @@ const GlobalPlayer = () => {
                       className={styles.ytSkipBtn}
                       onClick={(e) => {
                         e.stopPropagation();
-                        completeAdQuest();
                         setPreRollActive(false);
                       }}
                     >

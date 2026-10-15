@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -15,7 +15,10 @@ import {
   Play,
   Lock,
   Flame,
-  ArrowRight
+  ArrowRight,
+  Volume2,
+  VolumeX,
+  ExternalLink
 } from 'lucide-react';
 import styles from './VipModal.module.css';
 
@@ -44,6 +47,22 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     seconds_remaining: 0
   });
 
+  // Dedicated In-Modal Ad Player State
+  const [isPlayingAd, setIsPlayingAd] = useState(false);
+  const [adCountdown, setAdCountdown] = useState(10);
+  const [adCanClaim, setAdCanClaim] = useState(false);
+  const [adIsMuted, setAdIsMuted] = useState(true);
+  const [adClaiming, setAdClaiming] = useState(false);
+  const [adSuccessMsg, setAdSuccessMsg] = useState('');
+  const [loadingAdVideo, setLoadingAdVideo] = useState(false);
+  const [adVideoObj, setAdVideoObj] = useState({
+    url: '',
+    proxyUrl: '',
+    clickThrough: ''
+  });
+
+  const countdownTimerRef = useRef(null);
+
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
 
   const fetchQuest = () => {
@@ -67,9 +86,16 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   };
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      // Reset ad watching state when closed
+      setIsPlayingAd(false);
+      setAdCanClaim(false);
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+      return;
+    }
 
     setStatusMessage({ text: '', type: '' });
+    setAdSuccessMsg('');
     setIsExtending(false);
 
     // 1. Fetch quest status & tiers
@@ -89,7 +115,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     }
   }, [isOpen]);
 
-  // Lock body scroll cleanly when modal is open
+  // Clean body scroll lock
   useEffect(() => {
     if (isOpen) {
       const prevOverflow = document.body.style.overflow;
@@ -100,7 +126,109 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     }
   }, [isOpen]);
 
+  // Cleanup countdown timer on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+    };
+  }, []);
+
   if (!isOpen) return null;
+
+  // Handle Starting a Voluntary Sponsor Ad Watch in the Quest Section
+  const handleStartSponsorAd = async () => {
+    setIsPlayingAd(true);
+    setAdCountdown(10);
+    setAdCanClaim(false);
+    setAdSuccessMsg('');
+    setLoadingAdVideo(true);
+
+    // Resolve active sponsor ad
+    try {
+      const res = await fetch(`${API_BASE}/ads/config`);
+      const data = await res.json();
+      const preRoll = data?.config?.pre_roll;
+      const vastUrl = preRoll?.vast_url || 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH';
+
+      let videoUrl = '';
+      let clickThrough = '';
+
+      const pRes = await fetch(`${API_BASE}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`).catch(() => null);
+      let xmlText = pRes && pRes.ok ? await pRes.text() : '';
+      if (!xmlText) {
+        const dRes = await fetch(vastUrl).catch(() => null);
+        if (dRes && dRes.ok) xmlText = await dRes.text();
+      }
+
+      if (xmlText) {
+        const mp4Match = xmlText.match(/<MediaFile[^>]*type=["']video\/mp4["'][^>]*><!\[CDATA\[(.*?)\]\]><\/MediaFile>/i) ||
+                         xmlText.match(/<MediaFile[^>]*><!\[CDATA\[(.*?)\]\]><\/MediaFile>/i) ||
+                         xmlText.match(/<MediaFile[^>]*>(https?:\/\/[^<]+\.mp4[^<]*)<\/MediaFile>/i);
+        const clickMatch = xmlText.match(/<ClickThrough><!\[CDATA\[(.*?)\]\]><\/ClickThrough>/i) ||
+                           xmlText.match(/<ClickThrough>(https?:\/\/[^<]+)<\/ClickThrough>/i);
+
+        if (mp4Match) {
+          const rawUrl = mp4Match[1].trim();
+          const safeUrl = rawUrl.replace('://silent-basis.pro', '://www.silent-basis.pro');
+          const proxiedVideo = `${API_BASE}/ads/video-proxy?url=${encodeURIComponent(safeUrl)}`;
+          videoUrl = safeUrl;
+          clickThrough = clickMatch ? clickMatch[1].trim() : '';
+          setAdVideoObj({ url: safeUrl, proxyUrl: proxiedVideo, clickThrough });
+        }
+      }
+    } catch (_) {}
+
+    setLoadingAdVideo(false);
+
+    // Start 10-second countdown
+    let remaining = 10;
+    if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+    countdownTimerRef.current = setInterval(() => {
+      remaining -= 1;
+      setAdCountdown(Math.max(0, remaining));
+      if (remaining <= 0) {
+        clearInterval(countdownTimerRef.current);
+        setAdCanClaim(true);
+      }
+    }, 1000);
+  };
+
+  // Claim Completed Sponsor Ad
+  const handleClaimAdProgress = async () => {
+    if (adClaiming) return;
+    setAdClaiming(true);
+
+    try {
+      const token = localStorage.getItem('aurawatch_token');
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (visitorId) headers['x-visitor-id'] = visitorId;
+
+      const res = await fetch(`${API_BASE}/vip/ad-pass/complete-ad`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ visitor_id: visitorId, source: 'vip_section' })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setAdSuccessMsg(data.message || 'Progress recorded! +1 ad added to your VIP Pass quest.');
+        fetchQuest();
+        if (token) await refreshUser();
+        if (data.is_unlocked) {
+          window.dispatchEvent(new CustomEvent('aurawatch_vip_unlocked', { detail: data }));
+        }
+        setIsPlayingAd(false);
+      } else {
+        setStatusMessage({ text: data.message || 'Please wait a moment before claiming.', type: 'error' });
+      }
+    } catch (err) {
+      setStatusMessage({ text: 'Network error. Please try again.', type: 'error' });
+    } finally {
+      setAdClaiming(false);
+    }
+  };
 
   const handleRedeemCode = async (e) => {
     e.preventDefault();
@@ -241,10 +369,10 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                 </div>
 
                 <h2 className={styles.heroTitle}>
-                  Watch Sponsor Ads. <span className={styles.gradientText}>Unlock Free VIP.</span>
+                  Watch Sponsor Ads Here. <span className={styles.gradientText}>Unlock Free VIP.</span>
                 </h2>
                 <p className={styles.heroSubtitle}>
-                  Let 10-second sponsor ads play while streaming. In return, all ads, banners, and popup redirects are turned off platform-wide for up to 5 days.
+                  Watch 10-second sponsor ads voluntarily in this section to advance your quest. In return, all ads, banners, and popup redirects are turned off platform-wide for up to 5 days.
                 </p>
 
                 {/* 3-Step Simple Explainer */}
@@ -252,16 +380,16 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                   <div className={styles.stepItem}>
                     <span className={styles.stepNum}>1</span>
                     <div className={styles.stepText}>
-                      <strong>Play Any Movie</strong>
-                      <span>Stream without logging in</span>
+                      <strong>Click Watch Ad</strong>
+                      <span>Watch here (no movie ads count)</span>
                     </div>
                   </div>
                   <div className={styles.stepArrow}>➔</div>
                   <div className={styles.stepItem}>
                     <span className={styles.stepNum}>2</span>
                     <div className={styles.stepText}>
-                      <strong>Ads Auto-Count</strong>
-                      <span>Each 10s ad saves to quest</span>
+                      <strong>Count Adds Up</strong>
+                      <span>10s ad gives +1 quest point</span>
                     </div>
                   </div>
                   <div className={styles.stepArrow}>➔</div>
@@ -362,7 +490,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                         <div>
                           <h3 className={styles.questTitle}>Ad-Pass Milestone Quests</h3>
                           <p className={styles.questSubtitle}>
-                            Watch sponsor video ads while browsing to unlock extended ad-free passes.
+                            Watch sponsor ads in this section to advance your quest. Regular movie playback ads do not count.
                           </p>
                         </div>
                       </div>
@@ -444,19 +572,126 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                       </span>
                     </div>
 
-                    <div className={styles.perkDesc} style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <strong>How it works:</strong> Whenever you play a movie or episode, sponsor ads contribute to your quest. Once a milestone is reached, all pre-rolls, banners, and popups are deactivated across the entire platform.
-                    </div>
+                    {/* Interactive In-Modal Sponsor Ad Action Section */}
+                    <div className={styles.questAdSection}>
+                      {isPlayingAd ? (
+                        <div className={styles.adPlayerBox}>
+                          <div className={styles.adPlayerOverlayTop}>
+                            <div className={styles.adTagBadge}>
+                              <span>Sponsor Ad</span>
+                            </div>
+                            <div className={styles.adCountdownPill}>
+                              {adCountdown > 0 ? `Reward in ${adCountdown}s` : 'Reward Ready'}
+                            </div>
+                          </div>
 
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-                      <button
-                        type="button"
-                        className={styles.activateBtn}
-                        onClick={onClose}
-                      >
-                        <Play size={16} />
-                        <span>Start Streaming to Progress Quest</span>
-                      </button>
+                          {adVideoObj.url ? (
+                            <video
+                              src={adVideoObj.url}
+                              autoPlay
+                              playsInline
+                              muted={adIsMuted}
+                              className={styles.adPlayerVideo}
+                              onError={(e) => {
+                                if (adVideoObj.proxyUrl && e.target.src !== adVideoObj.proxyUrl) {
+                                  e.target.src = adVideoObj.proxyUrl;
+                                  e.target.play().catch(() => {});
+                                }
+                              }}
+                            />
+                          ) : (
+                            <div style={{
+                              padding: '40px 20px',
+                              background: 'radial-gradient(circle, rgba(255, 183, 3, 0.15) 0%, rgba(0,0,0,0.8) 100%)',
+                              textAlign: 'center'
+                            }}>
+                              <Loader2 size={32} className={styles.spinner} style={{ color: '#ffb703', margin: '0 auto 12px' }} />
+                              <div style={{ color: '#fff', fontSize: '14px', fontWeight: '700' }}>
+                                Sponsor Ad Playing...
+                              </div>
+                              <div style={{ color: '#aaa', fontSize: '12px', marginTop: '4px' }}>
+                                Reward credits when countdown finishes.
+                              </div>
+                            </div>
+                          )}
+
+                          <div className={styles.adPlayerOverlayBottom}>
+                            <button
+                              type="button"
+                              className={styles.adMuteBtn}
+                              onClick={() => setAdIsMuted(!adIsMuted)}
+                              title={adIsMuted ? 'Unmute' : 'Mute'}
+                            >
+                              {adIsMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                            </button>
+
+                            {adVideoObj.clickThrough && (
+                              <a
+                                href={adVideoObj.clickThrough}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.adVisitLink}
+                              >
+                                <span>Visit Sponsor</span>
+                                <ExternalLink size={12} />
+                              </a>
+                            )}
+
+                            {adCanClaim ? (
+                              <button
+                                type="button"
+                                className={styles.adClaimBtn}
+                                onClick={handleClaimAdProgress}
+                                disabled={adClaiming}
+                              >
+                                {adClaiming ? (
+                                  <>
+                                    <Loader2 size={14} className={styles.spinner} />
+                                    <span>Claiming...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check size={14} />
+                                    <span>Claim +1 Progress</span>
+                                  </>
+                                )}
+                              </button>
+                            ) : (
+                              <span style={{ fontSize: '11px', color: '#888' }}>
+                                Please watch full 10s to claim credit
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {adSuccessMsg && (
+                            <div className={styles.questCompleteCard}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontWeight: '700', fontSize: '14px' }}>
+                                <Check size={18} />
+                                <span>{adSuccessMsg}</span>
+                              </div>
+                              <span style={{ fontSize: '12px', color: '#ccc' }}>
+                                Current count: {currentAds} ads. You need {Math.max(0, nextTarget - currentAds)} more ads to reach the next VIP milestone!
+                              </span>
+                            </div>
+                          )}
+
+                          <button
+                            type="button"
+                            className={styles.watchAdBtn}
+                            onClick={handleStartSponsorAd}
+                            disabled={loadingAdVideo}
+                          >
+                            <Play size={18} fill="#000" />
+                            <span>Watch Sponsor Ad (+1 Progress)</span>
+                          </button>
+
+                          <p className={styles.watchAdHint}>
+                            Watch quick 10-second sponsor ads right here to fill your quest. Once unlocked, all ads across all movies turn off automatically!
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
