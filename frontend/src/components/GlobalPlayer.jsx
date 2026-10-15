@@ -445,7 +445,17 @@ const GlobalPlayer = () => {
       onTouchStart={handleTouchStart}
     >
       {/* Background Cinema Atmosphere */}
-      {!isSticky && <div className={styles.ambientCinemaGlow} />}
+      {!isSticky && (
+        <>
+          <div className={styles.ambientCinemaGlow} />
+          {movieData.backdrop && (
+            <div 
+              className={styles.ambientMovieBackdrop} 
+              style={{ backgroundImage: `url(${movieData.backdrop})` }} 
+            />
+          )}
+        </>
+      )}
 
       <button 
         className={styles.closeTrailerBtn} 
@@ -553,8 +563,27 @@ const GlobalPlayer = () => {
                       <span className={styles.ytAdYellow}>Ad</span>
                       <span className={styles.ytAdDot}>•</span>
                       <span>1 of 1</span>
-                      {adVideoStarted && preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
                     </div>
+
+                    <div className={styles.ytStreamQueuedPill}>
+                      <span className={styles.pulsingGreenDot} />
+                      <span className={styles.ytQueuedText}>Up Next: <strong>{label}</strong></span>
+                    </div>
+
+                    {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
+                      <div 
+                        className={styles.ytQuestBadge} 
+                        title="Click to unlock Free VIP Pass"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
+                        }}
+                      >
+                        <Crown size={13} color="#ffb703" />
+                        <span>Free VIP Pass</span>
+                        <span className={styles.ytQuestBtn}>Claim</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* YouTube Bottom Controls */}
@@ -594,7 +623,8 @@ const GlobalPlayer = () => {
                       </div>
                     ) : preRollSeconds > 0 ? (
                       <div className={styles.ytCountdownBox}>
-                        <span>Skip in</span>
+                        <Film size={13} color="#e50914" />
+                        <span className={styles.ytCountdownLabel}>{mediaLabel} plays in</span>
                         <span className={styles.ytCountdownNum}>{preRollSeconds}s</span>
                       </div>
                     ) : (
@@ -606,7 +636,8 @@ const GlobalPlayer = () => {
                           setPreRollActive(false);
                         }}
                       >
-                        <span>Skip Ad</span>
+                        <Play size={13} fill="#fbc02d" color="#fbc02d" />
+                        <span>Play {mediaLabel} Now</span>
                         <span className={styles.ytSkipArrow}>➔</span>
                       </button>
                     )}
@@ -618,24 +649,6 @@ const GlobalPlayer = () => {
                       className={styles.ytProgressFill}
                       style={{ width: `${adProgressPercent}%` }}
                     />
-                  </div>
-                </div>
-
-                {/* Mobile Info Deck below video for portrait screens */}
-                <div className={styles.ytMobileAdDeck}>
-                  <div className={styles.ytMobileMediaInfo}>
-                    {movieData.poster && (
-                      <img src={movieData.poster} alt={movieData.title} className={styles.ytMobilePoster} />
-                    )}
-                    <div className={styles.ytMobileMetaText}>
-                      <span className={styles.ytMobileUpNextLabel}>Up Next</span>
-                      <h4 className={styles.ytMobileTitle}>{label}</h4>
-                      <span className={styles.ytMobileSubtitle}>
-                        {adVideoStarted 
-                          ? (preRollSeconds > 0 ? `Video plays in ${preRollSeconds}s` : 'Ready — Tap Skip Ad to start')
-                          : 'Loading ad...'}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -650,8 +663,18 @@ const GlobalPlayer = () => {
                   <div className={styles.ytFallbackCard}>
                     <div className={styles.ytFallbackHeader}>
                       <div className={styles.ytFallbackUpNext}>
-                        <Film size={16} color="#e50914" />
-                        <span>Up Next: <strong>{label}</strong></span>
+                        {movieData.poster ? (
+                          <img src={movieData.poster} alt={label} className={styles.ytFallbackThumb} />
+                        ) : (
+                          <Film size={18} color="#e50914" />
+                        )}
+                        <div className={styles.ytFallbackMetaCol}>
+                          <span className={styles.ytFallbackQueueStatus}>
+                            <span className={styles.pulsingGreenDot} />
+                            HD STREAM READY & BUFFERED
+                          </span>
+                          <span className={styles.ytFallbackTitle}>Up Next: <strong>{label}</strong></span>
+                        </div>
                       </div>
                       <span className={styles.ytFallbackSponsoredBadge}>SPONSORED</span>
                     </div>
@@ -663,7 +686,7 @@ const GlobalPlayer = () => {
                     <div className={styles.ytFallbackFooter}>
                       <div className={styles.ytFallbackCountdownRow}>
                         <span className={styles.ytFallbackTimerText}>
-                          {preRollSeconds > 0 ? `Playing in ${preRollSeconds}s` : `Your video is ready`}
+                          {preRollSeconds > 0 ? `Starting ${mediaLabel} automatically in ${preRollSeconds}s...` : `Stream is ready to play!`}
                         </span>
                         {preRollSeconds > 0 && (
                           <span className={styles.ytCountdownNum}>{preRollSeconds}s</span>
@@ -685,9 +708,21 @@ const GlobalPlayer = () => {
                           className={styles.ytSkipBtn}
                           onClick={() => setPreRollActive(false)}
                         >
-                          <span>{preRollSeconds > 0 ? `Skip to ${mediaLabel}` : `Start Watching Now`}</span>
+                          <Play size={13} fill="#fbc02d" color="#fbc02d" />
+                          <span>{preRollSeconds > 0 ? `Play ${mediaLabel} Now` : `Start Watching Now`}</span>
                           <span className={styles.ytSkipArrow}>➔</span>
                         </button>
+
+                        {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
+                          <button
+                            type="button"
+                            className={styles.ytFallbackVipBtn}
+                            onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
+                          >
+                            <Crown size={14} color="#ffb703" />
+                            <span>Claim Free VIP Pass</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
