@@ -18,13 +18,13 @@ const defaultPreferences = {
   layout: 'cinematic',            // 'cinematic' | 'grid' | 'minimal'
   heroSize: 'full',               // 'full' | 'half' | 'compact' | 'hidden'
   contentWidth: 'full',           // 'full' | 'contained' | 'narrow'
-  navStyle: 'transparent',        // 'transparent' | 'solid' | 'glass' | 'hidden'
+  navStyle: 'glass',              // 'transparent' | 'solid' | 'glass' | 'hidden'
   sidebarPosition: 'left',        // 'left' | 'hidden'
   rowStyle: 'scroll',             // 'scroll' | 'wrap'
 
   // === CARDS ===
   cardStyle: 'poster',            // 'poster' | 'backdrop' | 'minimal' | 'rounded'
-  cardSize: 'large',             // 'small' | 'medium' | 'large' | 'xlarge'
+  cardSize: 'large',              // 'small' | 'medium' | 'large' | 'xlarge'
   cardHoverEffect: 'scale',       // 'scale' | 'glow' | 'lift' | 'flip' | 'none'
 
   // === TYPOGRAPHY ===
@@ -36,7 +36,7 @@ const defaultPreferences = {
   letterSpacing: 0,
 
   // === BUTTONS & CHROME ===
-  buttonStyle: 'filled',          // 'filled' | 'outline' | 'ghost' | 'pill' | 'sharp'
+  buttonStyle: 'pill',            // 'filled' | 'outline' | 'ghost' | 'pill' | 'sharp'
   scrollbarStyle: 'thin',         // 'thin' | 'hidden' | 'default'
 
   // === ADVANCED ===
@@ -47,7 +47,35 @@ const defaultPreferences = {
 
   // === PRESETS ===
   presets: {
-    preset1: null,
+    preset1: {
+      theme: 'classic',
+      layout: 'cinematic',
+      density: 'comfortable',
+      cardSize: 'large',
+      fontSize: 16,
+      heroSize: 'full',
+      navStyle: 'glass',
+      rowStyle: 'scroll',
+      cardStyle: 'poster',
+      animations: true,
+      fontFamily: "'Inter', sans-serif",
+      fontWeight: 'normal',
+      lineHeight: 1.6,
+      accentColor: '#e50914',
+      buttonStyle: 'pill',
+      glowEffects: false,
+      headingFont: "'Inter', sans-serif",
+      borderRadius: 12,
+      contentWidth: 'full',
+      transparency: 0.8,
+      blurIntensity: 10,
+      letterSpacing: 0,
+      scrollbarStyle: 'thin',
+      cardHoverEffect: 'scale',
+      shadowIntensity: 0.5,
+      sidebarPosition: 'left',
+      backgroundEffect: 'none'
+    },
     preset2: null,
     preset3: null
   }

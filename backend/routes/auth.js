@@ -78,6 +78,69 @@ async function syncGuestVipQuest(userId, visitorId) {
   }
 }
 
+const DEFAULT_UI_PREFERENCES = {
+  theme: 'classic',
+  layout: 'cinematic',
+  density: 'comfortable',
+  cardSize: 'large',
+  fontSize: 16,
+  heroSize: 'full',
+  navStyle: 'glass',
+  rowStyle: 'scroll',
+  cardStyle: 'poster',
+  animations: true,
+  fontFamily: "'Inter', sans-serif",
+  fontWeight: 'normal',
+  lineHeight: 1.6,
+  accentColor: '#e50914',
+  buttonStyle: 'pill',
+  glowEffects: false,
+  headingFont: "'Inter', sans-serif",
+  borderRadius: 12,
+  contentWidth: 'full',
+  transparency: 0.8,
+  blurIntensity: 10,
+  letterSpacing: 0,
+  scrollbarStyle: 'thin',
+  cardHoverEffect: 'scale',
+  shadowIntensity: 0.5,
+  sidebarPosition: 'left',
+  backgroundEffect: 'none',
+  presets: {
+    preset1: {
+      theme: 'classic',
+      layout: 'cinematic',
+      density: 'comfortable',
+      cardSize: 'large',
+      fontSize: 16,
+      heroSize: 'full',
+      navStyle: 'glass',
+      rowStyle: 'scroll',
+      cardStyle: 'poster',
+      animations: true,
+      fontFamily: "'Inter', sans-serif",
+      fontWeight: 'normal',
+      lineHeight: 1.6,
+      accentColor: '#e50914',
+      buttonStyle: 'pill',
+      glowEffects: false,
+      headingFont: "'Inter', sans-serif",
+      borderRadius: 12,
+      contentWidth: 'full',
+      transparency: 0.8,
+      blurIntensity: 10,
+      letterSpacing: 0,
+      scrollbarStyle: 'thin',
+      cardHoverEffect: 'scale',
+      shadowIntensity: 0.5,
+      sidebarPosition: 'left',
+      backgroundEffect: 'none'
+    },
+    preset2: null,
+    preset3: null
+  }
+};
+
 // Register
 router.post('/register', async (req, res) => {
   const { name, email, password, confirmPassword, securityQuestion, securityAnswer } = req.body;
@@ -113,7 +176,7 @@ router.post('/register', async (req, res) => {
 
     const result = await db.query(
       'INSERT INTO users (name, email, password_hash, security_question, security_answer_hash, ui_preferences) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      [name.trim(), cleanEmail, passwordHash, securityQuestion.trim(), answerHash, JSON.stringify({})]
+      [name.trim(), cleanEmail, passwordHash, securityQuestion.trim(), answerHash, JSON.stringify(DEFAULT_UI_PREFERENCES)]
     );
     const newUserId = result.rows[0].id;
 
@@ -143,7 +206,7 @@ router.post('/register', async (req, res) => {
         avatar: 'red',
         is_super_admin: false,
         admin_permissions: { all: false },
-        ui_preferences: {},
+        ui_preferences: DEFAULT_UI_PREFERENCES,
         is_premium: freshUser?.is_premium || false,
         premium_expires_at: freshUser?.premium_expires_at || null,
         premium_plan: freshUser?.premium_plan || 'free'
@@ -244,7 +307,7 @@ router.post('/login', async (req, res) => {
         role: user.role,
         is_super_admin: user.is_super_admin,
         admin_permissions: user.admin_permissions,
-        ui_preferences: user.ui_preferences || {},
+        ui_preferences: (user.ui_preferences && Object.keys(user.ui_preferences).length > 0) ? user.ui_preferences : DEFAULT_UI_PREFERENCES,
         is_premium: isPremium,
         premium_expires_at: expiresAt,
         premium_plan: freshUser.premium_plan || 'free'
@@ -383,7 +446,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       role: user.role,
       is_super_admin: user.is_super_admin,
       admin_permissions: user.admin_permissions,
-      ui_preferences: user.ui_preferences || {},
+      ui_preferences: (user.ui_preferences && Object.keys(user.ui_preferences).length > 0) ? user.ui_preferences : DEFAULT_UI_PREFERENCES,
       is_premium: isPremium,
       premium_expires_at: expiresAt,
       premium_plan: user.premium_plan || 'free'
