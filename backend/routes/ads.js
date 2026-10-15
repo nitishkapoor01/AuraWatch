@@ -81,9 +81,14 @@ router.get('/vast-proxy', async (req, res) => {
 // Proxy endpoint to stream MP4 video bytes through first-party origin (bypasses adblockers)
 router.get('/video-proxy', async (req, res) => {
   try {
-    const { url } = req.query;
+    let { url } = req.query;
     if (!url || !url.startsWith('https://')) {
       return res.status(400).json({ error: 'Invalid Video URL' });
+    }
+
+    // Normalize silent-basis.pro to www.silent-basis.pro (bare domain lacks DNS A record)
+    if (url.includes('://silent-basis.pro')) {
+      url = url.replace('://silent-basis.pro', '://www.silent-basis.pro');
     }
 
     const headers = {

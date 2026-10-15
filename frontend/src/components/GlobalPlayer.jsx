@@ -45,14 +45,18 @@ const GlobalPlayer = () => {
     setAdVideoStarted(false);
     setAdProgressPercent(0);
     setVastVideo(null);
-    setPreRollActive(false);
-    setIsResolvingVast(false);
 
     // Skip ads entirely for VIP members
     if (isAdExempt) {
       setPreRollActive(false);
+      setIsResolvingVast(false);
       return;
     }
+
+    // Immediately lock ad gateway so movie stream never flashes or starts before ad
+    setPreRollActive(true);
+    setIsResolvingVast(true);
+    setPreRollSeconds(10);
 
     let isMounted = true;
     const fetchAdsConfig = async () => {
@@ -111,7 +115,7 @@ const GlobalPlayer = () => {
 
                   if (foundVideo) {
                     const proxiedVideo = `${baseUrl}/ads/video-proxy?url=${encodeURIComponent(foundVideo)}`;
-                    setVastVideo({ url: proxiedVideo, clickThrough, impressions: impMatches });
+                    setVastVideo({ url: proxiedVideo, rawUrl: foundVideo, clickThrough, impressions: impMatches });
                     setIsResolvingVast(false);
                   } else {
                     console.warn('No video found in VAST XML, advancing to stream');
@@ -459,7 +463,13 @@ const GlobalPlayer = () => {
                   onEnded={() => {
                     setPreRollActive(false);
                   }}
-                  onError={() => {
+                  onError={(e) => {
+                    if (vastVideo?.rawUrl && e.target.src !== vastVideo.rawUrl) {
+                      console.warn('Video proxy playback failed, falling back to direct video URL:', vastVideo.rawUrl);
+                      e.target.src = vastVideo.rawUrl;
+                      e.target.play().catch(() => {});
+                      return;
+                    }
                     console.warn('Ad video playback error, advancing to stream');
                     setPreRollActive(false);
                   }}
