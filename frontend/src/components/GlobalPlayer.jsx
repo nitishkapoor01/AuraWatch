@@ -26,7 +26,7 @@ const GlobalPlayer = () => {
   const [preRollSeconds, setPreRollSeconds] = useState(5);
   const [preRollConfig, setPreRollConfig] = useState(null);
   const [vastVideo, setVastVideo] = useState(null);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [adVideoStarted, setAdVideoStarted] = useState(false);
   const [adProgressPercent, setAdProgressPercent] = useState(0);
   const [isResolvingVast, setIsResolvingVast] = useState(false);
@@ -422,6 +422,21 @@ const GlobalPlayer = () => {
                   playsInline
                   muted={isMuted}
                   className={styles.ytVideoElement}
+                  ref={(el) => {
+                    if (el) {
+                      el.muted = isMuted;
+                      const playPromise = el.play();
+                      if (playPromise && typeof playPromise.catch === 'function') {
+                        playPromise.catch((err) => {
+                          if (err.name === 'NotAllowedError') {
+                            el.muted = true;
+                            setIsMuted(true);
+                            el.play().catch(() => {});
+                          }
+                        });
+                      }
+                    }
+                  }}
                   onLoadedMetadata={(e) => {
                     e.target.currentTime = 0;
                   }}
