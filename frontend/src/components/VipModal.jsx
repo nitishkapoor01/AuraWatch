@@ -22,9 +22,9 @@ import { getApiBaseUrl } from '../utils/apiBase';
 import styles from './VipModal.module.css';
 
 const DEFAULT_TIERS = [
-  { id: '1_day', name: 'Daily Pass', target_ads: 5, reward_hours: 24, label: '24h VIP' },
-  { id: '2_days', name: '2-Day Pass', target_ads: 10, reward_hours: 48, label: '48h VIP' },
-  { id: '5_days', name: '5-Day Pass', target_ads: 20, reward_hours: 120, label: '5-Day VIP' }
+  { id: '1_day', name: 'Daily Pass', target_ads: 8, reward_hours: 24, label: '24h VIP' },
+  { id: '2_days', name: '2-Day Pass', target_ads: 15, reward_hours: 48, label: '48h VIP' },
+  { id: '5_days', name: '5-Day Pass', target_ads: 25, reward_hours: 120, label: '5-Day VIP' }
 ];
 
 const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
@@ -38,7 +38,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const [questProgress, setQuestProgress] = useState({
     enabled: true,
     current_count: 0,
-    target_count: 5,
+    target_count: 8,
     reward_hours: 24,
     tiers: DEFAULT_TIERS,
     is_unlocked: false,
@@ -418,7 +418,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                       )}
                     </div>
                     <h3 className={styles.questTitle}>
-                      Watch 5 Ads for 24h Free VIP Pass
+                      Watch {tiers[0]?.target_ads || 8} Ads for 24h Free VIP Pass
                     </h3>
                     <p className={styles.questSubtitle}>
                       Watch 10-second sponsor ads right here to turn off all video pre-rolls, banners, and popups.

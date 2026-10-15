@@ -1415,15 +1415,15 @@ router.post('/vip/payment-info', isAdmin, async (req, res) => {
 
 // 10. Get / Update Ad-Pass Quest Configuration
 const DEFAULT_AD_TIERS = [
-  { id: '1_day', name: 'Daily Pass', target_ads: 5, reward_hours: 24, label: '24 Hours (1 Day)' },
-  { id: '2_days', name: '2-Day Pass', target_ads: 10, reward_hours: 48, label: '48 Hours (2 Days)' },
-  { id: '5_days', name: '5-Day Pass', target_ads: 20, reward_hours: 120, label: '120 Hours (5 Days)' }
+  { id: '1_day', name: 'Daily Pass', target_ads: 8, reward_hours: 24, label: '24 Hours (1 Day)' },
+  { id: '2_days', name: '2-Day Pass', target_ads: 15, reward_hours: 48, label: '48 Hours (2 Days)' },
+  { id: '5_days', name: '5-Day Pass', target_ads: 25, reward_hours: 120, label: '120 Hours (5 Days)' }
 ];
 
 router.get('/vip/ad-pass-config', isModerator, async (req, res) => {
   try {
     const row = await db.query("SELECT value FROM settings WHERE key = 'ad_pass_config'");
-    let cfg = { enabled: true, target_ads: 5, reward_hours: 24, tiers: DEFAULT_AD_TIERS };
+    let cfg = { enabled: true, target_ads: 8, reward_hours: 24, tiers: DEFAULT_AD_TIERS };
     if (row.rows[0]?.value) {
       try { 
         const parsed = JSON.parse(row.rows[0].value);

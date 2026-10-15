@@ -563,7 +563,7 @@ const GlobalPlayer = () => {
                       style={{ cursor: 'pointer' }}
                     >
                       <Crown size={13} color="#ffb703" />
-                      <span>Tired of ads? Watch 5 ads in VIP Quest to unlock 24h Ad-Free VIP</span>
+                      <span>Tired of ads? Watch 8 ads in VIP Quest to unlock 24h Ad-Free VIP</span>
                     </div>
                   )}
                 </div>

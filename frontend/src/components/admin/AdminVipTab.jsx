@@ -24,9 +24,9 @@ import { useToast } from '../../context/ToastContext';
 import styles from './AdminVipTab.module.css';
 
 const DEFAULT_TIERS = [
-  { id: '1_day', name: 'Daily Pass', target_ads: 5, reward_hours: 24, label: '24 Hours (1 Day)' },
-  { id: '2_days', name: '2-Day Pass', target_ads: 10, reward_hours: 48, label: '48 Hours (2 Days)' },
-  { id: '5_days', name: '5-Day Pass', target_ads: 20, reward_hours: 120, label: '120 Hours (5 Days)' }
+  { id: '1_day', name: 'Daily Pass', target_ads: 8, reward_hours: 24, label: '24 Hours (1 Day)' },
+  { id: '2_days', name: '2-Day Pass', target_ads: 15, reward_hours: 48, label: '48 Hours (2 Days)' },
+  { id: '5_days', name: '5-Day Pass', target_ads: 25, reward_hours: 120, label: '120 Hours (5 Days)' }
 ];
 
 const AdminVipTab = ({ token }) => {
@@ -38,7 +38,7 @@ const AdminVipTab = ({ token }) => {
   // 1. Ad-Pass Quest Configuration State
   const [adPassSettings, setAdPassSettings] = useState({
     enabled: true,
-    target_ads: 5,
+    target_ads: 8,
     reward_hours: 24,
     tiers: DEFAULT_TIERS
   });
