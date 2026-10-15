@@ -178,7 +178,7 @@ router.get('/config', optionalAuth, async (req, res) => {
         enabled: true,
         type: 'vast', // 'vast' | 'video' | 'banner'
         vast_url: 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH',
-        timer_seconds: 8,
+        timer_seconds: 10,
         fallback_banner: false
       }
     };

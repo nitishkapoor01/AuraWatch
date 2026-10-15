@@ -74,7 +74,7 @@ const GlobalPlayer = () => {
 
           const preRoll = data.config?.pre_roll;
           if (data.config?.enabled && preRoll?.enabled) {
-            const timerSecs = Math.max(3, preRoll.timer_seconds || 8);
+            const timerSecs = Math.max(3, preRoll.timer_seconds || 10);
             setPreRollConfig(preRoll);
             setPreRollSeconds(timerSecs);
             setPreRollActive(true);
@@ -450,7 +450,7 @@ const GlobalPlayer = () => {
                   }}
                   onTimeUpdate={(e) => {
                     const ct = e.target.currentTime;
-                    const requiredSecs = preRollConfig?.timer_seconds || 8;
+                    const requiredSecs = preRollConfig?.timer_seconds || 10;
                     const rem = Math.max(0, Math.ceil(requiredSecs - ct));
                     setPreRollSeconds(rem);
                     const dur = e.target.duration || requiredSecs;
