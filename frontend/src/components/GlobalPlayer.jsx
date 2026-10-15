@@ -555,22 +555,6 @@ const GlobalPlayer = () => {
                       <span>1 of 1</span>
                       {adVideoStarted && preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
                     </div>
-
-                    {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
-                      <div 
-                        className={styles.ytQuestBadge} 
-                        title="Click to unlock Free VIP Pass"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
-                        }}
-                      >
-                        <Crown size={14} color="#ffb703" />
-                        <span className={styles.ytQuestDesktopText}>Skip All Ads With Free VIP Pass</span>
-                        <span className={styles.ytQuestMobileText}>VIP Pass</span>
-                        <span className={styles.ytQuestBtn}>Claim Free</span>
-                      </div>
-                    )}
                   </div>
 
                   {/* YouTube Bottom Controls */}
@@ -610,8 +594,7 @@ const GlobalPlayer = () => {
                       </div>
                     ) : preRollSeconds > 0 ? (
                       <div className={styles.ytCountdownBox}>
-                        <span className={styles.ytCountdownDesktopText}>Video will play after ad</span>
-                        <span className={styles.ytCountdownMobileText}>Ad</span>
+                        <span>Skip in</span>
                         <span className={styles.ytCountdownNum}>{preRollSeconds}s</span>
                       </div>
                     ) : (
@@ -638,7 +621,7 @@ const GlobalPlayer = () => {
                   </div>
                 </div>
 
-                {/* Mobile Ad Deck below video for portrait screens */}
+                {/* Mobile Info Deck below video for portrait screens */}
                 <div className={styles.ytMobileAdDeck}>
                   <div className={styles.ytMobileMediaInfo}>
                     {movieData.poster && (
@@ -649,27 +632,11 @@ const GlobalPlayer = () => {
                       <h4 className={styles.ytMobileTitle}>{label}</h4>
                       <span className={styles.ytMobileSubtitle}>
                         {adVideoStarted 
-                          ? (preRollSeconds > 0 ? `Stream starts in ${preRollSeconds}s` : 'Ad complete — Ready to stream')
-                          : 'Loading sponsor ad...'}
+                          ? (preRollSeconds > 0 ? `Video plays in ${preRollSeconds}s` : 'Ready — Tap Skip Ad to start')
+                          : 'Loading ad...'}
                       </span>
                     </div>
                   </div>
-
-                  {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
-                    <div 
-                      className={styles.ytMobileVipCard}
-                      onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
-                    >
-                      <div className={styles.ytMobileVipLeft}>
-                        <Crown size={16} color="#ffb703" />
-                        <div>
-                          <strong>Skip All Ads Free</strong>
-                          <span>Claim your 100% Free VIP Pass</span>
-                        </div>
-                      </div>
-                      <span className={styles.ytMobileVipBtn}>Claim Pass</span>
-                    </div>
-                  )}
                 </div>
               </div>
             ) : (
@@ -677,7 +644,7 @@ const GlobalPlayer = () => {
                 {isResolvingVast ? (
                   <div className={styles.ytLoadingOverlay}>
                     <Loader2 className={styles.spinner} size={32} />
-                    <span>Preparing your stream & sponsor preview...</span>
+                    <span>Preparing your stream...</span>
                   </div>
                 ) : (
                   <div className={styles.ytFallbackCard}>
@@ -686,7 +653,7 @@ const GlobalPlayer = () => {
                         <Film size={16} color="#e50914" />
                         <span>Up Next: <strong>{label}</strong></span>
                       </div>
-                      <span className={styles.ytFallbackSponsoredBadge}>SPONSORED PREVIEW</span>
+                      <span className={styles.ytFallbackSponsoredBadge}>SPONSORED</span>
                     </div>
 
                     <div className={styles.preRollAdArea}>
@@ -696,7 +663,7 @@ const GlobalPlayer = () => {
                     <div className={styles.ytFallbackFooter}>
                       <div className={styles.ytFallbackCountdownRow}>
                         <span className={styles.ytFallbackTimerText}>
-                          {preRollSeconds > 0 ? `Starting ${mediaLabel} in ${preRollSeconds}s` : `Your ${mediaLabel} is ready!`}
+                          {preRollSeconds > 0 ? `Playing in ${preRollSeconds}s` : `Your video is ready`}
                         </span>
                         {preRollSeconds > 0 && (
                           <span className={styles.ytCountdownNum}>{preRollSeconds}s</span>
@@ -721,17 +688,6 @@ const GlobalPlayer = () => {
                           <span>{preRollSeconds > 0 ? `Skip to ${mediaLabel}` : `Start Watching Now`}</span>
                           <span className={styles.ytSkipArrow}>➔</span>
                         </button>
-
-                        {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
-                          <button
-                            type="button"
-                            className={styles.ytFallbackVipBtn}
-                            onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
-                          >
-                            <Crown size={14} color="#ffb703" />
-                            <span>Remove All Ads with VIP Pass</span>
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>
