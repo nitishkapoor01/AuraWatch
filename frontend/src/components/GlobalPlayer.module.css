@@ -417,157 +417,239 @@
 
 /* ==========================================================================
    STREAM PRE-ROLL AD GATEWAY STYLES
+/* ==========================================================================
+   YOUTUBE-STYLE IN-STREAM PRE-ROLL AD STYLES
    ========================================================================== */
-.preRollGateway {
+.ytPreRollContainer {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgba(16, 20, 32, 0.98), rgba(4, 6, 12, 0.99));
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 20;
-  padding: 20px;
-  animation: fadeIn 0.3s ease-out;
+  overflow: hidden;
 }
 
-.preRollCard {
-  width: 100%;
-  max-width: 470px;
-  background: rgba(14, 18, 28, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-  padding: 18px 22px;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.92), 0 0 45px rgba(229, 9, 20, 0.18);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.ytVideoWrapper {
   position: relative;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.preRollHeader {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  justify-content: center;
+  background: #000;
 }
 
-.preRollBadge {
+.ytVideoElement {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  cursor: pointer;
+  display: block;
+}
+
+/* YouTube Top-Left Overlay */
+.ytTopOverlay {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.ytAdTag {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(229, 9, 20, 0.16);
-  border: 1px solid rgba(229, 9, 20, 0.38);
-  color: #ff4d58;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  text-transform: uppercase;
-}
-
-.preRollQualityBadge {
-  font-size: 11px;
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 3px 9px;
-  border-radius: 9999px;
-}
-
-.preRollMediaBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #facc15;
-  background: rgba(250, 204, 21, 0.12);
-  border: 1px solid rgba(250, 204, 21, 0.3);
-  padding: 3px 9px;
-  border-radius: 9999px;
-  letter-spacing: 0.4px;
-}
-
-.preRollDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #e50914;
-  box-shadow: 0 0 8px #e50914;
-  animation: pulseDot 1.6s infinite;
-}
-
-.preRollTitleRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: -2px;
-}
-
-.preRollMovieHeading {
-  font-size: 13.5px;
-  font-weight: 700;
   color: #ffffff;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: 0.2px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.preRollServerNoteBox {
+.ytAdYellow {
+  color: #fbc02d;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ytAdDot {
+  opacity: 0.4;
+  font-size: 10px;
+}
+
+.ytAdTime {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* YouTube Bottom-Left Controls */
+.ytBottomLeft {
+  position: absolute;
+  bottom: 20px;
+  left: 18px;
+  z-index: 60;
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(20, 24, 38, 0.6) 100%);
-  border: 1px solid rgba(229, 9, 20, 0.25);
-  border-radius: 12px;
-  padding: 10px 14px;
+  align-items: center;
+  gap: 12px;
 }
 
-.preRollServerNoteIcon {
-  margin-top: 2px;
+.ytSoundBtn {
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: heartThrob 2s infinite ease-in-out;
+  color: #ffffff;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes heartThrob {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.18); }
+.ytSoundBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.45);
+  transform: scale(1.08);
 }
 
-.preRollServerNoteText {
+.ytVisitBtn {
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  padding: 8px 16px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ytVisitBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+/* YouTube Bottom-Right Skip Button */
+.ytBottomRight {
+  position: absolute;
+  bottom: 20px;
+  right: 18px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+}
+
+.ytCountdownBox {
+  background: rgba(0, 0, 0, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  user-select: none;
+}
+
+.ytCountdownNum {
+  background: rgba(251, 192, 45, 0.2);
+  color: #fbc02d;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.ytSkipBtn {
+  background: rgba(0, 0, 0, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 4px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.ytSkipBtn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: #ffffff;
+  transform: scale(1.04);
+}
+
+.ytSkipArrow {
+  font-size: 15px;
+  color: #fbc02d;
+  transition: transform 0.2s ease;
+}
+
+.ytSkipBtn:hover .ytSkipArrow {
+  transform: translateX(3px);
+}
+
+/* YouTube Classic Yellow Bottom Progress Bar */
+.ytProgressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: rgba(255, 255, 255, 0.18);
+  z-index: 65;
+}
+
+.ytProgressFill {
+  height: 100%;
+  background: #fbc02d;
+  transition: width 0.3s linear;
+}
+
+/* Fallback Container if no video */
+.ytFallbackContainer {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-}
-
-.preRollNoteTitle {
-  font-size: 12px;
-  font-weight: 600;
-  color: #f1f5f9;
-}
-
-.preRollNoteTitle strong {
-  color: #ff4d58;
-  font-size: 13px;
-}
-
-.preRollNoteDesc {
-  font-size: 11px;
-  line-height: 1.4;
-  color: rgba(241, 245, 249, 0.72);
-  margin: 0;
+  align-items: center;
+  justify-content: center;
+  background: #0d0d11;
+  position: relative;
 }
 
 .preRollAdArea {
@@ -578,241 +660,40 @@
   width: 100%;
 }
 
-.preRollVideoWrapper {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.preRollVideoElement {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  cursor: pointer;
-  display: block;
-}
-
-.preRollMuteBtn {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  background: rgba(14, 18, 28, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-radius: 9999px;
-  padding: 6px 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  z-index: 5;
-  transition: all 0.2s ease;
-}
-
-.preRollMuteBtn:hover {
-  background: rgba(229, 9, 20, 0.9);
-  border-color: #e50914;
-  transform: scale(1.05);
-}
-
-.preRollVideoOverlayLink {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  text-decoration: none;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 5;
-  transition: all 0.2s ease;
-}
-
-.preRollVideoOverlayLink:hover {
-  background: rgba(229, 9, 20, 0.85);
-  border-color: #e50914;
-}
-
-.preRollDirectLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #f1f5f9;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 10px;
-  transition: all 0.2s ease;
-  margin-top: -4px;
-}
-
-.preRollDirectLink:hover {
-  background: rgba(229, 9, 20, 0.2);
-  border-color: rgba(229, 9, 20, 0.4);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.preRollFooter {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.preRollProgressBar {
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  overflow: hidden;
-}
-
-.preRollProgressFill {
-  height: 100%;
-  background: linear-gradient(90deg, #e50914 0%, #ff6b6b 100%);
-  transition: width 1s linear;
-}
-
-.preRollActions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.preRollServerStatus {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #4ade80;
-  letter-spacing: 0.2px;
-}
-
-.serverPulseDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
-  animation: pulseDotGreen 1.8s infinite;
-}
-
-@keyframes pulseDotGreen {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.3); opacity: 0.4; }
-}
-
-.serverIcon {
-  color: #22c55e;
-  opacity: 0.85;
-}
-
-.countdownPill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
-  font-size: 10.5px;
-  font-weight: 800;
-  padding: 1px 7px;
-  border-radius: 9999px;
-  margin-right: 2px;
-}
-
-.preRollNote {
-  font-size: 11.5px;
-  color: rgba(241, 245, 249, 0.6);
-  font-weight: 500;
-}
-
-.preRollSkipBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 18px;
-  border-radius: 9999px;
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(241, 245, 249, 0.5);
-  cursor: not-allowed;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
-  white-space: nowrap;
-}
-
-.preRollSkipBtnReady {
-  background: linear-gradient(135deg, #e50914 0%, #b80710 100%);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.5);
-  cursor: pointer;
-  animation: skipReadyPulse 1.8s infinite;
-}
-
-.preRollSkipBtnReady:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 6px 24px rgba(229, 9, 20, 0.7);
-  background: linear-gradient(135deg, #ff1a25 0%, #cf0a13 100%);
-}
-
-@keyframes skipReadyPulse {
-  0%, 100% {
-    box-shadow: 0 4px 18px rgba(229, 9, 20, 0.5);
-  }
-  50% {
-    box-shadow: 0 4px 28px rgba(229, 9, 20, 0.85);
-  }
-}
-
-@media (max-width: 480px) {
-  .preRollCard {
-    padding: 14px;
-    gap: 10px;
-  }
-  
-  .preRollMovieTitle {
-    max-width: 120px;
+@media (max-width: 600px) {
+  .ytTopOverlay {
+    top: 10px;
+    left: 10px;
   }
 
-  .preRollActions {
-    flex-direction: column;
-    align-items: stretch;
+  .ytBottomLeft {
+    bottom: 12px;
+    left: 10px;
     gap: 8px;
   }
 
-  .preRollSkipBtn {
-    justify-content: center;
-    width: 100%;
+  .ytBottomRight {
+    bottom: 12px;
+    right: 10px;
+  }
+
+  .ytVisitBtn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .ytSoundBtn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ytCountdownBox {
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+
+  .ytSkipBtn {
+    padding: 7px 14px;
+    font-size: 12px;
   }
 }

@@ -53,7 +53,7 @@ const GlobalPlayer = () => {
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s safeguard timeout
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s safeguard timeout for ad networks
 
         const savedToken = localStorage.getItem('aurawatch_token') || token;
         const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
@@ -76,18 +76,18 @@ const GlobalPlayer = () => {
             setPreRollActive(true);
 
             // Attempt to resolve VAST Video if configured
-            const vastUrl = preRoll.vast_url || (preRoll.type === 'vast' ? 'https://s.magsrv.com/v1/vast.php?idz=6033024' : '');
+            const vastUrl = preRoll.vast_url || (preRoll.type === 'vast' ? 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH' : '');
             if (vastUrl && preRoll.type !== 'banner' && preRoll.type !== 'video') {
               try {
                 let xmlText = '';
+                // Try backend proxy first for reliable bypass of ad blockers and CORS
                 try {
-                  const vRes = await fetch(vastUrl, { signal: controller.signal });
-                  if (vRes.ok) xmlText = await vRes.text();
-                } catch (_) {
-                  // CORS fallback via internal backend proxy
                   const proxyUrl = `${baseUrl}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`;
                   const pRes = await fetch(proxyUrl, { signal: controller.signal });
                   if (pRes.ok) xmlText = await pRes.text();
+                } catch (_) {
+                  const vRes = await fetch(vastUrl, { signal: controller.signal });
+                  if (vRes.ok) xmlText = await vRes.text();
                 }
 
                 if (xmlText && isMounted) {
@@ -147,12 +147,6 @@ const GlobalPlayer = () => {
         setPreRollSeconds(prev => prev - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else {
-      // Auto-start stream after 2.5s if user has not clicked skip
-      const autoStartTimer = setTimeout(() => {
-        setPreRollActive(false);
-      }, 2500);
-      return () => clearTimeout(autoStartTimer);
     }
   }, [preRollActive, preRollSeconds]);
 
@@ -399,150 +393,116 @@ const GlobalPlayer = () => {
       
       <div className={styles.playerStage}>
         {preRollActive ? (
-          <div className={styles.preRollGateway}>
-            <div className={styles.preRollCard}>
-              <div className={styles.preRollHeader}>
-                <div className={styles.preRollBadge}>
-                  <span className={styles.preRollDot} />
-                  <span>COMMUNITY SPONSOR</span>
-                </div>
-                <div className={styles.preRollMediaBadge}>
-                  {isTV ? <Tv size={12} /> : <Film size={12} />}
-                  <span>{mediaLabel.toUpperCase()} LOADING</span>
-                </div>
-                <span className={styles.preRollQualityBadge}>
-                  ⚡ 1080p Ultra HD
-                </span>
-              </div>
+          <div className={styles.ytPreRollContainer}>
+            {vastVideo?.url ? (
+              <div className={styles.ytVideoWrapper}>
+                <video
+                  key={vastVideo.url}
+                  src={vastVideo.url}
+                  autoPlay
+                  playsInline
+                  muted={isMuted}
+                  className={styles.ytVideoElement}
+                  onPlay={() => {
+                    if (vastVideo.impressions?.length) {
+                      vastVideo.impressions.forEach(impUrl => {
+                        try { new Image().src = impUrl; } catch (_) {}
+                      });
+                    }
+                  }}
+                  onClick={() => {
+                    if (vastVideo.clickThrough) {
+                      window.open(vastVideo.clickThrough, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
+                />
 
-              {/* Title & Friendly Community Server Note */}
-              <div className={styles.preRollTitleRow}>
-                {isTV ? <Tv size={15} color="#e50914" /> : <Film size={15} color="#e50914" />}
-                <h4 className={styles.preRollMovieHeading} title={label}>
-                  {label}
-                </h4>
-              </div>
-
-              <div className={styles.preRollServerNoteBox}>
-                <div className={styles.preRollServerNoteIcon}>
-                  <Heart size={16} fill="#e50914" color="#e50914" />
+                {/* YouTube Top Bar */}
+                <div className={styles.ytTopOverlay}>
+                  <div className={styles.ytAdTag}>
+                    <span className={styles.ytAdYellow}>Ad</span>
+                    <span className={styles.ytAdDot}>•</span>
+                    <span>1 of 1</span>
+                    {preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
+                  </div>
                 </div>
-                <div className={styles.preRollServerNoteText}>
-                  <span className={styles.preRollNoteTitle}>
-                    Your requested {mediaLabel.toLowerCase()} will play after these <strong>{preRollSeconds} seconds</strong>
-                  </span>
-                  <p className={styles.preRollNoteDesc}>
-                    These quick sponsor ads help us run our high-speed streaming servers and keep AuraWatch 100% free with zero subscriptions for everyone. Thank you for your support!
-                  </p>
-                </div>
-              </div>
 
-              {vastVideo?.url ? (
-                <div className={styles.preRollVideoWrapper}>
-                  <video
-                    key={vastVideo.url}
-                    src={vastVideo.url}
-                    autoPlay
-                    playsInline
-                    muted={isMuted}
-                    className={styles.preRollVideoElement}
-                    onPlay={() => {
-                      if (vastVideo.impressions?.length) {
-                        vastVideo.impressions.forEach(impUrl => {
-                          try { new Image().src = impUrl; } catch (_) {}
-                        });
-                      }
-                    }}
-                    onClick={() => {
-                      if (vastVideo.clickThrough) {
-                        window.open(vastVideo.clickThrough, '_blank', 'noopener,noreferrer');
-                      }
-                    }}
-                  />
+                {/* YouTube Bottom Controls */}
+                <div className={styles.ytBottomLeft}>
                   <button 
                     type="button" 
-                    className={styles.preRollMuteBtn}
+                    className={styles.ytSoundBtn}
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsMuted(!isMuted);
                     }}
                     title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
                   >
-                    {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-                    <span>{isMuted ? 'Unmute Sound' : 'Sound On'}</span>
+                    {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                   </button>
+
                   {vastVideo.clickThrough && (
                     <a
                       href={vastVideo.clickThrough}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.preRollVideoOverlayLink}
+                      className={styles.ytVisitBtn}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <span>Visit Sponsor</span>
-                      <ExternalLink size={12} />
+                      <span>Visit Advertiser</span>
+                      <ExternalLink size={13} />
                     </a>
                   )}
                 </div>
-              ) : (
-                <div className={styles.preRollAdArea}>
-                  <AdBanner slot="pre_roll" customConfig={preRollConfig} />
+
+                {/* YouTube Bottom-Right Skip Button */}
+                <div className={styles.ytBottomRight}>
+                  {preRollSeconds > 0 ? (
+                    <div className={styles.ytCountdownBox}>
+                      <span>Video will play after ad</span>
+                      <span className={styles.ytCountdownNum}>{preRollSeconds}</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.ytSkipBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreRollActive(false);
+                      }}
+                    >
+                      <span>Skip Ad</span>
+                      <span className={styles.ytSkipArrow}>➔</span>
+                    </button>
+                  )}
                 </div>
-              )}
 
-              {!vastVideo?.url && preRollConfig?.direct_url && (
-                <a 
-                  href={preRollConfig.direct_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className={styles.preRollDirectLink}
-                >
-                  <Sparkles size={13} color="#f5c518" />
-                  <span>Special Sponsor Offer</span>
-                  <ExternalLink size={13} />
-                </a>
-              )}
-
-              <div className={styles.preRollFooter}>
-                <div className={styles.preRollProgressBar}>
+                {/* YouTube Yellow Progress Bar */}
+                <div className={styles.ytProgressBar}>
                   <div 
-                    className={styles.preRollProgressFill} 
+                    className={styles.ytProgressFill}
                     style={{ 
                       width: `${Math.max(0, Math.min(100, (((preRollConfig?.timer_seconds || 5) - preRollSeconds) / (preRollConfig?.timer_seconds || 5)) * 100))}%` 
                     }}
                   />
                 </div>
-
-                <div className={styles.preRollActions}>
-                  <div className={styles.preRollServerStatus}>
-                    <span className={styles.serverPulseDot} />
-                    <Server size={13} className={styles.serverIcon} />
-                    <span>Server: Ready (Buffer-Free)</span>
-                  </div>
-
+              </div>
+            ) : (
+              <div className={styles.ytFallbackContainer}>
+                <div className={styles.preRollAdArea}>
+                  <AdBanner slot="pre_roll" customConfig={preRollConfig} />
+                </div>
+                <div className={styles.ytBottomRight}>
                   <button
-                    className={`${styles.preRollSkipBtn} ${preRollSeconds === 0 ? styles.preRollSkipBtnReady : ''}`}
-                    disabled={preRollSeconds > 0}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPreRollActive(false);
-                    }}
+                    type="button"
+                    className={styles.ytSkipBtn}
+                    onClick={() => setPreRollActive(false)}
                   >
-                    {preRollSeconds > 0 ? (
-                      <>
-                        <span className={styles.countdownPill}>{preRollSeconds}s</span>
-                        <span>Playing in {preRollSeconds}s</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play size={14} fill="#fff" />
-                        <span>Watch {mediaLabel} Now 🎬</span>
-                      </>
-                    )}
+                    <span>Continue to {mediaLabel} ➔</span>
                   </button>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <iframe
