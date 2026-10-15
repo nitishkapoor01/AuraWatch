@@ -7,6 +7,10 @@ const pool = new Pool({
   ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
+pool.on('error', (err) => {
+  console.error('[DB Pool] Error on idle database client:', err.message);
+});
+
 const initDB = async () => {
   try {
     await pool.query(`

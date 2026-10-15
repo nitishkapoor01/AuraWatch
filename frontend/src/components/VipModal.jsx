@@ -119,6 +119,12 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
       return () => {
         document.body.style.overflow = prevOverflow;
       };
+    } else {
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+        countdownTimerRef.current = null;
+      }
+      setIsPlayingAd(false);
     }
   }, [isOpen]);
 
@@ -132,6 +138,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const handleStartSponsorAd = async () => {
     setIsPlayingAd(true);
     setAdCountdown(15);
+    setAdProgressPercent(0);
     setAdCanClaim(false);
     setAdSuccessMsg('');
     setLoadingAdVideo(true);
@@ -173,14 +180,25 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     setLoadingAdVideo(false);
     setAdInlineMsg({ text: '', type: '' });
 
-    let remaining = 15;
+    const totalDurationMs = 15000;
+    const startTime = Date.now();
     if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+
+    setAdCountdown(15);
+    setAdProgressPercent(0);
+
     countdownTimerRef.current = setInterval(() => {
-      remaining -= 1;
-      setAdCountdown(Math.max(0, remaining));
-      setAdProgressPercent(prev => Math.max(prev, Math.min(100, Math.round(((15 - remaining) / 15) * 100))));
-      if (remaining <= 0) {
+      const elapsedMs = Date.now() - startTime;
+      const remainingSec = Math.max(0, Math.ceil((totalDurationMs - elapsedMs) / 1000));
+      const pct = Math.min(100, (elapsedMs / totalDurationMs) * 100);
+
+      setAdCountdown(remainingSec);
+      setAdProgressPercent(pct);
+
+      if (elapsedMs >= totalDurationMs) {
         clearInterval(countdownTimerRef.current);
+        countdownTimerRef.current = null;
+        setAdCountdown(0);
         setAdProgressPercent(100);
         setAdCanClaim(true);
         // Automatically claim reward once countdown reaches 0s
@@ -188,7 +206,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
           claimAdRef.current();
         }
       }
-    }, 1000);
+    }, 50);
   };
 
   // Claim Ad
@@ -477,6 +495,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                           <video
                             src={adVideoObj.url}
                             autoPlay
+                            loop
                             playsInline
                             muted={adIsMuted}
                             className={styles.adPlayerVideo}
@@ -494,12 +513,6 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                                   });
                                 }
                               }
-                            }}
-                            onTimeUpdate={(e) => {
-                              const ct = e.target.currentTime;
-                              const dur = e.target.duration || 15;
-                              const pct = Math.min(100, Math.round((ct / Math.min(dur, 15)) * 100));
-                              setAdProgressPercent(prev => Math.max(prev, pct));
                             }}
                             onError={(e) => {
                               if (adVideoObj.proxyUrl && e.target.src !== adVideoObj.proxyUrl) {
