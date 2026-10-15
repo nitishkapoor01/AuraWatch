@@ -225,6 +225,9 @@ const GlobalPlayer = () => {
         setPreRollSeconds(prev => prev - 1);
       }, 1000);
       return () => clearTimeout(timer);
+    } else if (preRollSeconds === 0 && !completedRef.current) {
+      completedRef.current = true;
+      setPreRollActive(false);
     }
   }, [preRollActive, preRollSeconds, vastVideo]);
 
@@ -474,161 +477,199 @@ const GlobalPlayer = () => {
           <div className={styles.ytPreRollContainer}>
             {vastVideo?.url ? (
               <div className={styles.ytVideoWrapper}>
-                <video
-                  key={`${vastVideo.url}_${movieData?._playTimestamp || Date.now()}`}
-                  src={vastVideo.url}
-                  autoPlay
-                  playsInline
-                  muted={isMuted}
-                  className={styles.ytVideoElement}
-                  ref={(el) => {
-                    if (el) {
-                      el.muted = isMuted;
-                      const playPromise = el.play();
-                      if (playPromise && typeof playPromise.catch === 'function') {
-                        playPromise.catch((err) => {
-                          if (err.name === 'NotAllowedError') {
-                            el.muted = true;
-                            setIsMuted(true);
-                            el.play().catch(() => {});
-                          }
+                <div className={styles.ytVideoBox}>
+                  <video
+                    key={`${vastVideo.url}_${movieData?._playTimestamp || Date.now()}`}
+                    src={vastVideo.url}
+                    autoPlay
+                    playsInline
+                    muted={isMuted}
+                    className={styles.ytVideoElement}
+                    ref={(el) => {
+                      if (el) {
+                        el.muted = isMuted;
+                        const playPromise = el.play();
+                        if (playPromise && typeof playPromise.catch === 'function') {
+                          playPromise.catch((err) => {
+                            if (err.name === 'NotAllowedError') {
+                              el.muted = true;
+                              setIsMuted(true);
+                              el.play().catch(() => {});
+                            }
+                          });
+                        }
+                      }
+                    }}
+                    onLoadedMetadata={(e) => {
+                      e.target.currentTime = 0;
+                    }}
+                    onPlaying={() => {
+                      setAdVideoStarted(true);
+                      if (vastVideo.impressions?.length) {
+                        vastVideo.impressions.forEach(impUrl => {
+                          try { new Image().src = impUrl; } catch (_) {}
                         });
                       }
-                    }
-                  }}
-                  onLoadedMetadata={(e) => {
-                    e.target.currentTime = 0;
-                  }}
-                  onPlaying={() => {
-                    setAdVideoStarted(true);
-                    if (vastVideo.impressions?.length) {
-                      vastVideo.impressions.forEach(impUrl => {
-                        try { new Image().src = impUrl; } catch (_) {}
-                      });
-                    }
-                  }}
-                  onTimeUpdate={(e) => {
-                    const ct = e.target.currentTime;
-                    const requiredSecs = preRollConfig?.timer_seconds || 10;
-                    const rem = Math.max(0, Math.ceil(requiredSecs - ct));
-                    setPreRollSeconds(rem);
-                    const dur = e.target.duration || requiredSecs;
-                    setAdProgressPercent(Math.min(100, (ct / Math.max(1, Math.min(dur, requiredSecs))) * 100));
-                  }}
-                  onEnded={() => {
-                    setPreRollActive(false);
-                  }}
-                  onError={(e) => {
-                    if (vastVideo?.proxyUrl && e.target.src !== vastVideo.proxyUrl) {
-                      console.warn('Direct CDN video blocked, falling back to first-party proxy:', vastVideo.proxyUrl);
-                      e.target.src = vastVideo.proxyUrl;
-                      e.target.play().catch(() => {});
-                      return;
-                    }
-                    console.warn('Ad video playback error, advancing to stream');
-                    setPreRollActive(false);
-                  }}
-                  onClick={() => {
-                    if (vastVideo.clickThrough) {
-                      window.open(vastVideo.clickThrough, '_blank', 'noopener,noreferrer');
-                    }
-                  }}
-                />
+                    }}
+                    onTimeUpdate={(e) => {
+                      const ct = e.target.currentTime;
+                      const requiredSecs = preRollConfig?.timer_seconds || 10;
+                      const rem = Math.max(0, Math.ceil(requiredSecs - ct));
+                      setPreRollSeconds(rem);
+                      const dur = e.target.duration || requiredSecs;
+                      setAdProgressPercent(Math.min(100, (ct / Math.max(1, Math.min(dur, requiredSecs))) * 100));
+                    }}
+                    onEnded={() => {
+                      setPreRollActive(false);
+                    }}
+                    onError={(e) => {
+                      if (vastVideo?.proxyUrl && e.target.src !== vastVideo.proxyUrl) {
+                        console.warn('Direct CDN video blocked, falling back to first-party proxy:', vastVideo.proxyUrl);
+                        e.target.src = vastVideo.proxyUrl;
+                        e.target.play().catch(() => {});
+                        return;
+                      }
+                      console.warn('Ad video playback error, advancing to stream');
+                      setPreRollActive(false);
+                    }}
+                    onClick={() => {
+                      if (vastVideo.clickThrough) {
+                        window.open(vastVideo.clickThrough, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                  />
 
-                {/* Loading overlay while ad video is buffering */}
-                {!adVideoStarted && (
-                  <div className={styles.ytLoadingOverlay}>
-                    <Loader2 className={styles.spinner} size={28} />
-                    <span>Loading ad...</span>
+                  {/* Loading overlay while ad video is buffering */}
+                  {!adVideoStarted && (
+                    <div className={styles.ytLoadingOverlay}>
+                      <Loader2 className={styles.spinner} size={28} />
+                      <span>Loading sponsor ad...</span>
+                    </div>
+                  )}
+
+                  {/* YouTube Top Bar */}
+                  <div className={styles.ytTopOverlay}>
+                    <div className={styles.ytAdTag}>
+                      <span className={styles.ytAdYellow}>Ad</span>
+                      <span className={styles.ytAdDot}>•</span>
+                      <span>1 of 1</span>
+                      {adVideoStarted && preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
+                    </div>
+
+                    {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
+                      <div 
+                        className={styles.ytQuestBadge} 
+                        title="Click to unlock Free VIP Pass"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
+                        }}
+                      >
+                        <Crown size={14} color="#ffb703" />
+                        <span className={styles.ytQuestDesktopText}>Skip All Ads With Free VIP Pass</span>
+                        <span className={styles.ytQuestMobileText}>VIP Pass</span>
+                        <span className={styles.ytQuestBtn}>Claim Free</span>
+                      </div>
+                    )}
                   </div>
-                )}
 
-                {/* YouTube Top Bar */}
-                <div className={styles.ytTopOverlay}>
-                  <div className={styles.ytAdTag}>
-                    <span className={styles.ytAdYellow}>Ad</span>
-                    <span className={styles.ytAdDot}>•</span>
-                    <span>1 of 1</span>
-                    {adVideoStarted && preRollSeconds > 0 && <span className={styles.ytAdTime}>({preRollSeconds}s)</span>}
+                  {/* YouTube Bottom Controls */}
+                  <div className={styles.ytBottomLeft}>
+                    <button 
+                      type="button" 
+                      className={styles.ytSoundBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMuted(!isMuted);
+                      }}
+                      title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
+                    >
+                      {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                    </button>
+
+                    {vastVideo.clickThrough && (
+                      <a
+                        href={vastVideo.clickThrough}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.ytVisitBtn}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span className={styles.ytVisitDesktopText}>Visit Advertiser</span>
+                        <span className={styles.ytVisitMobileText}>Visit</span>
+                        <ExternalLink size={13} />
+                      </a>
+                    )}
+                  </div>
+
+                  {/* YouTube Bottom-Right Skip Button */}
+                  <div className={styles.ytBottomRight}>
+                    {!adVideoStarted ? (
+                      <div className={styles.ytCountdownBox}>
+                        <span>Ad starting...</span>
+                      </div>
+                    ) : preRollSeconds > 0 ? (
+                      <div className={styles.ytCountdownBox}>
+                        <span className={styles.ytCountdownDesktopText}>Video will play after ad</span>
+                        <span className={styles.ytCountdownMobileText}>Ad</span>
+                        <span className={styles.ytCountdownNum}>{preRollSeconds}s</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.ytSkipBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreRollActive(false);
+                        }}
+                      >
+                        <span>Skip Ad</span>
+                        <span className={styles.ytSkipArrow}>➔</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* YouTube Yellow Progress Bar */}
+                  <div className={styles.ytProgressBar}>
+                    <div 
+                      className={styles.ytProgressFill}
+                      style={{ width: `${adProgressPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Mobile Ad Deck below video for portrait screens */}
+                <div className={styles.ytMobileAdDeck}>
+                  <div className={styles.ytMobileMediaInfo}>
+                    {movieData.poster && (
+                      <img src={movieData.poster} alt={movieData.title} className={styles.ytMobilePoster} />
+                    )}
+                    <div className={styles.ytMobileMetaText}>
+                      <span className={styles.ytMobileUpNextLabel}>Up Next</span>
+                      <h4 className={styles.ytMobileTitle}>{label}</h4>
+                      <span className={styles.ytMobileSubtitle}>
+                        {adVideoStarted 
+                          ? (preRollSeconds > 0 ? `Stream starts in ${preRollSeconds}s` : 'Ad complete — Ready to stream')
+                          : 'Loading sponsor ad...'}
+                      </span>
+                    </div>
                   </div>
 
                   {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
                     <div 
-                      className={styles.ytQuestBadge} 
-                      title="Click to unlock Free VIP Pass"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
-                      }}
-                      style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+                      className={styles.ytMobileVipCard}
+                      onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
                     >
-                      <Crown size={14} color="#ffb703" />
-                      <span>Skip All Ads With Free VIP Pass</span>
-                      <span className={styles.ytQuestBtn}>Claim Free</span>
+                      <div className={styles.ytMobileVipLeft}>
+                        <Crown size={16} color="#ffb703" />
+                        <div>
+                          <strong>Skip All Ads Free</strong>
+                          <span>Claim your 100% Free VIP Pass</span>
+                        </div>
+                      </div>
+                      <span className={styles.ytMobileVipBtn}>Claim Pass</span>
                     </div>
                   )}
-                </div>
-
-                {/* YouTube Bottom Controls */}
-                <div className={styles.ytBottomLeft}>
-                  <button 
-                    type="button" 
-                    className={styles.ytSoundBtn}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsMuted(!isMuted);
-                    }}
-                    title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
-                  >
-                    {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                  </button>
-
-                  {vastVideo.clickThrough && (
-                    <a
-                      href={vastVideo.clickThrough}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.ytVisitBtn}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span>Visit Advertiser</span>
-                      <ExternalLink size={13} />
-                    </a>
-                  )}
-                </div>
-
-                {/* YouTube Bottom-Right Skip Button */}
-                <div className={styles.ytBottomRight}>
-                  {!adVideoStarted ? (
-                    <div className={styles.ytCountdownBox}>
-                      <span>Ad starting...</span>
-                    </div>
-                  ) : preRollSeconds > 0 ? (
-                    <div className={styles.ytCountdownBox}>
-                      <span>Video will play after ad</span>
-                      <span className={styles.ytCountdownNum}>{preRollSeconds}</span>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className={styles.ytSkipBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPreRollActive(false);
-                      }}
-                    >
-                      <span>Skip Ad</span>
-                      <span className={styles.ytSkipArrow}>➔</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* YouTube Yellow Progress Bar */}
-                <div className={styles.ytProgressBar}>
-                  <div 
-                    className={styles.ytProgressFill}
-                    style={{ width: `${adProgressPercent}%` }}
-                  />
                 </div>
               </div>
             ) : (
@@ -636,23 +677,64 @@ const GlobalPlayer = () => {
                 {isResolvingVast ? (
                   <div className={styles.ytLoadingOverlay}>
                     <Loader2 className={styles.spinner} size={32} />
-                    <span>Loading sponsor ad...</span>
+                    <span>Preparing your stream & sponsor preview...</span>
                   </div>
                 ) : (
-                  <>
+                  <div className={styles.ytFallbackCard}>
+                    <div className={styles.ytFallbackHeader}>
+                      <div className={styles.ytFallbackUpNext}>
+                        <Film size={16} color="#e50914" />
+                        <span>Up Next: <strong>{label}</strong></span>
+                      </div>
+                      <span className={styles.ytFallbackSponsoredBadge}>SPONSORED PREVIEW</span>
+                    </div>
+
                     <div className={styles.preRollAdArea}>
                       <AdBanner slot="pre_roll" customConfig={preRollConfig} />
                     </div>
-                    <div className={styles.ytBottomRight}>
-                      <button
-                        type="button"
-                        className={styles.ytSkipBtn}
-                        onClick={() => setPreRollActive(false)}
-                      >
-                        <span>Continue to {mediaLabel} ➔</span>
-                      </button>
+
+                    <div className={styles.ytFallbackFooter}>
+                      <div className={styles.ytFallbackCountdownRow}>
+                        <span className={styles.ytFallbackTimerText}>
+                          {preRollSeconds > 0 ? `Starting ${mediaLabel} in ${preRollSeconds}s` : `Your ${mediaLabel} is ready!`}
+                        </span>
+                        {preRollSeconds > 0 && (
+                          <span className={styles.ytCountdownNum}>{preRollSeconds}s</span>
+                        )}
+                      </div>
+
+                      <div className={styles.ytFallbackProgressBar}>
+                        <div 
+                          className={styles.ytFallbackProgressFill}
+                          style={{ 
+                            width: `${Math.min(100, Math.max(5, ((Math.max(1, preRollConfig?.timer_seconds || 10) - preRollSeconds) / Math.max(1, preRollConfig?.timer_seconds || 10)) * 100))}%` 
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.ytFallbackActions}>
+                        <button
+                          type="button"
+                          className={styles.ytSkipBtn}
+                          onClick={() => setPreRollActive(false)}
+                        >
+                          <span>{preRollSeconds > 0 ? `Skip to ${mediaLabel}` : `Start Watching Now`}</span>
+                          <span className={styles.ytSkipArrow}>➔</span>
+                        </button>
+
+                        {adPassStatus?.enabled && !adPassStatus?.is_unlocked && !isAdExempt && (
+                          <button
+                            type="button"
+                            className={styles.ytFallbackVipBtn}
+                            onClick={() => window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'))}
+                          >
+                            <Crown size={14} color="#ffb703" />
+                            <span>Remove All Ads with VIP Pass</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             )}

@@ -418,14 +418,14 @@
 /* ==========================================================================
    STREAM PRE-ROLL AD GATEWAY STYLES
 /* ==========================================================================
-   YOUTUBE-STYLE IN-STREAM PRE-ROLL AD STYLES
+   YOUTUBE-STYLE IN-STREAM PRE-ROLL AD STYLES (MOBILE-OPTIMIZED)
    ========================================================================== */
 .ytPreRollContainer {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #000;
+  background: #04060a;
   z-index: 50;
   display: flex;
   align-items: center;
@@ -443,6 +443,17 @@
   background: #000;
 }
 
+.ytVideoBox {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
 .ytVideoElement {
   width: 100%;
   height: 100%;
@@ -452,70 +463,35 @@
   display: block;
 }
 
-/* YouTube Top-Left Overlay */
+/* YouTube Top Overlay */
 .ytTopOverlay {
   position: absolute;
   top: 16px;
   left: 18px;
+  right: 18px;
   z-index: 60;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   pointer-events: none;
-}
-
-.ytQuestBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, rgba(255, 183, 3, 0.22), rgba(255, 122, 0, 0.16));
-  border: 1px solid rgba(255, 183, 3, 0.45);
-  border-radius: 4px;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #ffb703;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  animation: pulseQuest 2.5s infinite ease-in-out;
-  transition: transform 0.2s ease;
-}
-
-.ytQuestBadge:hover {
-  transform: translateY(-1px);
-}
-
-.ytQuestBtn {
-  background: #ffb703;
-  color: #0b0b0f;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 11px;
-  letter-spacing: 0.3px;
-  margin-left: 6px;
-  display: inline-block;
-}
-
-@keyframes pulseQuest {
-  0%, 100% { border-color: rgba(255, 183, 3, 0.45); box-shadow: 0 0 10px rgba(255, 183, 3, 0.2); }
-  50% { border-color: rgba(255, 183, 3, 0.85); box-shadow: 0 0 16px rgba(255, 183, 3, 0.45); }
 }
 
 .ytAdTag {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 5px 12px;
   font-size: 13px;
   font-weight: 600;
   color: #ffffff;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
 }
 
 .ytAdYellow {
@@ -536,19 +512,77 @@
   font-size: 12px;
 }
 
+.ytQuestBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(255, 183, 3, 0.24), rgba(255, 122, 0, 0.18));
+  border: 1px solid rgba(255, 183, 3, 0.55);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffb703;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  animation: pulseQuest 2.5s infinite ease-in-out;
+  transition: transform 0.2s ease;
+  pointer-events: auto;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ytQuestBadge:hover {
+  transform: translateY(-1px);
+}
+
+.ytQuestBadge:active {
+  transform: scale(0.97);
+}
+
+.ytQuestBtn {
+  background: #ffb703;
+  color: #0b0b0f;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  margin-left: 4px;
+  display: inline-block;
+}
+
+.ytQuestDesktopText,
+.ytCountdownDesktopText,
+.ytVisitDesktopText {
+  display: inline;
+}
+
+.ytQuestMobileText,
+.ytCountdownMobileText,
+.ytVisitMobileText {
+  display: none;
+}
+
+@keyframes pulseQuest {
+  0%, 100% { border-color: rgba(255, 183, 3, 0.45); box-shadow: 0 0 10px rgba(255, 183, 3, 0.2); }
+  50% { border-color: rgba(255, 183, 3, 0.85); box-shadow: 0 0 16px rgba(255, 183, 3, 0.45); }
+}
+
 /* YouTube Bottom-Left Controls */
 .ytBottomLeft {
   position: absolute;
-  bottom: 20px;
+  bottom: 18px;
   left: 18px;
   z-index: 60;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .ytSoundBtn {
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 50%;
   width: 42px;
@@ -558,44 +592,56 @@
   justify-content: center;
   color: #ffffff;
   cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
 .ytSoundBtn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: scale(1.08);
 }
 
+.ytSoundBtn:active {
+  transform: scale(0.94);
+}
+
 .ytVisitBtn {
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 4px;
-  padding: 8px 16px;
+  border-radius: 6px;
+  padding: 8px 14px;
   color: #ffffff;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  gap: 7px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
 .ytVisitBtn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-1px);
+}
+
+.ytVisitBtn:active {
+  transform: scale(0.96);
 }
 
 /* YouTube Bottom-Right Skip Button */
 .ytBottomRight {
   position: absolute;
-  bottom: 20px;
+  bottom: 18px;
   right: 18px;
   z-index: 60;
   display: flex;
@@ -603,57 +649,64 @@
 }
 
 .ytCountdownBox {
-  background: rgba(0, 0, 0, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 4px;
-  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 9px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.9);
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  gap: 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
   user-select: none;
+  white-space: nowrap;
 }
 
 .ytCountdownNum {
-  background: rgba(251, 192, 45, 0.2);
+  background: rgba(251, 192, 45, 0.22);
   color: #fbc02d;
   font-weight: 800;
   font-size: 13px;
-  padding: 2px 8px;
-  border-radius: 3px;
+  padding: 2px 7px;
+  border-radius: 4px;
 }
 
 .ytSkipBtn {
-  background: rgba(0, 0, 0, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  border-radius: 4px;
-  padding: 10px 22px;
-  font-size: 14px;
+  background: rgba(8, 10, 16, 0.92);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  padding: 9px 20px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
+  white-space: nowrap;
 }
 
 .ytSkipBtn:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.25);
   border-color: #ffffff;
   transform: scale(1.04);
 }
 
+.ytSkipBtn:active {
+  transform: scale(0.96);
+}
+
 .ytSkipArrow {
-  font-size: 15px;
+  font-size: 14px;
   color: #fbc02d;
   transition: transform 0.2s ease;
 }
@@ -662,15 +715,21 @@
   transform: translateX(3px);
 }
 
-/* YouTube Classic Yellow Bottom Progress Bar */
+/* YouTube Yellow Bottom Progress Bar */
 .ytProgressBar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3.5px;
-  background: rgba(255, 255, 255, 0.18);
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
   z-index: 65;
+}
+
+.ytProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbc02d, #ff9800);
+  transition: width 0.3s linear;
 }
 
 .ytLoadingOverlay {
@@ -683,17 +742,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: rgba(6, 8, 12, 0.85);
+  gap: 12px;
+  background: rgba(6, 8, 14, 0.92);
   z-index: 52;
   color: #fff;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   pointer-events: none;
+  padding: 20px;
+  text-align: center;
 }
 
 .ytLoadingOverlay span {
-  opacity: 0.85;
+  opacity: 0.9;
   letter-spacing: 0.3px;
 }
 
@@ -703,30 +764,79 @@
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.ytProgressFill {
-  height: 100%;
-  background: #fbc02d;
-  transition: width 0.3s linear;
+/* Mobile Ad Deck (shown in mobile portrait mode below the video) */
+.ytMobileAdDeck {
+  display: none;
 }
 
-/* Fallback Container if no video */
+/* Fallback Intermission Container & Card */
 .ytFallbackContainer {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #0d0d11;
+  background: radial-gradient(circle at 50% 50%, rgba(20, 24, 36, 0.8) 0%, #06080d 100%);
   position: relative;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.ytFallbackCard {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(14, 18, 28, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(229, 9, 20, 0.12);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin: auto;
+}
+
+.ytFallbackHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ytFallbackUpNext {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ytFallbackUpNext strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.ytFallbackSponsoredBadge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #fbc02d;
+  background: rgba(251, 192, 45, 0.14);
+  border: 1px solid rgba(251, 192, 45, 0.35);
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .preRollAdArea {
@@ -735,42 +845,313 @@
   justify-content: center;
   min-height: 250px;
   width: 100%;
+  overflow: hidden;
+}
+
+.ytFallbackFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ytFallbackCountdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ytFallbackProgressBar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ytFallbackProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbc02d 0%, #ff9800 100%);
+  transition: width 0.3s ease;
+}
+
+.ytFallbackActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.ytFallbackVipBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  color: #ffb703;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 9px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.ytFallbackVipBtn:hover {
+  background: rgba(255, 183, 3, 0.14);
+  border-color: rgba(255, 183, 3, 0.65);
+}
+
+.ytFallbackVipBtn:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS (< 860px and < 600px)
+   ========================================================================== */
+@media (max-width: 860px) {
+  .ytPreRollContainer {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ytVideoWrapper {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    height: 100%;
+    overflow-y: auto;
+    background: #07090e;
+  }
+
+  .ytVideoBox {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    max-height: 42vh;
+    flex-shrink: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .ytMobileAdDeck {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 14px 24px;
+    width: 100%;
+    flex: 1;
+    background: linear-gradient(180deg, #090c13 0%, #05060a 100%);
+  }
+
+  .ytMobileMediaInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .ytMobilePoster {
+    width: 44px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  }
+
+  .ytMobileMetaText {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .ytMobileUpNextLabel {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #e50914;
+  }
+
+  .ytMobileTitle {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  .ytMobileSubtitle {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .ytMobileVipCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(255, 183, 3, 0.16) 0%, rgba(255, 122, 0, 0.1) 100%);
+    border: 1px solid rgba(255, 183, 3, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .ytMobileVipCard:active {
+    transform: scale(0.98);
+  }
+
+  .ytMobileVipLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ytMobileVipLeft div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ytMobileVipLeft strong {
+    font-size: 12.5px;
+    color: #ffb703;
+    font-weight: 700;
+  }
+
+  .ytMobileVipLeft span {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .ytMobileVipBtn {
+    background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%);
+    color: #0b0b0f;
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(255, 183, 3, 0.35);
+  }
 }
 
 @media (max-width: 600px) {
+  .ytQuestDesktopText,
+  .ytCountdownDesktopText,
+  .ytVisitDesktopText {
+    display: none !important;
+  }
+
+  .ytQuestMobileText,
+  .ytCountdownMobileText,
+  .ytVisitMobileText {
+    display: inline !important;
+  }
+
   .ytTopOverlay {
-    top: 10px;
-    left: 10px;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    gap: 6px;
+  }
+
+  .ytAdTag {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+    border-radius: 4px;
+  }
+
+  .ytQuestBadge {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+    border-radius: 4px;
+  }
+
+  .ytQuestBtn {
+    padding: 1px 6px;
+    font-size: 10px;
+    margin-left: 3px;
   }
 
   .ytBottomLeft {
-    bottom: 12px;
-    left: 10px;
-    gap: 8px;
-  }
-
-  .ytBottomRight {
-    bottom: 12px;
-    right: 10px;
-  }
-
-  .ytVisitBtn {
-    padding: 6px 10px;
-    font-size: 11px;
+    bottom: 8px;
+    left: 8px;
+    gap: 6px;
   }
 
   .ytSoundBtn {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .ytVisitBtn {
+    padding: 5px 8px;
+    font-size: 11px;
+    gap: 4px;
+    border-radius: 4px;
+  }
+
+  .ytBottomRight {
+    bottom: 8px;
+    right: 8px;
   }
 
   .ytCountdownBox {
-    padding: 7px 12px;
+    padding: 5px 9px;
     font-size: 11px;
+    gap: 5px;
+    border-radius: 4px;
+  }
+
+  .ytCountdownNum {
+    font-size: 11.5px;
+    padding: 1px 5px;
   }
 
   .ytSkipBtn {
-    padding: 7px 14px;
+    padding: 6px 12px;
     font-size: 12px;
+    gap: 5px;
+    font-weight: 700;
+    border-radius: 4px;
+  }
+
+  .ytFallbackCard {
+    padding: 14px;
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .ytFallbackActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .ytFallbackActions .ytSkipBtn {
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .ytFallbackVipBtn {
+    justify-content: center;
+    width: 100%;
+    padding: 9px;
   }
 }
+
