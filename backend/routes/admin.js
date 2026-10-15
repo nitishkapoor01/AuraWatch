@@ -998,20 +998,20 @@ router.post('/ads/universal-toggle', isAdmin, async (req, res) => {
 // 1. VIP Overview Stats
 router.get('/vip/overview', isModerator, async (req, res) => {
   try {
-    const [vipUsersRes, expiredVipRes, pendingReqRes, activeCodesRes, totalRevenueRes] = await Promise.all([
+    const [vipUsersRes, expiredVipRes, activeCodesRes, activeAdQuestsRes] = await Promise.all([
       db.query(`SELECT COUNT(*) as count FROM users WHERE is_premium = TRUE AND (premium_expires_at IS NULL OR premium_expires_at > NOW())`),
       db.query(`SELECT COUNT(*) as count FROM users WHERE is_premium = FALSE AND premium_expires_at IS NOT NULL`),
-      db.query(`SELECT COUNT(*) as count FROM vip_payment_requests WHERE status = 'pending'`),
       db.query(`SELECT COUNT(*) as count FROM vip_redeem_codes WHERE is_active = TRUE`),
-      db.query(`SELECT COALESCE(SUM(amount), 0) as total FROM vip_payment_requests WHERE status = 'approved'`)
+      db.query(`SELECT COUNT(*) as count FROM ad_pass_quests WHERE unlocked_until IS NOT NULL AND unlocked_until > NOW()`).catch(() => ({ rows: [{ count: 0 }] }))
     ]);
 
     res.json({
       activeVipUsers: parseInt(vipUsersRes.rows[0].count) || 0,
       expiredVipUsers: parseInt(expiredVipRes.rows[0].count) || 0,
-      pendingRequests: parseInt(pendingReqRes.rows[0].count) || 0,
+      pendingRequests: 0,
       activeCodes: parseInt(activeCodesRes.rows[0].count) || 0,
-      totalRevenue: parseFloat(totalRevenueRes.rows[0].total) || 0
+      activeAdQuests: parseInt(activeAdQuestsRes.rows[0].count) || 0,
+      totalRevenue: 0
     });
   } catch (error) {
     console.error('[Admin VIP Overview] Error:', error);
@@ -1414,12 +1414,22 @@ router.post('/vip/payment-info', isAdmin, async (req, res) => {
 });
 
 // 10. Get / Update Ad-Pass Quest Configuration
+const DEFAULT_AD_TIERS = [
+  { id: '1_day', name: 'Daily Pass', target_ads: 5, reward_hours: 24, label: '24 Hours (1 Day)' },
+  { id: '2_days', name: '2-Day Pass', target_ads: 10, reward_hours: 48, label: '48 Hours (2 Days)' },
+  { id: '5_days', name: '5-Day Pass', target_ads: 20, reward_hours: 120, label: '120 Hours (5 Days)' }
+];
+
 router.get('/vip/ad-pass-config', isModerator, async (req, res) => {
   try {
     const row = await db.query("SELECT value FROM settings WHERE key = 'ad_pass_config'");
-    let cfg = { enabled: true, target_ads: 5, reward_hours: 24 };
+    let cfg = { enabled: true, target_ads: 5, reward_hours: 24, tiers: DEFAULT_AD_TIERS };
     if (row.rows[0]?.value) {
-      try { cfg = { ...cfg, ...JSON.parse(row.rows[0].value) }; } catch (_) {}
+      try { 
+        const parsed = JSON.parse(row.rows[0].value);
+        cfg = { ...cfg, ...parsed };
+        if (!cfg.tiers || !cfg.tiers.length) cfg.tiers = DEFAULT_AD_TIERS;
+      } catch (_) {}
     }
     res.json(cfg);
   } catch (error) {
@@ -1429,13 +1439,26 @@ router.get('/vip/ad-pass-config', isModerator, async (req, res) => {
 
 router.post('/vip/ad-pass-config', isAdmin, async (req, res) => {
   try {
-    const { enabled = true, target_ads = 5, reward_hours = 24 } = req.body;
+    const { enabled = true, target_ads = 5, reward_hours = 24, tiers } = req.body;
     const safeTarget = Math.max(1, Math.min(50, parseInt(target_ads, 10) || 5));
-    const safeReward = Math.max(1, Math.min(720, parseInt(reward_hours, 10) || 24)); // up to 30 days
+    const safeReward = Math.max(1, Math.min(720, parseInt(reward_hours, 10) || 24));
+
+    let safeTiers = DEFAULT_AD_TIERS;
+    if (Array.isArray(tiers) && tiers.length > 0) {
+      safeTiers = tiers.map((t, idx) => ({
+        id: t.id || `tier_${idx + 1}`,
+        name: String(t.name || `Tier ${idx + 1}`).trim().slice(0, 50),
+        target_ads: Math.max(1, Math.min(100, parseInt(t.target_ads, 10) || (idx + 1) * 5)),
+        reward_hours: Math.max(1, Math.min(720, parseInt(t.reward_hours, 10) || (idx + 1) * 24)),
+        label: String(t.label || `${t.reward_hours || 24} Hours`).trim().slice(0, 50)
+      }));
+    }
+
     const cfg = {
       enabled: Boolean(enabled),
       target_ads: safeTarget,
-      reward_hours: safeReward
+      reward_hours: safeReward,
+      tiers: safeTiers
     };
 
     await db.query(
@@ -1445,7 +1468,7 @@ router.post('/vip/ad-pass-config', isAdmin, async (req, res) => {
       [JSON.stringify(cfg)]
     );
 
-    res.json({ success: true, message: 'Ad-Pass configuration updated successfully!', data: cfg });
+    res.json({ success: true, message: 'Ad-Pass configuration updated successfully.', data: cfg });
   } catch (error) {
     console.error('[Admin Ad-Pass Config] Error:', error);
     res.status(500).json({ message: 'Failed to update Ad-Pass configuration.' });

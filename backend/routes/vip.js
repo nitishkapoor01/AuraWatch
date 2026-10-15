@@ -3,16 +3,26 @@ const router = express.Router();
 const db = require('../db');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
 
+const DEFAULT_AD_TIERS = [
+  { id: '1_day', name: 'Daily Pass', target_ads: 5, reward_hours: 24, label: '24 Hours (1 Day)' },
+  { id: '2_days', name: '2-Day Pass', target_ads: 10, reward_hours: 48, label: '48 Hours (2 Days)' },
+  { id: '5_days', name: '5-Day Pass', target_ads: 20, reward_hours: 120, label: '120 Hours (5 Days)' }
+];
+
 async function getAdPassConfig() {
   try {
     const res = await db.query("SELECT value FROM settings WHERE key = 'ad_pass_config'");
-    let cfg = { enabled: true, target_ads: 5, reward_hours: 24 };
+    let cfg = { enabled: true, target_ads: 5, reward_hours: 24, tiers: DEFAULT_AD_TIERS };
     if (res.rows[0]?.value) {
-      try { cfg = { ...cfg, ...JSON.parse(res.rows[0].value) }; } catch (_) {}
+      try { 
+        const parsed = JSON.parse(res.rows[0].value);
+        cfg = { ...cfg, ...parsed };
+        if (!cfg.tiers || !cfg.tiers.length) cfg.tiers = DEFAULT_AD_TIERS;
+      } catch (_) {}
     }
     return cfg;
   } catch (err) {
-    return { enabled: true, target_ads: 5, reward_hours: 24 };
+    return { enabled: true, target_ads: 5, reward_hours: 24, tiers: DEFAULT_AD_TIERS };
   }
 }
 
@@ -71,13 +81,15 @@ router.get('/ad-pass/progress', optionalAuth, async (req, res) => {
     const visitorId = req.headers['x-visitor-id'] || req.query.visitor_id || null;
     const cleanVid = visitorId ? String(visitorId).trim().slice(0, 100) : null;
     const userId = req.user?.id || null;
+    const tiers = config.tiers || DEFAULT_AD_TIERS;
 
     if (!userId && !cleanVid) {
       return res.json({
         enabled: config.enabled,
         current_count: 0,
-        target_count: config.target_ads,
-        reward_hours: config.reward_hours,
+        target_count: tiers[0].target_ads,
+        reward_hours: tiers[0].reward_hours,
+        tiers,
         is_unlocked: false,
         unlocked_until: null,
         seconds_remaining: 0
@@ -91,9 +103,10 @@ router.get('/ad-pass/progress', optionalAuth, async (req, res) => {
         const secLeft = Math.max(0, Math.floor((exp.getTime() - Date.now()) / 1000));
         return res.json({
           enabled: config.enabled,
-          current_count: config.target_ads,
-          target_count: config.target_ads,
-          reward_hours: config.reward_hours,
+          current_count: 5,
+          target_count: 5,
+          reward_hours: 24,
+          tiers,
           is_unlocked: true,
           unlocked_until: exp,
           seconds_remaining: secLeft
@@ -138,11 +151,16 @@ router.get('/ad-pass/progress', optionalAuth, async (req, res) => {
       }
     }
 
+    const currentCount = quest?.current_count || 0;
+    // Find next tier target
+    const nextTier = tiers.find(t => t.target_ads > currentCount) || tiers[tiers.length - 1];
+
     res.json({
       enabled: config.enabled,
-      current_count: isUnlocked ? config.target_ads : (quest?.current_count || 0),
-      target_count: config.target_ads,
-      reward_hours: config.reward_hours,
+      current_count: currentCount,
+      target_count: nextTier.target_ads,
+      reward_hours: nextTier.reward_hours,
+      tiers,
       is_unlocked: isUnlocked,
       unlocked_until: unlockedUntil,
       seconds_remaining: secLeft
@@ -154,7 +172,7 @@ router.get('/ad-pass/progress', optionalAuth, async (req, res) => {
 });
 
 // @route   POST /api/vip/ad-pass/complete-ad
-// @desc    Increment ad watch count; unlock VIP pass when target reached
+// @desc    Increment ad watch count; unlock or extend VIP pass when milestones reached
 // @access  Public (supports user token and guest visitor_id)
 router.post('/ad-pass/complete-ad', optionalAuth, async (req, res) => {
   const client = await db.pool.connect();
@@ -167,6 +185,7 @@ router.post('/ad-pass/complete-ad', optionalAuth, async (req, res) => {
     const visitorId = req.headers['x-visitor-id'] || req.body.visitor_id || req.query.visitor_id || null;
     const cleanVid = visitorId ? String(visitorId).trim().slice(0, 100) : null;
     const userId = req.user?.id || null;
+    const tiers = config.tiers || DEFAULT_AD_TIERS;
 
     if (!userId && !cleanVid) {
       return res.status(400).json({ message: 'Missing visitor or user identification.' });
@@ -209,36 +228,31 @@ router.post('/ad-pass/complete-ad', optionalAuth, async (req, res) => {
           return res.status(429).json({ message: 'Please wait until the ad finishes playing.' });
         }
       }
-
-      // Check if already active and not expired
-      if (quest.unlocked_until && new Date(quest.unlocked_until) > now) {
-        await client.query('ROLLBACK');
-        return res.json({
-          success: true,
-          is_unlocked: true,
-          unlocked_until: quest.unlocked_until,
-          message: 'VIP Ad-Pass is already active!'
-        });
-      }
     } else {
       // Create initial quest row
       const insertRes = await client.query(
         `INSERT INTO ad_pass_quests (user_id, visitor_id, current_count, target_count, reward_hours)
          VALUES ($1, $2, 0, $3, $4)
          RETURNING *`,
-        [userId, userId ? null : cleanVid, config.target_ads, config.reward_hours]
+        [userId, userId ? null : cleanVid, tiers[0].target_ads, tiers[0].reward_hours]
       );
       quest = insertRes.rows[0];
     }
 
-    const currentCount = (quest.current_count || 0);
+    const currentCount = quest.current_count || 0;
     const nextCount = currentCount + 1;
-    const target = config.target_ads || 5;
-    const rewardHours = config.reward_hours || 24;
 
-    if (nextCount >= target) {
-      // Target reached! Unlock VIP!
-      const unlockedUntil = new Date(now.getTime() + rewardHours * 60 * 60 * 1000);
+    // Check if nextCount unlocks or upgrades any tier milestone
+    const matchedTier = tiers.find(t => t.target_ads === nextCount);
+    const highestEarnedTier = tiers.filter(t => nextCount >= t.target_ads).pop();
+
+    if (matchedTier) {
+      // Milestone reached! Calculate extension or new unlock
+      let baseDate = now;
+      if (quest.unlocked_until && new Date(quest.unlocked_until) > now) {
+        baseDate = new Date(quest.unlocked_until);
+      }
+      const newUnlockedUntil = new Date(baseDate.getTime() + matchedTier.reward_hours * 60 * 60 * 1000);
 
       await client.query(
         `UPDATE ad_pass_quests
@@ -249,61 +263,65 @@ router.post('/ad-pass/complete-ad', optionalAuth, async (req, res) => {
              last_ad_completed_at = CURRENT_TIMESTAMP,
              updated_at = CURRENT_TIMESTAMP
          WHERE id = $5`,
-        [target, target, rewardHours, unlockedUntil, quest.id]
+        [nextCount, matchedTier.target_ads, matchedTier.reward_hours, newUnlockedUntil, quest.id]
       );
 
-      // If user is logged in, grant is_premium in users table
       if (userId) {
-        let baseDate = now;
+        let userBaseDate = now;
         if (req.user?.is_premium && req.user?.premium_expires_at && new Date(req.user.premium_expires_at) > now) {
-          baseDate = new Date(req.user.premium_expires_at);
+          userBaseDate = new Date(req.user.premium_expires_at);
         }
-        const userExpiry = new Date(baseDate.getTime() + rewardHours * 60 * 60 * 1000);
+        const userExpiry = new Date(userBaseDate.getTime() + matchedTier.reward_hours * 60 * 60 * 1000);
 
         await client.query(
           `UPDATE users
            SET is_premium = TRUE,
                premium_expires_at = $1,
-               premium_plan = 'VIP Ad-Pass',
+               premium_plan = $2,
                premium_activated_by = 'ad_quest'
-           WHERE id = $2`,
-          [userExpiry, userId]
+           WHERE id = $3`,
+          [userExpiry, `VIP Ad-Pass (${matchedTier.name})`, userId]
         );
       }
 
       await client.query('COMMIT');
 
+      const nextTargetTier = tiers.find(t => t.target_ads > nextCount);
+
       return res.json({
         success: true,
         is_unlocked: true,
-        current_count: target,
-        target_count: target,
-        reward_hours: rewardHours,
-        unlocked_until: unlockedUntil,
-        message: `🎉 Quest Complete! You unlocked ${rewardHours} hours of 100% Ad-Free VIP Pass!`
+        current_count: nextCount,
+        target_count: nextTargetTier ? nextTargetTier.target_ads : nextCount,
+        reward_hours: matchedTier.reward_hours,
+        unlocked_until: newUnlockedUntil,
+        tier: matchedTier,
+        message: `${matchedTier.name} unlocked. ${matchedTier.label} active.`
       });
     } else {
       // Step increment
+      const nextTargetTier = tiers.find(t => t.target_ads > nextCount) || tiers[tiers.length - 1];
+      const isCurrentlyUnlocked = Boolean(quest.unlocked_until && new Date(quest.unlocked_until) > now);
+
       await client.query(
         `UPDATE ad_pass_quests
          SET current_count = $1,
-             target_count = $2,
-             reward_hours = $3,
              last_ad_completed_at = CURRENT_TIMESTAMP,
              updated_at = CURRENT_TIMESTAMP
-         WHERE id = $4`,
-        [nextCount, target, rewardHours, quest.id]
+         WHERE id = $2`,
+        [nextCount, quest.id]
       );
 
       await client.query('COMMIT');
 
       return res.json({
         success: true,
-        is_unlocked: false,
+        is_unlocked: isCurrentlyUnlocked,
         current_count: nextCount,
-        target_count: target,
-        remaining: target - nextCount,
-        message: `Ad progress saved! (${nextCount}/${target})`
+        target_count: nextTargetTier.target_ads,
+        remaining: Math.max(0, nextTargetTier.target_ads - nextCount),
+        unlocked_until: quest.unlocked_until,
+        message: `Progress saved (${nextCount}/${nextTargetTier.target_ads} ads).`
       });
     }
   } catch (error) {
@@ -437,7 +455,7 @@ router.post('/redeem', optionalAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: `🎉 VIP Membership activated for ${durationDays} days! Enjoy 100% ad-free streaming.`,
+      message: `VIP Membership activated for ${durationDays} days. Enjoy 100% ad-free streaming.`,
       is_premium: true,
       premium_expires_at: newExpiresAt,
       premium_plan: codeRow.plan_name || 'VIP Ad-Free',

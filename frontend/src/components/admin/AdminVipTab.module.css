@@ -513,7 +513,35 @@
   to { transform: rotate(360deg); }
 }
 
-/* 📱 Mobile Styles */
+/* Tier Editor Cards in Admin */
+.tiersList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 12px 0;
+}
+
+.tierEditorCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tierEditorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  color: #ffb703;
+  font-size: 14px;
+}
+
+/* Mobile Styles */
+
 @media (max-width: 768px) {
   .container {
     gap: 16px;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Crown, 
   Check, 
@@ -9,39 +9,50 @@ import {
   RefreshCw, 
   Users, 
   Clock, 
-  DollarSign, 
   Gift, 
   Search, 
   CheckCircle, 
   AlertCircle, 
-  ExternalLink,
-  ShieldCheck,
+  ShieldCheck, 
   Settings,
-  Loader2
+  Loader2,
+  Sparkles,
+  Flame,
+  Award
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import styles from './AdminVipTab.module.css';
 
+const DEFAULT_TIERS = [
+  { id: '1_day', name: 'Daily Pass', target_ads: 5, reward_hours: 24, label: '24 Hours (1 Day)' },
+  { id: '2_days', name: '2-Day Pass', target_ads: 10, reward_hours: 48, label: '48 Hours (2 Days)' },
+  { id: '5_days', name: '5-Day Pass', target_ads: 20, reward_hours: 120, label: '120 Hours (5 Days)' }
+];
+
 const AdminVipTab = ({ token }) => {
   const { showToast } = useToast();
-  const [subTab, setSubTab] = useState('requests'); // 'requests' | 'codes' | 'users' | 'settings'
+  const [subTab, setSubTab] = useState('ad_pass'); // 'ad_pass' | 'codes' | 'users'
   const [overview, setOverview] = useState(null);
   const [loadingOverview, setLoadingOverview] = useState(true);
 
-  // 1. Payment Requests State
-  const [requests, setRequests] = useState([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
-  const [requestFilter, setRequestFilter] = useState('pending');
-  const [reviewingId, setReviewingId] = useState(null);
+  // 1. Ad-Pass Quest Configuration State
+  const [adPassSettings, setAdPassSettings] = useState({
+    enabled: true,
+    target_ads: 5,
+    reward_hours: 24,
+    tiers: DEFAULT_TIERS
+  });
+  const [savingAdPass, setSavingAdPass] = useState(false);
 
   // 2. VIP Codes State
   const [codes, setCodes] = useState([]);
   const [loadingCodes, setLoadingCodes] = useState(false);
   const [codeFilter, setCodeFilter] = useState('all');
   const [codeSearch, setCodeSearch] = useState('');
+  const [debouncedCodeSearch, setDebouncedCodeSearch] = useState('');
   const [copiedCodeId, setCopiedCodeId] = useState(null);
   const [generateForm, setGenerateForm] = useState({
-    count: 1,
+    count: 10,
     duration_days: 30,
     plan_name: 'VIP Ad-Free 1 Month',
     prefix: 'AURA'
@@ -52,41 +63,29 @@ const AdminVipTab = ({ token }) => {
   const [vipUsers, setVipUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [userSearch, setUserSearch] = useState('');
+  const [debouncedUserSearch, setDebouncedUserSearch] = useState('');
   const [userFilter, setUserFilter] = useState('all');
   const [editingUserId, setEditingUserId] = useState(null);
   const [grantDuration, setGrantDuration] = useState(30);
 
-  // 4. Payment Info Settings State
-  const [paymentSettings, setPaymentSettings] = useState({
-    upi_id: 'aurawatch@upi',
-    upi_name: 'AuraWatch VIP',
-    qr_image_url: '',
-    plans: []
-  });
-  const [savingSettings, setSavingSettings] = useState(false);
-
-  // 5. Ad-Pass Quest Configuration State
-  const [adPassSettings, setAdPassSettings] = useState({
-    enabled: true,
-    target_ads: 5,
-    reward_hours: 24
-  });
-  const [savingAdPass, setSavingAdPass] = useState(false);
-
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
 
-  const fetchAdPassSettings = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/admin/vip/ad-pass-config`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAdPassSettings(data);
-      }
-    } catch (_) {}
-  };
+  // Debounce search inputs to eliminate typing lag
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedCodeSearch(codeSearch);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [codeSearch]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedUserSearch(userSearch);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [userSearch]);
+
+  // Fetch Overview Stats
   const fetchOverview = async () => {
     try {
       const res = await fetch(`${API_BASE}/admin/vip/overview`, {
@@ -100,24 +99,27 @@ const AdminVipTab = ({ token }) => {
     setLoadingOverview(false);
   };
 
-  const fetchRequests = async () => {
-    setLoadingRequests(true);
+  // Fetch Ad-Pass Configuration
+  const fetchAdPassSettings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/admin/vip/requests?status=${requestFilter}`, {
+      const res = await fetch(`${API_BASE}/admin/vip/ad-pass-config`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
-        setRequests(data.requests || []);
+        setAdPassSettings({
+          ...data,
+          tiers: data.tiers?.length ? data.tiers : DEFAULT_TIERS
+        });
       }
     } catch (_) {}
-    setLoadingRequests(false);
   };
 
+  // Fetch Codes
   const fetchCodes = async () => {
     setLoadingCodes(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/vip/codes?filter=${codeFilter}&search=${encodeURIComponent(codeSearch)}`, {
+      const res = await fetch(`${API_BASE}/admin/vip/codes?filter=${codeFilter}&search=${encodeURIComponent(debouncedCodeSearch)}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -128,10 +130,11 @@ const AdminVipTab = ({ token }) => {
     setLoadingCodes(false);
   };
 
+  // Fetch VIP Users
   const fetchVipUsers = async () => {
     setLoadingUsers(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/vip/users?filter=${userFilter}&search=${encodeURIComponent(userSearch)}`, {
+      const res = await fetch(`${API_BASE}/admin/vip/users?filter=${userFilter}&search=${encodeURIComponent(debouncedUserSearch)}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -142,56 +145,61 @@ const AdminVipTab = ({ token }) => {
     setLoadingUsers(false);
   };
 
-  const fetchPaymentSettings = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/admin/vip/payment-info`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPaymentSettings(data);
-      }
-    } catch (_) {}
-  };
-
   useEffect(() => {
     fetchOverview();
   }, [token]);
 
   useEffect(() => {
-    if (subTab === 'requests') fetchRequests();
+    if (subTab === 'ad_pass') fetchAdPassSettings();
     if (subTab === 'codes') fetchCodes();
     if (subTab === 'users') fetchVipUsers();
-    if (subTab === 'settings') {
-      fetchPaymentSettings();
-      fetchAdPassSettings();
-    }
-  }, [subTab, requestFilter, codeFilter, userFilter]);
+  }, [subTab]);
 
-  // Handle Review Request
-  const handleReviewRequest = async (id, status) => {
-    setReviewingId(id);
+  useEffect(() => {
+    if (subTab === 'codes') fetchCodes();
+  }, [codeFilter, debouncedCodeSearch]);
+
+  useEffect(() => {
+    if (subTab === 'users') fetchVipUsers();
+  }, [userFilter, debouncedUserSearch]);
+
+  // Handle Save Ad-Pass Settings
+  const handleSaveAdPassSettings = async (e) => {
+    e.preventDefault();
+    setSavingAdPass(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/vip/requests/${id}/review`, {
-        method: 'PUT',
+      const res = await fetch(`${API_BASE}/admin/vip/ad-pass-config`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify(adPassSettings)
       });
       const data = await res.json();
       if (res.ok) {
-        showToast(data.message, 'success');
-        fetchRequests();
+        showToast(data.message || 'Ad-Pass Quest configuration updated successfully.', 'success');
         fetchOverview();
       } else {
-        showToast(data.message || 'Action failed', 'error');
+        showToast(data.message || 'Failed to update Ad-Pass configuration.', 'error');
       }
-    } catch (err) {
-      showToast('Network error while reviewing request', 'error');
+    } catch (_) {
+      showToast('Network error saving Ad-Pass configuration.', 'error');
     }
-    setReviewingId(null);
+    setSavingAdPass(false);
+  };
+
+  // Handle Tier Change
+  const handleTierChange = (index, field, value) => {
+    const updatedTiers = [...(adPassSettings.tiers || DEFAULT_TIERS)];
+    updatedTiers[index] = {
+      ...updatedTiers[index],
+      [field]: field === 'target_ads' || field === 'reward_hours' ? parseInt(value, 10) || 0 : value
+    };
+    setAdPassSettings({
+      ...adPassSettings,
+      tiers: updatedTiers
+    });
   };
 
   // Handle Generate Codes
@@ -266,80 +274,30 @@ const AdminVipTab = ({ token }) => {
     }
   };
 
-  // Handle Save Payment Settings
-  const handleSaveSettings = async (e) => {
-    e.preventDefault();
-    setSavingSettings(true);
-    try {
-      const res = await fetch(`${API_BASE}/admin/vip/payment-info`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(paymentSettings)
-      });
-      const data = await res.json();
-      if (res.ok) {
-        showToast('VIP payment configuration saved!', 'success');
-      } else {
-        showToast('Failed to save settings', 'error');
-      }
-    } catch (err) {
-      showToast('Network error saving settings', 'error');
-    }
-    setSavingSettings(false);
-  };
-
   const handleCopyCode = (code, id) => {
     navigator.clipboard.writeText(code);
     setCopiedCodeId(id);
     setTimeout(() => setCopiedCodeId(null), 2000);
   };
 
-  // Handle Save Ad-Pass Quest Settings
-  const handleSaveAdPassSettings = async (e) => {
-    e.preventDefault();
-    setSavingAdPass(true);
-    try {
-      const res = await fetch(`${API_BASE}/admin/vip/ad-pass-config`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(adPassSettings)
-      });
-      const data = await res.json();
-      if (res.ok) {
-        showToast('Ad-Pass Quest configuration updated successfully!', 'success');
-      } else {
-        showToast('Failed to save Ad-Pass settings', 'error');
-      }
-    } catch (_) {
-      showToast('Network error saving Ad-Pass settings', 'error');
-    }
-    setSavingAdPass(false);
-  };
-
-  // Quick 1-click copy for Telegram / Discord giveaway drops
-  const handleCopyAllTelegramCodes = () => {
+  // Clean 1-click export/copy for community drops (Zero Emojis!)
+  const handleCopyAllCodes = () => {
     const activeCodes = codes.filter(c => c.is_active);
     if (activeCodes.length === 0) {
-      showToast('No active codes found in current list to copy.', 'error');
+      showToast('No active keys found in current list to copy.', 'error');
       return;
     }
-    const text = `🎉 AURA VIP PASS GIVEAWAY! 🎉\nRedeem on AuraWatch to unlock 100% Ad-Free streaming:\n\n` +
-      activeCodes.map(c => `🔑 ${c.code} (${c.duration_days} Days)`).join('\n') +
-      `\n\n⚡ First come, first served! Enjoy 0s downloads & zero ads! 🔥`;
+    const text = `AURA VIP PASS GIVEAWAY KEYS\n` +
+      `Redeem on AuraWatch for 100% Ad-Free Streaming:\n\n` +
+      activeCodes.map(c => `${c.code} [${c.duration_days} Days]`).join('\n') +
+      `\n\nInstant zero-second downloads and zero ads.`;
     navigator.clipboard.writeText(text);
-    showToast(`Copied ${activeCodes.length} VIP keys for Telegram/Discord drop!`, 'success');
+    showToast(`Copied ${activeCodes.length} VIP keys to clipboard.`, 'success');
   };
-
 
   return (
     <div className={styles.container}>
-      {/* Overview Cards */}
+      {/* Overview Metric Cards */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: 'rgba(255, 183, 3, 0.15)', color: '#ffb703' }}>
@@ -348,34 +306,23 @@ const AdminVipTab = ({ token }) => {
           <div className={styles.statInfo}>
             <h3>{overview?.activeVipUsers ?? 0}</h3>
             <p>Active VIP Users</p>
-            <span className={styles.statSub}>100% Zero Ads Active</span>
+            <span className={styles.statSub}>100% Ad-Free active</span>
           </div>
         </div>
 
         <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
-            <Clock size={24} />
+          <div className={styles.statIcon} style={{ background: 'rgba(255, 122, 0, 0.15)', color: '#ff7a00' }}>
+            <Sparkles size={24} />
           </div>
           <div className={styles.statInfo}>
-            <h3>{overview?.pendingRequests ?? 0}</h3>
-            <p>Pending UPI Verifications</p>
-            <span className={styles.statSub}>Requires admin review</span>
+            <h3>{overview?.activeAdQuests ?? 0}</h3>
+            <p>Active Ad-Pass Quests</p>
+            <span className={styles.statSub}>Watch-unlocked viewers</span>
           </div>
         </div>
 
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-            <DollarSign size={24} />
-          </div>
-          <div className={styles.statInfo}>
-            <h3>₹{overview?.totalRevenue?.toLocaleString() ?? 0}</h3>
-            <p>Verified Revenue</p>
-            <span className={styles.statSub}>From approved UPI requests</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' }}>
             <Gift size={24} />
           </div>
           <div className={styles.statInfo}>
@@ -384,19 +331,27 @@ const AdminVipTab = ({ token }) => {
             <span className={styles.statSub}>Ready for redemption</span>
           </div>
         </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#aaa' }}>
+            <Clock size={24} />
+          </div>
+          <div className={styles.statInfo}>
+            <h3>{overview?.expiredVipUsers ?? 0}</h3>
+            <p>Expired VIP Users</p>
+            <span className={styles.statSub}>Past subscription history</span>
+          </div>
+        </div>
       </div>
 
-      {/* Sub-Navigation Tabs */}
+      {/* Clean Navigation Subtabs */}
       <div className={styles.subTabs}>
         <button
-          className={`${styles.subTabBtn} ${subTab === 'requests' ? styles.subTabActive : ''}`}
-          onClick={() => setSubTab('requests')}
+          className={`${styles.subTabBtn} ${subTab === 'ad_pass' ? styles.subTabActive : ''}`}
+          onClick={() => setSubTab('ad_pass')}
         >
-          <Clock size={16} />
-          <span>Payment Requests</span>
-          {overview?.pendingRequests > 0 && (
-            <span className={styles.pendingBadge}>{overview.pendingRequests}</span>
-          )}
+          <Sparkles size={16} />
+          <span>Ad-Pass Quests & Tiers</span>
         </button>
 
         <button
@@ -404,7 +359,7 @@ const AdminVipTab = ({ token }) => {
           onClick={() => setSubTab('codes')}
         >
           <Gift size={16} />
-          <span>Gift Codes Manager</span>
+          <span>VIP Giveaway Keys</span>
         </button>
 
         <button
@@ -414,183 +369,175 @@ const AdminVipTab = ({ token }) => {
           <Users size={16} />
           <span>VIP Users Directory</span>
         </button>
-
-        <button
-          className={`${styles.subTabBtn} ${subTab === 'settings' ? styles.subTabActive : ''}`}
-          onClick={() => setSubTab('settings')}
-        >
-          <Settings size={16} />
-          <span>UPI & QR Settings</span>
-        </button>
       </div>
 
-      {/* 1. PAYMENT REQUESTS SUBTAB */}
-      {subTab === 'requests' && (
+      {/* 1. AD-PASS QUESTS & TIERS SUBTAB */}
+      {subTab === 'ad_pass' && (
         <div className={styles.sectionCard}>
           <div className={styles.sectionHeader}>
             <div>
-              <h3 className={styles.sectionTitle}>UPI Payment Requests</h3>
-              <p className={styles.sectionDesc}>Review and verify user-submitted UPI UTR reference numbers.</p>
-            </div>
-            <div className={styles.filterGroup}>
-              <select
-                className={styles.selectFilter}
-                value={requestFilter}
-                onChange={e => setRequestFilter(e.target.value)}
-              >
-                <option value="pending">Pending ({overview?.pendingRequests || 0})</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-                <option value="all">All Requests</option>
-              </select>
-              <button className={styles.refreshBtn} onClick={fetchRequests} title="Refresh">
-                <RefreshCw size={14} className={loadingRequests ? styles.spinner : ''} />
-              </button>
+              <h3 className={styles.sectionTitle}>Gamified Ad-Pass Milestone Configuration</h3>
+              <p className={styles.sectionDesc}>
+                Configure multi-tier ad watch quests so visitors earn temporary VIP passes by watching sponsor ads.
+              </p>
             </div>
           </div>
 
-          {loadingRequests ? (
-            <div className={styles.loadingState}>
-              <Loader2 size={24} className={styles.spinner} />
-              <span>Loading payment requests...</span>
+          <form onSubmit={handleSaveAdPassSettings} className={styles.settingsForm}>
+            <div className={styles.formRow}>
+              <div className={styles.formCol}>
+                <label>Ad-Pass Quest Status</label>
+                <select
+                  value={adPassSettings.enabled ? 'true' : 'false'}
+                  onChange={e => setAdPassSettings({ ...adPassSettings, enabled: e.target.value === 'true' })}
+                >
+                  <option value="true">Enabled (Active across Player and VIP modal)</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </div>
             </div>
-          ) : requests.length === 0 ? (
-            <div className={styles.emptyState}>No payment requests found for this filter.</div>
-          ) : (
-            <div className={styles.tableWrapper}>
-              <table className={styles.dataTable}>
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>UTR / Ref Number</th>
-                    <th>Amount</th>
-                    <th>Duration</th>
-                    <th>Submitted</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {requests.map(req => (
-                    <tr key={req.id}>
-                      <td>
-                        <div className={styles.userCell}>
-                          <strong>{req.user_name}</strong>
-                          <span className={styles.subText}>{req.user_email}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <code className={styles.utrCode}>{req.utr_number}</code>
-                        {req.screenshot_url && (
-                          <a 
-                            href={req.screenshot_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className={styles.screenshotLink}
-                          >
-                            <ExternalLink size={12} /> View Proof
-                          </a>
-                        )}
-                      </td>
-                      <td><strong>₹{req.amount}</strong></td>
-                      <td>{req.plan_duration_days} Days</td>
-                      <td>{new Date(req.created_at).toLocaleDateString()}</td>
-                      <td>
-                        <span className={`${styles.statusPill} ${styles[req.status]}`}>
-                          {req.status}
-                        </span>
-                      </td>
-                      <td>
-                        {req.status === 'pending' ? (
-                          <div className={styles.actionBtns}>
-                            <button
-                              className={styles.approveBtn}
-                              disabled={reviewingId === req.id}
-                              onClick={() => handleReviewRequest(req.id, 'approved')}
-                              title="Approve & Grant VIP"
-                            >
-                              <Check size={14} /> Approve
-                            </button>
-                            <button
-                              className={styles.rejectBtn}
-                              disabled={reviewingId === req.id}
-                              onClick={() => handleReviewRequest(req.id, 'rejected')}
-                              title="Reject Request"
-                            >
-                              <X size={14} /> Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <span className={styles.reviewedBy}>
-                            by {req.reviewer_name || 'Admin'}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+            <div style={{ marginTop: '14px' }}>
+              <label style={{ fontSize: '14px', fontWeight: '700', color: '#fff', display: 'block', marginBottom: '8px' }}>
+                Milestone Tiers (Ads Required & Reward Duration)
+              </label>
+
+              <div className={styles.tiersList}>
+                {(adPassSettings.tiers || DEFAULT_TIERS).map((tier, idx) => (
+                  <div key={tier.id || idx} className={styles.tierEditorCard}>
+                    <div className={styles.tierEditorHeader}>
+                      <span>Tier {idx + 1}: {tier.name}</span>
+                      <span style={{ fontSize: '12px', color: '#888' }}>Milestone ID: {tier.id}</span>
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.formCol}>
+                        <label>Tier Name</label>
+                        <input
+                          type="text"
+                          value={tier.name}
+                          onChange={e => handleTierChange(idx, 'name', e.target.value)}
+                          placeholder="e.g. Daily Pass"
+                          required
+                        />
+                      </div>
+
+                      <div className={styles.formCol}>
+                        <label>Target Ads Required</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={tier.target_ads}
+                          onChange={e => handleTierChange(idx, 'target_ads', e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className={styles.formCol}>
+                        <label>Reward Duration (Hours)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="720"
+                          value={tier.reward_hours}
+                          onChange={e => handleTierChange(idx, 'reward_hours', e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className={styles.formCol}>
+                        <label>Display Label</label>
+                        <input
+                          type="text"
+                          value={tier.label || `${tier.reward_hours} Hours Pass`}
+                          onChange={e => handleTierChange(idx, 'label', e.target.value)}
+                          placeholder="e.g. 24 Hours (1 Day)"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
+
+            <button
+              type="submit"
+              className={styles.saveSettingsBtn}
+              disabled={savingAdPass}
+              style={{ background: 'linear-gradient(135deg, #ffb703, #ff7a00)', color: '#000', fontWeight: '700', marginTop: '16px' }}
+            >
+              {savingAdPass ? (
+                <>
+                  <Loader2 size={16} className={styles.spinner} />
+                  <span>Saving Configuration...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck size={16} />
+                  <span>Save Ad-Pass Milestone Settings</span>
+                </>
+              )}
+            </button>
+          </form>
         </div>
       )}
 
-      {/* 2. VIP GIFT CODES SUBTAB */}
+      {/* 2. VIP GIVEAWAY KEYS MANAGER */}
       {subTab === 'codes' && (
         <div className={styles.subGrid}>
-          {/* Generator Card */}
+          {/* Generator Form */}
           <div className={styles.sectionCard}>
-            <h3 className={styles.sectionTitle}>Generate VIP Gift Codes</h3>
-            <p className={styles.sectionDesc}>Create redeemable codes for giveaways, VIP members, or manual orders.</p>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h3 className={styles.sectionTitle}>Generate VIP Keys</h3>
+                <p className={styles.sectionDesc}>Batch-generate giveaway redemption keys.</p>
+              </div>
+            </div>
 
             <form onSubmit={handleGenerateCodes} className={styles.generateForm}>
-              <div className={styles.formRow}>
-                <div className={styles.formCol}>
-                  <label>Quantity (1-50)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={generateForm.count}
-                    onChange={e => setGenerateForm({ ...generateForm, count: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className={styles.formCol}>
-                  <label>Duration (Days)</label>
-                  <select
-                    value={generateForm.duration_days}
-                    onChange={e => setGenerateForm({ ...generateForm, duration_days: e.target.value })}
-                  >
-                    <option value={7}>7 Days (1 Week)</option>
-                    <option value={30}>30 Days (1 Month)</option>
-                    <option value={90}>90 Days (3 Months)</option>
-                    <option value={180}>180 Days (6 Months)</option>
-                    <option value={365}>365 Days (1 Year)</option>
-                  </select>
-                </div>
+              <div className={styles.formCol}>
+                <label>Number of Keys to Generate</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={generateForm.count}
+                  onChange={e => setGenerateForm({ ...generateForm, count: parseInt(e.target.value) || 1 })}
+                  required
+                />
               </div>
 
-              <div className={styles.formRow}>
-                <div className={styles.formCol}>
-                  <label>Plan Label</label>
-                  <input
-                    type="text"
-                    value={generateForm.plan_name}
-                    onChange={e => setGenerateForm({ ...generateForm, plan_name: e.target.value })}
-                    placeholder="VIP Ad-Free"
-                  />
-                </div>
-                <div className={styles.formCol}>
-                  <label>Code Prefix</label>
-                  <input
-                    type="text"
-                    value={generateForm.prefix}
-                    onChange={e => setGenerateForm({ ...generateForm, prefix: e.target.value.toUpperCase() })}
-                    placeholder="AURA"
-                    maxLength={8}
-                  />
-                </div>
+              <div className={styles.formCol}>
+                <label>Pass Duration (Days)</label>
+                <select
+                  value={generateForm.duration_days}
+                  onChange={e => setGenerateForm({ 
+                    ...generateForm, 
+                    duration_days: parseInt(e.target.value),
+                    plan_name: `VIP Ad-Free ${e.target.value} Days`
+                  })}
+                >
+                  <option value={1}>1 Day (24 Hours)</option>
+                  <option value={2}>2 Days (48 Hours)</option>
+                  <option value={7}>7 Days (1 Week)</option>
+                  <option value={30}>30 Days (1 Month)</option>
+                  <option value={90}>90 Days (3 Months)</option>
+                  <option value={365}>365 Days (1 Year)</option>
+                </select>
+              </div>
+
+              <div className={styles.formCol}>
+                <label>Key Prefix</label>
+                <input
+                  type="text"
+                  maxLength={8}
+                  value={generateForm.prefix}
+                  onChange={e => setGenerateForm({ ...generateForm, prefix: e.target.value.toUpperCase() })}
+                  placeholder="AURA"
+                  required
+                />
               </div>
 
               <button
@@ -601,53 +548,56 @@ const AdminVipTab = ({ token }) => {
                 {generatingCodes ? (
                   <>
                     <Loader2 size={16} className={styles.spinner} />
-                    <span>Generating...</span>
+                    <span>Generating Keys...</span>
                   </>
                 ) : (
                   <>
                     <Plus size={16} />
-                    <span>Generate Codes Now</span>
+                    <span>Generate {generateForm.count} Keys</span>
                   </>
                 )}
               </button>
             </form>
           </div>
 
-          {/* Existing Codes Table */}
+          {/* Keys List */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <div>
-                <h3 className={styles.sectionTitle}>Existing VIP Codes</h3>
-                <p className={styles.sectionDesc}>Manage generated codes and view redemption logs.</p>
+                <h3 className={styles.sectionTitle}>Redemption Keys Directory</h3>
+                <p className={styles.sectionDesc}>Manage generated keys.</p>
               </div>
+
               <div className={styles.filterGroup}>
-                <input
-                  type="text"
-                  placeholder="Search code..."
-                  value={codeSearch}
-                  onChange={e => setCodeSearch(e.target.value)}
-                  className={styles.searchInput}
-                  onKeyDown={e => e.key === 'Enter' && fetchCodes()}
-                />
+                <button
+                  className={styles.exportBtn}
+                  onClick={handleCopyAllCodes}
+                  title="Copy all active keys to clipboard"
+                >
+                  <Copy size={13} /> Copy Active Keys
+                </button>
+
+                <div className={styles.searchWrapper}>
+                  <Search size={14} className={styles.searchIcon} />
+                  <input
+                    type="text"
+                    className={styles.searchInput}
+                    placeholder="Search key code..."
+                    value={codeSearch}
+                    onChange={e => setCodeSearch(e.target.value)}
+                  />
+                </div>
+
                 <select
                   className={styles.selectFilter}
                   value={codeFilter}
                   onChange={e => setCodeFilter(e.target.value)}
                 >
-                  <option value="all">All</option>
+                  <option value="all">All Keys</option>
                   <option value="active">Active Only</option>
                   <option value="used">Redeemed</option>
                 </select>
-                <button
-                  type="button"
-                  className={styles.approveBtn}
-                  onClick={handleCopyAllTelegramCodes}
-                  title="Copy formatted list of all active codes for Telegram or Discord drops"
-                  style={{ whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <Copy size={13} />
-                  <span>Copy for Telegram</span>
-                </button>
+
                 <button className={styles.refreshBtn} onClick={fetchCodes} title="Refresh">
                   <RefreshCw size={14} className={loadingCodes ? styles.spinner : ''} />
                 </button>
@@ -657,17 +607,18 @@ const AdminVipTab = ({ token }) => {
             {loadingCodes ? (
               <div className={styles.loadingState}>
                 <Loader2 size={24} className={styles.spinner} />
-                <span>Loading codes...</span>
+                <span>Loading VIP keys...</span>
               </div>
             ) : codes.length === 0 ? (
-              <div className={styles.emptyState}>No codes found matching criteria.</div>
+              <div className={styles.emptyState}>No VIP keys match your query.</div>
             ) : (
               <div className={styles.tableWrapper}>
                 <table className={styles.dataTable}>
                   <thead>
                     <tr>
-                      <th>Code</th>
+                      <th>Redemption Key</th>
                       <th>Duration</th>
+                      <th>Plan Name</th>
                       <th>Status</th>
                       <th>Redeemed By</th>
                       <th>Action</th>
@@ -678,34 +629,37 @@ const AdminVipTab = ({ token }) => {
                       <tr key={c.id}>
                         <td>
                           <div className={styles.codeCell}>
-                            <code>{c.code}</code>
+                            <code className={styles.keyString}>{c.code}</code>
                             <button
-                              className={styles.iconCopyBtn}
+                              className={styles.miniCopyBtn}
                               onClick={() => handleCopyCode(c.code, c.id)}
-                              title="Copy Code"
+                              title="Copy Key"
                             >
                               {copiedCodeId === c.id ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
                             </button>
                           </div>
                         </td>
                         <td>{c.duration_days} Days</td>
+                        <td>{c.plan_name || 'VIP Ad-Free'}</td>
                         <td>
-                          <span className={`${styles.statusPill} ${c.is_active ? styles.approved : styles.rejected}`}>
+                          <span className={`${styles.statusPill} ${c.is_active ? styles.active : styles.used}`}>
                             {c.is_active ? 'Active' : 'Redeemed'}
                           </span>
                         </td>
                         <td>
-                          {c.used_by_name ? (
-                            <span className={styles.subText}>{c.used_by_name} ({c.used_by_email})</span>
+                          {c.used_by_email ? (
+                            <span className={styles.subText}>{c.used_by_email}</span>
+                          ) : c.used_at ? (
+                            <span className={styles.subText}>Guest Visitor</span>
                           ) : (
-                            <span className={styles.dimText}>—</span>
+                            <span className={styles.mutedText}>Unused</span>
                           )}
                         </td>
                         <td>
                           <button
-                            className={styles.deleteBtn}
+                            className={styles.deleteIconBtn}
                             onClick={() => handleDeleteCode(c.id)}
-                            title="Delete Code"
+                            title="Delete Key"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -720,33 +674,38 @@ const AdminVipTab = ({ token }) => {
         </div>
       )}
 
-      {/* 3. VIP USERS DIRECT MANAGER */}
+      {/* 3. VIP USERS DIRECTORY SUBTAB */}
       {subTab === 'users' && (
         <div className={styles.sectionCard}>
           <div className={styles.sectionHeader}>
             <div>
-              <h3 className={styles.sectionTitle}>User VIP Directory</h3>
-              <p className={styles.sectionDesc}>Directly grant, extend, or revoke 100% ad-free VIP access for any user.</p>
+              <h3 className={styles.sectionTitle}>VIP User Membership Directory</h3>
+              <p className={styles.sectionDesc}>Directly grant or revoke VIP membership for registered users.</p>
             </div>
+
             <div className={styles.filterGroup}>
-              <input
-                type="text"
-                placeholder="Search user name or email..."
-                value={userSearch}
-                onChange={e => setUserSearch(e.target.value)}
-                className={styles.searchInput}
-                onKeyDown={e => e.key === 'Enter' && fetchVipUsers()}
-              />
+              <div className={styles.searchWrapper}>
+                <Search size={14} className={styles.searchIcon} />
+                <input
+                  type="text"
+                  className={styles.searchInput}
+                  placeholder="Search user name or email..."
+                  value={userSearch}
+                  onChange={e => setUserSearch(e.target.value)}
+                />
+              </div>
+
               <select
                 className={styles.selectFilter}
                 value={userFilter}
                 onChange={e => setUserFilter(e.target.value)}
               >
-                <option value="all">All Users</option>
+                <option value="all">All Registered Users</option>
                 <option value="active">Active VIP Only</option>
                 <option value="expired">Expired VIP</option>
-                <option value="free">Free Users</option>
+                <option value="free">Standard Free</option>
               </select>
+
               <button className={styles.refreshBtn} onClick={fetchVipUsers} title="Refresh">
                 <RefreshCw size={14} className={loadingUsers ? styles.spinner : ''} />
               </button>
@@ -756,7 +715,7 @@ const AdminVipTab = ({ token }) => {
           {loadingUsers ? (
             <div className={styles.loadingState}>
               <Loader2 size={24} className={styles.spinner} />
-              <span>Loading users...</span>
+              <span>Loading user directory...</span>
             </div>
           ) : vipUsers.length === 0 ? (
             <div className={styles.emptyState}>No users found.</div>
@@ -767,9 +726,9 @@ const AdminVipTab = ({ token }) => {
                   <tr>
                     <th>User</th>
                     <th>VIP Status</th>
-                    <th>Expires At</th>
-                    <th>Plan / Activated Via</th>
-                    <th>Manage Access</th>
+                    <th>Plan</th>
+                    <th>Expires On</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -782,19 +741,19 @@ const AdminVipTab = ({ token }) => {
                         </div>
                       </td>
                       <td>
-                        <span className={`${styles.statusPill} ${u.is_premium ? styles.approved : styles.rejected}`}>
-                          {u.is_premium ? '👑 VIP ACTIVE' : 'Free Tier'}
+                        <span className={`${styles.statusPill} ${u.is_premium ? styles.active : styles.free}`}>
+                          {u.is_premium ? 'VIP Active' : 'Free Tier'}
                         </span>
                       </td>
+                      <td>{u.premium_plan || 'Standard'}</td>
                       <td>
-                        {u.premium_expires_at
-                          ? new Date(u.premium_expires_at).toLocaleDateString()
-                          : '—'}
-                      </td>
-                      <td>
-                        <span className={styles.subText}>
-                          {u.premium_plan || 'free'} · {u.premium_activated_by || 'standard'}
-                        </span>
+                        {u.premium_expires_at ? (
+                          new Date(u.premium_expires_at).toLocaleDateString()
+                        ) : u.is_premium ? (
+                          'Lifetime'
+                        ) : (
+                          <span className={styles.mutedText}>None</span>
+                        )}
                       </td>
                       <td>
                         {editingUserId === u.id ? (
@@ -804,6 +763,8 @@ const AdminVipTab = ({ token }) => {
                               onChange={e => setGrantDuration(parseInt(e.target.value))}
                               className={styles.miniSelect}
                             >
+                              <option value={1}>1 Day</option>
+                              <option value={2}>2 Days</option>
                               <option value={7}>7 Days</option>
                               <option value={30}>30 Days</option>
                               <option value={90}>90 Days</option>
@@ -845,141 +806,6 @@ const AdminVipTab = ({ token }) => {
               </table>
             </div>
           )}
-        </div>
-      )}
-
-      {/* 4. SETTINGS SUBTAB */}
-      {subTab === 'settings' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Ad-Pass Quest Configuration */}
-          <div className={styles.sectionCard}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <Crown size={22} color="#ffb703" />
-              <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Gamified Ad-Pass Quest Configuration</h3>
-            </div>
-            <p className={styles.sectionDesc}>
-              Allow users and guests to unlock 100% Ad-Free VIP Pass by watching sponsor ads instead of paying.
-            </p>
-
-            <form onSubmit={handleSaveAdPassSettings} className={styles.settingsForm}>
-              <div className={styles.formRow}>
-                <div className={styles.formCol}>
-                  <label>Enable Ad-Pass Quest</label>
-                  <select
-                    value={adPassSettings.enabled ? 'true' : 'false'}
-                    onChange={e => setAdPassSettings({ ...adPassSettings, enabled: e.target.value === 'true' })}
-                  >
-                    <option value="true">Active (Enabled across player and VIP modal)</option>
-                    <option value="false">Disabled</option>
-                  </select>
-                </div>
-                <div className={styles.formCol}>
-                  <label>Target Ads Required</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={adPassSettings.target_ads}
-                    onChange={e => setAdPassSettings({ ...adPassSettings, target_ads: e.target.value })}
-                    required
-                  />
-                  <small style={{ color: '#888', marginTop: '4px' }}>Recommended: 5 to 10 ads for optimal monetization</small>
-                </div>
-                <div className={styles.formCol}>
-                  <label>Reward Duration (Hours)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="720"
-                    value={adPassSettings.reward_hours}
-                    onChange={e => setAdPassSettings({ ...adPassSettings, reward_hours: e.target.value })}
-                    required
-                  />
-                  <small style={{ color: '#888', marginTop: '4px' }}>24 Hours = 1 Day VIP Pass, 48 Hours = 2 Days</small>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className={styles.saveSettingsBtn}
-                disabled={savingAdPass}
-                style={{ background: 'linear-gradient(135deg, #ffb703, #ff7a00)', color: '#000', fontWeight: '700' }}
-              >
-                {savingAdPass ? (
-                  <>
-                    <Loader2 size={16} className={styles.spinner} />
-                    <span>Saving Ad-Pass...</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck size={16} />
-                    <span>Save Ad-Pass Configuration</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* UPI & Payment Settings */}
-          <div className={styles.sectionCard}>
-            <h3 className={styles.sectionTitle}>UPI & Payment Configuration (Optional)</h3>
-            <p className={styles.sectionDesc}>Customize the UPI receiver account, QR code image, and public pricing tiers.</p>
-
-            <form onSubmit={handleSaveSettings} className={styles.settingsForm}>
-              <div className={styles.formRow}>
-                <div className={styles.formCol}>
-                  <label>Receiver UPI ID</label>
-                  <input
-                    type="text"
-                    value={paymentSettings.upi_id}
-                    onChange={e => setPaymentSettings({ ...paymentSettings, upi_id: e.target.value })}
-                    placeholder="e.g. aurawatch@upi"
-                    required
-                  />
-                </div>
-                <div className={styles.formCol}>
-                  <label>Payee Name / Title</label>
-                  <input
-                    type="text"
-                    value={paymentSettings.upi_name}
-                    onChange={e => setPaymentSettings({ ...paymentSettings, upi_name: e.target.value })}
-                    placeholder="AuraWatch VIP"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formCol}>
-                  <label>Custom QR Code Image URL (Leave blank to auto-generate)</label>
-                  <input
-                    type="url"
-                    value={paymentSettings.qr_image_url}
-                    onChange={e => setPaymentSettings({ ...paymentSettings, qr_image_url: e.target.value })}
-                    placeholder="https://.../my-qr.png"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className={styles.saveSettingsBtn}
-                disabled={savingSettings}
-              >
-                {savingSettings ? (
-                  <>
-                    <Loader2 size={16} className={styles.spinner} />
-                    <span>Saving Configuration...</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck size={16} />
-                    <span>Save Payment Settings</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
         </div>
       )}
     </div>

@@ -5,45 +5,32 @@ import {
   Crown, 
   X, 
   Check, 
-  Copy, 
   Sparkles, 
   Zap, 
   ShieldCheck, 
   Clock, 
-  QrCode, 
   Gift, 
-  ArrowRight, 
   Loader2, 
   AlertCircle,
-  ExternalLink,
   Play,
+  Lock,
   Flame,
-  Send
+  ArrowRight
 } from 'lucide-react';
 import styles from './VipModal.module.css';
 
-const DEFAULT_PLANS = [
-  { id: '1_month', name: '1 Month', duration_days: 30, price_inr: 29, badge: 'Popular' },
-  { id: '3_months', name: '3 Months', duration_days: 90, price_inr: 69, badge: 'Best Value' },
-  { id: '1_year', name: '1 Year', duration_days: 365, price_inr: 199, badge: 'VIP Master' }
+const DEFAULT_TIERS = [
+  { id: '1_day', name: 'Daily Pass', target_ads: 5, reward_hours: 24, label: '24 Hours (1 Day)' },
+  { id: '2_days', name: '2-Day Pass', target_ads: 10, reward_hours: 48, label: '48 Hours (2 Days)' },
+  { id: '5_days', name: '5-Day Pass', target_ads: 20, reward_hours: 120, label: '120 Hours (5 Days)' }
 ];
 
 const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const { user, isLoggedIn, refreshUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('quest'); // 'quest' | 'redeem' | 'upi'
-  const [selectedPlan, setSelectedPlan] = useState(DEFAULT_PLANS[0]);
+  const [activeTab, setActiveTab] = useState('quest'); // 'quest' | 'redeem'
   const [redeemCode, setRedeemCode] = useState('');
-  const [utrNumber, setUtrNumber] = useState('');
-  const [screenshotUrl, setScreenshotUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
-  const [copiedUpi, setCopiedUpi] = useState(false);
-  const [paymentInfo, setPaymentInfo] = useState({
-    upi_id: 'aurawatch@upi',
-    upi_name: 'AuraWatch VIP',
-    qr_image_url: '',
-    plans: DEFAULT_PLANS
-  });
   const [vipStatus, setVipStatus] = useState(null);
   const [isExtending, setIsExtending] = useState(false);
   const [questProgress, setQuestProgress] = useState({
@@ -51,6 +38,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     current_count: 0,
     target_count: 5,
     reward_hours: 24,
+    tiers: DEFAULT_TIERS,
     is_unlocked: false,
     unlocked_until: null,
     seconds_remaining: 0
@@ -69,40 +57,25 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
       .then(r => r.json())
       .then(data => {
         if (data && data.enabled !== undefined) {
-          setQuestProgress(data);
+          setQuestProgress({
+            ...data,
+            tiers: data.tiers?.length ? data.tiers : DEFAULT_TIERS
+          });
         }
       })
       .catch(() => {});
   };
 
-  // Fetch Payment Info (UPI ID, plans) & VIP status & Quest status
   useEffect(() => {
     if (!isOpen) return;
 
     setStatusMessage({ text: '', type: '' });
     setIsExtending(false);
 
-    // 1. Fetch quest progress
+    // 1. Fetch quest status & tiers
     fetchQuest();
 
-    // 2. Fetch public payment info
-    fetch(`${API_BASE}/settings/vip_payment_info`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.value && typeof data.value === 'object') {
-          setPaymentInfo(prev => ({
-            ...prev,
-            ...data.value,
-            plans: data.value.plans?.length ? data.value.plans : DEFAULT_PLANS
-          }));
-          if (data.value.plans?.length) {
-            setSelectedPlan(data.value.plans[0]);
-          }
-        }
-      })
-      .catch(() => {});
-
-    // 3. Fetch authenticated VIP status if logged in
+    // 2. Fetch authenticated VIP status if logged in
     const token = localStorage.getItem('aurawatch_token');
     if (token) {
       fetch(`${API_BASE}/vip/status`, {
@@ -116,7 +89,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     }
   }, [isOpen]);
 
-  // Lock body scroll when modal is open
+  // Lock body scroll cleanly when modal is open
   useEffect(() => {
     if (isOpen) {
       const prevOverflow = document.body.style.overflow;
@@ -129,17 +102,10 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
 
   if (!isOpen) return null;
 
-  const handleCopyUpi = () => {
-    const upi = paymentInfo.upi_id || 'aurawatch@upi';
-    navigator.clipboard.writeText(upi);
-    setCopiedUpi(true);
-    setTimeout(() => setCopiedUpi(false), 2500);
-  };
-
   const handleRedeemCode = async (e) => {
     e.preventDefault();
     if (!redeemCode.trim()) {
-      setStatusMessage({ text: 'Please enter a VIP gift code.', type: 'error' });
+      setStatusMessage({ text: 'Please enter a VIP giveaway code.', type: 'error' });
       return;
     }
 
@@ -164,7 +130,6 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
         setStatusMessage({ text: data.message, type: 'success' });
         setRedeemCode('');
         if (token) await refreshUser();
-        // Update local vipStatus and quest status
         setVipStatus(prev => ({
           ...prev,
           is_premium: true,
@@ -181,75 +146,25 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
         setStatusMessage({ text: data.message || 'Failed to redeem code.', type: 'error' });
       }
     } catch (err) {
-      setStatusMessage({ text: 'Network error. Please try again.', type: 'error' });
+      setStatusMessage({ text: 'Network connection issue. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmitPayment = async (e) => {
-    e.preventDefault();
-    if (!isLoggedIn) {
-      onClose();
-      if (onRequireLogin) onRequireLogin();
-      return;
-    }
-
-    if (!utrNumber.trim() || utrNumber.trim().length < 6) {
-      setStatusMessage({ text: 'Please enter a valid 12-digit UPI Reference / UTR Number.', type: 'error' });
-      return;
-    }
-
-    setLoading(true);
-    setStatusMessage({ text: '', type: '' });
-
-    try {
-      const token = localStorage.getItem('aurawatch_token');
-      const res = await fetch(`${API_BASE}/vip/request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          utr_number: utrNumber.trim(),
-          amount: selectedPlan.price_inr,
-          plan_duration_days: selectedPlan.duration_days,
-          screenshot_url: screenshotUrl.trim() || null
-        })
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        setStatusMessage({ text: data.message, type: 'success' });
-        setUtrNumber('');
-        setScreenshotUrl('');
-        setVipStatus(prev => ({
-          ...prev,
-          latest_request: data.request
-        }));
-      } else {
-        setStatusMessage({ text: data.message || 'Failed to submit request.', type: 'error' });
-      }
-    } catch (err) {
-      setStatusMessage({ text: 'Network error. Please try again.', type: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const isUserVip = Boolean(user?.is_premium || vipStatus?.is_premium);
-  const upiId = paymentInfo.upi_id || 'aurawatch@upi';
-  const upiPayLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(paymentInfo.upi_name || 'AuraWatch')}&am=${selectedPlan.price_inr}&cu=INR&tn=${encodeURIComponent(`VIP ${selectedPlan.name}`)}`;
-  const qrCodeUrl = paymentInfo.qr_image_url || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiPayLink)}`;
+  const isUserVip = Boolean(user?.is_premium || vipStatus?.is_premium || questProgress?.is_unlocked);
+  const tiers = questProgress.tiers && questProgress.tiers.length ? questProgress.tiers : DEFAULT_TIERS;
+  const currentAds = questProgress.current_count || 0;
+  const nextTarget = questProgress.target_count || tiers[0].target_ads;
+  const progressPercent = Math.min(100, Math.round((currentAds / nextTarget) * 100));
 
   return createPortal(
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
-        {/* Glowing Header */}
+        {/* Header */}
         <div className={styles.modalHeader}>
           <div className={styles.crownBadge}>
-            <Crown size={22} className={styles.crownIcon} />
+            <Crown size={20} className={styles.crownIcon} />
             <span>AURA VIP PASS</span>
           </div>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
@@ -263,36 +178,42 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
           {isUserVip && !isExtending ? (
             <div className={styles.activeVipHero}>
               <div className={styles.activeCrownGlow}>
-                <Crown size={48} />
+                <Crown size={46} />
               </div>
-              <h2 className={styles.activeVipTitle}>You are an Active VIP Member!</h2>
+              <h2 className={styles.activeVipTitle}>VIP Pass Active</h2>
               <p className={styles.activeVipSubtitle}>
-                Enjoy 100% ad-free cinema, instant 0s downloads, and premium streaming.
+                Enjoy 100% ad-free cinema, instant downloads, and unthrottled streaming.
               </p>
 
               <div className={styles.vipDetailsCard}>
                 <div className={styles.vipDetailItem}>
-                  <span className={styles.detailLabel}>Current Plan</span>
-                  <span className={styles.detailValue}>{vipStatus?.premium_plan || user?.premium_plan || 'VIP Ad-Free'}</span>
-                </div>
-                <div className={styles.vipDetailDivider} />
-                <div className={styles.vipDetailItem}>
-                  <span className={styles.detailLabel}>Days Remaining</span>
-                  <span className={styles.detailValueHighlight}>
-                    {vipStatus?.days_remaining ?? 'Active'} Days
+                  <span className={styles.detailLabel}>Pass Tier</span>
+                  <span className={styles.detailValue}>
+                    {vipStatus?.premium_plan || user?.premium_plan || 'Ad-Pass VIP (Ad-Free)'}
                   </span>
                 </div>
                 <div className={styles.vipDetailDivider} />
                 <div className={styles.vipDetailItem}>
-                  <span className={styles.detailLabel}>Expires On</span>
+                  <span className={styles.detailLabel}>Time Remaining</span>
+                  <span className={styles.detailValueHighlight}>
+                    {questProgress.seconds_remaining > 0
+                      ? `${Math.ceil(questProgress.seconds_remaining / 3600)} Hours`
+                      : `${vipStatus?.days_remaining ?? 'Active'} Days`}
+                  </span>
+                </div>
+                <div className={styles.vipDetailDivider} />
+                <div className={styles.vipDetailItem}>
+                  <span className={styles.detailLabel}>Valid Until</span>
                   <span className={styles.detailValue}>
-                    {vipStatus?.premium_expires_at || user?.premium_expires_at
-                      ? new Date(vipStatus?.premium_expires_at || user?.premium_expires_at).toLocaleDateString(undefined, {
+                    {questProgress.unlocked_until || vipStatus?.premium_expires_at || user?.premium_expires_at
+                      ? new Date(questProgress.unlocked_until || vipStatus?.premium_expires_at || user?.premium_expires_at).toLocaleDateString(undefined, {
                           year: 'numeric',
                           month: 'short',
-                          day: 'numeric'
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
                         })
-                      : 'Lifetime'}
+                      : 'Active'}
                   </span>
                 </div>
               </div>
@@ -303,7 +224,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                   onClick={() => setIsExtending(true)}
                 >
                   <Sparkles size={16} />
-                  <span>Extend Subscription</span>
+                  <span>Extend / Progress Quests</span>
                 </button>
                 <button className={styles.doneBtn} onClick={onClose}>
                   Done
@@ -318,7 +239,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                   Stream Without Limits. <span className={styles.gradientText}>Zero Ads.</span>
                 </h2>
                 <p className={styles.heroSubtitle}>
-                  Unlock uninterrupted entertainment with instant links and pure ad-free experience.
+                  Watch sponsor ads to unlock 100% ad-free viewing or redeem an activation key.
                 </p>
 
                 <div className={styles.perksGrid}>
@@ -337,8 +258,8 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                       <Zap size={20} className={styles.perkIcon} />
                     </div>
                     <div>
-                      <h4 className={styles.perkName}>Instant 0-Second Downloads</h4>
-                      <p className={styles.perkDesc}>Skip countdown timers entirely. Direct high-speed links.</p>
+                      <h4 className={styles.perkName}>Instant 0s Downloads</h4>
+                      <p className={styles.perkDesc}>Skip countdown timers entirely. Direct high-speed access.</p>
                     </div>
                   </div>
 
@@ -348,7 +269,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                     </div>
                     <div>
                       <h4 className={styles.perkName}>VIP Crown Badge</h4>
-                      <p className={styles.perkDesc}>Exclusive golden crown badge on your profile and header.</p>
+                      <p className={styles.perkDesc}>Golden VIP identity shown on your player and profile.</p>
                     </div>
                   </div>
                 </div>
@@ -362,52 +283,35 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                 </div>
               )}
 
-              {/* Pending Request Alert */}
-              {vipStatus?.latest_request?.status === 'pending' && (
-                <div className={styles.pendingBanner}>
-                  <Clock size={18} className={styles.pendingIcon} />
-                  <div>
-                    <strong>Verification Underway:</strong> UTR <code>{vipStatus.latest_request.utr_number}</code> is currently being reviewed by admin. Your VIP will activate as soon as it is confirmed.
-                  </div>
-                </div>
-              )}
-
-              {/* Mode Tabs */}
+              {/* Clean 2 Tabs (Quest & Redeem) */}
               <div className={styles.tabsContainer}>
                 <button
                   className={`${styles.tabBtn} ${activeTab === 'quest' ? styles.tabActive : ''}`}
                   onClick={() => { setActiveTab('quest'); setStatusMessage({ text: '', type: '' }); }}
                 >
                   <Sparkles size={16} />
-                  <span>🎮 Watch & Unlock (Free)</span>
+                  <span>Watch & Unlock (Ad-Pass)</span>
                 </button>
                 <button
                   className={`${styles.tabBtn} ${activeTab === 'redeem' ? styles.tabActive : ''}`}
                   onClick={() => { setActiveTab('redeem'); setStatusMessage({ text: '', type: '' }); }}
                 >
                   <Gift size={16} />
-                  <span>🎁 Redeem Giveaway Key</span>
-                </button>
-                <button
-                  className={`${styles.tabBtn} ${activeTab === 'upi' ? styles.tabActive : ''}`}
-                  onClick={() => { setActiveTab('upi'); setStatusMessage({ text: '', type: '' }); }}
-                >
-                  <QrCode size={16} />
-                  <span>⚡ Direct VIP Pass</span>
+                  <span>Redeem VIP Key</span>
                 </button>
               </div>
 
-              {/* Tab 1: 🎮 Watch & Unlock VIP (Free Quest) */}
+              {/* Tab 1: Watch & Unlock VIP (Milestone Quest) */}
               {activeTab === 'quest' && (
                 <div className={styles.tabContent}>
                   <div className={styles.questCard}>
                     <div className={styles.questHeader}>
                       <div className={styles.questTitleGroup}>
-                        <Crown size={28} className={styles.questIcon} />
+                        <Crown size={26} className={styles.questIcon} />
                         <div>
-                          <h3 className={styles.questTitle}>Ad-Pass VIP Quest</h3>
+                          <h3 className={styles.questTitle}>Ad-Pass Milestone Quests</h3>
                           <p className={styles.questSubtitle}>
-                            Watch {questProgress.target_count || 5} sponsor ads to instantly unlock {questProgress.reward_hours || 24} Hours of 100% Ad-Free VIP Pass!
+                            Watch sponsor video ads while browsing to unlock extended ad-free passes.
                           </p>
                         </div>
                       </div>
@@ -420,29 +324,80 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                       )}
                     </div>
 
+                    {/* Milestone Tiers Grid */}
+                    <div className={styles.tiersGrid}>
+                      {tiers.map((tier, idx) => {
+                        const isUnlockedTier = currentAds >= tier.target_ads;
+                        const isCurrentTarget = !isUnlockedTier && (idx === 0 || currentAds >= tiers[idx - 1].target_ads);
+
+                        return (
+                          <div 
+                            key={tier.id || idx}
+                            className={`${styles.tierCard} ${isUnlockedTier ? styles.tierCardUnlocked : ''} ${isCurrentTarget ? styles.tierCardCurrent : ''}`}
+                          >
+                            <div className={styles.tierCardHeader}>
+                              <span className={styles.tierBadge}>{tier.name}</span>
+                              {isUnlockedTier ? (
+                                <Check size={16} color="#10b981" />
+                              ) : isCurrentTarget ? (
+                                <Flame size={16} color="#ffb703" />
+                              ) : (
+                                <Lock size={14} color="rgba(255,255,255,0.4)" />
+                              )}
+                            </div>
+
+                            <div className={styles.tierTargetAds}>
+                              {tier.target_ads}
+                              <span className={styles.tierTargetAdsSub}>Ads Required</span>
+                            </div>
+
+                            <div className={styles.tierReward}>
+                              <Clock size={14} />
+                              <span>{tier.label || `${tier.reward_hours} Hours Pass`}</span>
+                            </div>
+
+                            <div className={styles.tierStatusRow}>
+                              {isUnlockedTier ? (
+                                <span className={styles.tierUnlockedPill}>
+                                  <Check size={13} /> Unlocked
+                                </span>
+                              ) : isCurrentTarget ? (
+                                <span className={styles.tierProgressPill}>
+                                  In Progress ({currentAds}/{tier.target_ads})
+                                </span>
+                              ) : (
+                                <span className={styles.tierLockedPill}>
+                                  Locked ({tier.target_ads - currentAds} more)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Overall Progress Bar */}
                     <div className={styles.questProgressBarOuter}>
                       <div 
                         className={styles.questProgressBarInner}
-                        style={{ 
-                          width: `${Math.min(100, Math.round(((questProgress.current_count || 0) / (questProgress.target_count || 5)) * 100))}%` 
-                        }}
+                        style={{ width: `${progressPercent}%` }}
                       />
                     </div>
 
                     <div className={styles.questStats}>
                       <span className={styles.questCounter}>
-                        {questProgress.current_count || 0} of {questProgress.target_count || 5} Ads Watched
+                        {currentAds} of {nextTarget} Ads to Next Milestone
                       </span>
                       <span className={styles.questPercent}>
-                        {Math.min(100, Math.round(((questProgress.current_count || 0) / (questProgress.target_count || 5)) * 100))}% Completed
+                        {progressPercent}% Complete
                       </span>
                     </div>
 
                     <div className={styles.perkDesc} style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      💡 <strong>How it works:</strong> Whenever you play a movie, simply let the 10-second sponsor ad finish. Your quest counter saves automatically. Once you hit {questProgress.target_count || 5} ads, all player pre-rolls, popup redirects, and banners vanish across the entire site for {questProgress.reward_hours || 24} hours!
+                      <strong>How it works:</strong> Whenever you play a movie or episode, sponsor ads contribute to your quest. Once a milestone is reached, all pre-rolls, banners, and popups are deactivated across the entire platform.
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
                       <button
                         type="button"
                         className={styles.activateBtn}
@@ -456,16 +411,16 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                 </div>
               )}
 
-              {/* Tab 2: 🎁 Redeem Giveaway Key */}
+              {/* Tab 2: Redeem VIP Giveaway Key */}
               {activeTab === 'redeem' && (
                 <div className={styles.tabContent}>
                   <div className={styles.redeemSection}>
                     <div className={styles.redeemIconWrapper}>
                       <Gift size={36} className={styles.redeemIcon} />
                     </div>
-                    <h3 className={styles.redeemTitle}>Have a VIP Giveaway Key?</h3>
+                    <h3 className={styles.redeemTitle}>Redeem VIP Activation Key</h3>
                     <p className={styles.redeemSubtitle}>
-                      Enter your activation key dropped in our community giveaways or Discord to instantly unlock VIP.
+                      Enter an AuraWatch VIP key from our official community giveaways to instantly unlock ad-free access.
                     </p>
 
                     <form onSubmit={handleRedeemCode} className={styles.redeemForm}>
@@ -494,146 +449,11 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                         ) : (
                           <>
                             <Crown size={18} />
-                            <span>Activate VIP Key</span>
+                            <span>Activate VIP Pass</span>
                           </>
                         )}
                       </button>
                     </form>
-
-                    {/* Telegram Community Giveaway Banner */}
-                    <div className={styles.telegramDropCard}>
-                      <div className={styles.telegramLeft}>
-                        <div className={styles.telegramIconWrap}>
-                          <Send size={22} />
-                        </div>
-                        <div>
-                          <div className={styles.telegramTitle}>AuraWatch Telegram VIP Key Drops</div>
-                          <div className={styles.telegramDesc}>We drop 50+ free 7-Day & 30-Day VIP keys weekly in our channel!</div>
-                        </div>
-                      </div>
-                      <a
-                        href="https://t.me/AuraWatchOfficial"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.telegramBtn}
-                      >
-                        <span>Join Telegram Drops</span>
-                        <ExternalLink size={13} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 3: ⚡ Direct VIP Pass (UPI / QR Pay) */}
-              {activeTab === 'upi' && (
-                <div className={styles.tabContent}>
-                  {/* Plan Picker */}
-                  <div className={styles.planPicker}>
-                    <label className={styles.sectionLabel}>Select Your VIP Pass</label>
-                    <div className={styles.plansGrid}>
-                      {(paymentInfo.plans || DEFAULT_PLANS).map(plan => {
-                        const isSelected = selectedPlan.id === plan.id;
-                        return (
-                          <div
-                            key={plan.id}
-                            className={`${styles.planCard} ${isSelected ? styles.planSelected : ''}`}
-                            onClick={() => setSelectedPlan(plan)}
-                          >
-                            {plan.badge && <span className={styles.planBadge}>{plan.badge}</span>}
-                            <div className={styles.planDuration}>{plan.name}</div>
-                            <div className={styles.planPrice}>
-                              <span className={styles.currencySymbol}>₹</span>
-                              {plan.price_inr}
-                            </div>
-                            <div className={styles.planDays}>{plan.duration_days} Days Ad-Free</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* QR & UPI Section */}
-                  <div className={styles.paymentSection}>
-                    <div className={styles.qrBlock}>
-                      <div className={styles.qrFrame}>
-                        <img 
-                          src={qrCodeUrl} 
-                          alt="UPI QR Code" 
-                          className={styles.qrImage}
-                        />
-                      </div>
-                      <span className={styles.scanHint}>Scan with any UPI App (GPay, PhonePe, Paytm)</span>
-                    </div>
-
-                    <div className={styles.upiDetailsBlock}>
-                      <div className={styles.amountNotice}>
-                        <span>Amount to Pay:</span>
-                        <strong className={styles.amountHighlight}>₹{selectedPlan.price_inr}</strong>
-                      </div>
-
-                      <div className={styles.upiCopyBox}>
-                        <div className={styles.upiTextGroup}>
-                          <span className={styles.upiLabel}>UPI ID:</span>
-                          <span className={styles.upiValue}>{upiId}</span>
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.copyBtn}
-                          onClick={handleCopyUpi}
-                          title="Copy UPI ID"
-                        >
-                          {copiedUpi ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
-                          <span>{copiedUpi ? 'Copied' : 'Copy'}</span>
-                        </button>
-                      </div>
-
-                      {/* Payment Verification Form */}
-                      <form onSubmit={handleSubmitPayment} className={styles.utrForm}>
-                        <label className={styles.formLabel}>
-                          12-digit UPI Reference / UTR Number
-                          <span className={styles.requiredMark}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          className={styles.inputField}
-                          placeholder="e.g. 429810482910"
-                          value={utrNumber}
-                          onChange={e => setUtrNumber(e.target.value.toUpperCase())}
-                          maxLength={30}
-                          required
-                        />
-
-                        <label className={styles.formLabelOptional}>
-                          Transaction Screenshot URL (Optional)
-                        </label>
-                        <input
-                          type="url"
-                          className={styles.inputField}
-                          placeholder="https://imgur.com/... or image link"
-                          value={screenshotUrl}
-                          onChange={e => setScreenshotUrl(e.target.value)}
-                        />
-
-                        <button
-                          type="submit"
-                          className={styles.submitBtn}
-                          disabled={loading}
-                        >
-                          {loading ? (
-                            <>
-                              <Loader2 size={18} className={styles.spinner} />
-                              <span>Submitting Verification...</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>Submit Payment Verification</span>
-                              <ArrowRight size={18} />
-                            </>
-                          )}
-                        </button>
-                      </form>
-                    </div>
                   </div>
                 </div>
               )}
