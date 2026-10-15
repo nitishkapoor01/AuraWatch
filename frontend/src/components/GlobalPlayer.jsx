@@ -13,7 +13,9 @@ const GlobalPlayer = () => {
   const navigate = useNavigate();
   const { isLoggedIn, token, user } = useAuth();
   const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
-  const isAdExempt = isAdmin || Boolean(user?.is_premium);
+  // Only users with an active VIP subscription are exempt from ads.
+  // Admins are NOT exempt by default so they can test and preview ads in real time!
+  const isAdExempt = Boolean(user?.is_premium);
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -27,27 +29,24 @@ const GlobalPlayer = () => {
   const [isMuted, setIsMuted] = useState(true);
   const [adVideoStarted, setAdVideoStarted] = useState(false);
   const [adProgressPercent, setAdProgressPercent] = useState(0);
-  const activeMovieKeyRef = useRef(null);
+  const [isResolvingVast, setIsResolvingVast] = useState(false);
 
   // Fetch Ads config and initialize Pre-Roll Gateway when opening a movie
   useEffect(() => {
     if (!isOpen || !movieData) {
       setPreRollActive(false);
-      activeMovieKeyRef.current = null;
+      setVastVideo(null);
       setAdVideoStarted(false);
       setAdProgressPercent(0);
+      setIsResolvingVast(false);
       return;
     }
 
-    const currentKey = `${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}-${movieData._playTimestamp || 0}`;
-    if (activeMovieKeyRef.current === currentKey) {
-      return;
-    }
-    activeMovieKeyRef.current = currentKey;
     setAdVideoStarted(false);
     setAdProgressPercent(0);
+    setVastVideo(null);
 
-    // Skip ads entirely for admins or VIP members
+    // Skip ads entirely for VIP members
     if (isAdExempt) {
       setPreRollActive(false);
       return;
@@ -58,15 +57,11 @@ const GlobalPlayer = () => {
       try {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s safeguard timeout for ad networks
 
         const savedToken = localStorage.getItem('aurawatch_token') || token;
         const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
 
-        const res = await fetch(`${baseUrl}/ads/config`, { signal: controller.signal, headers });
-        clearTimeout(timeoutId);
+        const res = await fetch(`${baseUrl}/ads/config`, { headers });
 
         if (res.ok && isMounted) {
           const data = await res.json();
@@ -81,6 +76,7 @@ const GlobalPlayer = () => {
             setPreRollConfig(preRoll);
             setPreRollSeconds(timerSecs);
             setPreRollActive(true);
+            setIsResolvingVast(true);
 
             // Attempt to resolve VAST Video if configured
             const vastUrl = preRoll.vast_url || (preRoll.type === 'vast' ? 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH' : '');
@@ -90,51 +86,63 @@ const GlobalPlayer = () => {
                 // Try backend proxy first for reliable bypass of ad blockers and CORS
                 try {
                   const proxyUrl = `${baseUrl}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`;
-                  const pRes = await fetch(proxyUrl, { signal: controller.signal });
+                  const pRes = await fetch(proxyUrl);
                   if (pRes.ok) xmlText = await pRes.text();
                 } catch (_) {
-                  const vRes = await fetch(vastUrl, { signal: controller.signal });
+                  const vRes = await fetch(vastUrl);
                   if (vRes.ok) xmlText = await vRes.text();
                 }
 
                 if (xmlText && isMounted) {
-                  const parser = new DOMParser();
-                  const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-                  const mediaFiles = Array.from(xmlDoc.querySelectorAll('MediaFile'));
-                  let foundVideo = '';
-                  for (const mf of mediaFiles) {
-                    const src = mf.textContent.trim();
-                    const type = (mf.getAttribute('type') || '').toLowerCase();
-                    if (src && (type.includes('mp4') || src.includes('.mp4') || !foundVideo)) {
-                      foundVideo = src;
-                      if (type.includes('mp4')) break;
-                    }
-                  }
+                  // Instant regex match for mp4 URL (handles CDATA and standard tags)
+                  const mp4Match = xmlText.match(/<MediaFile[^>]*type=["']video\/mp4["'][^>]*><!\[CDATA\[(.*?)\]\]><\/MediaFile>/i) ||
+                                   xmlText.match(/<MediaFile[^>]*><!\[CDATA\[(.*?)\]\]><\/MediaFile>/i) ||
+                                   xmlText.match(/<MediaFile[^>]*>(https?:\/\/[^<]+\.mp4[^<]*)<\/MediaFile>/i);
+                  
+                  const clickMatch = xmlText.match(/<ClickThrough><!\[CDATA\[(.*?)\]\]><\/ClickThrough>/i) ||
+                                     xmlText.match(/<ClickThrough>(https?:\/\/[^<]+)<\/ClickThrough>/i);
 
-                  const clickThrough = xmlDoc.querySelector('ClickThrough')?.textContent.trim() || '';
-                  const impressions = Array.from(xmlDoc.querySelectorAll('Impression')).map(i => i.textContent.trim()).filter(Boolean);
+                  const impMatches = Array.from(xmlText.matchAll(/<Impression><!\[CDATA\[(.*?)\]\]><\/Impression>/gi)).map(m => m[1]);
+
+                  const foundVideo = mp4Match ? mp4Match[1].trim() : '';
+                  const clickThrough = clickMatch ? clickMatch[1].trim() : '';
 
                   if (foundVideo) {
-                    setVastVideo({ url: foundVideo, clickThrough, impressions });
+                    setVastVideo({ url: foundVideo, clickThrough, impressions: impMatches });
+                    setIsResolvingVast(false);
                   } else {
-                    setVastVideo(null);
+                    console.warn('No video found in VAST XML, advancing to stream');
+                    setPreRollActive(false);
+                    setIsResolvingVast(false);
                   }
+                } else if (isMounted) {
+                  setPreRollActive(false);
+                  setIsResolvingVast(false);
                 }
               } catch (vErr) {
                 console.warn('VAST resolution note:', vErr);
-                if (isMounted) setVastVideo(null);
+                if (isMounted) {
+                  setPreRollActive(false);
+                  setIsResolvingVast(false);
+                }
               }
             } else if (preRoll.type === 'video' && preRoll.video_url) {
               setVastVideo({ url: preRoll.video_url, clickThrough: preRoll.direct_url || '', impressions: [] });
+              setIsResolvingVast(false);
             } else {
-              setVastVideo(null);
+              setPreRollActive(false);
+              setIsResolvingVast(false);
             }
           } else {
             setPreRollActive(false);
+            setIsResolvingVast(false);
           }
         }
       } catch (e) {
-        if (isMounted) setPreRollActive(false);
+        if (isMounted) {
+          setPreRollActive(false);
+          setIsResolvingVast(false);
+        }
       }
     };
 
@@ -523,18 +531,27 @@ const GlobalPlayer = () => {
               </div>
             ) : (
               <div className={styles.ytFallbackContainer}>
-                <div className={styles.preRollAdArea}>
-                  <AdBanner slot="pre_roll" customConfig={preRollConfig} />
-                </div>
-                <div className={styles.ytBottomRight}>
-                  <button
-                    type="button"
-                    className={styles.ytSkipBtn}
-                    onClick={() => setPreRollActive(false)}
-                  >
-                    <span>Continue to {mediaLabel} ➔</span>
-                  </button>
-                </div>
+                {isResolvingVast ? (
+                  <div className={styles.ytLoadingOverlay}>
+                    <Loader2 className={styles.spinner} size={32} />
+                    <span>Loading sponsor ad...</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className={styles.preRollAdArea}>
+                      <AdBanner slot="pre_roll" customConfig={preRollConfig} />
+                    </div>
+                    <div className={styles.ytBottomRight}>
+                      <button
+                        type="button"
+                        className={styles.ytSkipBtn}
+                        onClick={() => setPreRollActive(false)}
+                      >
+                        <span>Continue to {mediaLabel} ➔</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
