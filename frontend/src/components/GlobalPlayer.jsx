@@ -13,17 +13,28 @@ const GlobalPlayer = () => {
   const navigate = useNavigate();
   const { isLoggedIn, token, user } = useAuth();
   const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
-  // Only users with an active VIP subscription are exempt from ads.
-  // Admins are NOT exempt by default so they can test and preview ads in real time!
-  const isAdExempt = Boolean(user?.is_premium);
+  
+  // Synchronously determine if user or guest has ANY VIP / ad-free access
+  const isVipExemptSync = () => {
+    if (Boolean(user?.is_premium)) return true;
+    try {
+      const guestUntil = localStorage.getItem('aurawatch_guest_vip_until');
+      if (guestUntil && new Date(guestUntil) > new Date()) return true;
+      const isUnlocked = localStorage.getItem('aurawatch_vip_unlocked');
+      if (isUnlocked === 'true') return true;
+    } catch (_) {}
+    return false;
+  };
+
+  const isAdExempt = isVipExemptSync();
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, dragged: false });
 
-  // Pre-Roll Ad Gateway States
+  // Pre-Roll Ad Gateway States (Strict 10s Timer)
   const [preRollActive, setPreRollActive] = useState(false);
-  const [preRollSeconds, setPreRollSeconds] = useState(5);
+  const [preRollSeconds, setPreRollSeconds] = useState(10);
   const [preRollConfig, setPreRollConfig] = useState(null);
   const [vastVideo, setVastVideo] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -32,6 +43,46 @@ const GlobalPlayer = () => {
   const [isResolvingVast, setIsResolvingVast] = useState(false);
   const [adPassStatus, setAdPassStatus] = useState(null);
   const completedRef = useRef(false);
+
+  // Helper to log first-party ad impression in real time for admin panel tracking
+  const logFirstPartyImpression = (slot = 'pre_roll') => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+        (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const visitorId = localStorage.getItem('trackingVisitorId') || '';
+      const sessionId = sessionStorage.getItem('trackingSessionId') || '';
+      const deviceType = window.innerWidth <= 860 ? 'mobile' : 'desktop';
+      fetch(`${baseUrl}/ads/impression`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slot, visitorId, sessionId, deviceType })
+      }).catch(() => {});
+    } catch (_) {}
+  };
+
+  // Skip ad instantly handler
+  const handleSkipAd = (e) => {
+    if (e) e.stopPropagation();
+    setPreRollActive(false);
+    setIsResolvingVast(false);
+    setVastVideo(null);
+  };
+
+  // Listen to global VIP unlock events (instant exemption)
+  useEffect(() => {
+    const onVipUnlocked = (e) => {
+      const d = e.detail;
+      if (d?.premium_expires_at) {
+        localStorage.setItem('aurawatch_guest_vip_until', d.premium_expires_at);
+      }
+      localStorage.setItem('aurawatch_vip_unlocked', 'true');
+      setPreRollActive(false);
+      setIsResolvingVast(false);
+      setVastVideo(null);
+    };
+    window.addEventListener('aurawatch_vip_unlocked', onVipUnlocked);
+    return () => window.removeEventListener('aurawatch_vip_unlocked', onVipUnlocked);
+  }, []);
 
   // Fetch Ads config and initialize Pre-Roll Gateway when opening a movie
   useEffect(() => {
@@ -48,14 +99,14 @@ const GlobalPlayer = () => {
     setAdProgressPercent(0);
     setVastVideo(null);
 
-    // Skip ads entirely for VIP members
-    if (isAdExempt) {
+    // INSTANT PLAY FOR VIP: If user or guest has ANY VIP access, launch player instantly with 0ms delay!
+    if (isVipExemptSync()) {
       setPreRollActive(false);
       setIsResolvingVast(false);
       return;
     }
 
-    // Immediately lock ad gateway so movie stream never flashes or starts before ad
+    // Lock gateway strictly for non-VIP users with 10s timer
     setPreRollActive(true);
     setIsResolvingVast(true);
     setPreRollSeconds(10);
@@ -92,6 +143,10 @@ const GlobalPlayer = () => {
             if (qData && isMounted) {
               setAdPassStatus(qData);
               if (qData.is_unlocked) {
+                try {
+                  if (qData.unlocked_until) localStorage.setItem('aurawatch_guest_vip_until', qData.unlocked_until);
+                  localStorage.setItem('aurawatch_vip_unlocked', 'true');
+                } catch (_) {}
                 setPreRollActive(false);
                 setIsResolvingVast(false);
               }
@@ -106,7 +161,7 @@ const GlobalPlayer = () => {
           try { data = await res.json(); } catch (_) {}
         }
         
-        // If config endpoint was slow or failed, use hardened HilltopAds VAST default so ads never freeze
+        // If config endpoint was slow or failed, use hardened HilltopAds VAST default with 10s timer
         if (!data) {
           data = {
             config: {
@@ -130,7 +185,7 @@ const GlobalPlayer = () => {
 
           const preRoll = data.config?.pre_roll;
           if (data.config?.enabled && preRoll?.enabled) {
-            const timerSecs = Math.max(3, preRoll.timer_seconds || 10);
+            const timerSecs = Math.max(10, preRoll.timer_seconds || 10);
             setPreRollConfig(preRoll);
             setPreRollSeconds(timerSecs);
             setPreRollActive(true);
@@ -505,6 +560,7 @@ const GlobalPlayer = () => {
                     }}
                     onPlaying={() => {
                       setAdVideoStarted(true);
+                      logFirstPartyImpression('pre_roll');
                       if (vastVideo.impressions?.length) {
                         vastVideo.impressions.forEach(impUrl => {
                           try { new Image().src = impUrl; } catch (_) {}
@@ -513,7 +569,7 @@ const GlobalPlayer = () => {
                     }}
                     onTimeUpdate={(e) => {
                       const ct = e.target.currentTime;
-                      const requiredSecs = preRollConfig?.timer_seconds || 10;
+                      const requiredSecs = Math.max(10, preRollConfig?.timer_seconds || 10);
                       const rem = Math.max(0, Math.ceil(requiredSecs - ct));
                       setPreRollSeconds(rem);
                       const dur = e.target.duration || requiredSecs;
@@ -613,10 +669,7 @@ const GlobalPlayer = () => {
                       <button
                         type="button"
                         className={styles.ytSkipBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPreRollActive(false);
-                        }}
+                        onClick={handleSkipAd}
                       >
                         <span>Skip Ad</span>
                         <span className={styles.ytSkipArrow}>➔</span>
@@ -678,7 +731,7 @@ const GlobalPlayer = () => {
                         <button
                           type="button"
                           className={styles.ytSkipBtn}
-                          onClick={() => setPreRollActive(false)}
+                          onClick={handleSkipAd}
                         >
                           <span>Skip Ad</span>
                           <span className={styles.ytSkipArrow}>➔</span>

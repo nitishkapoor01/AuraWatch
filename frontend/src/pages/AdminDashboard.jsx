@@ -136,7 +136,7 @@ const AdminDashboard = () => {
       type: 'vast',
       vast_url: 'https://s.magsrv.com/v1/vast.php?idz=6033024',
       video_url: '',
-      timer_seconds: 5,
+      timer_seconds: 10,
       key: 'ccd684eb4f620dcc7303d2fce2577bae',
       script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js',
       direct_url: 'https://www.profitableratecpmnetwork.com/vjbf0irysc?key=e9c2d7dcafa36589f0542411f295ee11',
@@ -285,6 +285,17 @@ const AdminDashboard = () => {
       const supportRes = await fetch(`${baseUrl}/support`, { headers });
       if (supportRes.ok) setSupportTickets(await supportRes.json());
     } else if (tab === 'ads') {
+      fetchAdStatsData();
+    } else if (tab === 'hub') {
+      fetchHubPosts();
+    }
+  };
+
+  const fetchAdStatsData = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+      const savedToken = localStorage.getItem('aurawatch_token') || token;
+      const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
       const adsRes = await fetch(`${baseUrl}/admin/ads/stats`, { headers });
       if (adsRes.ok) {
         const data = await adsRes.json();
@@ -293,10 +304,18 @@ const AdminDashboard = () => {
           setAdsConfig(prev => ({ ...prev, ...data.config }));
         }
       }
-    } else if (tab === 'hub') {
-      fetchHubPosts();
-    }
+    } catch (_) {}
   };
+
+  // Real-time auto-refresh for Ads tab every 10 seconds
+  useEffect(() => {
+    if (activeTab !== 'ads') return;
+    fetchAdStatsData();
+    const interval = setInterval(() => {
+      fetchAdStatsData();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [activeTab]);
 
   const formatDuration = (seconds) => {
     if (!seconds || seconds <= 0) return '0m';
@@ -2508,7 +2527,132 @@ const AdminDashboard = () => {
       {/* ADS & MONETIZATION TAB */}
       {activeTab === 'ads' && (
         <div className={styles.tabContent}>
-          {/* KPI CARDS */}
+          {/* LIVE REAL-TIME HEADER */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className={styles.pulsingDot} style={{ background: '#22c55e', boxShadow: '0 0 10px #22c55e' }} />
+              <span style={{ fontSize: '13px', fontWeight: '800', color: '#22c55e', letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+                Live Real-Time Ads & VAST Monitor
+              </span>
+              <span style={{ fontSize: '11.5px', color: '#888' }}>• Auto-refreshing every 10s</span>
+            </div>
+            <button
+              type="button"
+              className={styles.refreshBtn}
+              onClick={fetchAdStatsData}
+              title="Refresh live metrics"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: '600' }}
+            >
+              <RefreshCw size={13} />
+              <span>Refresh Now</span>
+            </button>
+          </div>
+
+          {/* DEDICATED VAST VIDEO ADS LIVE METRICS */}
+          <div style={{ background: 'linear-gradient(135deg, rgba(229, 9, 20, 0.08) 0%, rgba(20, 24, 36, 0.6) 100%)', border: '1px solid rgba(229, 9, 20, 0.3)', borderRadius: '14px', padding: '18px 20px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: '#e50914', color: '#fff', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Play size={18} fill="#fff" />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#fff', margin: 0 }}>
+                    In-Stream Video Ads (VAST 3.0 Player)
+                  </h3>
+                  <p style={{ fontSize: '12px', color: '#aaa', margin: '2px 0 0 0' }}>
+                    Live tracking of pre-roll video ads played inside movie player across mobile and desktop
+                  </p>
+                </div>
+              </div>
+              <span style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71', border: '1px solid rgba(46, 204, 113, 0.3)', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+                ● REAL-TIME LOGGING ACTIVE
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+              <div style={{ background: 'rgba(0, 0, 0, 0.45)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', padding: '14px 16px' }}>
+                <span style={{ fontSize: '11px', color: '#e50914', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Today's VAST Views</span>
+                <div style={{ fontSize: '24px', fontWeight: '800', color: '#fff', marginTop: '4px' }}>
+                  {adStats?.preRollStats?.today?.toLocaleString() || 0}
+                </div>
+                <span style={{ fontSize: '11px', color: '#888' }}>Player ads watched today</span>
+              </div>
+
+              <div style={{ background: 'rgba(0, 0, 0, 0.45)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', padding: '14px 16px' }}>
+                <span style={{ fontSize: '11px', color: '#2ecc71', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>All-Time VAST Views</span>
+                <div style={{ fontSize: '24px', fontWeight: '800', color: '#fff', marginTop: '4px' }}>
+                  {adStats?.preRollStats?.total?.toLocaleString() || 0}
+                </div>
+                <span style={{ fontSize: '11px', color: '#888' }}>Total player ad impressions</span>
+              </div>
+
+              <div style={{ background: 'rgba(0, 0, 0, 0.45)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', padding: '14px 16px' }}>
+                <span style={{ fontSize: '11px', color: '#0071eb', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Unique VAST Viewers</span>
+                <div style={{ fontSize: '24px', fontWeight: '800', color: '#fff', marginTop: '4px' }}>
+                  {adStats?.preRollStats?.unique_viewers?.toLocaleString() || 0}
+                </div>
+                <span style={{ fontSize: '11px', color: '#888' }}>Distinct audience reach</span>
+              </div>
+
+              <div style={{ background: 'rgba(0, 0, 0, 0.45)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '10px', padding: '14px 16px' }}>
+                <span style={{ fontSize: '11px', color: '#f5c518', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Device Breakdown</span>
+                <div style={{ fontSize: '16px', fontWeight: '800', color: '#fff', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📱 {adStats?.preRollStats?.mobile || 0}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+                  <span>💻 {adStats?.preRollStats?.desktop || 0}</span>
+                </div>
+                <span style={{ fontSize: '11px', color: '#888' }}>Mobile vs Desktop plays</span>
+              </div>
+            </div>
+
+            {/* LIVE STREAM TABLE OF RECENT VAST AD PLAYS */}
+            <div style={{ marginTop: '16px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#ddd', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Recent VAST Player Ad Plays (Live Stream):
+              </div>
+              {adStats?.recentPreRolls && adStats.recentPreRolls.length > 0 ? (
+                <div style={{ maxHeight: '180px', overflowY: 'auto', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: 'rgba(255,255,255,0.05)', color: '#888', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <th style={{ padding: '8px 12px' }}>Event</th>
+                        <th style={{ padding: '8px 12px' }}>Device</th>
+                        <th style={{ padding: '8px 12px' }}>Visitor / Session</th>
+                        <th style={{ padding: '8px 12px', textAlign: 'right' }}>Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adStats.recentPreRolls.map((log) => (
+                        <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                          <td style={{ padding: '8px 12px', color: '#fff', fontWeight: '600' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#e50914' }} />
+                              VAST Video Ad Played
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 12px', color: log.device_type === 'mobile' ? '#f5c518' : '#0071eb' }}>
+                            {log.device_type === 'mobile' ? '📱 Mobile' : '💻 Desktop'}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: '#aaa', fontFamily: 'monospace' }}>
+                            {log.visitor_id ? `${log.visitor_id.slice(0, 14)}...` : (log.session_id ? `${log.session_id.slice(0, 14)}...` : 'Guest')}
+                          </td>
+                          <td style={{ padding: '8px 12px', textAlign: 'right', color: '#888' }}>
+                            {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div style={{ padding: '16px', textAlign: 'center', color: '#777', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>
+                  No VAST in-stream video ads recorded in this session yet. Play a movie to see real-time entry!
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* OVERALL PLATFORM KPI CARDS */}
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
               <div className={styles.statIcon} style={{ background: 'rgba(229, 9, 20, 0.15)', color: '#e50914' }}>
@@ -2516,7 +2660,7 @@ const AdminDashboard = () => {
               </div>
               <div className={styles.statInfo}>
                 <h3>{adStats?.todayImpressions?.toLocaleString() || 0}</h3>
-                <p>Today's Ad Impressions</p>
+                <p>Today's Total Ad Impressions</p>
               </div>
             </div>
 
@@ -2526,7 +2670,7 @@ const AdminDashboard = () => {
               </div>
               <div className={styles.statInfo}>
                 <h3>{adStats?.totalImpressions?.toLocaleString() || 0}</h3>
-                <p>Total Ad Impressions</p>
+                <p>All-Time Total Impressions</p>
               </div>
             </div>
 
@@ -2597,7 +2741,7 @@ const AdminDashboard = () => {
                 </div>
                 <div style={{ marginTop: '20px' }}>
                   {[
-                    { id: 'pre_roll', label: 'Stream Pre-Roll Gateway (Player 300x250)' },
+                    { id: 'pre_roll', label: '🎬 In-Stream Video Ads (VAST Player)' },
                     { id: 'download_modal', label: 'Download Modal (300x250)' },
                     { id: 'movie_detail', label: 'Movie Detail Banner (728x90)' },
                     { id: 'search_grid', label: 'Search & Category In-Feed Cards' }
@@ -3047,21 +3191,21 @@ const AdminDashboard = () => {
 
                 {/* TIMER SLIDER */}
                 <div className={styles.adFieldGroup}>
-                  <label>Pre-Roll Countdown Timer: {adsConfig.pre_roll?.timer_seconds || 5}s</label>
+                  <label>Pre-Roll Countdown Timer: {adsConfig.pre_roll?.timer_seconds || 10}s</label>
                   <div className={styles.sliderRow}>
                     <input 
                       type="range" 
                       min="3" 
-                      max="15" 
+                      max="30" 
                       step="1"
                       className={styles.sliderInput}
-                      value={adsConfig.pre_roll?.timer_seconds || 5}
+                      value={adsConfig.pre_roll?.timer_seconds || 10}
                       onChange={e => setAdsConfig(prev => ({
                         ...prev,
                         pre_roll: { ...prev.pre_roll, timer_seconds: Number(e.target.value) }
                       }))}
                     />
-                    <span className={styles.sliderValue}>{adsConfig.pre_roll?.timer_seconds || 5} sec</span>
+                    <span className={styles.sliderValue}>{adsConfig.pre_roll?.timer_seconds || 10} sec</span>
                   </div>
                 </div>
 

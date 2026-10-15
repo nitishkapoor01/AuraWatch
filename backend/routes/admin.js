@@ -871,32 +871,59 @@ router.delete('/security/block-ip/:ip', isAdmin, async (req, res) => {
 // Get Ad Impressions & Performance Stats
 router.get('/ads/stats', isModerator, async (req, res) => {
   try {
-    const todayResult = await db.query("SELECT COUNT(*) as count FROM ad_impressions WHERE created_at >= CURRENT_DATE");
-    const totalResult = await db.query("SELECT COUNT(*) as count FROM ad_impressions");
-    const uniqueViewersToday = await db.query("SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id)) as count FROM ad_impressions WHERE created_at >= CURRENT_DATE");
-    const uniqueViewersTotal = await db.query("SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id)) as count FROM ad_impressions");
-
-    const slotBreakdown = await db.query(`
-      SELECT 
-        slot, 
-        COUNT(*) as impressions,
-        COUNT(DISTINCT COALESCE(visitor_id, session_id)) as unique_visitors
-      FROM ad_impressions 
-      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY slot
-      ORDER BY impressions DESC
-    `);
-
-    const dailyTrend = await db.query(`
-      SELECT 
-        TO_CHAR(d.day, 'YYYY-MM-DD') as date_str, 
-        COUNT(a.id)::int as count 
-      FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, '1 day'::interval) d(day)
-      LEFT JOIN ad_impressions a 
-        ON DATE(a.created_at) = DATE(d.day)
-      GROUP BY d.day 
-      ORDER BY d.day ASC
-    `);
+    const [
+      todayResult,
+      totalResult,
+      uniqueViewersToday,
+      uniqueViewersTotal,
+      slotBreakdown,
+      dailyTrend,
+      preRollStatsRes,
+      recentPreRollsRes
+    ] = await Promise.all([
+      db.query("SELECT COUNT(*) as count FROM ad_impressions WHERE created_at >= CURRENT_DATE"),
+      db.query("SELECT COUNT(*) as count FROM ad_impressions"),
+      db.query("SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id)) as count FROM ad_impressions WHERE created_at >= CURRENT_DATE"),
+      db.query("SELECT COUNT(DISTINCT COALESCE(visitor_id, session_id)) as count FROM ad_impressions"),
+      db.query(`
+        SELECT 
+          slot, 
+          COUNT(*) as impressions,
+          COUNT(DISTINCT COALESCE(visitor_id, session_id)) as unique_visitors
+        FROM ad_impressions 
+        WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+        GROUP BY slot
+        ORDER BY impressions DESC
+      `),
+      db.query(`
+        SELECT 
+          TO_CHAR(d.day, 'YYYY-MM-DD') as date_str, 
+          COUNT(a.id)::int as count 
+        FROM generate_series(CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE, '1 day'::interval) d(day)
+        LEFT JOIN ad_impressions a 
+          ON DATE(a.created_at) = DATE(d.day)
+        GROUP BY d.day 
+        ORDER BY d.day ASC
+      `),
+      db.query(`
+        SELECT 
+          COUNT(*)::int as total,
+          COUNT(CASE WHEN created_at >= CURRENT_DATE THEN 1 END)::int as today,
+          COUNT(DISTINCT COALESCE(visitor_id, session_id))::int as unique_viewers,
+          COUNT(CASE WHEN device_type = 'mobile' THEN 1 END)::int as mobile,
+          COUNT(CASE WHEN device_type != 'mobile' THEN 1 END)::int as desktop
+        FROM ad_impressions
+        WHERE slot = 'pre_roll'
+      `),
+      db.query(`
+        SELECT 
+          id, slot, visitor_id, session_id, device_type, created_at
+        FROM ad_impressions
+        WHERE slot = 'pre_roll'
+        ORDER BY created_at DESC
+        LIMIT 20
+      `)
+    ]);
 
     // Get current ads_config
     const configRow = await db.query("SELECT value FROM settings WHERE key = 'ads_config'");
@@ -910,6 +937,8 @@ router.get('/ads/stats', isModerator, async (req, res) => {
       totalImpressions: parseInt(totalResult.rows[0].count) || 0,
       uniqueViewersToday: parseInt(uniqueViewersToday.rows[0].count) || 0,
       uniqueViewersTotal: parseInt(uniqueViewersTotal.rows[0].count) || 0,
+      preRollStats: preRollStatsRes.rows[0] || { total: 0, today: 0, unique_viewers: 0, mobile: 0, desktop: 0 },
+      recentPreRolls: recentPreRollsRes.rows || [],
       slotBreakdown: slotBreakdown.rows.map(r => ({
         slot: r.slot,
         impressions: parseInt(r.impressions) || 0,
