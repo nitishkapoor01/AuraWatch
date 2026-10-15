@@ -2854,8 +2854,8 @@ const AdminDashboard = () => {
                   <div className={styles.adSlotTitle}>
                     <Zap size={20} color="#f5c518" />
                     <div>
-                      <h3>Download Smartlink (Direct Link)</h3>
-                      <span style={{ fontSize: '12px', color: '#888' }}>High-CPM Adsterra Direct Link</span>
+                      <h3>Popunder / Direct Link</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>HilltopAds High-eCPM Popunder (1x Daily Frequency Capped)</span>
                     </div>
                   </div>
                   <button 
@@ -2879,14 +2879,14 @@ const AdminDashboard = () => {
                       ...prev,
                       direct_link: { ...prev.direct_link, url: e.target.value.trim() }
                     }))}
-                    placeholder="https://www.profitableratecpmnetwork.com/..."
+                    placeholder="https://plump-plastic.com/b.3RVK0pP/..."
                   />
                 </div>
 
                 <div className={styles.adFieldGroup}>
                   <label>Placement Notes</label>
                   <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
-                    Triggers in a new background tab when a visitor clicks the Download button on any movie, giving maximum eCPM on downloads while the movie download starts cleanly.
+                    Triggers in a new background tab only once every 24 hours per visitor when clicking Play or Download. Maximum eCPM without annoying the user.
                   </p>
                 </div>
               </div>
@@ -2897,8 +2897,8 @@ const AdminDashboard = () => {
                   <div className={styles.adSlotTitle}>
                     <Play size={20} color="#e50914" />
                     <div>
-                      <h3>Stream Pre-Roll Video / Ad Gateway</h3>
-                      <span style={{ fontSize: '12px', color: '#888' }}>ExoClick VAST, Direct MP4 & Adsterra Banner</span>
+                      <h3>In-Stream Video Ads (YouTube Style)</h3>
+                      <span style={{ fontSize: '12px', color: '#888' }}>HilltopAds VAST 3.0 Linear Video Tag</span>
                     </div>
                   </div>
                   <button 
@@ -2917,9 +2917,9 @@ const AdminDashboard = () => {
                   <label>Pre-Roll Ad Technology</label>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
                     {[
-                      { id: 'vast', label: '🎬 ExoClick VAST Video' },
+                      { id: 'vast', label: '🎬 HilltopAds / VAST 3.0' },
                       { id: 'video', label: '🎥 Custom MP4 Clip' },
-                      { id: 'banner', label: '🖼️ Adsterra Banner' }
+                      { id: 'banner', label: '🖼️ Fallback Banner' }
                     ].map(typeItem => (
                       <button
                         key={typeItem.id}
@@ -2950,7 +2950,7 @@ const AdminDashboard = () => {
                 {(adsConfig.pre_roll?.type || 'vast') === 'vast' && (
                   <>
                     <div className={styles.adFieldGroup}>
-                      <label>ExoClick / VAST 3.0 Tag URL</label>
+                      <label>HilltopAds / VAST 3.0 Tag URL</label>
                       <input 
                         type="text" 
                         className={styles.adInput}
@@ -2959,7 +2959,7 @@ const AdminDashboard = () => {
                           ...prev,
                           pre_roll: { ...prev.pre_roll, vast_url: e.target.value.trim() }
                         }))}
-                        placeholder="https://s.magsrv.com/v1/vast.php?idz=6033024"
+                        placeholder="https://loyal-product.com/dXmaFuz.dKG/..."
                       />
                     </div>
 

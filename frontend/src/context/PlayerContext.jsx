@@ -13,7 +13,7 @@ export const PlayerProvider = ({ children }) => {
     setPlayerState({
       isOpen: true,
       isSticky: false,
-      movieData: data,
+      movieData: { ...data, _playTimestamp: Date.now() },
     });
   };
 

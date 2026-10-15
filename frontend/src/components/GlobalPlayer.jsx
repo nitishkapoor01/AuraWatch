@@ -31,10 +31,11 @@ const GlobalPlayer = () => {
   useEffect(() => {
     if (!isOpen || !movieData) {
       setPreRollActive(false);
+      activeMovieKeyRef.current = null;
       return;
     }
 
-    const currentKey = `${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}`;
+    const currentKey = `${movieData.id}-${movieData.season || 0}-${movieData.episode || 0}-${movieData._playTimestamp || 0}`;
     if (activeMovieKeyRef.current === currentKey) {
       return;
     }
