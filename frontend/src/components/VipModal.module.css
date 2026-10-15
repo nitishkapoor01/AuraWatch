@@ -377,6 +377,22 @@
   display: block;
 }
 
+.adVideoProgressBarOuter {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.adVideoProgressBarInner {
+  height: 100%;
+  background: linear-gradient(90deg, #ffb703, #ff7a00);
+  transition: width 0.25s linear;
+  box-shadow: 0 0 8px rgba(255, 183, 3, 0.8);
+}
+
 .adPlayerOverlayTop {
   position: absolute;
   top: 8px;

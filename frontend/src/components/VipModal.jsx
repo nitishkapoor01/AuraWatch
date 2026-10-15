@@ -48,8 +48,9 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   // Dedicated In-Modal Ad Player State
   const [isPlayingAd, setIsPlayingAd] = useState(false);
   const [adCountdown, setAdCountdown] = useState(10);
+  const [adProgressPercent, setAdProgressPercent] = useState(0);
   const [adCanClaim, setAdCanClaim] = useState(false);
-  const [adIsMuted, setAdIsMuted] = useState(true);
+  const [adIsMuted, setAdIsMuted] = useState(false); // Default unmuted
   const [adClaiming, setAdClaiming] = useState(false);
   const [adSuccessMsg, setAdSuccessMsg] = useState('');
   const [loadingAdVideo, setLoadingAdVideo] = useState(false);
@@ -175,8 +176,10 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     countdownTimerRef.current = setInterval(() => {
       remaining -= 1;
       setAdCountdown(Math.max(0, remaining));
+      setAdProgressPercent(prev => Math.max(prev, Math.min(100, Math.round(((10 - remaining) / 10) * 100))));
       if (remaining <= 0) {
         clearInterval(countdownTimerRef.current);
+        setAdProgressPercent(100);
         setAdCanClaim(true);
       }
     }, 1000);
@@ -459,6 +462,27 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                             playsInline
                             muted={adIsMuted}
                             className={styles.adPlayerVideo}
+                            ref={(el) => {
+                              if (el) {
+                                el.muted = adIsMuted;
+                                const p = el.play();
+                                if (p && typeof p.catch === 'function') {
+                                  p.catch((err) => {
+                                    if (err.name === 'NotAllowedError') {
+                                      el.muted = true;
+                                      setAdIsMuted(true);
+                                      el.play().catch(() => {});
+                                    }
+                                  });
+                                }
+                              }
+                            }}
+                            onTimeUpdate={(e) => {
+                              const ct = e.target.currentTime;
+                              const dur = e.target.duration || 10;
+                              const pct = Math.min(100, Math.round((ct / Math.min(dur, 10)) * 100));
+                              setAdProgressPercent(prev => Math.max(prev, pct));
+                            }}
                             onError={(e) => {
                               if (adVideoObj.proxyUrl && e.target.src !== adVideoObj.proxyUrl) {
                                 e.target.src = adVideoObj.proxyUrl;
@@ -477,6 +501,14 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                             </div>
                           </div>
                         )}
+
+                        {/* Live Ad Progress Bar */}
+                        <div className={styles.adVideoProgressBarOuter}>
+                          <div 
+                            className={styles.adVideoProgressBarInner}
+                            style={{ width: `${adProgressPercent}%` }}
+                          />
+                        </div>
 
                         <div className={styles.adPlayerOverlayBottom}>
                           <button
