@@ -378,7 +378,6 @@ const TopNav = () => {
         </Link>
       )}
 
-      <div className={styles.navActions}>
         {/* Action Controls & Navigation Shortcuts */}
         <div className={styles.actionControlsGroup}>
           <div className={styles.filterInline}>
@@ -408,7 +407,7 @@ const TopNav = () => {
           <button
             className={`${styles.vipHeaderBtn} ${(user?.is_premium || isGuestVipActive) ? styles.vipActive : ''}`}
             onClick={() => setIsVipModalOpen(true)}
-            title={(user?.is_premium || isGuestVipActive) ? "VIP Pass Active (100% Ad-Free)" : "Ad-Pass: Watch Sponsor Ads to Unlock Free VIP"}
+            title={(user?.is_premium || isGuestVipActive) ? "VIP Pass Active (100% Ad-Free)" : "Ad-Pass: Unlock Free VIP"}
           >
             <Crown size={14} className={(user?.is_premium || isGuestVipActive) ? styles.crownActive : ''} />
             <span className={styles.vipBtnLabel}>{(user?.is_premium || isGuestVipActive) ? 'VIP ACTIVE' : 'FREE VIP PASS'}</span>
