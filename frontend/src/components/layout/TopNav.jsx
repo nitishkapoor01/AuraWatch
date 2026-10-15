@@ -39,12 +39,45 @@ const TopNav = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showRouletteModal, setShowRouletteModal] = useState(false);
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
+  const [isGuestVipActive, setIsGuestVipActive] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [hasUnreadHub, setHasUnreadHub] = useState(false);
   const surpriseRef = useRef(null);
   const dropdownRef = useRef(null);
   const searchContainerRef = useRef(null);
   const buttonWarnings = useButtonWarnings();
+
+  // Listen to open VIP modal requests from player or other components
+  useEffect(() => {
+    const handleOpenVip = () => setIsVipModalOpen(true);
+    window.addEventListener('aurawatch_open_vip_modal', handleOpenVip);
+    return () => window.removeEventListener('aurawatch_open_vip_modal', handleOpenVip);
+  }, []);
+
+  // Track guest VIP Ad-Pass unlock status
+  useEffect(() => {
+    const checkGuestVip = () => {
+      const vid = localStorage.getItem('trackingVisitorId') || '';
+      if (!vid) return;
+      const API_BASE = getApiBaseUrl();
+      fetch(`${API_BASE}/vip/ad-pass/progress?visitor_id=${encodeURIComponent(vid)}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.is_unlocked) {
+            setIsGuestVipActive(true);
+          } else {
+            setIsGuestVipActive(false);
+          }
+        })
+        .catch(() => {});
+    };
+
+    checkGuestVip();
+
+    const onUnlocked = () => setIsGuestVipActive(true);
+    window.addEventListener('aurawatch_vip_unlocked', onUnlocked);
+    return () => window.removeEventListener('aurawatch_vip_unlocked', onUnlocked);
+  }, []);
 
   // Check unread admin hub post for blinking red dot
   useEffect(() => {
@@ -373,18 +406,12 @@ const TopNav = () => {
           </Link>
 
           <button
-            className={`${styles.vipHeaderBtn} ${user?.is_premium ? styles.vipActive : ''}`}
-            onClick={() => {
-              if (!isLoggedIn) {
-                setIsLoginPromptOpen(true);
-              } else {
-                setIsVipModalOpen(true);
-              }
-            }}
-            title={user?.is_premium ? "VIP Membership Active (Ad-Free)" : "Get VIP - 100% Ad-Free"}
+            className={`${styles.vipHeaderBtn} ${(user?.is_premium || isGuestVipActive) ? styles.vipActive : ''}`}
+            onClick={() => setIsVipModalOpen(true)}
+            title={(user?.is_premium || isGuestVipActive) ? "VIP Pass Active (100% Ad-Free)" : "Ad-Pass: Watch Sponsor Ads to Unlock Free VIP"}
           >
-            <Crown size={14} className={user?.is_premium ? styles.crownActive : ''} />
-            <span className={styles.vipBtnLabel}>{user?.is_premium ? 'VIP ACTIVE' : 'GET VIP'}</span>
+            <Crown size={14} className={(user?.is_premium || isGuestVipActive) ? styles.crownActive : ''} />
+            <span className={styles.vipBtnLabel}>{(user?.is_premium || isGuestVipActive) ? 'VIP ACTIVE' : 'FREE VIP PASS'}</span>
           </button>
         </div>
 
@@ -609,16 +636,12 @@ const TopNav = () => {
                       className={styles.dropdownItem} 
                       onClick={() => { 
                         setIsDropdownOpen(false); 
-                        if (!isLoggedIn) {
-                          setIsLoginPromptOpen(true);
-                        } else {
-                          setIsVipModalOpen(true);
-                        }
+                        setIsVipModalOpen(true);
                       }}
                     >
-                      <Crown size={16} color={user?.is_premium ? '#ffb703' : '#aaa'} /> 
-                      {user?.is_premium ? 'VIP Membership (Active)' : 'Upgrade to VIP (No Ads)'}
-                      {user?.is_premium && (
+                      <Crown size={16} color={(user?.is_premium || isGuestVipActive) ? '#ffb703' : '#aaa'} /> 
+                      {(user?.is_premium || isGuestVipActive) ? 'VIP Membership (Active)' : 'Free Ad-Pass VIP (No Ads)'}
+                      {(user?.is_premium || isGuestVipActive) && (
                         <span style={{
                           marginLeft: 'auto',
                           background: 'linear-gradient(90deg, #ffb703, #ff7b00)',

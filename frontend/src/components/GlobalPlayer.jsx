@@ -588,9 +588,17 @@ const GlobalPlayer = () => {
                   </div>
 
                   {adPassStatus?.enabled && !adPassStatus?.is_unlocked && (
-                    <div className={styles.ytQuestBadge} title="Complete the daily quest to unlock 24 Hours of Ad-Free VIP!">
+                    <div 
+                      className={styles.ytQuestBadge} 
+                      title="Click to view your free VIP quest progress and milestones"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.dispatchEvent(new CustomEvent('aurawatch_open_vip_modal'));
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <Gift size={13} />
-                      <span>Ad-Pass: {Math.min(adPassStatus.target_count || 5, (adPassStatus.current_count || 0) + 1)}/{adPassStatus.target_count || 5} (Watch to get {adPassStatus.reward_hours || 24}h VIP)</span>
+                      <span>Ad-Pass: {Math.min(adPassStatus.target_count || 5, (adPassStatus.current_count || 0) + 1)}/{adPassStatus.target_count || 5} (Watch for {adPassStatus.reward_hours || 24}h VIP)</span>
                     </div>
                   )}
                 </div>

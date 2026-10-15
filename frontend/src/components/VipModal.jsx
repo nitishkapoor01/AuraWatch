@@ -235,12 +235,63 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
             <>
               {/* Value Proposition Highlights */}
               <div className={styles.heroSection}>
+                <div className={styles.freePassPill}>
+                  <Sparkles size={14} />
+                  <span>100% Free • No Login or Payment Required</span>
+                </div>
+
                 <h2 className={styles.heroTitle}>
-                  Stream Without Limits. <span className={styles.gradientText}>Zero Ads.</span>
+                  Watch Sponsor Ads. <span className={styles.gradientText}>Unlock Free VIP.</span>
                 </h2>
                 <p className={styles.heroSubtitle}>
-                  Watch sponsor ads to unlock 100% ad-free viewing or redeem an activation key.
+                  Let 10-second sponsor ads play while streaming. In return, all ads, banners, and popup redirects are turned off platform-wide for up to 5 days.
                 </p>
+
+                {/* 3-Step Simple Explainer */}
+                <div className={styles.howItWorksSteps}>
+                  <div className={styles.stepItem}>
+                    <span className={styles.stepNum}>1</span>
+                    <div className={styles.stepText}>
+                      <strong>Play Any Movie</strong>
+                      <span>Stream without logging in</span>
+                    </div>
+                  </div>
+                  <div className={styles.stepArrow}>➔</div>
+                  <div className={styles.stepItem}>
+                    <span className={styles.stepNum}>2</span>
+                    <div className={styles.stepText}>
+                      <strong>Ads Auto-Count</strong>
+                      <span>Each 10s ad saves to quest</span>
+                    </div>
+                  </div>
+                  <div className={styles.stepArrow}>➔</div>
+                  <div className={styles.stepItem}>
+                    <span className={styles.stepNum}>3</span>
+                    <div className={styles.stepText}>
+                      <strong>Zero Ads Unlocked</strong>
+                      <span>Enjoy 1 to 5 days 100% ad-free</span>
+                    </div>
+                  </div>
+                </div>
+
+                {!isLoggedIn && (
+                  <div className={styles.guestSyncRow}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <ShieldCheck size={16} color="#10b981" />
+                      <span><strong>Guest Mode:</strong> Progress saves on this device. No account or card needed.</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.guestSyncBtn}
+                      onClick={() => {
+                        onClose();
+                        if (onRequireLogin) onRequireLogin();
+                      }}
+                    >
+                      Sign In to Sync
+                    </button>
+                  </div>
+                )}
 
                 <div className={styles.perksGrid}>
                   <div className={styles.perkCard}>
