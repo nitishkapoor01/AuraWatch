@@ -18,6 +18,7 @@ import {
   VolumeX,
   ExternalLink
 } from 'lucide-react';
+import { getApiBaseUrl } from '../utils/apiBase';
 import styles from './VipModal.module.css';
 
 const DEFAULT_TIERS = [
@@ -53,6 +54,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const [adIsMuted, setAdIsMuted] = useState(false); // Default unmuted
   const [adClaiming, setAdClaiming] = useState(false);
   const [adSuccessMsg, setAdSuccessMsg] = useState('');
+  const [adInlineMsg, setAdInlineMsg] = useState({ text: '', type: '' });
   const [loadingAdVideo, setLoadingAdVideo] = useState(false);
   const [adVideoObj, setAdVideoObj] = useState({
     url: '',
@@ -61,8 +63,9 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   });
 
   const countdownTimerRef = useRef(null);
+  const claimAdRef = useRef(null);
 
-  const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
+  const API_BASE = getApiBaseUrl();
 
   const fetchQuest = () => {
     const token = localStorage.getItem('aurawatch_token');
@@ -170,6 +173,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     } catch (_) {}
 
     setLoadingAdVideo(false);
+    setAdInlineMsg({ text: '', type: '' });
 
     let remaining = 10;
     if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
@@ -181,6 +185,10 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
         clearInterval(countdownTimerRef.current);
         setAdProgressPercent(100);
         setAdCanClaim(true);
+        // Automatically claim reward once countdown reaches 0s
+        if (claimAdRef.current) {
+          claimAdRef.current();
+        }
       }
     }, 1000);
   };
@@ -189,13 +197,19 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const handleClaimAdProgress = async () => {
     if (adClaiming) return;
     setAdClaiming(true);
+    setAdInlineMsg({ text: '', type: '' });
 
     try {
+      let visitorId = localStorage.getItem('trackingVisitorId');
+      if (!visitorId) {
+        visitorId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('trackingVisitorId', visitorId);
+      }
+
       const token = localStorage.getItem('aurawatch_token');
-      const visitorId = localStorage.getItem('trackingVisitorId') || '';
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      if (visitorId) headers['x-visitor-id'] = visitorId;
+      headers['x-visitor-id'] = visitorId;
 
       const res = await fetch(`${API_BASE}/vip/ad-pass/complete-ad`, {
         method: 'POST',
@@ -205,7 +219,8 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setAdSuccessMsg(data.message || '+1 Ad completed!');
+        setAdSuccessMsg(data.message || '+1 Ad completed successfully.');
+        setAdInlineMsg({ text: '', type: '' });
         fetchQuest();
         if (token) await refreshUser();
         if (data.is_unlocked) {
@@ -213,14 +228,19 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
         }
         setIsPlayingAd(false);
       } else {
-        setStatusMessage({ text: data.message || 'Please wait a moment before claiming.', type: 'error' });
+        setAdInlineMsg({ text: data.message || 'Please wait a moment before claiming.', type: 'error' });
       }
     } catch (err) {
-      setStatusMessage({ text: 'Network error. Please try again.', type: 'error' });
+      setAdInlineMsg({ text: 'Network connection issue. Please retry.', type: 'error' });
     } finally {
       setAdClaiming(false);
     }
   };
+
+  // Connect ref so countdown interval can cleanly trigger auto-claim
+  useEffect(() => {
+    claimAdRef.current = handleClaimAdProgress;
+  });
 
   const handleRedeemCode = async (e) => {
     e.preventDefault();
@@ -510,6 +530,40 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                           />
                         </div>
 
+                        {/* Centered Prominent Claim Overlay when Reward is Ready */}
+                        {adCanClaim && (
+                          <div className={styles.centerClaimOverlay}>
+                            <button
+                              type="button"
+                              className={styles.centerClaimBtn}
+                              onClick={handleClaimAdProgress}
+                              disabled={adClaiming}
+                            >
+                              {adClaiming ? (
+                                <>
+                                  <Loader2 size={16} className={styles.spinner} />
+                                  <span>Recording Progress...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Check size={18} />
+                                  <span>Claim +1 Ad Progress Now</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* In-Player Status Alert */}
+                        {adInlineMsg.text && (
+                          <div className={styles.inlinePlayerAlert}>
+                            <span>{adInlineMsg.text}</span>
+                            <button type="button" onClick={handleClaimAdProgress} className={styles.inlineRetryBtn}>
+                              Retry
+                            </button>
+                          </div>
+                        )}
+
                         <div className={styles.adPlayerOverlayBottom}>
                           <button
                             type="button"
@@ -540,11 +594,11 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                               disabled={adClaiming}
                             >
                               {adClaiming ? <Loader2 size={13} className={styles.spinner} /> : <Check size={13} />}
-                              <span>Claim +1 Progress</span>
+                              <span>Claim +1</span>
                             </button>
                           ) : (
                             <span style={{ fontSize: '11px', color: '#888' }}>
-                              Watch full 10s to claim
+                              Reward in {adCountdown}s
                             </span>
                           )}
                         </div>
@@ -554,7 +608,14 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                         {adSuccessMsg && (
                           <div className={styles.adSuccessCard}>
                             <Check size={16} />
-                            <span>{adSuccessMsg}</span>
+                            <div style={{ textAlign: 'left', flex: 1 }}>
+                              <div style={{ fontWeight: '700', color: '#10b981' }}>
+                                {questProgress.is_unlocked ? 'VIP Pass Active' : '+1 Ad Recorded'}
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#aaa', marginTop: '2px' }}>
+                                {adSuccessMsg}
+                              </div>
+                            </div>
                           </div>
                         )}
 
@@ -565,7 +626,11 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                           disabled={loadingAdVideo}
                         >
                           <Play size={16} fill="#000" />
-                          <span>Watch Sponsor Ad (+1 Progress)</span>
+                          <span>
+                            {currentAds > 0 && currentAds < nextTarget 
+                              ? `Watch Next Ad (${nextTarget - currentAds} more to unlock)` 
+                              : 'Watch Sponsor Ad (+1 Progress)'}
+                          </span>
                         </button>
 
                         <p className={styles.watchAdSub}>

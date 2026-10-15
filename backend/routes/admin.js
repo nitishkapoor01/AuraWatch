@@ -1475,5 +1475,111 @@ router.post('/vip/ad-pass-config', isAdmin, async (req, res) => {
   }
 });
 
+// 11. List All Ad-Pass Viewer Quests & Live Activity
+router.get('/vip/ad-pass/quests', isModerator, async (req, res) => {
+  try {
+    const { filter = 'all', page = 1, limit = 20, search = '' } = req.query;
+    const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+    const cleanSearch = (search || '').trim().toLowerCase();
+
+    let whereClause = '1=1';
+    const params = [];
+
+    if (filter === 'active') {
+      whereClause += ' AND q.unlocked_until IS NOT NULL AND q.unlocked_until > NOW()';
+    } else if (filter === 'in_progress') {
+      whereClause += ' AND (q.unlocked_until IS NULL OR q.unlocked_until <= NOW()) AND q.current_count > 0';
+    } else if (filter === 'guests') {
+      whereClause += ' AND q.user_id IS NULL';
+    } else if (filter === 'users') {
+      whereClause += ' AND q.user_id IS NOT NULL';
+    }
+
+    if (cleanSearch) {
+      params.push(`%${cleanSearch}%`);
+      whereClause += ` AND (LOWER(COALESCE(u.name, '')) LIKE $${params.length} OR LOWER(COALESCE(u.email, '')) LIKE $${params.length} OR LOWER(COALESCE(q.visitor_id, '')) LIKE $${params.length})`;
+    }
+
+    // Platform-wide Ad-Pass summary metrics
+    const [summaryRes, countRes] = await Promise.all([
+      db.query(`
+        SELECT 
+          COUNT(*) as total_quests,
+          COUNT(CASE WHEN unlocked_until IS NOT NULL AND unlocked_until > NOW() THEN 1 END) as active_passes,
+          COALESCE(SUM(current_count), 0) as total_ads_watched,
+          COUNT(CASE WHEN user_id IS NULL THEN 1 END) as guest_quests,
+          COUNT(CASE WHEN user_id IS NOT NULL THEN 1 END) as user_quests
+        FROM ad_pass_quests
+      `),
+      db.query(`
+        SELECT COUNT(*) as count 
+        FROM ad_pass_quests q
+        LEFT JOIN users u ON q.user_id = u.id
+        WHERE ${whereClause}
+      `, params)
+    ]);
+
+    const total = parseInt(countRes.rows[0]?.count, 10) || 0;
+    const dataParams = [...params, parseInt(limit, 10), offset];
+
+    const dataRes = await db.query(`
+      SELECT 
+        q.id,
+        q.user_id,
+        q.visitor_id,
+        q.current_count,
+        q.target_count,
+        q.reward_hours,
+        q.unlocked_until,
+        q.last_ad_completed_at,
+        q.created_at,
+        q.updated_at,
+        u.name as user_name,
+        u.email as user_email,
+        u.avatar as user_avatar,
+        u.role as user_role,
+        CASE 
+          WHEN q.unlocked_until IS NOT NULL AND q.unlocked_until > NOW() THEN TRUE 
+          ELSE FALSE 
+        END as is_unlocked,
+        CASE 
+          WHEN q.unlocked_until IS NOT NULL AND q.unlocked_until > NOW() THEN 
+            ROUND(EXTRACT(EPOCH FROM (q.unlocked_until - NOW())) / 3600.0, 1)
+          ELSE 0 
+        END as hours_remaining
+      FROM ad_pass_quests q
+      LEFT JOIN users u ON q.user_id = u.id
+      WHERE ${whereClause}
+      ORDER BY 
+        CASE WHEN q.unlocked_until IS NOT NULL AND q.unlocked_until > NOW() THEN 0 ELSE 1 END,
+        q.updated_at DESC
+      LIMIT $${dataParams.length - 1} OFFSET $${dataParams.length}
+    `, dataParams);
+
+    res.json({
+      quests: dataRes.rows,
+      summary: summaryRes.rows[0] || {},
+      total,
+      page: parseInt(page, 10),
+      totalPages: Math.ceil(total / parseInt(limit, 10))
+    });
+  } catch (error) {
+    console.error('[Admin Ad-Pass Quests] Error:', error);
+    res.status(500).json({ message: 'Failed to retrieve Ad-Pass viewer quests.' });
+  }
+});
+
+// 12. Delete / Reset an Ad-Pass Quest
+router.delete('/vip/ad-pass/quests/:id', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM ad_pass_quests WHERE id = $1', [id]);
+    res.json({ success: true, message: 'Ad-Pass quest record removed successfully.' });
+  } catch (error) {
+    console.error('[Admin Delete Ad-Pass Quest] Error:', error);
+    res.status(500).json({ message: 'Failed to remove quest record.' });
+  }
+});
+
 module.exports = router;
 

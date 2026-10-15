@@ -68,6 +68,14 @@ const AdminVipTab = ({ token }) => {
   const [editingUserId, setEditingUserId] = useState(null);
   const [grantDuration, setGrantDuration] = useState(30);
 
+  // 4. Live Ad-Pass Quests & Viewers Activity State
+  const [quests, setQuests] = useState([]);
+  const [questSummary, setQuestSummary] = useState(null);
+  const [loadingQuests, setLoadingQuests] = useState(false);
+  const [questFilter, setQuestFilter] = useState('all');
+  const [questSearch, setQuestSearch] = useState('');
+  const [debouncedQuestSearch, setDebouncedQuestSearch] = useState('');
+
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:10000'}/api` : 'https://aurawatch-1.onrender.com/api')}`;
 
   // Debounce search inputs to eliminate typing lag
@@ -84,6 +92,13 @@ const AdminVipTab = ({ token }) => {
     }, 250);
     return () => clearTimeout(timer);
   }, [userSearch]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuestSearch(questSearch);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [questSearch]);
 
   // Fetch Overview Stats
   const fetchOverview = async () => {
@@ -113,6 +128,42 @@ const AdminVipTab = ({ token }) => {
         });
       }
     } catch (_) {}
+  };
+
+  // Fetch Live Ad-Pass Viewer Quests
+  const fetchQuests = async () => {
+    setLoadingQuests(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/vip/ad-pass/quests?filter=${questFilter}&search=${encodeURIComponent(debouncedQuestSearch)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setQuests(data.quests || []);
+        if (data.summary) setQuestSummary(data.summary);
+      }
+    } catch (_) {}
+    setLoadingQuests(false);
+  };
+
+  // Reset or Delete Ad-Pass Quest
+  const handleDeleteQuest = async (id) => {
+    if (!window.confirm('Reset this viewer quest record?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/admin/vip/ad-pass/quests/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        showToast('Ad-Pass quest record reset successfully.', 'success');
+        fetchQuests();
+        fetchOverview();
+      } else {
+        showToast('Failed to reset quest record.', 'error');
+      }
+    } catch (_) {
+      showToast('Network error resetting quest.', 'error');
+    }
   };
 
   // Fetch Codes
@@ -150,10 +201,17 @@ const AdminVipTab = ({ token }) => {
   }, [token]);
 
   useEffect(() => {
-    if (subTab === 'ad_pass') fetchAdPassSettings();
+    if (subTab === 'ad_pass') {
+      fetchAdPassSettings();
+      fetchQuests();
+    }
     if (subTab === 'codes') fetchCodes();
     if (subTab === 'users') fetchVipUsers();
   }, [subTab]);
+
+  useEffect(() => {
+    if (subTab === 'ad_pass') fetchQuests();
+  }, [questFilter, debouncedQuestSearch]);
 
   useEffect(() => {
     if (subTab === 'codes') fetchCodes();
@@ -373,6 +431,7 @@ const AdminVipTab = ({ token }) => {
 
       {/* 1. AD-PASS QUESTS & TIERS SUBTAB */}
       {subTab === 'ad_pass' && (
+        <>
         <div className={styles.sectionCard}>
           <div className={styles.sectionHeader}>
             <div>
@@ -482,6 +541,207 @@ const AdminVipTab = ({ token }) => {
             </button>
           </form>
         </div>
+
+        {/* Live Ad-Pass Viewers & Claim Activity Section */}
+        <div className={styles.sectionCard} style={{ marginTop: '20px' }}>
+          <div className={styles.sectionHeader} style={{ flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h3 className={styles.sectionTitle}>Live Ad-Pass Viewers & Claim Activity</h3>
+              <p className={styles.sectionDesc}>
+                Real-time monitor of visitors and registered users watching sponsor ads, claim counts, and active VIP pass durations.
+              </p>
+            </div>
+            <button
+              type="button"
+              className={styles.refreshBtn}
+              onClick={fetchQuests}
+              disabled={loadingQuests}
+              title="Refresh quest activity"
+            >
+              <RefreshCw size={14} className={loadingQuests ? styles.spinner : ''} />
+            </button>
+          </div>
+
+          {/* Quick Metrics Bar */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+            <div style={{ background: 'rgba(255, 183, 3, 0.08)', border: '1px solid rgba(255, 183, 3, 0.25)', borderRadius: '8px', padding: '8px 14px', flex: '1 1 140px' }}>
+              <div style={{ fontSize: '11px', color: '#ffb703', fontWeight: '700', textTransform: 'uppercase' }}>Active VIP Passes</div>
+              <div style={{ fontSize: '18px', fontWeight: '800', color: '#fff', marginTop: '2px' }}>{questSummary?.active_passes ?? 0}</div>
+            </div>
+            <div style={{ background: 'rgba(0, 113, 235, 0.08)', border: '1px solid rgba(0, 113, 235, 0.25)', borderRadius: '8px', padding: '8px 14px', flex: '1 1 140px' }}>
+              <div style={{ fontSize: '11px', color: '#24a1de', fontWeight: '700', textTransform: 'uppercase' }}>Total Ads Watched</div>
+              <div style={{ fontSize: '18px', fontWeight: '800', color: '#fff', marginTop: '2px' }}>{questSummary?.total_ads_watched ?? 0}</div>
+            </div>
+            <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '8px', padding: '8px 14px', flex: '1 1 140px' }}>
+              <div style={{ fontSize: '11px', color: '#10b981', fontWeight: '700', textTransform: 'uppercase' }}>Total Quests Started</div>
+              <div style={{ fontSize: '18px', fontWeight: '800', color: '#fff', marginTop: '2px' }}>{questSummary?.total_quests ?? 0}</div>
+            </div>
+            <div style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '8px 14px', flex: '1 1 140px' }}>
+              <div style={{ fontSize: '11px', color: '#aaa', fontWeight: '700', textTransform: 'uppercase' }}>Guests vs Users</div>
+              <div style={{ fontSize: '15px', fontWeight: '800', color: '#fff', marginTop: '2px' }}>
+                {questSummary?.guest_quests ?? 0} Guests / {questSummary?.user_quests ?? 0} Users
+              </div>
+            </div>
+          </div>
+
+          {/* Filter and Search Bar */}
+          <div style={{ marginBottom: '14px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'all', label: 'All Viewers' },
+                { id: 'active', label: 'Active Passes' },
+                { id: 'in_progress', label: 'In Progress' },
+                { id: 'guests', label: 'Guests Only' },
+                { id: 'users', label: 'Registered Users' }
+              ].map(f => (
+                <button
+                  key={f.id}
+                  type="button"
+                  style={{
+                    background: questFilter === f.id ? 'rgba(255, 183, 3, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                    border: questFilter === f.id ? '1px solid #ffb703' : '1px solid rgba(255, 255, 255, 0.1)',
+                    color: questFilter === f.id ? '#ffb703' : '#aaa',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setQuestFilter(f.id)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ minWidth: '240px', position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: '#777' }} />
+              <input
+                type="text"
+                className={styles.searchInput}
+                placeholder="Search user, email, or visitor ID..."
+                value={questSearch}
+                onChange={e => setQuestSearch(e.target.value)}
+                style={{ width: '100%', paddingLeft: '32px', boxSizing: 'border-box' }}
+              />
+            </div>
+          </div>
+
+          {/* Data Table */}
+          {loadingQuests ? (
+            <div style={{ padding: '36px', textAlign: 'center', color: '#888' }}>
+              <Loader2 size={24} className={styles.spinner} style={{ margin: '0 auto 8px' }} />
+              <div>Loading viewer quests...</div>
+            </div>
+          ) : quests.length === 0 ? (
+            <div style={{ padding: '36px', textAlign: 'center', color: '#888', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+              No ad-pass viewer activity found matching current filter.
+            </div>
+          ) : (
+            <div className={styles.tableWrapper}>
+              <table className={styles.dataTable}>
+                <thead>
+                  <tr>
+                    <th>Viewer</th>
+                    <th>Ads Claimed</th>
+                    <th>VIP Status</th>
+                    <th>Last Ad Watched</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {quests.map(q => {
+                    const isUnlocked = q.is_unlocked;
+                    const target = q.target_count || 5;
+                    const pct = Math.min(100, Math.round(((q.current_count || 0) / target) * 100));
+
+                    return (
+                      <tr key={q.id}>
+                        <td>
+                          {q.user_name ? (
+                            <div className={styles.userCell}>
+                              <div style={{ fontWeight: '700', color: '#fff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span>{q.user_name}</span>
+                                <span style={{ fontSize: '10px', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '1px 5px', borderRadius: '4px' }}>
+                                  User #{q.user_id}
+                                </span>
+                              </div>
+                              <span className={styles.subText}>{q.user_email}</span>
+                            </div>
+                          ) : (
+                            <div className={styles.userCell}>
+                              <div style={{ fontWeight: '700', color: '#ffb703', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontSize: '10px', background: 'rgba(255, 183, 3, 0.15)', border: '1px solid rgba(255, 183, 3, 0.3)', padding: '1px 6px', borderRadius: '4px', color: '#ffb703' }}>
+                                  Guest Visitor
+                                </span>
+                                <code style={{ fontSize: '12px', color: '#ccc' }}>
+                                  {q.visitor_id ? `${q.visitor_id.slice(0, 12)}...` : 'Anonymous'}
+                                </code>
+                              </div>
+                              <span className={styles.subText} title={q.visitor_id}>
+                                Device ID: {q.visitor_id || 'N/A'}
+                              </span>
+                            </div>
+                          )}
+                        </td>
+
+                        <td style={{ minWidth: '150px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '700' }}>
+                              <span style={{ color: '#ffb703' }}>{q.current_count || 0} Ads</span>
+                              <span style={{ color: '#888' }}>Target: {target}</span>
+                            </div>
+                            <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ width: `${pct}%`, height: '100%', background: isUnlocked ? '#10b981' : '#ffb703', borderRadius: '3px' }} />
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          {isUnlocked ? (
+                            <span className={`${styles.statusPill} ${styles.approved}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <Check size={11} />
+                              <span>Active ({q.hours_remaining}h left)</span>
+                            </span>
+                          ) : (q.current_count > 0) ? (
+                            <span className={`${styles.statusPill} ${styles.pending}`}>
+                              In Progress ({q.current_count}/{target})
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '11px', color: '#777', padding: '3px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.04)' }}>
+                              Expired / Not Started
+                            </span>
+                          )}
+                        </td>
+
+                        <td>
+                          <div style={{ fontSize: '12px', color: '#ccc' }}>
+                            {q.last_ad_completed_at ? new Date(q.last_ad_completed_at).toLocaleString() : 'N/A'}
+                          </div>
+                          <div className={styles.subText}>
+                            Created: {new Date(q.created_at).toLocaleDateString()}
+                          </div>
+                        </td>
+
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            type="button"
+                            className={styles.deleteBtn}
+                            onClick={() => handleDeleteQuest(q.id)}
+                            title="Reset this quest record"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        </>
       )}
 
       {/* 2. VIP GIVEAWAY KEYS MANAGER */}

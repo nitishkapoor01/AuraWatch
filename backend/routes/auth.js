@@ -13,9 +13,75 @@ const LOCKOUT_DURATION_MINUTES = 15;
 // Helper to normalize security answer
 const normalizeAnswer = (answer) => answer.toLowerCase().trim();
 
+// Seamlessly sync any guest Ad-Pass quest & active VIP status to registered user account
+async function syncGuestVipQuest(userId, visitorId) {
+  if (!userId || !visitorId) return;
+  try {
+    const cleanVid = String(visitorId).trim().slice(0, 100);
+    if (!cleanVid) return;
+
+    // Find any guest quest record for this visitor
+    const questRes = await db.query(
+      'SELECT * FROM ad_pass_quests WHERE visitor_id = $1 AND user_id IS NULL ORDER BY updated_at DESC LIMIT 1',
+      [cleanVid]
+    );
+
+    if (questRes.rows.length > 0) {
+      const guestQuest = questRes.rows[0];
+
+      // Check if user already has an existing quest row
+      const userQuestRes = await db.query(
+        'SELECT * FROM ad_pass_quests WHERE user_id = $1',
+        [userId]
+      );
+
+      if (userQuestRes.rows.length === 0) {
+        // Link the guest quest directly to the user
+        await db.query('UPDATE ad_pass_quests SET user_id = $1 WHERE id = $2', [userId, guestQuest.id]);
+      } else {
+        // Merge progress: take whichever has higher watch count or longer expiry
+        const userQuest = userQuestRes.rows[0];
+        const higherCount = Math.max(userQuest.current_count || 0, guestQuest.current_count || 0);
+        let bestExpiry = userQuest.unlocked_until;
+        if (guestQuest.unlocked_until) {
+          if (!bestExpiry || new Date(guestQuest.unlocked_until) > new Date(bestExpiry)) {
+            bestExpiry = guestQuest.unlocked_until;
+          }
+        }
+        await db.query(
+          'UPDATE ad_pass_quests SET current_count = $1, unlocked_until = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+          [higherCount, bestExpiry, userQuest.id]
+        );
+      }
+
+      // If quest unlocked pass is currently active, activate user VIP membership
+      if (guestQuest.unlocked_until && new Date(guestQuest.unlocked_until) > new Date()) {
+        const userRow = await db.query('SELECT is_premium, premium_expires_at FROM users WHERE id = $1', [userId]);
+        const user = userRow.rows[0];
+        let targetExpiry = new Date(guestQuest.unlocked_until);
+        if (user?.is_premium && user?.premium_expires_at && new Date(user.premium_expires_at) > targetExpiry) {
+          targetExpiry = new Date(user.premium_expires_at);
+        }
+        await db.query(
+          `UPDATE users
+           SET is_premium = TRUE,
+               premium_expires_at = $1,
+               premium_plan = 'VIP Ad-Pass',
+               premium_activated_by = 'ad_quest'
+           WHERE id = $2`,
+          [targetExpiry, userId]
+        );
+      }
+    }
+  } catch (err) {
+    console.error('[Sync Guest VIP Quest] Non-fatal error:', err);
+  }
+}
+
 // Register
 router.post('/register', async (req, res) => {
   const { name, email, password, confirmPassword, securityQuestion, securityAnswer } = req.body;
+  const visitorId = req.headers['x-visitor-id'] || req.body.visitor_id || null;
 
   if (!name || !email || !password || !confirmPassword || !securityQuestion || !securityAnswer) {
     return res.status(400).json({ message: 'All fields are required.' });
@@ -37,7 +103,6 @@ router.post('/register', async (req, res) => {
 
   // Check if email already exists
   const existingResult = await db.query('SELECT id FROM users WHERE email = $1', [cleanEmail]);
-  console.log('[DEBUG] Existing check for', cleanEmail, 'Result rows:', existingResult.rows.length);
   if (existingResult.rows.length > 0) {
     return res.status(409).json({ message: 'An account with this email already exists.' });
   }
@@ -51,6 +116,15 @@ router.post('/register', async (req, res) => {
       [name.trim(), cleanEmail, passwordHash, securityQuestion.trim(), answerHash, JSON.stringify({})]
     );
     const newUserId = result.rows[0].id;
+
+    // Seamlessly sync any guest quest / VIP pass they earned before signing up
+    if (visitorId) {
+      await syncGuestVipQuest(newUserId, visitorId);
+    }
+
+    // Fetch refreshed user status
+    const freshUserRes = await db.query('SELECT is_premium, premium_expires_at, premium_plan FROM users WHERE id = $1', [newUserId]);
+    const freshUser = freshUserRes.rows[0];
 
     const token = jwt.sign(
       { id: newUserId, email: cleanEmail, name: name.trim() },
@@ -70,9 +144,9 @@ router.post('/register', async (req, res) => {
         is_super_admin: false,
         admin_permissions: { all: false },
         ui_preferences: {},
-        is_premium: false,
-        premium_expires_at: null,
-        premium_plan: 'free'
+        is_premium: freshUser?.is_premium || false,
+        premium_expires_at: freshUser?.premium_expires_at || null,
+        premium_plan: freshUser?.premium_plan || 'free'
       }
     });
   } catch (error) {
@@ -143,8 +217,17 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    let isPremium = user.is_premium || false;
-    const expiresAt = user.premium_expires_at;
+    const visitorId = req.headers['x-visitor-id'] || req.body.visitor_id || null;
+    if (visitorId) {
+      await syncGuestVipQuest(user.id, visitorId);
+    }
+
+    // Refresh user VIP status after possible guest sync
+    const freshUserRes = await db.query('SELECT is_premium, premium_expires_at, premium_plan FROM users WHERE id = $1', [user.id]);
+    const freshUser = freshUserRes.rows[0] || user;
+
+    let isPremium = freshUser.is_premium || false;
+    let expiresAt = freshUser.premium_expires_at;
     if (isPremium && expiresAt && new Date(expiresAt) < new Date()) {
       isPremium = false;
       await db.query('UPDATE users SET is_premium = FALSE WHERE id = $1', [user.id]).catch(() => {});
@@ -164,7 +247,7 @@ router.post('/login', async (req, res) => {
         ui_preferences: user.ui_preferences || {},
         is_premium: isPremium,
         premium_expires_at: expiresAt,
-        premium_plan: user.premium_plan || 'free'
+        premium_plan: freshUser.premium_plan || 'free'
       }
     });
   } catch (error) {

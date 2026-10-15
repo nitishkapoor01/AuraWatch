@@ -220,12 +220,13 @@ router.post('/ad-pass/complete-ad', optionalAuth, async (req, res) => {
     const now = new Date();
 
     if (quest) {
-      // Abuse prevention: cooldown between ad completions (min 8 seconds)
+      // Abuse prevention: cooldown between ad completions (min 6 seconds)
       if (quest.last_ad_completed_at) {
         const timeSince = (now.getTime() - new Date(quest.last_ad_completed_at).getTime()) / 1000;
-        if (timeSince < 8) {
+        if (timeSince < 6) {
           await client.query('ROLLBACK');
-          return res.status(429).json({ message: 'Please wait until the ad finishes playing.' });
+          const waitSec = Math.ceil(6 - timeSince);
+          return res.status(429).json({ message: `Please wait ${waitSec}s before claiming the next ad.` });
         }
       }
     } else {
