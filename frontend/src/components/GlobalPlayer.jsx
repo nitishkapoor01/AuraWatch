@@ -67,10 +67,32 @@ const GlobalPlayer = () => {
         const savedToken = localStorage.getItem('aurawatch_token') || token;
         const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
 
-        const res = await fetch(`${baseUrl}/ads/config`, { headers });
+        let res = null;
+        try {
+          res = await fetch(`${baseUrl}/ads/config`, { headers });
+        } catch (_) {}
 
-        if (res.ok && isMounted) {
-          const data = await res.json();
+        let data = null;
+        if (res && res.ok) {
+          try { data = await res.json(); } catch (_) {}
+        }
+        
+        // If config endpoint failed, use hardened HilltopAds VAST default so ads never fail
+        if (!data) {
+          data = {
+            config: {
+              enabled: true,
+              pre_roll: {
+                enabled: true,
+                type: 'vast',
+                vast_url: 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH',
+                timer_seconds: 10
+              }
+            }
+          };
+        }
+
+        if (isMounted) {
           if (data.is_premium || data.skipAdsTimer || !data.config?.enabled) {
             setPreRollActive(false);
             return;
@@ -94,9 +116,14 @@ const GlobalPlayer = () => {
                   const proxyUrl = `${baseUrl}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`;
                   const pRes = await fetch(proxyUrl);
                   if (pRes.ok) xmlText = await pRes.text();
-                } catch (_) {
-                  const vRes = await fetch(vastUrl);
-                  if (vRes.ok) xmlText = await vRes.text();
+                } catch (_) {}
+
+                // If proxy didn't succeed, fetch directly from client
+                if (!xmlText) {
+                  try {
+                    const vRes = await fetch(vastUrl);
+                    if (vRes.ok) xmlText = await vRes.text();
+                  } catch (_) {}
                 }
 
                 if (xmlText && isMounted) {

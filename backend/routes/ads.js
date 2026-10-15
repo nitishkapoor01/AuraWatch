@@ -117,10 +117,29 @@ router.get('/video-proxy', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
 
     const { Readable } = require('stream');
-    Readable.fromWeb(response.body).pipe(res);
+    const nodeStream = Readable.fromWeb(response.body);
+
+    nodeStream.on('error', (streamErr) => {
+      // Client disconnected, closed player modal, or skipped ad — safely ignore
+      if (!res.headersSent) {
+        try { res.status(500).end(); } catch (_) {}
+      }
+    });
+
+    req.on('close', () => {
+      try { nodeStream.destroy(); } catch (_) {}
+    });
+
+    res.on('error', () => {
+      try { nodeStream.destroy(); } catch (_) {}
+    });
+
+    nodeStream.pipe(res);
   } catch (err) {
     console.error('Video proxy error:', err);
-    res.status(500).json({ error: 'Failed to proxy video' });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to proxy video' });
+    }
   }
 });
 
@@ -208,8 +227,28 @@ router.get('/config', optionalAuth, async (req, res) => {
       skipAdsTimer: !!skipAdsTimer
     });
   } catch (error) {
-    console.error('Failed to get public ads config:', error);
-    res.status(500).json({ error: 'Failed to retrieve ads config' });
+    console.error('Failed to get public ads config, serving default fallback:', error);
+    res.json({
+      config: {
+        enabled: true,
+        download_modal: { enabled: false, timer_seconds: 5 },
+        movie_detail: { enabled: false },
+        search_grid: { enabled: false },
+        social_bar: { enabled: false },
+        direct_link: {
+          enabled: true,
+          url: 'https://plump-plastic.com/b.3RVK0pP/3EpIvPbnm/VIJBZWDe0K3kNkT/IVx/M/T/AF5tL/TGcy1/Mjj/EGxhMOTJMT'
+        },
+        pre_roll: {
+          enabled: true,
+          type: 'vast',
+          vast_url: 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH',
+          timer_seconds: 10,
+          fallback_banner: false
+        }
+      },
+      skipAdsTimer: false
+    });
   }
 });
 
