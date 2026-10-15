@@ -18,13 +18,15 @@ const SocialBarAd = () => {
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
         const token = localStorage.getItem('aurawatch_token');
+        const visitorId = localStorage.getItem('trackingVisitorId') || '';
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        if (visitorId) headers['x-visitor-id'] = visitorId;
 
-        const res = await fetch(`${baseUrl}/ads/config`, { headers });
+        const res = await fetch(`${baseUrl}/ads/config?visitor_id=${encodeURIComponent(visitorId)}`, { headers });
         if (!res.ok || !isMounted) return;
 
         const data = await res.json();
-        if (data.is_premium) return;
+        if (data.is_premium || data.skipAdsTimer) return;
         const config = data?.config;
 
         if (config?.enabled && config?.social_bar?.enabled && config?.social_bar?.script_url) {

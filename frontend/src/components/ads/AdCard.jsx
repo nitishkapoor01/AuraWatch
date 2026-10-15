@@ -30,12 +30,14 @@ const AdCard = ({ style, compact = false }) => {
           (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
 
         const token = localStorage.getItem('aurawatch_token');
+        const visitorId = localStorage.getItem('trackingVisitorId') || '';
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        if (visitorId) headers['x-visitor-id'] = visitorId;
 
-        const res = await fetch(`${baseUrl}/ads/config`, { headers });
+        const res = await fetch(`${baseUrl}/ads/config?visitor_id=${encodeURIComponent(visitorId)}`, { headers });
         if (res.ok && isMounted) {
           const data = await res.json();
-          if (data.is_premium || (data.config && !data.config.enabled)) {
+          if (data.is_premium || data.skipAdsTimer || (data.config && !data.config.enabled)) {
             setAdConfig(null);
           } else if (data.config && data.config.search_grid) {
             setAdConfig(data.config.search_grid);
@@ -45,7 +47,16 @@ const AdCard = ({ style, compact = false }) => {
     };
 
     fetchConfig();
-    return () => { isMounted = false; };
+
+    const onVipUnlocked = () => {
+      if (isMounted) setAdConfig(null);
+    };
+    window.addEventListener('aurawatch_vip_unlocked', onVipUnlocked);
+
+    return () => { 
+      isMounted = false; 
+      window.removeEventListener('aurawatch_vip_unlocked', onVipUnlocked);
+    };
   }, [user]);
 
   // Compute responsive scale factor to fit 300px ad inside card bounds

@@ -121,9 +121,14 @@ const MovieDetail = () => {
     const fetchGlobalSettings = async () => {
       try {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
+        const visitorId = localStorage.getItem('trackingVisitorId') || '';
+        const savedToken = localStorage.getItem('aurawatch_token') || token;
+        const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
+        if (visitorId) headers['x-visitor-id'] = visitorId;
+
         const [skipRes, adsRes] = await Promise.all([
           fetch(`${baseUrl}/settings/skip_ads_timer`),
-          fetch(`${baseUrl}/ads/config`)
+          fetch(`${baseUrl}/ads/config?visitor_id=${encodeURIComponent(visitorId)}`, { headers })
         ]);
         if (skipRes.ok) {
           const data = await skipRes.json();
@@ -131,7 +136,7 @@ const MovieDetail = () => {
         }
         if (adsRes.ok) {
           const adsData = await adsRes.json();
-          if (adsData.config?.enabled === false) {
+          if (adsData.is_premium || adsData.config?.enabled === false) {
             setDirectLinkUrl('');
             setGlobalSkipAds(true);
           } else {
@@ -157,7 +162,14 @@ const MovieDetail = () => {
     setSeasons([]);
     setEpisodes([]);
     setSelectedSeason(1);
-  }, [id, type]);
+
+    const onVipUnlocked = () => {
+      setGlobalSkipAds(true);
+      setDirectLinkUrl('');
+    };
+    window.addEventListener('aurawatch_vip_unlocked', onVipUnlocked);
+    return () => window.removeEventListener('aurawatch_vip_unlocked', onVipUnlocked);
+  }, [id, type, token]);
 
   // Set current viewing movie for live feed tracking
   useEffect(() => {
