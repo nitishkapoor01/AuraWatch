@@ -48,7 +48,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
 
   // Dedicated In-Modal Ad Player State
   const [isPlayingAd, setIsPlayingAd] = useState(false);
-  const [adCountdown, setAdCountdown] = useState(10);
+  const [adCountdown, setAdCountdown] = useState(15);
   const [adProgressPercent, setAdProgressPercent] = useState(0);
   const [adCanClaim, setAdCanClaim] = useState(false);
   const [adIsMuted, setAdIsMuted] = useState(false); // Default unmuted
@@ -128,12 +128,10 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     };
   }, []);
 
-  if (!isOpen) return null;
-
   // Voluntary Ad Watch
   const handleStartSponsorAd = async () => {
     setIsPlayingAd(true);
-    setAdCountdown(10);
+    setAdCountdown(15);
     setAdCanClaim(false);
     setAdSuccessMsg('');
     setLoadingAdVideo(true);
@@ -175,12 +173,12 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
     setLoadingAdVideo(false);
     setAdInlineMsg({ text: '', type: '' });
 
-    let remaining = 10;
+    let remaining = 15;
     if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
     countdownTimerRef.current = setInterval(() => {
       remaining -= 1;
       setAdCountdown(Math.max(0, remaining));
-      setAdProgressPercent(prev => Math.max(prev, Math.min(100, Math.round(((10 - remaining) / 10) * 100))));
+      setAdProgressPercent(prev => Math.max(prev, Math.min(100, Math.round(((15 - remaining) / 15) * 100))));
       if (remaining <= 0) {
         clearInterval(countdownTimerRef.current);
         setAdProgressPercent(100);
@@ -238,9 +236,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   };
 
   // Connect ref so countdown interval can cleanly trigger auto-claim
-  useEffect(() => {
-    claimAdRef.current = handleClaimAdProgress;
-  });
+  claimAdRef.current = handleClaimAdProgress;
 
   const handleRedeemCode = async (e) => {
     e.preventDefault();
@@ -297,6 +293,8 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
   const currentAds = questProgress.current_count || 0;
   const nextTarget = questProgress.target_count || tiers[0].target_ads;
   const progressPercent = Math.min(100, Math.round((currentAds / nextTarget) * 100));
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -421,7 +419,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                       Watch {tiers[0]?.target_ads || 8} Ads for 24h Free VIP Pass
                     </h3>
                     <p className={styles.questSubtitle}>
-                      Watch 10-second sponsor ads right here to turn off all video pre-rolls, banners, and popups.
+                      Watch 15-second sponsor ads right here to turn off all video pre-rolls, banners, and popups.
                     </p>
                   </div>
 
@@ -499,8 +497,8 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                             }}
                             onTimeUpdate={(e) => {
                               const ct = e.target.currentTime;
-                              const dur = e.target.duration || 10;
-                              const pct = Math.min(100, Math.round((ct / Math.min(dur, 10)) * 100));
+                              const dur = e.target.duration || 15;
+                              const pct = Math.min(100, Math.round((ct / Math.min(dur, 15)) * 100));
                               setAdProgressPercent(prev => Math.max(prev, pct));
                             }}
                             onError={(e) => {
@@ -517,7 +515,7 @@ const VipModal = ({ isOpen, onClose, onRequireLogin }) => {
                               Sponsor Ad Playing...
                             </div>
                             <div style={{ color: '#888', fontSize: '11px', marginTop: '3px' }}>
-                              Reward activates when 10-second timer completes.
+                              Reward activates when 15-second timer completes.
                             </div>
                           </div>
                         )}
