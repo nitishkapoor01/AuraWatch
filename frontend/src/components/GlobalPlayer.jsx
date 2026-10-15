@@ -45,6 +45,8 @@ const GlobalPlayer = () => {
     setAdVideoStarted(false);
     setAdProgressPercent(0);
     setVastVideo(null);
+    setPreRollActive(false);
+    setIsResolvingVast(false);
 
     // Skip ads entirely for VIP members
     if (isAdExempt) {
@@ -72,7 +74,7 @@ const GlobalPlayer = () => {
 
           const preRoll = data.config?.pre_roll;
           if (data.config?.enabled && preRoll?.enabled) {
-            const timerSecs = Math.max(3, preRoll.timer_seconds || 5);
+            const timerSecs = Math.max(3, preRoll.timer_seconds || 8);
             setPreRollConfig(preRoll);
             setPreRollSeconds(timerSecs);
             setPreRollActive(true);
@@ -108,7 +110,8 @@ const GlobalPlayer = () => {
                   const clickThrough = clickMatch ? clickMatch[1].trim() : '';
 
                   if (foundVideo) {
-                    setVastVideo({ url: foundVideo, clickThrough, impressions: impMatches });
+                    const proxiedVideo = `${baseUrl}/ads/video-proxy?url=${encodeURIComponent(foundVideo)}`;
+                    setVastVideo({ url: proxiedVideo, clickThrough, impressions: impMatches });
                     setIsResolvingVast(false);
                   } else {
                     console.warn('No video found in VAST XML, advancing to stream');
@@ -413,12 +416,15 @@ const GlobalPlayer = () => {
             {vastVideo?.url ? (
               <div className={styles.ytVideoWrapper}>
                 <video
-                  key={vastVideo.url}
+                  key={`${vastVideo.url}_${movieData?._playTimestamp || Date.now()}`}
                   src={vastVideo.url}
                   autoPlay
                   playsInline
                   muted={isMuted}
                   className={styles.ytVideoElement}
+                  onLoadedMetadata={(e) => {
+                    e.target.currentTime = 0;
+                  }}
                   onPlaying={() => {
                     setAdVideoStarted(true);
                     if (vastVideo.impressions?.length) {
@@ -429,7 +435,7 @@ const GlobalPlayer = () => {
                   }}
                   onTimeUpdate={(e) => {
                     const ct = e.target.currentTime;
-                    const requiredSecs = preRollConfig?.timer_seconds || 5;
+                    const requiredSecs = preRollConfig?.timer_seconds || 8;
                     const rem = Math.max(0, Math.ceil(requiredSecs - ct));
                     setPreRollSeconds(rem);
                     const dur = e.target.duration || requiredSecs;

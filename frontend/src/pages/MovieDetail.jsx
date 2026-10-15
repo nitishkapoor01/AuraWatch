@@ -318,18 +318,23 @@ const MovieDetail = () => {
   };
 
   const triggerSmartlink = () => {
-    const isAdExempt = user && (user.role === 'admin' || user.is_super_admin || user.is_premium);
-    if (isAdExempt || globalSkipAds || !directLinkUrl) return;
+    const isStaff = user && (user.role === 'admin' || user.is_super_admin || user.role === 'moderator');
+    const isVip = Boolean(user?.is_premium);
+    if (isVip || globalSkipAds || !directLinkUrl) return;
 
-    // Strict 1x per 24 hours frequency cap so user is never spammed
-    const lastPopTime = localStorage.getItem('aurawatch_last_popunder');
+    // Frequency capping:
+    // On localhost or for staff, allow trigger so you can test and verify ads anytime!
+    // For free end-users on production, throttle to 1x per 15 minutes per session.
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const lastPopTime = sessionStorage.getItem('aurawatch_last_popunder');
     const now = Date.now();
-    if (lastPopTime && now - Number(lastPopTime) < 24 * 60 * 60 * 1000) {
-      return; // Already shown once in the last 24h
+    if (!isStaff && !isLocal && lastPopTime && now - Number(lastPopTime) < 15 * 60 * 1000) {
+      return; // Cooldown active for free users
     }
 
     try {
-      localStorage.setItem('aurawatch_last_popunder', String(now));
+      sessionStorage.setItem('aurawatch_last_popunder', String(now));
+      localStorage.removeItem('aurawatch_last_popunder');
       window.open(directLinkUrl, '_blank', 'noopener,noreferrer');
       
       const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');

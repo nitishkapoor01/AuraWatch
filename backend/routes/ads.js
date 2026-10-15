@@ -70,10 +70,52 @@ router.get('/vast-proxy', async (req, res) => {
     });
     const xml = await response.text();
     res.set('Content-Type', 'application/xml');
+    res.set('Access-Control-Allow-Origin', '*');
     res.send(xml);
   } catch (err) {
     console.error('VAST proxy error:', err);
     res.status(500).json({ error: 'Failed to proxy VAST' });
+  }
+});
+
+// Proxy endpoint to stream MP4 video bytes through first-party origin (bypasses adblockers)
+router.get('/video-proxy', async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url || !url.startsWith('https://')) {
+      return res.status(400).json({ error: 'Invalid Video URL' });
+    }
+
+    const headers = {
+      'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Referer': 'https://aurawatch.fun',
+      'Origin': 'https://aurawatch.fun'
+    };
+
+    if (req.headers.range) {
+      headers['Range'] = req.headers.range;
+    }
+
+    const response = await fetch(url, { headers });
+    
+    if (response.headers.get('content-range')) {
+      res.status(206);
+      res.set('Content-Range', response.headers.get('content-range'));
+      res.set('Accept-Ranges', 'bytes');
+    } else {
+      res.status(response.status);
+    }
+
+    res.set('Content-Type', response.headers.get('content-type') || 'video/mp4');
+    const cl = response.headers.get('content-length');
+    if (cl) res.set('Content-Length', cl);
+    res.set('Access-Control-Allow-Origin', '*');
+
+    const { Readable } = require('stream');
+    Readable.fromWeb(response.body).pipe(res);
+  } catch (err) {
+    console.error('Video proxy error:', err);
+    res.status(500).json({ error: 'Failed to proxy video' });
   }
 });
 
@@ -136,7 +178,7 @@ router.get('/config', optionalAuth, async (req, res) => {
         enabled: true,
         type: 'vast', // 'vast' | 'video' | 'banner'
         vast_url: 'https://loyal-product.com/dXmaFuz.dKG/N/vIZdG/UJ/Zexmc9Gu/ZpUql/k/PSTRcp1/Mtj_EUwsMJjgkFtJNzzYU/y/MOTUA-ztMKwH',
-        timer_seconds: 5,
+        timer_seconds: 8,
         fallback_banner: false
       }
     };

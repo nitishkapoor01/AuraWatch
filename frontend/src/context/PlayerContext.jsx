@@ -21,6 +21,7 @@ export const PlayerProvider = ({ children }) => {
     setPlayerState((prev) => ({
       ...prev,
       isOpen: false,
+      movieData: null,
     }));
   };
 
