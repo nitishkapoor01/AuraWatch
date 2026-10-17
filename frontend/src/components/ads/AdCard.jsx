@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import styles from './AdCard.module.css';
 
 const DEFAULT_CONFIG = {
-  enabled: false,
+  enabled: true,
   format: 'native',
   container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
   key: 'ccd684eb4f620dcc7303d2fce2577bae',
@@ -14,10 +14,12 @@ const DEFAULT_CONFIG = {
 
 const AdCard = ({ style, compact = false }) => {
   const { user } = useAuth();
-  const [adConfig, setAdConfig] = useState(null);
+  const [adConfig, setAdConfig] = useState(DEFAULT_CONFIG);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [scale, setScale] = useState(0.6);
   const cardRef = useRef(null);
   const impressionLoggedRef = useRef(false);
+  const cardIdRef = useRef(`ad-card-${Math.random().toString(36).substring(2, 9)}`);
 
   const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
   const isAdExempt = isAdmin || Boolean(user?.is_premium);
@@ -37,7 +39,7 @@ const AdCard = ({ style, compact = false }) => {
         const res = await fetch(`${baseUrl}/ads/config?visitor_id=${encodeURIComponent(visitorId)}`, { headers });
         if (res.ok && isMounted) {
           const data = await res.json();
-          if (data.is_premium || data.skipAdsTimer || (data.config && !data.config.enabled)) {
+          if (data.is_premium || data.skipAdsTimer || (data.config && data.config.enabled === false)) {
             setAdConfig(null);
           } else if (data.config && data.config.search_grid) {
             setAdConfig(data.config.search_grid);
@@ -85,6 +87,18 @@ const AdCard = ({ style, compact = false }) => {
     return () => ro.disconnect();
   }, [adConfig, compact]);
 
+  // Listen for fill message from iframe
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data?.type === 'AURA_CARD_FILLED' && event.data?.cardId === cardIdRef.current) {
+        setIsLoaded(true);
+        logImpression();
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const logImpression = async () => {
     if (impressionLoggedRef.current) return;
     impressionLoggedRef.current = true;
@@ -110,7 +124,7 @@ const AdCard = ({ style, compact = false }) => {
   };
 
   // Strictly hide ads from all administrators and VIP members
-  if (isAdExempt || !adConfig || !adConfig.enabled) {
+  if (isAdExempt || !adConfig || adConfig.enabled === false) {
     return null;
   }
 
@@ -119,6 +133,8 @@ const AdCard = ({ style, compact = false }) => {
   const scriptSrc = (adConfig.script_url || '').startsWith('//') 
     ? `https:${adConfig.script_url}` 
     : (adConfig.script_url || 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js');
+
+  const cardId = cardIdRef.current;
 
   const iframeDoc = isNative ? `
     <!DOCTYPE html>
@@ -150,6 +166,26 @@ const AdCard = ({ style, compact = false }) => {
       <body>
         <div id="${containerId}"></div>
         <script async="async" data-cfasync="false" src="${scriptSrc}"></script>
+        <script>
+          (function() {
+            var checks = 0;
+            var timer = setInterval(function() {
+              checks++;
+              var el = document.getElementById('${containerId}');
+              var filled = el && (
+                el.children.length > 0 ||
+                el.querySelector('img, a, iframe, div') ||
+                el.innerText.trim().length > 0 ||
+                el.offsetHeight > 20
+              );
+              if (filled) {
+                clearInterval(timer);
+                window.parent.postMessage({ type: 'AURA_CARD_FILLED', cardId: '${cardId}' }, '*');
+              }
+              if (checks > 35) { clearInterval(timer); }
+            }, 180);
+          })();
+        </script>
       </body>
     </html>
   ` : `
@@ -181,6 +217,20 @@ const AdCard = ({ style, compact = false }) => {
           };
         </script>
         <script type="text/javascript" src="${scriptSrc}"></script>
+        <script>
+          (function() {
+            var checks = 0;
+            var timer = setInterval(function() {
+              checks++;
+              var hasAd = document.querySelector('iframe, img, a');
+              if (hasAd || document.body.children.length > 2) {
+                clearInterval(timer);
+                window.parent.postMessage({ type: 'AURA_CARD_FILLED', cardId: '${cardId}' }, '*');
+              }
+              if (checks > 35) { clearInterval(timer); }
+            }, 180);
+          })();
+        </script>
       </body>
     </html>
   `;
@@ -189,7 +239,10 @@ const AdCard = ({ style, compact = false }) => {
     <div 
       ref={cardRef} 
       className={`${styles.adCard} ${compact ? styles.compact : ''}`}
-      style={style}
+      style={{
+        ...style,
+        display: isLoaded ? 'flex' : 'none' // Zero empty black box: only display if ad actually filled!
+      }}
     >
       <span className={styles.badge}>Ad</span>
       <div className={styles.frameWrapper}>
@@ -210,7 +263,6 @@ const AdCard = ({ style, compact = false }) => {
             className={styles.adFrame}
             scrolling="no"
             frameBorder="0"
-            onLoad={logImpression}
           />
         </div>
       </div>

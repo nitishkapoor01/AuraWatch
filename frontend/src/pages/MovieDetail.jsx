@@ -10,7 +10,7 @@ import { useButtonWarnings } from '../hooks/useButtonWarnings';
 import { useToast } from '../context/ToastContext';
 import { usePlayer } from '../context/PlayerContext';
 import HelpModal from '../components/profile/HelpModal';
-
+import AdBanner from '../components/ads/AdBanner';
 import PlaylistModal from '../components/PlaylistModal';
 
 const isTVType = (t) => {
@@ -344,7 +344,15 @@ const MovieDetail = () => {
     try {
       sessionStorage.setItem('aurawatch_last_popunder', String(now));
       localStorage.removeItem('aurawatch_last_popunder');
-      window.open(directLinkUrl, '_blank', 'noopener,noreferrer');
+
+      // Popunder/Direct link delivery via link click (bypasses browser popup blockers)
+      const link = document.createElement('a');
+      link.href = directLinkUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
       const baseUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` : 'https://aurawatch-1.onrender.com/api');
       fetch(`${baseUrl}/ads/impression`, {
@@ -1064,6 +1072,9 @@ const MovieDetail = () => {
 
 
 
+      {/* In-Content Banner Ad (Zero Black Box: only displays if ad script fills) */}
+      <AdBanner slot="movie_detail" />
+
       {/* More Like This */}
       <div className={`${styles.recommendations} recommendations`}>
         <Row title="More Like This" endpoint={`${id}/similar?type=${type}`} />
@@ -1087,7 +1098,10 @@ const MovieDetail = () => {
                 
                 {(!user || (!user.is_premium && user.role !== 'admin' && !user.is_super_admin)) && !globalSkipAds ? (
                   <>
-
+                    {/* ADVERTISEMENT SCRIPT (Zero Black Box) */}
+                    <div className={styles.adPlaceholder} style={{ padding: 0, background: 'transparent', border: 'none' }}>
+                      <AdBanner slot="download_modal" />
+                    </div>
                     
                     <div className={styles.timerBox}>
                       <Loader2 size={24} className={styles.spinner} />

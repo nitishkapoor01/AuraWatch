@@ -4,7 +4,7 @@ import styles from './AdBanner.module.css';
 
 const DEFAULT_CONFIGS = {
   download_modal: {
-    enabled: false,
+    enabled: true,
     format: 'native',
     container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 300,
@@ -13,7 +13,7 @@ const DEFAULT_CONFIGS = {
     script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
   },
   movie_detail: {
-    enabled: false,
+    enabled: true,
     format: 'native',
     container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 728,
@@ -22,7 +22,7 @@ const DEFAULT_CONFIGS = {
     script_url: 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js'
   },
   pre_roll: {
-    enabled: false,
+    enabled: true,
     format: 'native',
     container_id: 'container-ccd684eb4f620dcc7303d2fce2577bae',
     width: 300,
@@ -34,9 +34,11 @@ const DEFAULT_CONFIGS = {
 
 const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
   const { user } = useAuth();
-  const [adConfig, setAdConfig] = useState(customConfig || null);
+  const [adConfig, setAdConfig] = useState(customConfig || DEFAULT_CONFIGS[slot]);
   const [skipAds, setSkipAds] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const impressionLoggedRef = useRef(false);
+  const bannerIdRef = useRef(`ad-banner-${slot}-${Math.random().toString(36).substring(2, 9)}`);
 
   // Check if admin or VIP bypass applies
   const isAdmin = user && (user.role === 'admin' || user.is_super_admin);
@@ -60,8 +62,8 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
           if (data.is_premium || data.skipAdsTimer) {
             setSkipAds(true);
           }
-          if (data.is_premium || (data.config && !data.config.enabled)) {
-            setAdConfig(null); // All ads disabled
+          if (data.is_premium || (data.config && data.config.enabled === false)) {
+            setAdConfig(null);
           } else if (data.config && data.config[slot]) {
             setAdConfig(data.config[slot]);
           }
@@ -88,6 +90,18 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
       window.removeEventListener('aurawatch_vip_unlocked', onVipUnlocked);
     };
   }, [slot, customConfig, user]);
+
+  // Listen for iframe content detection
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data?.type === 'AURA_AD_FILLED' && event.data?.bannerId === bannerIdRef.current) {
+        setIsLoaded(true);
+        logImpression();
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [slot]);
 
   const logImpression = async () => {
     if (impressionLoggedRef.current) return;
@@ -116,16 +130,16 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
   };
 
   // Strictly hide ads from all administrators and VIP members
-  if (isAdExempt || skipAds || !adConfig || !adConfig.enabled) {
+  if (isAdExempt || skipAds || !adConfig || adConfig.enabled === false) {
     return null;
   }
 
   // Adjust dimensions for mobile responsiveness if leaderboard
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const isLeaderboard = adConfig.width === 728;
-  const renderWidth = (isMobile && isLeaderboard) ? 300 : adConfig.width;
-  const renderHeight = (isMobile && isLeaderboard) ? 250 : adConfig.height;
-  const renderKey = (isMobile && isLeaderboard) ? '8e9991a7d4aa3fef2ca28a617f3c1844' : adConfig.key;
+  const renderWidth = (isMobile && isLeaderboard) ? 300 : (adConfig.width || 300);
+  const renderHeight = (isMobile && isLeaderboard) ? 250 : (adConfig.height || 250);
+  const renderKey = (isMobile && isLeaderboard) ? '8e9991a7d4aa3fef2ca28a617f3c1844' : (adConfig.key || 'ccd684eb4f620dcc7303d2fce2577bae');
 
   const isNative = adConfig.format === 'native' || !!adConfig.container_id;
   const containerId = adConfig.container_id || 'container-ccd684eb4f620dcc7303d2fce2577bae';
@@ -133,7 +147,9 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
     ? `https:${adConfig.script_url}` 
     : (adConfig.script_url || 'https://pl31278426.profitableratecpmnetwork.com/ccd684eb4f620dcc7303d2fce2577bae/invoke.js');
 
-  // Build clean HTML doc for iframe isolation
+  const bannerId = bannerIdRef.current;
+
+  // Build clean HTML doc for iframe isolation with fill observer
   const iframeDoc = isNative ? `
     <!DOCTYPE html>
     <html>
@@ -164,6 +180,26 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
       <body>
         <div id="${containerId}"></div>
         <script async="async" data-cfasync="false" src="${scriptSrc}"></script>
+        <script>
+          (function() {
+            var checks = 0;
+            var timer = setInterval(function() {
+              checks++;
+              var el = document.getElementById('${containerId}');
+              var filled = el && (
+                el.children.length > 0 ||
+                el.querySelector('img, a, iframe, div') ||
+                el.innerText.trim().length > 0 ||
+                el.offsetHeight > 20
+              );
+              if (filled) {
+                clearInterval(timer);
+                window.parent.postMessage({ type: 'AURA_AD_FILLED', bannerId: '${bannerId}' }, '*');
+              }
+              if (checks > 35) { clearInterval(timer); }
+            }, 180);
+          })();
+        </script>
       </body>
     </html>
   ` : `
@@ -195,6 +231,20 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
           };
         </script>
         <script type="text/javascript" src="${scriptSrc}"></script>
+        <script>
+          (function() {
+            var checks = 0;
+            var timer = setInterval(function() {
+              checks++;
+              var hasAd = document.querySelector('iframe, img, a');
+              if (hasAd || document.body.children.length > 2) {
+                clearInterval(timer);
+                window.parent.postMessage({ type: 'AURA_AD_FILLED', bannerId: '${bannerId}' }, '*');
+              }
+              if (checks > 35) { clearInterval(timer); }
+            }, 180);
+          })();
+        </script>
       </body>
     </html>
   `;
@@ -202,7 +252,10 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
   return (
     <div 
       className={`${styles.adContainer} ${slot === 'download_modal' ? styles.downloadModalAd : slot === 'pre_roll' ? styles.preRollAd : styles.movieDetailAd}`}
-      style={{ width: `${renderWidth}px` }}
+      style={{ 
+        width: `${renderWidth}px`,
+        display: isLoaded ? 'flex' : 'none' // Zero empty black box: only display when ad actually rendered!
+      }}
     >
       <div className={styles.adBadge}>Sponsored</div>
       <iframe
@@ -213,7 +266,14 @@ const AdBanner = ({ slot = 'download_modal', customConfig = null }) => {
         className={styles.adFrame}
         scrolling="no"
         frameBorder="0"
-        onLoad={logImpression}
+        onLoad={() => {
+          // Fallback check after 2s: if iframe loaded without error and container has height
+          setTimeout(() => {
+            if (!isLoaded && impressionLoggedRef.current === false) {
+              // Non-blocking ping
+            }
+          }, 2000);
+        }}
       />
     </div>
   );

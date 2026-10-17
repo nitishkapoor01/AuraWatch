@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchWithCache } from '../utils/api';
 import styles from '../pages/Home.module.css';
+import AdCard from './ads/AdCard';
 
 const Row = ({ title, endpoint, compact = false, rowIndex }) => {
   const [movies, setMovies] = useState([]);
@@ -149,6 +150,16 @@ const Row = ({ title, endpoint, compact = false, rowIndex }) => {
                   <span className={styles.cardTitle}>{movie.title}</span>
                 </div>
               </Link>
+              {idx === 5 && !title.toLowerCase().includes('top 10') && (
+                <AdCard 
+                  compact={compact} 
+                  style={{
+                    flex: compact ? '0 0 calc(20% - 8px)' : undefined,
+                    aspectRatio: compact ? '16 / 9' : '2 / 3',
+                    minWidth: compact ? undefined : '150px'
+                  }} 
+                />
+              )}
             </React.Fragment>
           ))}
         </div>

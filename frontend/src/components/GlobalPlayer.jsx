@@ -42,6 +42,31 @@ const GlobalPlayer = () => {
   const [isResolvingVast, setIsResolvingVast] = useState(false);
   const [adPassStatus, setAdPassStatus] = useState(null);
   const completedRef = useRef(false);
+  const firedTrackingEventsRef = useRef(new Set());
+
+  // Helper to reliably fire VAST ad network tracking URLs via Beacon, fetch, or Image
+  const fireTrackingBeacon = (urls) => {
+    if (!urls || !urls.length) return;
+    urls.forEach(url => {
+      try {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(url);
+        } else {
+          fetch(url, { mode: 'no-cors', keepalive: true }).catch(() => {});
+        }
+      } catch (_) {
+        try { new Image().src = url; } catch (__) {}
+      }
+    });
+  };
+
+  const fireTrackEventOnce = (eventName) => {
+    if (firedTrackingEventsRef.current.has(eventName)) return;
+    firedTrackingEventsRef.current.add(eventName);
+    if (vastVideo?.trackingEvents && vastVideo.trackingEvents[eventName]) {
+      fireTrackingBeacon(vastVideo.trackingEvents[eventName]);
+    }
+  };
 
   // Helper to log first-party ad impression in real time for admin panel tracking
   const logFirstPartyImpression = (slot = 'pre_roll') => {
@@ -62,6 +87,7 @@ const GlobalPlayer = () => {
   // Skip ad instantly handler
   const handleSkipAd = (e) => {
     if (e) e.stopPropagation();
+    fireTrackEventOnce('skip');
     setPreRollActive(false);
     setIsResolvingVast(false);
     setVastVideo(null);
@@ -195,14 +221,14 @@ const GlobalPlayer = () => {
             if (vastUrl && preRoll.type !== 'banner' && preRoll.type !== 'video') {
               try {
                 let xmlText = '';
-                // 1. Try fast backend proxy
+                // 1. Try fast backend proxy (3500ms timeout for reliable delivery)
                 const proxyUrl = `${baseUrl}/ads/vast-proxy?url=${encodeURIComponent(vastUrl)}`;
-                const pRes = await fetchWithTimeout(proxyUrl, {}, 1200);
+                const pRes = await fetchWithTimeout(proxyUrl, {}, 3500).catch(() => null);
                 if (pRes && pRes.ok) xmlText = await pRes.text();
 
                 // 2. If proxy was slow or failed, fetch directly from HilltopAds
                 if (!xmlText) {
-                  const vRes = await fetchWithTimeout(vastUrl, {}, 1500);
+                  const vRes = await fetchWithTimeout(vastUrl, {}, 3500).catch(() => null);
                   if (vRes && vRes.ok) xmlText = await vRes.text();
                 }
 
@@ -216,6 +242,31 @@ const GlobalPlayer = () => {
                                      xmlText.match(/<ClickThrough>(https?:\/\/[^<]+)<\/ClickThrough>/i);
 
                   const impMatches = Array.from(xmlText.matchAll(/<Impression><!\[CDATA\[(.*?)\]\]><\/Impression>/gi)).map(m => m[1]);
+                  if (!impMatches.length) {
+                    const plainImp = xmlText.match(/<Impression>(https?:\/\/[^<]+)<\/Impression>/i);
+                    if (plainImp) impMatches.push(plainImp[1].trim());
+                  }
+
+                  // Extract all standard VAST quartile and tracking events
+                  const trackingEvents = {};
+                  const trackMatches = Array.from(xmlText.matchAll(/<Tracking\s+event=["'](.*?)["'][^>]*><!\[CDATA\[(.*?)\]\]><\/Tracking>/gi));
+                  trackMatches.forEach(m => {
+                    const ev = (m[1] || '').trim().toLowerCase();
+                    const u = (m[2] || '').trim();
+                    if (ev && u) {
+                      if (!trackingEvents[ev]) trackingEvents[ev] = [];
+                      trackingEvents[ev].push(u);
+                    }
+                  });
+                  const plainTrackMatches = Array.from(xmlText.matchAll(/<Tracking\s+event=["'](.*?)["'][^>]*>(https?:\/\/[^<]+)<\/Tracking>/gi));
+                  plainTrackMatches.forEach(m => {
+                    const ev = (m[1] || '').trim().toLowerCase();
+                    const u = (m[2] || '').trim();
+                    if (ev && u) {
+                      if (!trackingEvents[ev]) trackingEvents[ev] = [];
+                      if (!trackingEvents[ev].includes(u)) trackingEvents[ev].push(u);
+                    }
+                  });
 
                   const foundVideo = mp4Match ? mp4Match[1].trim() : '';
                   const clickThrough = clickMatch ? clickMatch[1].trim() : '';
@@ -223,8 +274,15 @@ const GlobalPlayer = () => {
                   if (foundVideo) {
                     const safeDirectVideo = foundVideo.replace('://silent-basis.pro', '://www.silent-basis.pro');
                     const proxiedVideo = `${baseUrl}/ads/video-proxy?url=${encodeURIComponent(safeDirectVideo)}`;
-                    // Use direct CDN video for instant, zero-lag 60fps playback, with proxy as fallback
-                    setVastVideo({ url: safeDirectVideo, proxyUrl: proxiedVideo, rawUrl: foundVideo, clickThrough, impressions: impMatches });
+                    // Use direct CDN video for instant playback, with proxy as fallback
+                    setVastVideo({ 
+                      url: safeDirectVideo, 
+                      proxyUrl: proxiedVideo, 
+                      rawUrl: foundVideo, 
+                      clickThrough, 
+                      impressions: impMatches,
+                      trackingEvents 
+                    });
                     setIsResolvingVast(false);
                   } else {
                     console.warn('No video found in VAST XML, advancing to stream');
@@ -561,10 +619,10 @@ const GlobalPlayer = () => {
                       setAdVideoStarted(true);
                       logFirstPartyImpression('pre_roll');
                       if (vastVideo.impressions?.length) {
-                        vastVideo.impressions.forEach(impUrl => {
-                          try { new Image().src = impUrl; } catch (_) {}
-                        });
+                        fireTrackingBeacon(vastVideo.impressions);
                       }
+                      fireTrackEventOnce('start');
+                      fireTrackEventOnce('creativeView');
                     }}
                     onTimeUpdate={(e) => {
                       const ct = e.target.currentTime;
@@ -572,9 +630,16 @@ const GlobalPlayer = () => {
                       const rem = Math.max(0, Math.ceil(requiredSecs - ct));
                       setPreRollSeconds(rem);
                       const dur = e.target.duration || requiredSecs;
-                      setAdProgressPercent(Math.min(100, (ct / Math.max(1, Math.min(dur, requiredSecs))) * 100));
+                      const pct = dur > 0 ? (ct / dur) * 100 : 0;
+                      setAdProgressPercent(Math.min(100, pct));
+
+                      // Fire quartile events for accurate ad network revenue recognition
+                      if (pct >= 25) fireTrackEventOnce('firstQuartile');
+                      if (pct >= 50) fireTrackEventOnce('midpoint');
+                      if (pct >= 75) fireTrackEventOnce('thirdQuartile');
                     }}
                     onEnded={() => {
+                      fireTrackEventOnce('complete');
                       setPreRollActive(false);
                     }}
                     onError={(e) => {
@@ -588,6 +653,7 @@ const GlobalPlayer = () => {
                       setPreRollActive(false);
                     }}
                     onClick={() => {
+                      fireTrackEventOnce('click');
                       if (vastVideo.clickThrough) {
                         window.open(vastVideo.clickThrough, '_blank', 'noopener,noreferrer');
                       }

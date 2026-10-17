@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styles from './Search.module.css'; // Reusing search grid styles
 import homeStyles from './Home.module.css';
 import SEO from '../components/SEO';
+import AdCard from '../components/ads/AdCard';
 
 const Category = ({ type, title }) => {
   const [results, setResults] = useState([]);
@@ -61,6 +62,9 @@ const Category = ({ type, title }) => {
               >
                 <img src={movie.poster} alt={movie.title} className={homeStyles.cardImage} />
               </Link>
+              {(idx === 3 || (idx > 3 && (idx - 3) % 8 === 0)) && (
+                <AdCard key={`ad-cat-${idx}`} />
+              )}
             </React.Fragment>
           ))}
         </div>
